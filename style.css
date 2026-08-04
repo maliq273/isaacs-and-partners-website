@@ -2289,6 +2289,68 @@ bottom:95px;
 
 }
 
+/* Scroll Progress */
+
+#scrollProgress{
+
+position:fixed;
+
+top:0;
+
+left:0;
+
+height:4px;
+
+width:0;
+
+background:linear-gradient(90deg,#D4AF37,#C9A227);
+
+z-index:999999;
+
+}
+
+/* Particles */
+
+.particle{
+
+position:absolute;
+
+border-radius:50%;
+
+background:rgba(201,162,39,.35);
+
+animation:floatParticle linear infinite;
+
+pointer-events:none;
+
+}
+
+@keyframes floatParticle{
+
+0%{
+
+transform:translateY(0) scale(1);
+
+opacity:0;
+
+}
+
+20%{
+
+opacity:1;
+
+}
+
+100%{
+
+transform:translateY(-120vh) scale(.2);
+
+opacity:0;
+
+}
+
+}
+
 /*=====================================
 END OF STYLESHEET
 ======================================*/
