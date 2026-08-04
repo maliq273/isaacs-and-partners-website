@@ -2351,6 +2351,56 @@ opacity:0;
 
 }
 
+/*==================================================
+NOTIFICATIONS
+==================================================*/
+
+.notification{
+
+position:fixed;
+
+top:30px;
+
+right:-450px;
+
+background:#111;
+
+color:white;
+
+padding:20px 30px;
+
+border-left:5px solid #C9A227;
+
+border-radius:12px;
+
+box-shadow:0 20px 50px rgba(0,0,0,.35);
+
+transition:.4s;
+
+z-index:999999;
+
+max-width:350px;
+
+}
+
+.notification.show{
+
+right:30px;
+
+}
+
+.notification.success{
+
+border-color:#22c55e;
+
+}
+
+.notification.error{
+
+border-color:#ef4444;
+
+}
+
 /*=====================================
 END OF STYLESHEET
 ======================================*/
