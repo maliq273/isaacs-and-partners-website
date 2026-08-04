@@ -635,3 +635,359 @@ console.log(
 "color:#C9A227;font-size:15px;font-weight:bold;"
 
 );
+
+/*=====================================================
+ CONSULTATION FORM
+======================================================*/
+
+const consultationForm = document.getElementById("consultationForm");
+
+if (consultationForm) {
+
+    consultationForm.addEventListener("submit", submitConsultation);
+
+}
+
+async function submitConsultation(e){
+
+    e.preventDefault();
+
+    const form=e.target;
+
+    const button=form.querySelector(".submit-btn");
+
+    button.disabled=true;
+
+    button.innerHTML="Submitting...";
+
+    const data=new FormData(form);
+
+    try{
+
+        /*
+        ============================================
+        TEMPORARY MODE
+
+        Replace with Web3Forms
+        OR Zoho Forms
+        OR Supabase
+
+        in Phase 2
+        ============================================
+        */
+
+        console.table(
+
+            Object.fromEntries(data.entries())
+
+        );
+
+        await fakeDelay(1500);
+
+        showNotification(
+
+            "Thank you! Your consultation request has been received.",
+
+            "success"
+
+        );
+
+        form.reset();
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        showNotification(
+
+            "Something went wrong. Please try again.",
+
+            "error"
+
+        );
+
+    }
+
+    button.disabled=false;
+
+    button.innerHTML="Request Consultation";
+
+}
+
+/*=====================================================
+ FAKE API DELAY
+======================================================*/
+
+function fakeDelay(ms){
+
+    return new Promise(resolve=>{
+
+        setTimeout(resolve,ms);
+
+    });
+
+}
+
+/*=====================================================
+ FILE VALIDATION
+======================================================*/
+
+document
+
+.querySelectorAll("input[type=file]")
+
+.forEach(file=>{
+
+file.addEventListener("change",()=>{
+
+const max=10*1024*1024;
+
+for(let f of file.files){
+
+if(f.size>max){
+
+alert(
+
+f.name+
+
+" exceeds the 10MB upload limit."
+
+);
+
+file.value="";
+
+return;
+
+}
+
+}
+
+});
+
+});
+
+/*=====================================================
+ EMAIL VALIDATION
+======================================================*/
+
+document
+
+.querySelectorAll("input[type=email]")
+
+.forEach(input=>{
+
+input.addEventListener("blur",()=>{
+
+const email=input.value.trim();
+
+const regex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if(email!=="" && !regex.test(email)){
+
+input.style.borderColor="red";
+
+}else{
+
+input.style.borderColor="#2b2b2b";
+
+}
+
+});
+
+});
+
+/*=====================================================
+ PHONE VALIDATION
+======================================================*/
+
+document
+
+.querySelectorAll("input[type=tel]")
+
+.forEach(input=>{
+
+input.addEventListener("input",()=>{
+
+input.value=input.value.replace(
+
+/[^0-9+ ]/g,
+
+""
+
+);
+
+});
+
+});
+
+/*=====================================================
+ NOTIFICATIONS
+======================================================*/
+
+function showNotification(message,type){
+
+let box=document.createElement("div");
+
+box.className="notification "+type;
+
+box.innerHTML=message;
+
+document.body.appendChild(box);
+
+setTimeout(()=>{
+
+box.classList.add("show");
+
+},100);
+
+setTimeout(()=>{
+
+box.classList.remove("show");
+
+setTimeout(()=>{
+
+box.remove();
+
+},500);
+
+},4000);
+
+}
+
+/*=====================================================
+ MOBILE MENU CLOSE
+======================================================*/
+
+document
+
+.querySelectorAll(".nav-links a")
+
+.forEach(link=>{
+
+link.addEventListener("click",()=>{
+
+if(navLinks){
+
+navLinks.classList.remove("show");
+
+}
+
+if(hamburger){
+
+hamburger.classList.remove("active");
+
+}
+
+});
+
+});
+
+/*=====================================================
+ ACCESSIBILITY
+======================================================*/
+
+document
+
+.querySelectorAll("button,a")
+
+.forEach(item=>{
+
+item.addEventListener("keyup",(e)=>{
+
+if(e.key==="Enter"){
+
+item.click();
+
+}
+
+});
+
+});
+
+/*=====================================================
+ LAZY LOAD IMAGES
+======================================================*/
+
+const lazyImages=document.querySelectorAll("img");
+
+const imageObserver=new IntersectionObserver(entries=>{
+
+entries.forEach(entry=>{
+
+if(entry.isIntersecting){
+
+const img=entry.target;
+
+if(img.dataset.src){
+
+img.src=img.dataset.src;
+
+}
+
+imageObserver.unobserve(img);
+
+}
+
+});
+
+});
+
+lazyImages.forEach(img=>{
+
+imageObserver.observe(img);
+
+});
+
+/*=====================================================
+ CONSOLE INFO
+======================================================*/
+
+console.log(
+
+"%cIsaacs & Partners Premium Website",
+
+"color:#D4AF37;font-size:18px;font-weight:bold;"
+
+);
+
+console.log(
+
+"%cWebsite Ready",
+
+"color:#4ade80;font-size:14px;"
+
+);
+
+/*=====================================================
+ FUTURE MODULES PLACEHOLDERS
+======================================================*/
+
+const WebsiteModules={
+
+aiConsultation:false,
+
+bookingPortal:false,
+
+matterTracking:false,
+
+clientPortal:false,
+
+supabase:false,
+
+zoho:false,
+
+web3forms:false,
+
+whatsappBot:false,
+
+onlinePayments:false
+
+};
+
+console.table(WebsiteModules);
+
+/*=====================================================
+ END
+======================================================*/
