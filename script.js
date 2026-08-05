@@ -637,82 +637,88 @@ console.log(
 );
 
 /*=====================================================
- CONSULTATION FORM
+ WEB3FORMS SUBMISSION
 ======================================================*/
 
 const consultationForm = document.getElementById("consultationForm");
 
 if (consultationForm) {
-
     consultationForm.addEventListener("submit", submitConsultation);
-
 }
 
-async function submitConsultation(e){
+async function submitConsultation(e) {
 
     e.preventDefault();
 
-    const form=e.target;
+    const form = e.target;
 
-    const button=form.querySelector(".submit-btn");
+    const button = form.querySelector(".submit-btn");
 
-    button.disabled=true;
+    const originalText = button.innerHTML;
 
-    button.innerHTML="Submitting...";
+    button.disabled = true;
+    button.innerHTML = "Sending...";
 
-    const data=new FormData(form);
+    const formData = new FormData(form);
 
-    try{
+    formData.append(
+        "access_key",
+        "d1d5b67c-10df-46ee-bb92-2eea199503d5"
+    );
 
-        /*
-        ============================================
-        TEMPORARY MODE
+    formData.append(
+        "subject",
+        "New Isaacs & Partners Consultation"
+    );
 
-        Replace with Web3Forms
-        OR Zoho Forms
-        OR Supabase
+    formData.append(
+        "from_name",
+        "Isaacs & Partners Website"
+    );
 
-        in Phase 2
-        ============================================
-        */
+    try {
 
-        console.table(
-
-            Object.fromEntries(data.entries())
-
+        const response = await fetch(
+            "https://api.web3forms.com/submit",
+            {
+                method: "POST",
+                body: formData
+            }
         );
 
-        await fakeDelay(1500);
+        const data = await response.json();
+
+        if (response.ok) {
+
+            showNotification(
+                "Thank you! Your consultation request has been submitted successfully.",
+                "success"
+            );
+
+            form.reset();
+
+        } else {
+
+            showNotification(
+                data.message || "Submission failed.",
+                "error"
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
 
         showNotification(
-
-            "Thank you! Your consultation request has been received.",
-
-            "success"
-
-        );
-
-        form.reset();
-
-    }
-
-    catch(err){
-
-        console.error(err);
-
-        showNotification(
-
-            "Something went wrong. Please try again.",
-
+            "Unable to connect. Please try again.",
             "error"
-
         );
 
     }
 
-    button.disabled=false;
-
-    button.innerHTML="Request Consultation";
+    button.disabled = false;
+    button.innerHTML = originalText;
 
 }
 
