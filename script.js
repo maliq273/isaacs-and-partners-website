@@ -660,6 +660,9 @@ async function submitConsultation(e) {
     button.innerHTML = "Sending...";
 
     const formData = new FormData(form);
+     for (const [key, value] of formData.entries()) {
+       console.log(key, "=", value);
+}
 
     formData.append(
         "access_key",
