@@ -667,11 +667,6 @@ async function submitConsultation(e) {
     );
 
     formData.append(
-        "subject",
-        "New Isaacs & Partners Consultation"
-    );
-
-    formData.append(
         "from_name",
         "Isaacs & Partners Website"
     );
