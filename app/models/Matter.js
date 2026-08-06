@@ -128,5 +128,184 @@ export default class Matter extends AggregateRoot {
         };
 
     }
+    /*=====================================================
+        STATUS MANAGEMENT
+    =====================================================*/
 
+    setStatus(status) {
+
+        this.status = status;
+
+        this.touch();
+
+        return this;
+
+    }
+
+    setStage(stage) {
+
+        this.stage = stage;
+
+        this.touch();
+
+        return this;
+
+    }
+
+    setPriority(priority) {
+
+        this.priority = priority;
+
+        this.touch();
+
+        return this;
+
+    }
+
+    setOutcome(outcome) {
+
+        this.outcome = outcome;
+
+        this.touch();
+
+        return this;
+
+    }
+
+    /*=====================================================
+        ASSIGNMENTS
+    =====================================================*/
+
+    assignConsultant(consultantId) {
+
+        this.consultantId = consultantId;
+
+        this.touch();
+
+        return this;
+
+    }
+
+    assignAttorney(attorneyId) {
+
+        this.attorneyId = attorneyId;
+
+        this.touch();
+
+        return this;
+
+    }
+
+    assignUser(userId) {
+
+        this.assignedTo = userId;
+
+        this.touch();
+
+        return this;
+
+    }
+
+    /*=====================================================
+        TAGS
+    =====================================================*/
+
+    addTag(tag) {
+
+        if (!this.tags.includes(tag)) {
+
+            this.tags.push(tag);
+
+            this.touch();
+
+        }
+
+        return this;
+
+    }
+
+    removeTag(tag) {
+
+        this.tags = this.tags.filter(t => t !== tag);
+
+        this.touch();
+
+        return this;
+
+    }
+
+    /*=====================================================
+        NOTES
+    =====================================================*/
+
+    addNote(note) {
+
+        this.notes.push({
+
+            id: crypto.randomUUID(),
+
+            note,
+
+            createdAt: new Date().toISOString()
+
+        });
+
+        this.touch();
+
+        return this;
+
+    }
+
+    /*=====================================================
+        TIMELINE
+    =====================================================*/
+
+    addTimelineEntry(title, description = "") {
+
+        this.timeline.push({
+
+            id: crypto.randomUUID(),
+
+            title,
+
+            description,
+
+            timestamp: new Date().toISOString()
+
+        });
+
+        this.touch();
+
+        return this;
+
+    }
+
+    /*=====================================================
+        VALIDATION
+    =====================================================*/
+
+    validate() {
+
+        if (!this.title) {
+
+            throw new Error("Matter title is required.");
+
+        }
+
+        if (!this.type) {
+
+            throw new Error("Matter type is required.");
+
+        }
+
+        if (!this.department) {
+
+            throw new Error("Matter department is required.");
+
+        }
+
+        return true;
+
+    }
+    
 }
