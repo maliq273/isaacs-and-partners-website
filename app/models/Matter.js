@@ -170,7 +170,89 @@ export default class Matter extends AggregateRoot {
         return this;
 
     }
+    
+    /*=====================================================
+        TASKS
+    =====================================================*/
 
+    addTask(task) {
+
+        if (!(task instanceof Task)) {
+
+            throw new Error("Expected Task instance.");
+
+        }
+
+        task.setMatter(this.id);
+
+        this.tasks.push(task);
+
+        this.touch();
+
+        return this;
+
+    }
+
+    getOpenTasks() {
+
+        return this.tasks.filter(
+
+            t => !t.completed
+
+        );
+
+    }
+
+    /*=====================================================
+        APPOINTMENTS
+    =====================================================*/
+
+    scheduleAppointment(appointment) {
+
+        if (!(appointment instanceof Appointment)) {
+
+            throw new Error("Expected Appointment instance.");
+
+        }
+
+        appointment.setMatter(this.id);
+
+        this.appointments.push(appointment);
+
+        this.touch();
+
+        return this;
+
+    }
+
+    getUpcomingAppointments() {
+
+        return this.appointments;
+
+    }
+
+    /*=====================================================
+        COMMUNICATIONS
+    =====================================================*/
+
+    addCommunication(communication) {
+
+        if (!(communication instanceof Communication)) {
+
+            throw new Error("Expected Communication instance.");
+
+        }
+
+        communication.setMatter(this.id);
+
+        this.communications.push(communication);
+
+        this.touch();
+
+        return this;
+
+    }
+    
     /*=====================================================
         ASSIGNMENTS
     =====================================================*/
@@ -272,26 +354,26 @@ export default class Matter extends AggregateRoot {
     }
 
     /*=====================================================
-        TIMELINE
+    TIMELINE
     =====================================================*/
 
     addTimelineEntry(title, description = "") {
 
-        this.timeline.push({
+        const entry = new TimelineEntry({
 
-            id: crypto.randomUUID(),
+            matterId: this.id,
 
             title,
 
-            description,
-
-            timestamp: new Date().toISOString()
+            description
 
         });
 
+        this.timeline.push(entry);
+
         this.touch();
 
-        return this;
+        return entry;
 
     }
 
