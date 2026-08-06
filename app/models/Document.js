@@ -7,10 +7,9 @@
  * ============================================================
  */
 
-import Entity from "../domain/Entity.js";
-import { DocumentStatus } from "../domain/enums/index.js";
+import Record from "./base/Record.js";
 
-export default class Document extends Entity {
+export default class Document extends Record {
 
     constructor(data = {}) {
 
