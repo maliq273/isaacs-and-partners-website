@@ -75,27 +75,19 @@ export default class Matter extends AggregateRoot {
         this.assignedTo = data.assignedTo ?? null;
 
         /*=====================================================
-            COLLECTIONS
+        TYPED COLLECTIONS
         =====================================================*/
 
-        this.documents = [];
-
-        this.appointments = [];
-
-        this.communications = [];
-
-        this.tasks = [];
-
-        this.notes = [];
-
-        this.timeline = [];
+        this.documents = [];        // Document[]
+        this.appointments = [];     // Appointment[]
+        this.communications = [];   // Communication[]
+        this.tasks = [];            // Task[]
+        this.notes = [];            // Note[]
+        this.timeline = [];         // TimelineEntry[]
 
         this.quotes = [];
-
         this.invoices = [];
-
         this.payments = [];
-
         this.tags = [];
 
         /*=====================================================
