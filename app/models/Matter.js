@@ -234,20 +234,36 @@ export default class Matter extends AggregateRoot {
     }
 
     /*=====================================================
-        NOTES
+    NOTES
     =====================================================*/
 
     addNote(note) {
 
-        this.notes.push({
+        if (!(note instanceof Note)) {
 
-            id: crypto.randomUUID(),
+            throw new Error("Expected Note instance.");
 
-            note,
+        }
 
-            createdAt: new Date().toISOString()
+        note.setMatter(this.id);
 
-        });
+        note.validate();
+
+        this.notes.push(note);
+
+        this.touch();
+
+        return this;
+
+    }
+
+    removeNote(noteId) {
+
+        this.notes = this.notes.filter(
+
+            n => n.id !== noteId
+
+        );
 
         this.touch();
 
