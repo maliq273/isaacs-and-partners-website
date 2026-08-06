@@ -21,6 +21,13 @@ import {
     MatterOutcome
 } from "../domain/enums/index.js";
 
+import Document from "./Document.js";
+import Note from "./Note.js";
+import TimelineEntry from "./TimelineEntry.js";
+import Task from "./Task.js";
+import Appointment from "./Appointment.js";
+import Communication from "./Communication.js";
+
 export default class Matter extends AggregateRoot {
 
     constructor(data = {}) {
