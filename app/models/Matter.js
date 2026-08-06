@@ -306,5 +306,75 @@ export default class Matter extends AggregateRoot {
         return true;
 
     }
+    /*=====================================================
+    DOCUMENT MANAGEMENT
+    =====================================================*/
+
+    addDocument(document) {
+
+        if (!(document instanceof Document)) {
+
+            throw new Error("Expected Document instance.");
+
+        }
+
+        document.setMatter(this.id);
+
+        document.validate();
+
+        const exists = this.documents.some(d => d.id === document.id);
+
+        if (exists) {
+
+            throw new Error("Document already exists.");
+
+        }
+
+        this.documents.push(document);
+
+        this.addTimelineEntry(
+            "Document Added",
+            document.name
+        );
+
+        this.touch();
+
+        return this;
+
+    }
+
+    removeDocument(documentId) {
+
+        this.documents = this.documents.filter(
+
+            d => d.id !== documentId
+
+        );
+
+        this.touch();
+
+        return this;
+
+    }
+
+    getDocument(documentId) {
+
+        return this.documents.find(
+
+            d => d.id === documentId
+
+        );
+
+    }
+
+    getDocumentsByStatus(status) {
+
+        return this.documents.filter(
+
+            d => d.status === status
+
+        );
+
+    }
     
 }
