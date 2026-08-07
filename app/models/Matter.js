@@ -7,7 +7,7 @@
  * Every client matter in the platform starts here.
  * ============================================================
  */
-import CaseAnalysis from "../ai/analysis/CaseAnalysis.js";
+
 import AggregateRoot from "../domain/AggregateRoot.js";
 
 import {
@@ -20,6 +20,9 @@ import {
     MatterVisibility,
     MatterOutcome
 } from "../domain/enums/index.js";
+
+import CaseAnalysis from "../ai/analysis/CaseAnalysis.js";
+import KnowledgeEngine from "../knowledgebase/engine/KnowledgeEngine.js";
 
 import Document from "./Document.js";
 import Note from "./Note.js";
@@ -34,15 +37,11 @@ export default class Matter extends AggregateRoot {
 
         super(data.id);
 
-    analyse() {
+        /*=====================================================
+            SERVICES
+        =====================================================*/
 
-        this.ai = CaseAnalysis.analyse(this);
-
-        this.touch();
-
-        return this.ai;
-
-    }
+        this.knowledge = new KnowledgeEngine();
 
         /*=====================================================
             BASIC INFORMATION
@@ -85,19 +84,27 @@ export default class Matter extends AggregateRoot {
         this.assignedTo = data.assignedTo ?? null;
 
         /*=====================================================
-        TYPED COLLECTIONS
+            TYPED COLLECTIONS
         =====================================================*/
 
-        this.documents = [];        // Document[]
-        this.appointments = [];     // Appointment[]
-        this.communications = [];   // Communication[]
-        this.tasks = [];            // Task[]
-        this.notes = [];            // Note[]
-        this.timeline = [];         // TimelineEntry[]
+        this.documents = [];
+
+        this.appointments = [];
+
+        this.communications = [];
+
+        this.tasks = [];
+
+        this.notes = [];
+
+        this.timeline = [];
 
         this.quotes = [];
+
         this.invoices = [];
+
         this.payments = [];
+
         this.tags = [];
 
         /*=====================================================
@@ -137,6 +144,31 @@ export default class Matter extends AggregateRoot {
         };
 
     }
+
+    /*=====================================================
+        AI
+    =====================================================*/
+
+    analyse() {
+
+        this.ai = CaseAnalysis.analyse(this);
+
+        this.touch();
+
+        return this.ai;
+
+    }
+
+    /*=====================================================
+        KNOWLEDGE
+    =====================================================*/
+
+    getRequiredDocuments() {
+
+        return this.knowledge.getDocuments(this.type);
+
+    }
+
     /*=====================================================
         STATUS MANAGEMENT
     =====================================================*/
@@ -180,89 +212,7 @@ export default class Matter extends AggregateRoot {
         return this;
 
     }
-    
-    /*=====================================================
-        TASKS
-    =====================================================*/
 
-    addTask(task) {
-
-        if (!(task instanceof Task)) {
-
-            throw new Error("Expected Task instance.");
-
-        }
-
-        task.setMatter(this.id);
-
-        this.tasks.push(task);
-
-        this.touch();
-
-        return this;
-
-    }
-
-    getOpenTasks() {
-
-        return this.tasks.filter(
-
-            t => !t.completed
-
-        );
-
-    }
-
-    /*=====================================================
-        APPOINTMENTS
-    =====================================================*/
-
-    scheduleAppointment(appointment) {
-
-        if (!(appointment instanceof Appointment)) {
-
-            throw new Error("Expected Appointment instance.");
-
-        }
-
-        appointment.setMatter(this.id);
-
-        this.appointments.push(appointment);
-
-        this.touch();
-
-        return this;
-
-    }
-
-    getUpcomingAppointments() {
-
-        return this.appointments;
-
-    }
-
-    /*=====================================================
-        COMMUNICATIONS
-    =====================================================*/
-
-    addCommunication(communication) {
-
-        if (!(communication instanceof Communication)) {
-
-            throw new Error("Expected Communication instance.");
-
-        }
-
-        communication.setMatter(this.id);
-
-        this.communications.push(communication);
-
-        this.touch();
-
-        return this;
-
-    }
-    
     /*=====================================================
         ASSIGNMENTS
     =====================================================*/
@@ -326,7 +276,70 @@ export default class Matter extends AggregateRoot {
     }
 
     /*=====================================================
-    NOTES
+        DOCUMENT MANAGEMENT
+    =====================================================*/
+
+    addDocument(document) {
+
+        if (!(document instanceof Document)) {
+
+            throw new Error("Expected Document instance.");
+
+        }
+
+        document.setMatter(this.id);
+
+        document.validate();
+
+        if (this.documents.some(d => d.id === document.id)) {
+
+            throw new Error("Document already exists.");
+
+        }
+
+        this.documents.push(document);
+
+        this.addTimelineEntry(
+            "Document Added",
+            document.name
+        );
+
+        this.touch();
+
+        return this;
+
+    }
+
+    removeDocument(documentId) {
+
+        this.documents = this.documents.filter(
+            d => d.id !== documentId
+        );
+
+        this.touch();
+
+        return this;
+
+    }
+
+    getDocument(documentId) {
+
+        return this.documents.find(
+            d => d.id === documentId
+        );
+
+    }
+
+    getDocumentsByStatus(status) {
+
+        return this.documents.filter(
+            d => d.status === status
+        );
+
+    }
+
+    /*=====================================================
+        NOTES
     =====================================================*/
 
     addNote(note) {
@@ -352,9 +365,7 @@ export default class Matter extends AggregateRoot {
     removeNote(noteId) {
 
         this.notes = this.notes.filter(
-
             n => n.id !== noteId
-
         );
 
         this.touch();
@@ -364,7 +375,7 @@ export default class Matter extends AggregateRoot {
     }
 
     /*=====================================================
-    TIMELINE
+        TIMELINE
     =====================================================*/
 
     addTimelineEntry(title, description = "") {
@@ -384,6 +395,86 @@ export default class Matter extends AggregateRoot {
         this.touch();
 
         return entry;
+
+    }
+
+    /*=====================================================
+        TASKS
+    =====================================================*/
+
+    addTask(task) {
+
+        if (!(task instanceof Task)) {
+
+            throw new Error("Expected Task instance.");
+
+        }
+
+        task.setMatter(this.id);
+
+        this.tasks.push(task);
+
+        this.touch();
+
+        return this;
+
+    }
+
+    getOpenTasks() {
+
+        return this.tasks.filter(
+            task => !task.completed
+        );
+
+    }
+
+    /*=====================================================
+        APPOINTMENTS
+    =====================================================*/
+
+    scheduleAppointment(appointment) {
+
+        if (!(appointment instanceof Appointment)) {
+
+            throw new Error("Expected Appointment instance.");
+
+        }
+
+        appointment.setMatter(this.id);
+
+        this.appointments.push(appointment);
+
+        this.touch();
+
+        return this;
+
+    }
+
+    getUpcomingAppointments() {
+
+        return this.appointments;
+
+    }
+
+    /*=====================================================
+        COMMUNICATIONS
+    =====================================================*/
+
+    addCommunication(communication) {
+
+        if (!(communication instanceof Communication)) {
+
+            throw new Error("Expected Communication instance.");
+
+        }
+
+        communication.setMatter(this.id);
+
+        this.communications.push(communication);
+
+        this.touch();
+
+        return this;
 
     }
 
@@ -414,75 +505,5 @@ export default class Matter extends AggregateRoot {
         return true;
 
     }
-    /*=====================================================
-    DOCUMENT MANAGEMENT
-    =====================================================*/
 
-    addDocument(document) {
-
-        if (!(document instanceof Document)) {
-
-            throw new Error("Expected Document instance.");
-
-        }
-
-        document.setMatter(this.id);
-
-        document.validate();
-
-        const exists = this.documents.some(d => d.id === document.id);
-
-        if (exists) {
-
-            throw new Error("Document already exists.");
-
-        }
-
-        this.documents.push(document);
-
-        this.addTimelineEntry(
-            "Document Added",
-            document.name
-        );
-
-        this.touch();
-
-        return this;
-
-    }
-
-    removeDocument(documentId) {
-
-        this.documents = this.documents.filter(
-
-            d => d.id !== documentId
-
-        );
-
-        this.touch();
-
-        return this;
-
-    }
-
-    getDocument(documentId) {
-
-        return this.documents.find(
-
-            d => d.id === documentId
-
-        );
-
-    }
-
-    getDocumentsByStatus(status) {
-
-        return this.documents.filter(
-
-            d => d.status === status
-
-        );
-
-    }
-    
 }
