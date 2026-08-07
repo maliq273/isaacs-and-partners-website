@@ -34,6 +34,16 @@ export default class Matter extends AggregateRoot {
 
         super(data.id);
 
+    analyse() {
+
+        this.ai = CaseAnalysis.analyse(this);
+
+        this.touch();
+
+        return this.ai;
+
+    }
+
         /*=====================================================
             BASIC INFORMATION
         =====================================================*/
