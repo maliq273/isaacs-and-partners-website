@@ -7,7 +7,7 @@
  * Every client matter in the platform starts here.
  * ============================================================
  */
-
+import CaseAnalysis from "../ai/analysis/CaseAnalysis.js";
 import AggregateRoot from "../domain/AggregateRoot.js";
 
 import {
