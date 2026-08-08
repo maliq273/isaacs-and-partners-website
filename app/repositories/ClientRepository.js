@@ -1,292 +1,190 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * ============================================================
- *
- * FILE
- * ClientRepository.js
- *
- * FILE ID
- * REP-003
- *
- * LOCATION
- * app/repositories/ClientRepository.js
- *
- * LAYER
- * Repository
- *
- * RESPONSIBILITY
- * Client persistence and retrieval.
- *
- * EXTENDS
- * BaseRepository
- *
- * VERSION
- * 1.0.0
- *
- * ============================================================
- * FUTURE EXPANSION MAP
- * ============================================================
- *
- * ✔ CRUD
- * ✔ Passport Search
- * ✔ Email Search
- * ✔ Phone Search
- * ✔ Company Search
- * ✔ Statistics
- *
- * □ AI Search
- * □ Archive
- * □ Restore
- * □ Duplicate Detection
- * □ Synchronisation
- * □ GDPR Export
+ * ClientRepository
  * ============================================================
  */
 
-import BaseRepository from "./BaseRepository.js";
+import BaseRepository
+    from "./BaseRepository.js";
 
-export default class ClientRepository extends BaseRepository {
+import ClientSerializer
+    from "../serializers/ClientSerializer.js";
 
-    /*=====================================================
-        CLI-REP-001
-        Constructor
-    =====================================================*/
+export default class ClientRepository
+    extends BaseRepository {
 
-    constructor(storage) {
+    constructor(options = {}) {
 
-        super(storage);
+        super({
 
+            ...options,
+
+            entityName: "Client",
+
+            collection:
+                options.collection ??
+                "clients",
+
+            serializer:
+                options.serializer ??
+                ClientSerializer
+
+        });
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Client deduplication
+        // Passport matching
+        // Client portal identity
+        // POPIA consent lookup
+        // Client search
+        //
+        // ====================================================
     }
 
-    /*=====================================================
-        CLI-REP-002
-        Passport Queries
-    =====================================================*/
 
-    async findByPassport(passportNumber) {
+    async findByEmail(
+        email
+    ) {
 
-        return this.search({
+        if (!email) {
+            return null;
+        }
 
-            passportNumber
-
+        return this.firstWhere({
+            email:
+                String(email)
+                    .trim()
+                    .toLowerCase()
         });
 
     }
 
-    /*=====================================================
-        CLI-REP-003
-        Email Queries
-    =====================================================*/
 
-    async findByEmail(email) {
+    async findByPassportNumber(
+        passportNumber
+    ) {
 
-        return this.search({
+        if (!passportNumber) {
+            return null;
+        }
 
-            email
-
+        return this.firstWhere({
+            passportNumber:
+                String(passportNumber)
+                    .trim()
+                    .toUpperCase()
         });
 
     }
 
-    /*=====================================================
-        CLI-REP-004
-        Phone Queries
-    =====================================================*/
 
-    async findByPhone(phone) {
+    async findByReferenceNumber(
+        referenceNumber
+    ) {
 
-        return this.search({
+        if (!referenceNumber) {
+            return null;
+        }
 
-            phone
-
+        return this.firstWhere({
+            referenceNumber:
+                String(referenceNumber)
+                    .trim()
         });
 
     }
 
-    /*=====================================================
-        CLI-REP-005
-        Company Queries
-    =====================================================*/
 
-    async findByCompany(companyId) {
+    async findByPhone(
+        phone
+    ) {
 
-        return this.search({
+        if (!phone) {
+            return null;
+        }
 
-            companyId
-
+        return this.firstWhere({
+            phone:
+                String(phone)
+                    .trim()
         });
 
     }
 
-    /*=====================================================
-        CLI-REP-006
-        Consultant Queries
-    =====================================================*/
 
-    async findByConsultant(consultantId) {
+    async findByMatter(
+        matterId
+    ) {
 
-        return this.search({
+        if (!matterId) {
+            return [];
+        }
 
-            consultantId
-
+        return this.findWhere({
+            matterId
         });
 
     }
 
-    /*=====================================================
-        CLI-REP-007
-        Status Queries
-    =====================================================*/
 
-    async findActiveClients() {
+    async search(
+        query,
+        options = {}
+    ) {
 
-        return this.search({
+        const text =
+            String(query ?? "")
+                .trim()
+                .toLowerCase();
 
-            active: true
+        if (!text) {
 
-        });
+            return this.findAll(
+                options
+            );
 
-    }
+        }
 
-    async findArchivedClients() {
+        const clients =
+            await this.findAll(
+                options
+            );
 
-        return this.search({
+        return clients.filter(
+            client => {
 
-            archived: true
+                const searchable = [
 
-        });
+                    client.firstName,
 
-    }
+                    client.lastName,
 
-    /*=====================================================
-        CLI-REP-008
-        Statistics
-    =====================================================*/
+                    client.fullName,
 
-    async statistics() {
+                    client.email,
 
-        return {
+                    client.phone,
 
-            total: await this.count(),
+                    client.passportNumber,
 
-            active: (
+                    client.idNumber,
 
-                await this.findActiveClients()
+                    client.referenceNumber
 
-            ).length,
+                ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
 
-            archived: (
+                return searchable.includes(
+                    text
+                );
 
-                await this.findArchivedClients()
-
-            ).length
-
-        };
-
-    }
-
-    /*=====================================================
-        CLI-REP-009
-        Duplicate Detection
-        Reserved
-    =====================================================*/
-
-    async findDuplicates() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CLI-REP-010
-        AI Search
-        Reserved
-    =====================================================*/
-
-    async semanticSearch(query) {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CLI-REP-011
-        Archive
-        Reserved
-    =====================================================*/
-
-    async archive(clientId) {
-
-        // Reserved
-
-    }
-
-    async restore(clientId) {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CLI-REP-012
-        Synchronisation
-        Reserved
-    =====================================================*/
-
-    async synchronise() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CLI-REP-013
-        GDPR
-        Reserved
-    =====================================================*/
-
-    async exportPersonalData(clientId) {
-
-        // Reserved
-
-    }
-
-    async deletePersonalData(clientId) {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CLI-REP-014
-        Repository Maintenance
-        Reserved
-    =====================================================*/
-
-    async rebuildIndexes() {
-
-        // Reserved
-
-    }
-
-    async optimise() {
-
-        // Reserved
-
-    }
-
-    async healthCheck() {
-
-        return {
-
-            repository: "ClientRepository",
-
-            healthy: true,
-
-            timestamp: new Date()
-
-        };
+            }
+        );
 
     }
 
