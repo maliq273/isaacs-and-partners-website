@@ -7,7 +7,7 @@
  * BookingService.js
  *
  * FILE ID
- * SER-004
+ * SER-012
  *
  * LOCATION
  * app/services/BookingService.js
@@ -16,267 +16,230 @@
  * Application / Service
  *
  * RESPONSIBILITY
- * Coordinates appointments and booking operations.
+ * Central booking and appointment orchestration service.
  *
  * ============================================================
  *
- * ARCHITECTURE
+ * BOOKING FLOW
  *
- * Consultation / Dashboard / Client Portal
- *                  ↓
- *          BookingService
- *                  ↓
- *         BookingRepository
- *                  ↓
- *             Booking
- *                  ↓
- *       Matter / Client / User
+ * Client / Staff / Consultation
+ *             ↓
+ *       BookingService
+ *             ↓
+ *      BookingRepository
+ *             ↓
+ *          Booking
+ *             ↓
+ *       Appointment
+ *             ↓
+ *   Matter / Client / Staff
+ *             ↓
+ *       NotificationService
  *
  * ============================================================
  *
- * VERSION
- * 1.0.0
+ * RELATED FILES
+ *
+ * app/booking/booking.js
+ * app/booking/calendar.js
+ * app/booking/confirmation.js
+ * app/booking/index.html
+ *
+ * app/models/Appointment.js
+ * app/models/Client.js
+ * app/models/Matter.js
+ *
+ * app/repositories/BookingRepository.js
+ *
+ * app/services/NotificationService.js
  *
  * ============================================================
  *
- * FUTURE EXPANSION MAP
- * ============================================================
+ * DESIGN RULE
  *
- * ✔ Create Booking
- * ✔ Retrieve Booking
- * ✔ Update Booking
- * ✔ Cancel Booking
- * ✔ Search Bookings
- * ✔ Client Bookings
- * ✔ Matter Bookings
- * ✔ Staff Bookings
- * ✔ Date Queries
- * ✔ Availability Interface
- * ✔ Statistics
- * ✔ Health Check
+ * This service contains application-level booking logic.
  *
- * □ Calendar Synchronisation
- * □ Google Calendar
- * □ Outlook Calendar
- * □ WhatsApp Reminders
- * □ Email Reminders
- * □ SMS Reminders
- * □ Automatic Rescheduling
- * □ No-show Detection
- * □ AI Appointment Scheduling
- * □ AI Consultation Preparation
- * □ Conflict Detection
- * □ Working Hours Engine
- * □ Public Booking Portal
+ * Database persistence belongs to the repository.
+ *
+ * Domain behaviour belongs to the domain/model layer.
+ *
+ * UI behaviour belongs to the booking UI.
+ *
  * ============================================================
  */
 
 
-import Appointment from "../models/Appointment.js";
-
+/*=============================================================
+    BOOKING SERVICE
+=============================================================*/
 
 export default class BookingService {
 
 
     /*=========================================================
         SER-BOOK-001
-        Constructor / Dependency Injection
+        Constructor
     =========================================================*/
 
     constructor({
 
-        repository = null,
+        bookingRepository = null,
 
-        clientService = null,
+        clientRepository = null,
 
-        matterService = null,
+        matterRepository = null,
 
         notificationService = null,
 
-        aiService = null
+        calendarProvider = null,
+
+        logger = null,
+
+        state = null,
+
+        storage = null,
+
+        settings = null
 
     } = {}) {
 
-        this.repository =
-            repository;
 
-        this.clientService =
-            clientService;
+        this.bookingRepository =
+            bookingRepository;
 
-        this.matterService =
-            matterService;
+
+        this.clientRepository =
+            clientRepository;
+
+
+        this.matterRepository =
+            matterRepository;
+
 
         this.notificationService =
             notificationService;
 
-        this.aiService =
-            aiService;
+
+        this.calendarProvider =
+            calendarProvider;
+
+
+        this.logger =
+            logger;
+
+
+        this.state =
+            state;
+
+
+        this.storage =
+            storage;
+
+
+        this.settings =
+            settings;
+
+
+        /*
+         *=====================================================
+         * BOOKING CONFIGURATION
+         *=====================================================
+         */
+
+        this.defaultDuration =
+            30;
+
+
+        this.minimumDuration =
+            15;
+
+
+        this.maximumDuration =
+            480;
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * BUSINESS HOURS ENGINE
+         *
+         * Future configuration should come from:
+         *
+         * app/config/settings.js
+         *
+         * app/config/workflow.config.js
+         *
+         * It will support:
+         *
+         * office opening hours
+         * branch hours
+         * public holidays
+         * staff working hours
+         * lunch breaks
+         * blocked periods
+         * emergency bookings
+         *=====================================================
+         */
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * BRANCH / OFFICE CALENDAR
+         *
+         * Future booking architecture:
+         *
+         * Branch
+         *   ↓
+         * Calendar
+         *   ↓
+         * Staff Availability
+         *   ↓
+         * Appointment Slots
+         *=====================================================
+         */
 
     }
 
 
     /*=========================================================
         SER-BOOK-002
-        Repository Configuration
-    =========================================================*/
-
-    setRepository(repository) {
-
-        this.repository =
-            repository;
-
-        return this;
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-003
-        Dependency Validation
-    =========================================================*/
-
-    ensureRepository() {
-
-        if (!this.repository) {
-
-            throw new Error(
-                "BookingService requires a BookingRepository."
-            );
-
-        }
-
-        return true;
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-004
         Create Booking
     =========================================================*/
 
-    async createBooking(
-        data = {}
-    ) {
+    async createBooking({
 
-        this.ensureRepository();
+        clientId = null,
 
+        matterId = null,
 
-        const appointment =
-            data instanceof Appointment
-                ? data
-                : new Appointment(data);
+        staffId = null,
 
+        type = null,
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * BOOKING VALIDATION ENGINE
-         *
-         * Validate:
-         *
-         * - Date
-         * - Time
-         * - Client
-         * - Matter
-         * - Appointment type
-         * - Assigned staff member
-         * - Duration
-         *=====================================================
-         */
+        title = "",
 
+        description = "",
 
-        if (
-            typeof appointment.validate ===
-            "function"
-        ) {
+        date = null,
 
-            appointment.validate();
+        startTime = null,
 
-        }
+        endTime = null,
 
+        duration = null,
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * CONFLICT DETECTION ENGINE
-         *
-         * Check whether:
-         *
-         * - Staff member is already booked
-         * - Consultation room is occupied
-         * - Client has conflicting appointment
-         * - Matter has conflicting appointment
-         *=====================================================
-         */
+        location = null,
 
+        notes = "",
 
-        return this.repository.create(
-            appointment
-        );
+        status = "PENDING",
 
-    }
+        metadata = {}
 
-
-    /*=========================================================
-        SER-BOOK-005
-        Retrieve Booking
-    =========================================================*/
-
-    async getBooking(
-        bookingId
-    ) {
-
-        this.ensureRepository();
-
-
-        if (!bookingId) {
-
-            throw new Error(
-                "Booking ID is required."
-            );
-
-        }
-
-
-        return this.repository.findById(
-            bookingId
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-006
-        Search Bookings
-    =========================================================*/
-
-    async search(
-        criteria = {}
-    ) {
-
-        this.ensureRepository();
-
-
-        return this.repository.search(
-            criteria
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-007
-        Client Bookings
-    =========================================================*/
-
-    async getClientBookings(
-        clientId
-    ) {
-
-        this.ensureRepository();
+    } = {}) {
 
 
         if (!clientId) {
@@ -288,81 +251,6 @@ export default class BookingService {
         }
 
 
-        return this.repository.findByClient(
-            clientId
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-008
-        Matter Bookings
-    =========================================================*/
-
-    async getMatterBookings(
-        matterId
-    ) {
-
-        this.ensureRepository();
-
-
-        if (!matterId) {
-
-            throw new Error(
-                "Matter ID is required."
-            );
-
-        }
-
-
-        return this.repository.findByMatter(
-            matterId
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-009
-        Staff Bookings
-    =========================================================*/
-
-    async getStaffBookings(
-        staffId
-    ) {
-
-        this.ensureRepository();
-
-
-        if (!staffId) {
-
-            throw new Error(
-                "Staff ID is required."
-            );
-
-        }
-
-
-        return this.repository.findByStaff(
-            staffId
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-010
-        Date Bookings
-    =========================================================*/
-
-    async getBookingsByDate(
-        date
-    ) {
-
-        this.ensureRepository();
-
-
         if (!date) {
 
             throw new Error(
@@ -372,86 +260,677 @@ export default class BookingService {
         }
 
 
-        return this.repository.findByDate(
-            date
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-011
-        Date Range
-    =========================================================*/
-
-    async getBookingsByDateRange(
-        startDate,
-        endDate
-    ) {
-
-        this.ensureRepository();
-
-
-        if (
-            !startDate ||
-            !endDate
-        ) {
+        if (!startTime) {
 
             throw new Error(
-                "Start date and end date are required."
+                "Booking start time is required."
             );
 
         }
 
 
-        return this.repository.findByDateRange(
-            startDate,
-            endDate
+        const bookingData =
+            this.prepareBookingData({
+
+                clientId,
+
+                matterId,
+
+                staffId,
+
+                type,
+
+                title,
+
+                description,
+
+                date,
+
+                startTime,
+
+                endTime,
+
+                duration,
+
+                location,
+
+                notes,
+
+                status,
+
+                metadata
+
+            });
+
+
+        await this.validateBooking(
+            bookingData
         );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-012
-        Upcoming Bookings
-    =========================================================*/
-
-    async getUpcomingBookings(
-        options = {}
-    ) {
-
-        this.ensureRepository();
 
 
         /*
          *=====================================================
          * FUTURE INSERT
          *
-         * UPCOMING APPOINTMENT ENGINE
+         * APPOINTMENT DOMAIN OBJECT
          *
-         * Default:
+         * Once Appointment.js is fully integrated, the service
+         * should construct and validate the domain object here.
          *
-         * - Today
-         * - Next 7 days
+         * Example:
          *
-         * Future configuration may allow:
+         * const appointment = new Appointment(bookingData);
          *
-         * - 24 hours
-         * - 48 hours
-         * - 7 days
-         * - 30 days
+         * appointment.validate();
          *=====================================================
          */
 
 
+        let booking;
+
+
         if (
-            typeof this.repository.findUpcoming ===
+            this.bookingRepository &&
+            typeof this.bookingRepository.create ===
             "function"
         ) {
 
-            return this.repository.findUpcoming(
-                options
+            booking =
+                await this.bookingRepository.create(
+                    bookingData
+                );
+
+        } else {
+
+            booking =
+                this.createTemporaryBooking(
+                    bookingData
+                );
+
+        }
+
+
+        await this.afterBookingCreated(
+            booking
+        );
+
+
+        return booking;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-003
+        Prepare Booking Data
+    =========================================================*/
+
+    prepareBookingData(
+        data
+    ) {
+
+
+        const duration =
+            this.resolveDuration(
+                data.duration
+            );
+
+
+        const endTime =
+            data.endTime ||
+            this.calculateEndTime(
+                data.startTime,
+                duration
+            );
+
+
+        return {
+
+            ...data,
+
+            duration,
+
+            endTime,
+
+            createdAt:
+                new Date(),
+
+            updatedAt:
+                new Date()
+
+        };
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-004
+        Resolve Duration
+    =========================================================*/
+
+    resolveDuration(
+        duration
+    ) {
+
+
+        const value =
+            Number(
+                duration ||
+                this.defaultDuration
+            );
+
+
+        if (
+            !Number.isFinite(
+                value
+            )
+        ) {
+
+            throw new Error(
+                "Booking duration must be numeric."
+            );
+
+        }
+
+
+        if (
+            value <
+            this.minimumDuration
+        ) {
+
+            throw new Error(
+                `Booking duration cannot be less than ${this.minimumDuration} minutes.`
+            );
+
+        }
+
+
+        if (
+            value >
+            this.maximumDuration
+        ) {
+
+            throw new Error(
+                `Booking duration cannot exceed ${this.maximumDuration} minutes.`
+            );
+
+        }
+
+
+        return value;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-005
+        Calculate End Time
+    =========================================================*/
+
+    calculateEndTime(
+        startTime,
+        duration
+    ) {
+
+
+        if (!startTime) {
+
+            throw new Error(
+                "Start time is required."
+            );
+
+        }
+
+
+        const parts =
+            String(
+                startTime
+            )
+                .split(":")
+                .map(
+                    Number
+                );
+
+
+        if (
+            parts.length <
+            2 ||
+            parts.some(
+                value =>
+                    !Number.isFinite(
+                        value
+                    )
+            )
+        ) {
+
+            throw new Error(
+                "Invalid start time."
+            );
+
+        }
+
+
+        const hours =
+            parts[0];
+
+
+        const minutes =
+            parts[1];
+
+
+        const totalMinutes =
+            (
+                hours * 60
+            ) +
+            minutes +
+            Number(
+                duration
+            );
+
+
+        const endHours =
+            Math.floor(
+                totalMinutes /
+                60
+            ) % 24;
+
+
+        const endMinutes =
+            totalMinutes %
+            60;
+
+
+        return (
+
+            String(
+                endHours
+            ).padStart(
+                2,
+                "0"
+            ) +
+
+            ":" +
+
+            String(
+                endMinutes
+            ).padStart(
+                2,
+                "0"
+            )
+
+        );
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-006
+        Validate Booking
+    =========================================================*/
+
+    async validateBooking(
+        booking
+    ) {
+
+
+        if (!booking.clientId) {
+
+            throw new Error(
+                "Client ID is required."
+            );
+
+        }
+
+
+        if (!booking.date) {
+
+            throw new Error(
+                "Booking date is required."
+            );
+
+        }
+
+
+        if (!booking.startTime) {
+
+            throw new Error(
+                "Booking start time is required."
+            );
+
+        }
+
+
+        if (!booking.endTime) {
+
+            throw new Error(
+                "Booking end time is required."
+            );
+
+        }
+
+
+        if (
+            booking.staffId
+        ) {
+
+            await this.validateStaffAvailability(
+                booking
+            );
+
+        }
+
+
+        await this.validateConflict(
+            booking
+        );
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * BUSINESS-RULE VALIDATION
+         *
+         * Add:
+         *
+         * public holiday validation
+         * branch availability
+         * service availability
+         * staff qualification
+         * appointment type restrictions
+         * matter restrictions
+         * client restrictions
+         *=====================================================
+         */
+
+
+        return true;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-007
+        Validate Staff Availability
+    =========================================================*/
+
+    async validateStaffAvailability(
+        booking
+    ) {
+
+
+        if (
+            !this.bookingRepository
+        ) {
+
+            return true;
+
+        }
+
+
+        if (
+            typeof this.bookingRepository
+                .findByStaffAndDate !==
+            "function"
+        ) {
+
+            return true;
+
+        }
+
+
+        const existing =
+            await this.bookingRepository
+                .findByStaffAndDate(
+                    booking.staffId,
+                    booking.date
+                );
+
+
+        if (
+            !Array.isArray(
+                existing
+            )
+        ) {
+
+            return true;
+
+        }
+
+
+        const conflict =
+            existing.some(
+                appointment =>
+                    this.timesOverlap(
+                        booking.startTime,
+                        booking.endTime,
+                        appointment.startTime,
+                        appointment.endTime
+                    )
+            );
+
+
+        if (
+            conflict
+        ) {
+
+            throw new Error(
+                "Staff member is not available for the selected time."
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-008
+        Validate Conflict
+    =========================================================*/
+
+    async validateConflict(
+        booking
+    ) {
+
+
+        if (
+            !this.bookingRepository
+        ) {
+
+            return true;
+
+        }
+
+
+        if (
+            typeof this.bookingRepository
+                .findConflicts !==
+            "function"
+        ) {
+
+            return true;
+
+        }
+
+
+        const conflicts =
+            await this.bookingRepository
+                .findConflicts(
+                    booking
+                );
+
+
+        if (
+            Array.isArray(
+                conflicts
+            ) &&
+            conflicts.length
+        ) {
+
+            throw new Error(
+                "The selected booking time is already occupied."
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-009
+        Check Time Overlap
+    =========================================================*/
+
+    timesOverlap(
+        startA,
+        endA,
+        startB,
+        endB
+    ) {
+
+
+        const aStart =
+            this.timeToMinutes(
+                startA
+            );
+
+
+        const aEnd =
+            this.timeToMinutes(
+                endA
+            );
+
+
+        const bStart =
+            this.timeToMinutes(
+                startB
+            );
+
+
+        const bEnd =
+            this.timeToMinutes(
+                endB
+            );
+
+
+        return (
+            aStart <
+            bEnd &&
+            bStart <
+            aEnd
+        );
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-010
+        Convert Time To Minutes
+    =========================================================*/
+
+    timeToMinutes(
+        time
+    ) {
+
+
+        if (!time) {
+
+            return 0;
+
+        }
+
+
+        const [
+            hours,
+            minutes
+        ] =
+            String(
+                time
+            )
+                .split(":")
+                .map(
+                    Number
+                );
+
+
+        return (
+            hours * 60
+        ) +
+        minutes;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-011
+        Get Booking
+    =========================================================*/
+
+    async getBooking(
+        bookingId
+    ) {
+
+
+        if (!bookingId) {
+
+            throw new Error(
+                "Booking ID is required."
+            );
+
+        }
+
+
+        if (
+            this.bookingRepository &&
+            typeof this.bookingRepository.findById ===
+            "function"
+        ) {
+
+            return this.bookingRepository.findById(
+                bookingId
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-012
+        Get Client Bookings
+    =========================================================*/
+
+    async getClientBookings(
+        clientId
+    ) {
+
+
+        if (!clientId) {
+
+            throw new Error(
+                "Client ID is required."
+            );
+
+        }
+
+
+        if (
+            this.bookingRepository &&
+            typeof this.bookingRepository.findByClientId ===
+            "function"
+        ) {
+
+            return this.bookingRepository.findByClientId(
+                clientId
             );
 
         }
@@ -464,563 +943,31 @@ export default class BookingService {
 
     /*=========================================================
         SER-BOOK-013
-        Update Booking
+        Get Matter Bookings
     =========================================================*/
 
-    async updateBooking(
-        bookingId,
-        changes = {}
+    async getMatterBookings(
+        matterId
     ) {
 
-        this.ensureRepository();
 
-
-        const booking =
-            await this.getBooking(
-                bookingId
-            );
-
-
-        if (!booking) {
+        if (!matterId) {
 
             throw new Error(
-                "Booking not found."
+                "Matter ID is required."
             );
 
         }
 
 
-        Object.keys(changes).forEach(
-            key => {
-
-                /*
-                 * Booking identity must not
-                 * be overwritten.
-                 */
-
-                if (
-                    key === "id"
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    Object.prototype.hasOwnProperty.call(
-                        booking,
-                        key
-                    )
-                ) {
-
-                    booking[key] =
-                        changes[key];
-
-                }
-
-            }
-        );
-
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * CONFLICT RECHECK
-         *
-         * Every date/time modification should eventually
-         * pass through the scheduling engine.
-         *=====================================================
-         */
-
-
         if (
-            typeof booking.touch ===
+            this.bookingRepository &&
+            typeof this.bookingRepository.findByMatterId ===
             "function"
         ) {
 
-            booking.touch();
-
-        }
-
-
-        if (
-            typeof booking.validate ===
-            "function"
-        ) {
-
-            booking.validate();
-
-        }
-
-
-        return this.repository.update(
-            bookingId,
-            booking
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-014
-        Confirm Booking
-    =========================================================*/
-
-    async confirmBooking(
-        bookingId
-    ) {
-
-        const booking =
-            await this.getBooking(
-                bookingId
-            );
-
-
-        if (!booking) {
-
-            throw new Error(
-                "Booking not found."
-            );
-
-        }
-
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * BOOKING STATUS ENGINE
-         *
-         * Expected states:
-         *
-         * PENDING
-         * CONFIRMED
-         * CANCELLED
-         * COMPLETED
-         * NO_SHOW
-         * RESCHEDULED
-         *=====================================================
-         */
-
-
-        if (
-            typeof booking.confirm ===
-            "function"
-        ) {
-
-            booking.confirm();
-
-        } else {
-
-            booking.status =
-                "CONFIRMED";
-
-        }
-
-
-        if (
-            typeof booking.touch ===
-            "function"
-        ) {
-
-            booking.touch();
-
-        }
-
-
-        return this.repository.update(
-            bookingId,
-            booking
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-015
-        Cancel Booking
-    =========================================================*/
-
-    async cancelBooking(
-        bookingId,
-        reason = ""
-    ) {
-
-        const booking =
-            await this.getBooking(
-                bookingId
-            );
-
-
-        if (!booking) {
-
-            throw new Error(
-                "Booking not found."
-            );
-
-        }
-
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * CANCELLATION POLICY ENGINE
-         *
-         * Future rules:
-         *
-         * - Cancellation notice
-         * - Consultation deposits
-         * - Refund rules
-         * - Staff notification
-         * - Client notification
-         *=====================================================
-         */
-
-
-        if (
-            typeof booking.cancel ===
-            "function"
-        ) {
-
-            booking.cancel(
-                reason
-            );
-
-        } else {
-
-            booking.status =
-                "CANCELLED";
-
-            booking.cancellationReason =
-                reason;
-
-        }
-
-
-        if (
-            typeof booking.touch ===
-            "function"
-        ) {
-
-            booking.touch();
-
-        }
-
-
-        return this.repository.update(
-            bookingId,
-            booking
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-016
-        Reschedule Booking
-    =========================================================*/
-
-    async rescheduleBooking(
-        bookingId,
-        newDate,
-        newTime
-    ) {
-
-        const booking =
-            await this.getBooking(
-                bookingId
-            );
-
-
-        if (!booking) {
-
-            throw new Error(
-                "Booking not found."
-            );
-
-        }
-
-
-        if (
-            !newDate ||
-            !newTime
-        ) {
-
-            throw new Error(
-                "New date and time are required."
-            );
-
-        }
-
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * RESCHEDULING ENGINE
-         *
-         * Must:
-         *
-         * 1. Check availability
-         * 2. Check staff conflicts
-         * 3. Check client conflicts
-         * 4. Update appointment
-         * 5. Record timeline event
-         * 6. Notify client
-         *=====================================================
-         */
-
-
-        booking.date =
-            newDate;
-
-        booking.time =
-            newTime;
-
-
-        if (
-            typeof booking.touch ===
-            "function"
-        ) {
-
-            booking.touch();
-
-        }
-
-
-        return this.repository.update(
-            bookingId,
-            booking
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-017
-        Complete Booking
-    =========================================================*/
-
-    async completeBooking(
-        bookingId
-    ) {
-
-        const booking =
-            await this.getBooking(
-                bookingId
-            );
-
-
-        if (!booking) {
-
-            throw new Error(
-                "Booking not found."
-            );
-
-        }
-
-
-        /*
-         * FUTURE INSERT
-         *
-         * POST-APPOINTMENT ENGINE
-         *
-         * Future actions:
-         *
-         * - Update matter timeline
-         * - Create consultation notes
-         * - Trigger AI summary
-         * - Create follow-up task
-         * - Request documents
-         * - Send client follow-up
-         */
-
-
-        if (
-            typeof booking.complete ===
-            "function"
-        ) {
-
-            booking.complete();
-
-        } else {
-
-            booking.status =
-                "COMPLETED";
-
-        }
-
-
-        if (
-            typeof booking.touch ===
-            "function"
-        ) {
-
-            booking.touch();
-
-        }
-
-
-        return this.repository.update(
-            bookingId,
-            booking
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-018
-        Mark No-Show
-    =========================================================*/
-
-    async markNoShow(
-        bookingId
-    ) {
-
-        const booking =
-            await this.getBooking(
-                bookingId
-            );
-
-
-        if (!booking) {
-
-            throw new Error(
-                "Booking not found."
-            );
-
-        }
-
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * NO-SHOW ENGINE
-         *
-         * Future actions:
-         *
-         * - Record no-show
-         * - Update client history
-         * - Apply policy
-         * - Notify staff
-         * - Notify client
-         * - Trigger rescheduling workflow
-         *=====================================================
-         */
-
-
-        booking.status =
-            "NO_SHOW";
-
-
-        if (
-            typeof booking.touch ===
-            "function"
-        ) {
-
-            booking.touch();
-
-        }
-
-
-        return this.repository.update(
-            bookingId,
-            booking
-        );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-019
-        Availability
-    =========================================================*/
-
-    async checkAvailability(
-        options = {}
-    ) {
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * AVAILABILITY ENGINE
-         *
-         * Inputs:
-         *
-         * - Date
-         * - Time
-         * - Duration
-         * - Staff member
-         * - Appointment type
-         * - Matter
-         *
-         * Output:
-         *
-         * Available
-         * Unavailable
-         * Alternative times
-         *=====================================================
-         */
-
-
-        if (
-            typeof this.repository.checkAvailability ===
-            "function"
-        ) {
-
-            return this.repository
-                .checkAvailability(
-                    options
-                );
-
-        }
-
-
-        return {
-
-            available: false,
-
-            alternatives: [],
-
-            status:
-                "AVAILABILITY_ENGINE_NOT_CONNECTED"
-
-        };
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-020
-        Conflict Detection
-    =========================================================*/
-
-    async detectConflicts(
-        options = {}
-    ) {
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * BOOKING CONFLICT ENGINE
-         *=====================================================
-         */
-
-
-        if (
-            typeof this.repository.findConflicts ===
-            "function"
-        ) {
-
-            return this.repository.findConflicts(
-                options
+            return this.bookingRepository.findByMatterId(
+                matterId
             );
 
         }
@@ -1032,14 +979,353 @@ export default class BookingService {
 
 
     /*=========================================================
-        SER-BOOK-021
-        Reminder
+        SER-BOOK-014
+        Get Staff Bookings
     =========================================================*/
 
-    async sendReminder(
-        bookingId,
-        channel = "whatsapp"
+    async getStaffBookings(
+        staffId,
+        date = null
     ) {
+
+
+        if (!staffId) {
+
+            throw new Error(
+                "Staff ID is required."
+            );
+
+        }
+
+
+        if (
+            this.bookingRepository &&
+            typeof this.bookingRepository.findByStaffId ===
+            "function"
+        ) {
+
+            return this.bookingRepository.findByStaffId(
+                staffId,
+                date
+            );
+
+        }
+
+
+        return [];
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-015
+        Get Available Slots
+    =========================================================*/
+
+    async getAvailableSlots({
+
+        date,
+
+        staffId = null,
+
+        duration = null,
+
+        startTime = "08:00",
+
+        endTime = "17:00",
+
+        interval = 30
+
+    } = {}) {
+
+
+        if (!date) {
+
+            throw new Error(
+                "Date is required."
+            );
+
+        }
+
+
+        const bookingDuration =
+            this.resolveDuration(
+                duration
+            );
+
+
+        const slots = [];
+
+
+        let current =
+            this.timeToMinutes(
+                startTime
+            );
+
+
+        const closing =
+            this.timeToMinutes(
+                endTime
+            );
+
+
+        let existing = [];
+
+
+        if (
+            staffId &&
+            this.bookingRepository &&
+            typeof this.bookingRepository
+                .findByStaffAndDate ===
+            "function"
+        ) {
+
+            existing =
+                await this.bookingRepository
+                    .findByStaffAndDate(
+                        staffId,
+                        date
+                    );
+
+        }
+
+
+        while (
+            current +
+            bookingDuration <=
+            closing
+        ) {
+
+
+            const slotStart =
+                this.minutesToTime(
+                    current
+                );
+
+
+            const slotEnd =
+                this.minutesToTime(
+                    current +
+                    bookingDuration
+                );
+
+
+            const occupied =
+                existing.some(
+                    appointment =>
+                        this.timesOverlap(
+                            slotStart,
+                            slotEnd,
+                            appointment.startTime,
+                            appointment.endTime
+                        )
+                );
+
+
+            if (!occupied) {
+
+                slots.push({
+
+                    date,
+
+                    startTime:
+                        slotStart,
+
+                    endTime:
+                        slotEnd,
+
+                    duration:
+                        bookingDuration
+
+                });
+
+            }
+
+
+            current +=
+                Number(
+                    interval
+                );
+
+        }
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * ADVANCED AVAILABILITY ENGINE
+         *
+         * Staff working hours
+         * Branch hours
+         * Holidays
+         * Existing appointments
+         * Leave
+         * Meetings
+         * Training
+         * Emergency blocks
+         *=====================================================
+         */
+
+
+        return slots;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-016
+        Minutes To Time
+    =========================================================*/
+
+    minutesToTime(
+        minutes
+    ) {
+
+
+        const hours =
+            Math.floor(
+                minutes /
+                60
+            ) % 24;
+
+
+        const remainder =
+            minutes %
+            60;
+
+
+        return (
+
+            String(
+                hours
+            ).padStart(
+                2,
+                "0"
+            ) +
+
+            ":" +
+
+            String(
+                remainder
+            ).padStart(
+                2,
+                "0"
+            )
+
+        );
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-017
+        Update Booking
+    =========================================================*/
+
+    async updateBooking(
+        bookingId,
+        updates = {}
+    ) {
+
+
+        if (!bookingId) {
+
+            throw new Error(
+                "Booking ID is required."
+            );
+
+        }
+
+
+        const existing =
+            await this.getBooking(
+                bookingId
+            );
+
+
+        if (!existing) {
+
+            throw new Error(
+                "Booking not found."
+            );
+
+        }
+
+
+        const updated = {
+
+            ...existing,
+
+            ...updates,
+
+            updatedAt:
+                new Date()
+
+        };
+
+
+        await this.validateBooking(
+            updated
+        );
+
+
+        if (
+            this.bookingRepository &&
+            typeof this.bookingRepository.update ===
+            "function"
+        ) {
+
+            const result =
+                await this.bookingRepository.update(
+                    bookingId,
+                    updated
+                );
+
+
+            await this.afterBookingUpdated(
+                result
+            );
+
+
+            return result;
+
+        }
+
+
+        return updated;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-018
+        Reschedule Booking
+    =========================================================*/
+
+    async rescheduleBooking({
+
+        bookingId,
+
+        date,
+
+        startTime,
+
+        endTime = null,
+
+        duration = null
+
+    } = {}) {
+
+
+        if (!bookingId) {
+
+            throw new Error(
+                "Booking ID is required."
+            );
+
+        }
+
 
         const booking =
             await this.getBooking(
@@ -1056,198 +1342,492 @@ export default class BookingService {
         }
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * APPOINTMENT REMINDER ENGINE
-         *
-         * Channels:
-         *
-         * WhatsApp
-         * Email
-         * SMS
-         * Client Portal
-         *=====================================================
-         */
-
-
-        if (!this.notificationService) {
-
-            throw new Error(
-                "NotificationService has not been configured."
+        const resolvedDuration =
+            this.resolveDuration(
+                duration ||
+                booking.duration
             );
 
-        }
 
-
-        return this.notificationService
-            .sendAppointmentReminder(
-                booking,
-                channel
+        const resolvedEndTime =
+            endTime ||
+            this.calculateEndTime(
+                startTime,
+                resolvedDuration
             );
 
-    }
 
-
-    /*=========================================================
-        SER-BOOK-022
-        AI Appointment Preparation
-    =========================================================*/
-
-    async prepareWithAI(
-        bookingId
-    ) {
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * AI CONSULTATION PREPARATION
-         *
-         * AI will eventually review:
-         *
-         * - Client history
-         * - Matter history
-         * - Outstanding documents
-         * - Previous communications
-         * - Previous consultations
-         *
-         * and produce:
-         *
-         * - Consultation briefing
-         * - Suggested questions
-         * - Missing information
-         * - Risk flags
-         *=====================================================
-         */
-
-
-        if (!this.aiService) {
-
-            throw new Error(
-                "AIService has not been configured."
-            );
-
-        }
-
-
-        return this.aiService
-            .prepareAppointment(
-                bookingId
-            );
-
-    }
-
-
-    /*=========================================================
-        SER-BOOK-023
-        Calendar Synchronisation
-        Reserved
-    =========================================================*/
-
-    async synchroniseCalendar(
-        bookingId
-    ) {
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * CALENDAR INTEGRATION
-         *
-         * Google Calendar
-         * Outlook
-         * Internal Calendar
-         *=====================================================
-         */
-
-
-        return {
+        return this.updateBooking(
 
             bookingId,
 
-            synchronised: false,
+            {
 
-            status:
-                "CALENDAR_ENGINE_NOT_CONNECTED"
+                date,
 
-        };
+                startTime,
 
-    }
+                endTime:
+                    resolvedEndTime,
 
+                duration:
+                    resolvedDuration
 
-    /*=========================================================
-        SER-BOOK-024
-        Public Booking
-        Reserved
-    =========================================================*/
+            }
 
-    async createPublicBooking(
-        data = {}
-    ) {
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * PUBLIC BOOKING ENGINE
-         *
-         * This will eventually connect:
-         *
-         * app/booking/index.html
-         *
-         * with:
-         *
-         * Client
-         * Consultation
-         * Matter
-         * Calendar
-         * Notifications
-         *=====================================================
-         */
-
-
-        return this.createBooking(
-            data
         );
 
     }
 
 
     /*=========================================================
-        SER-BOOK-025
-        Booking Statistics
+        SER-BOOK-019
+        Confirm Booking
     =========================================================*/
 
-    async statistics() {
+    async confirmBooking(
+        bookingId
+    ) {
 
-        this.ensureRepository();
+
+        return this.updateBooking(
+
+            bookingId,
+
+            {
+
+                status:
+                    "CONFIRMED",
+
+                confirmedAt:
+                    new Date()
+
+            }
+
+        );
+
+    }
 
 
-        if (
-            typeof this.repository.statistics ===
-            "function"
-        ) {
+    /*=========================================================
+        SER-BOOK-020
+        Cancel Booking
+    =========================================================*/
 
-            return this.repository.statistics();
+    async cancelBooking({
+
+        bookingId,
+
+        reason = ""
+
+    } = {}) {
+
+
+        if (!bookingId) {
+
+            throw new Error(
+                "Booking ID is required."
+            );
 
         }
 
 
+        const booking =
+            await this.getBooking(
+                bookingId
+            );
+
+
+        if (!booking) {
+
+            throw new Error(
+                "Booking not found."
+            );
+
+        }
+
+
+        const result =
+            await this.updateBooking(
+
+                bookingId,
+
+                {
+
+                    status:
+                        "CANCELLED",
+
+                    cancellationReason:
+                        reason,
+
+                    cancelledAt:
+                        new Date()
+
+                }
+
+            );
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * AUTOMATIC CANCELLATION NOTIFICATION
+         *=====================================================
+         */
+
+
+        return result;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-021
+        Complete Booking
+    =========================================================*/
+
+    async completeBooking(
+        bookingId
+    ) {
+
+
+        return this.updateBooking(
+
+            bookingId,
+
+            {
+
+                status:
+                    "COMPLETED",
+
+                completedAt:
+                    new Date()
+
+            }
+
+        );
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-022
+        Mark No Show
+    =========================================================*/
+
+    async markNoShow(
+        bookingId
+    ) {
+
+
+        return this.updateBooking(
+
+            bookingId,
+
+            {
+
+                status:
+                    "NO_SHOW",
+
+                noShowAt:
+                    new Date()
+
+            }
+
+        );
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-023
+        Send Booking Confirmation
+    =========================================================*/
+
+    async sendConfirmation(
+        booking
+    ) {
+
+
+        if (
+            !this.notificationService
+        ) {
+
+            return null;
+
+        }
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * CLIENT LOOKUP
+         *
+         * booking.clientId
+         * ↓
+         * ClientRepository
+         * ↓
+         * Client
+         *=====================================================
+         */
+
+
+        if (
+            typeof this.notificationService
+                .sendToClient !==
+            "function"
+        ) {
+
+            return null;
+
+        }
+
+
+        /*
+         * Provider/client resolution will be completed when
+         * NotificationService and ClientRepository are wired
+         * together.
+         */
+
+
+        return null;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-024
+        Send Reminder
+    =========================================================*/
+
+    async sendReminder(
+        booking
+    ) {
+
+
+        if (
+            !this.notificationService
+        ) {
+
+            return null;
+
+        }
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * AUTOMATED REMINDER ENGINE
+         *
+         * Suggested schedule:
+         *
+         * 24 hours before
+         * 2 hours before
+         * configurable reminders
+         *=====================================================
+         */
+
+
+        return null;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-025
+        After Booking Created
+    =========================================================*/
+
+    async afterBookingCreated(
+        booking
+    ) {
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * POST-CREATION WORKFLOW
+         *
+         * 1. Persist booking
+         * 2. Add timeline entry
+         * 3. Send confirmation
+         * 4. Notify assigned staff
+         * 5. Add calendar event
+         * 6. Schedule reminder
+         *=====================================================
+         */
+
+
+        if (
+            this.state &&
+            typeof this.state.set ===
+            "function"
+        ) {
+
+            this.state.set(
+                "lastBooking",
+                booking
+            );
+
+        }
+
+
+        return booking;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-026
+        After Booking Updated
+    =========================================================*/
+
+    async afterBookingUpdated(
+        booking
+    ) {
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * UPDATE WORKFLOW
+         *
+         * Notify client when:
+         *
+         * date changes
+         * time changes
+         * staff changes
+         * location changes
+         * status changes
+         *=====================================================
+         */
+
+
+        return booking;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-027
+        Calendar Integration
+    =========================================================*/
+
+    async syncCalendar(
+        booking
+    ) {
+
+
+        if (
+            !this.calendarProvider
+        ) {
+
+            return null;
+
+        }
+
+
+        if (
+            typeof this.calendarProvider.createEvent ===
+            "function"
+        ) {
+
+            return this.calendarProvider.createEvent(
+                booking
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-028
+        Delete Booking
+    =========================================================*/
+
+    async deleteBooking(
+        bookingId
+    ) {
+
+
+        if (!bookingId) {
+
+            throw new Error(
+                "Booking ID is required."
+            );
+
+        }
+
+
+        if (
+            !this.bookingRepository ||
+            typeof this.bookingRepository.delete !==
+            "function"
+        ) {
+
+            throw new Error(
+                "Booking repository does not support deletion."
+            );
+
+        }
+
+
+        const result =
+            await this.bookingRepository.delete(
+                bookingId
+            );
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * SOFT DELETE POLICY
+         *
+         * Production should generally prefer:
+         *
+         * cancelled
+         * archived
+         * deletedAt
+         *
+         * rather than permanent deletion.
+         *=====================================================
+         */
+
+
+        return result;
+
+    }
+
+
+    /*=========================================================
+        SER-BOOK-029
+        Temporary Booking
+    =========================================================*/
+
+    createTemporaryBooking(
+        data
+    ) {
+
+
         return {
 
-            total: 0,
+            id:
+                `BOOK-${Date.now()}-` +
+                Math.random()
+                    .toString(36)
+                    .slice(2, 8),
 
-            pending: 0,
-
-            confirmed: 0,
-
-            completed: 0,
-
-            cancelled: 0,
-
-            noShows: 0
+            ...data
 
         };
 
@@ -1255,11 +1835,12 @@ export default class BookingService {
 
 
     /*=========================================================
-        SER-BOOK-026
+        SER-BOOK-030
         Booking Health Check
     =========================================================*/
 
     async healthCheck() {
+
 
         return {
 
@@ -1267,23 +1848,21 @@ export default class BookingService {
                 "BookingService",
 
             healthy:
-                Boolean(
-                    this.repository
-                ),
+                true,
 
             repositoryConfigured:
                 Boolean(
-                    this.repository
+                    this.bookingRepository
                 ),
 
-            clientServiceConfigured:
+            clientRepositoryConfigured:
                 Boolean(
-                    this.clientService
+                    this.clientRepository
                 ),
 
-            matterServiceConfigured:
+            matterRepositoryConfigured:
                 Boolean(
-                    this.matterService
+                    this.matterRepository
                 ),
 
             notificationServiceConfigured:
@@ -1291,9 +1870,9 @@ export default class BookingService {
                     this.notificationService
                 ),
 
-            aiServiceConfigured:
+            calendarProviderConfigured:
                 Boolean(
-                    this.aiService
+                    this.calendarProvider
                 ),
 
             timestamp:
@@ -1305,7 +1884,7 @@ export default class BookingService {
 
 
     /*=========================================================
-        SER-BOOK-027
+        SER-BOOK-031
         FUTURE MASTER BOOKING ENGINE
     =========================================================*/
 
@@ -1314,33 +1893,66 @@ export default class BookingService {
      * FUTURE INSERT MAP
      * ========================================================
      *
-     * BOOKING
+     * BOOKING CREATION
      * --------------------------------------------------------
      *
      * createBooking()
-     * updateBooking()
-     * confirmBooking()
-     * cancelBooking()
-     * rescheduleBooking()
-     * completeBooking()
-     * markNoShow()
+     * prepareBookingData()
+     * validateBooking()
      *
      *
      * AVAILABILITY
      * --------------------------------------------------------
      *
-     * calculateAvailability()
-     * findAvailableSlots()
-     * detectConflicts()
-     * calculateDuration()
+     * getAvailableSlots()
+     * validateStaffAvailability()
+     * validateConflict()
+     * timesOverlap()
+     *
+     *
+     * BOOKING MANAGEMENT
+     * --------------------------------------------------------
+     *
+     * getBooking()
+     * updateBooking()
+     * rescheduleBooking()
+     * confirmBooking()
+     * cancelBooking()
+     * completeBooking()
+     * markNoShow()
+     * deleteBooking()
+     *
+     *
+     * CLIENT
+     * --------------------------------------------------------
+     *
+     * getClientBookings()
+     * getClientAvailability()
+     *
+     *
+     * MATTER
+     * --------------------------------------------------------
+     *
+     * getMatterBookings()
+     * linkBookingToMatter()
+     *
+     *
+     * STAFF
+     * --------------------------------------------------------
+     *
+     * getStaffBookings()
+     * getStaffAvailability()
+     * blockStaffTime()
+     * unblockStaffTime()
      *
      *
      * CALENDAR
      * --------------------------------------------------------
      *
-     * syncGoogleCalendar()
-     * syncOutlookCalendar()
-     * syncInternalCalendar()
+     * syncCalendar()
+     * createCalendarEvent()
+     * updateCalendarEvent()
+     * deleteCalendarEvent()
      *
      *
      * NOTIFICATIONS
@@ -1352,30 +1964,35 @@ export default class BookingService {
      * sendRescheduleNotice()
      *
      *
-     * AI
+     * AUTOMATION
      * --------------------------------------------------------
      *
-     * prepareConsultation()
-     * summarisePreviousConsultation()
-     * recommendQuestions()
-     * detectRisk()
+     * scheduleReminder()
+     * processReminders()
+     * processUpcomingBookings()
      *
      *
-     * PUBLIC BOOKING
+     * BRANCHES
      * --------------------------------------------------------
      *
-     * createPublicBooking()
-     * validatePublicBooking()
-     * createClientFromBooking()
-     * createMatterFromBooking()
+     * getBranchAvailability()
+     * getBranchBookings()
      *
      *
-     * WORKFLOW
+     * FUTURE
      * --------------------------------------------------------
      *
-     * triggerBookingWorkflow()
-     * triggerConsultationWorkflow()
-     * triggerFollowUpWorkflow()
+     * public holiday engine
+     * staff leave engine
+     * recurring appointments
+     * waiting list
+     * appointment deposits
+     * appointment payments
+     * online booking
+     * WhatsApp booking
+     * AI booking assistant
+     * consultation booking
+     * VFS appointment scheduling
      *
      * ========================================================
      */
