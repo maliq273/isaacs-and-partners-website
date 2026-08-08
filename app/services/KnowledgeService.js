@@ -1,4 +1,168 @@
-/**
+/**/**
+ * ============================================================
+ * ISAACS & PARTNERS ENTERPRISE PLATFORM
+ * KnowledgeService
+ * ============================================================
+ *
+ * LOCATION
+ * app/services/KnowledgeService.js
+ * ============================================================
+ */
+
+export default class KnowledgeService {
+
+    constructor({
+        knowledgeRepository = null,
+        knowledgeLoader = null,
+        knowledgeEngine = null,
+        logger = null
+    } = {}) {
+
+        this.knowledgeRepository =
+            knowledgeRepository;
+
+        this.knowledgeLoader =
+            knowledgeLoader;
+
+        this.knowledgeEngine =
+            knowledgeEngine;
+
+        this.logger =
+            logger;
+
+        /*
+         * ====================================================
+         * FUTURE INSERT
+         *
+         * Knowledge domains:
+         *
+         * immigration
+         * labour
+         * HR
+         * CCMA
+         * business
+         * contracts
+         * mediation
+         * notary
+         * ====================================================
+         */
+
+    }
+
+    async getKnowledge(
+        category
+    ) {
+
+        if (
+            this.knowledgeRepository &&
+            typeof this.knowledgeRepository.findByCategory ===
+            "function"
+        ) {
+            return this.knowledgeRepository
+                .findByCategory(
+                    category
+                );
+        }
+
+        if (
+            this.knowledgeLoader &&
+            typeof this.knowledgeLoader.load ===
+            "function"
+        ) {
+            return this.knowledgeLoader.load(
+                category
+            );
+        }
+
+        return null;
+    }
+
+    async getRequiredDocuments(
+        matter
+    ) {
+
+        if (
+            !matter
+        ) {
+            throw new Error(
+                "Matter is required."
+            );
+        }
+
+        if (
+            this.knowledgeEngine &&
+            typeof this.knowledgeEngine
+                .getDocuments ===
+            "function"
+        ) {
+            return this.knowledgeEngine
+                .getDocuments(
+                    matter.type
+                );
+        }
+
+        return [];
+    }
+
+    async getVisaRequirements(
+        visaType
+    ) {
+
+        return this.getKnowledge(
+            visaType
+        );
+    }
+
+    async search(
+        query,
+        category = null
+    ) {
+
+        if (
+            this.knowledgeRepository &&
+            typeof this.knowledgeRepository.search ===
+            "function"
+        ) {
+            return this.knowledgeRepository.search(
+                query,
+                category
+            );
+        }
+
+        return [];
+    }
+
+    async validateKnowledge() {
+
+        if (
+            this.knowledgeRepository &&
+            typeof this.knowledgeRepository.validate ===
+            "function"
+        ) {
+            return this.knowledgeRepository.validate();
+        }
+
+        return true;
+    }
+
+    /*
+     * ========================================================
+     * FUTURE INSERT
+     *
+     * Immigration legislative engine
+     * DHA requirements
+     * VFS requirements
+     * Visa form mappings
+     * Country rules
+     * Occupation rules
+     * Policy versioning
+     * Effective dates
+     * Source citations
+     * Knowledge confidence
+     * ========================================================
+     */
+
+}
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * ============================================================
