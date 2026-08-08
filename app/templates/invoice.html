@@ -1,1 +1,864 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Invoice - Isaacs & Partners</title>
+
+    <style>
+        :root {
+            --primary: #111827;
+            --secondary: #374151;
+            --border: #d1d5db;
+            --light: #f3f4f6;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--primary);
+            background: #f5f5f5;
+            font-size: 13px;
+        }
+
+        .invoice {
+            max-width: 1000px;
+            margin: auto;
+            background: var(--white);
+            padding: 45px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 25px;
+        }
+
+        .business-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .document-title {
+            text-align: right;
+        }
+
+        .document-title h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .document-number {
+            margin-top: 8px;
+            font-weight: 700;
+        }
+
+        .information {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .box {
+            border: 1px solid var(--border);
+            padding: 15px;
+        }
+
+        .box-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border);
+            padding: 11px 8px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background: var(--light);
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .numeric {
+            text-align: right;
+        }
+
+        .line-description {
+            min-width: 250px;
+        }
+
+        .line-input {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            font: inherit;
+            outline: none;
+        }
+
+        .quantity-input,
+        .price-input {
+            width: 90px;
+            text-align: right;
+            border: 0;
+            background: transparent;
+            font: inherit;
+            outline: none;
+        }
+
+        .remove-line {
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .controls {
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 9px 14px;
+            border: 1px solid var(--primary);
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+        }
+
+        .totals {
+            width: 360px;
+            margin-left: auto;
+            margin-top: 25px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .grand-total {
+            border-top: 2px solid var(--primary);
+            font-size: 17px;
+            font-weight: 700;
+            padding-top: 12px;
+        }
+
+        .payment {
+            margin-top: 35px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .notice {
+            margin-top: 20px;
+            padding: 12px;
+            background: var(--light);
+            font-size: 11px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 10px;
+            color: var(--secondary);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .invoice {
+                max-width: none;
+                padding: 20px;
+            }
+
+            .controls,
+            .remove-column {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="invoice" id="invoice">
+
+    <!-- =====================================================
+         FUTURE INSERT
+         TemplateEngine → InvoiceService → InvoiceRepository
+         ===================================================== -->
+
+    <header class="header">
+
+        <div>
+
+            <div class="business-name">
+                Isaacs and Partners
+            </div>
+
+            <div>
+                <strong>Isaacs and Partners Pty(Ltd)</strong>
+            </div>
+
+            <div>
+                Registration No:
+                2025/474736/07
+            </div>
+
+            <div>
+                SARS Income Tax No:
+                9293784261
+            </div>
+
+            <div>
+                VAT Status:
+                Not VAT Registered
+            </div>
+
+            <br>
+
+            <div>
+                13 Middel Street,<br>
+                Kempenville,<br>
+                Cape Town, 7530
+            </div>
+
+            <div>
+                Postal:
+                Unit 215, River Hamlet,<br>
+                52 Gie Rd, Milnerton Rural, 7441
+            </div>
+
+            <br>
+
+            <div>
+                info@isaacsandpartners.online
+            </div>
+
+            <div>
+                +27 71 883 1097
+            </div>
+
+            <div>
+                www.isaacsandpartners.online
+            </div>
+
+        </div>
+
+        <div class="document-title">
+
+            <h1>INVOICE</h1>
+
+            <div class="document-number">
+                Invoice No:
+                <span id="invoiceNumber">
+                    {{invoice.number}}
+                </span>
+            </div>
+
+            <div>
+                Issue Date:
+                <span id="issueDate">
+                    {{invoice.issueDate}}
+                </span>
+            </div>
+
+            <div>
+                Due Date:
+                <span id="dueDate">
+                    {{invoice.dueDate}}
+                </span>
+            </div>
+
+            <div>
+                Payment Terms:
+                On receipt
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <section class="information">
+
+        <div class="box">
+
+            <div class="box-title">
+                Bill To
+            </div>
+
+            <strong>
+                {{client.fullName}}
+            </strong>
+
+            <br>
+
+            {{client.address}}
+
+            <br>
+
+            {{client.email}}
+
+            <br>
+
+            {{client.telephone}}
+
+            <!-- =================================================
+                 FUTURE INSERT
+                 Client entity / ClientRepository
+                 ================================================= -->
+
+        </div>
+
+
+        <div class="box">
+
+            <div class="box-title">
+                Matter Information
+            </div>
+
+            Matter Reference:
+            <strong>
+                {{matter.referenceNumber}}
+            </strong>
+
+            <br>
+
+            Matter:
+            {{matter.title}}
+
+            <br>
+
+            Service:
+            {{matter.type}}
+
+            <br>
+
+            Consultant:
+            {{matter.assignedTo}}
+
+        </div>
+
+    </section>
+
+
+    <table id="invoiceLines">
+
+        <thead>
+
+            <tr>
+
+                <th class="line-description">
+                    Description
+                </th>
+
+                <th class="numeric">
+                    Qty
+                </th>
+
+                <th class="numeric">
+                    Unit
+                </th>
+
+                <th class="numeric">
+                    Unit Price
+                </th>
+
+                <th class="numeric">
+                    Line Total
+                </th>
+
+                <th class="remove-column">
+                    &nbsp;
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="lineItems">
+
+            <tr>
+
+                <td>
+                    <input
+                        class="line-input"
+                        value="{{line.description}}"
+                        placeholder="Description"
+                    >
+                </td>
+
+                <td>
+                    <input
+                        class="quantity-input"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="{{line.quantity}}"
+                        oninput="calculateInvoice()"
+                    >
+                </td>
+
+                <td>
+                    <input
+                        class="line-input numeric"
+                        value="{{line.unit}}"
+                        placeholder="unit"
+                    >
+                </td>
+
+                <td>
+                    <input
+                        class="price-input"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="{{line.unitPrice}}"
+                        oninput="calculateInvoice()"
+                    >
+                </td>
+
+                <td class="numeric line-total">
+                    R0.00
+                </td>
+
+                <td class="remove-column">
+                    <button
+                        type="button"
+                        class="remove-line"
+                        onclick="removeLine(this)"
+                    >
+                        ×
+                    </button>
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+
+    <div class="controls">
+
+        <button
+            type="button"
+            onclick="addLine()"
+        >
+            + Add Line
+        </button>
+
+    </div>
+
+
+    <section class="totals">
+
+        <div class="total-row">
+
+            <span>
+                Subtotal
+            </span>
+
+            <strong id="subtotal">
+                R0.00
+            </strong>
+
+        </div>
+
+
+        <!-- =====================================================
+             VAT CONTROL
+             =====================================================
+
+             Isaacs & Partners is currently NOT VAT registered.
+
+             VAT is therefore not charged.
+
+             FUTURE INSERT:
+             When legitimate VAT registration occurs,
+             InvoiceService will populate the configured VAT rate
+             and VAT number.
+             ===================================================== -->
+
+        <div class="total-row">
+
+            <span>
+                VAT
+            </span>
+
+            <strong id="vat">
+                R0.00
+            </strong>
+
+        </div>
+
+
+        <div class="total-row grand-total">
+
+            <span>
+                TOTAL
+            </span>
+
+            <strong id="total">
+                R0.00
+            </strong>
+
+        </div>
+
+
+        <div class="total-row">
+
+            <span>
+                Amount Paid
+            </span>
+
+            <strong>
+                {{invoice.amountPaid}}
+            </strong>
+
+        </div>
+
+
+        <div class="total-row">
+
+            <span>
+                Balance Due
+            </span>
+
+            <strong id="balance">
+                R0.00
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <section class="payment">
+
+        <h3>
+            Banking Details
+        </h3>
+
+        <strong>
+            First Nation Bank
+        </strong>
+
+        <br>
+
+        Account Holder:
+        Isaacs and Partners
+
+        <br>
+
+        Account Number:
+        63211314454
+
+        <br>
+
+        Branch Code:
+        255355
+
+        <br>
+
+        Account Type:
+        Business Account
+
+        <br><br>
+
+        Payment Reference:
+
+        <strong>
+            Initials - Querie - Invoice Number
+        </strong>
+
+    </section>
+
+
+    <div class="notice">
+
+        Payment is due on receipt unless otherwise agreed
+        in writing.
+
+        <br><br>
+
+        This invoice does not charge VAT because
+        Isaacs and Partners is currently not VAT registered.
+
+    </div>
+
+
+    <!-- =====================================================
+         FUTURE INSERT
+         Payment allocation
+         PaymentRepository
+         Receipt generation
+         ===================================================== -->
+
+
+    <footer class="footer">
+
+        Isaacs and Partners Pty(Ltd)
+        |
+        Registration No. 2025/474736/07
+        |
+        SARS Income Tax No. 9293784261
+
+        <br>
+
+        info@isaacsandpartners.online
+        |
+        +27 71 883 1097
+
+    </footer>
+
+</div>
+
+
+<script>
+
+    function money(value) {
+
+        return new Intl.NumberFormat(
+            "en-ZA",
+            {
+                style: "currency",
+                currency: "ZAR"
+            }
+        ).format(
+            Number(value || 0)
+        );
+
+    }
+
+
+    function calculateInvoice() {
+
+        let subtotal = 0;
+
+        document
+            .querySelectorAll(
+                "#lineItems tr"
+            )
+            .forEach(row => {
+
+                const quantity =
+                    Number(
+                        row.querySelector(
+                            ".quantity-input"
+                        )?.value || 0
+                    );
+
+                const price =
+                    Number(
+                        row.querySelector(
+                            ".price-input"
+                        )?.value || 0
+                    );
+
+                const total =
+                    quantity * price;
+
+                const lineTotal =
+                    row.querySelector(
+                        ".line-total"
+                    );
+
+                if (lineTotal) {
+
+                    lineTotal.textContent =
+                        money(total);
+
+                }
+
+                subtotal += total;
+
+            });
+
+
+        /*
+         * =====================================================
+         * VAT
+         *
+         * Current configuration:
+         *
+         * VAT_REGISTERED = false
+         *
+         * Therefore VAT = 0.
+         *
+         * =====================================================
+         */
+
+        const vat = 0;
+
+        const total =
+            subtotal + vat;
+
+
+        const paid =
+            Number(
+                "{{invoice.amountPaid}}" || 0
+            );
+
+
+        const balance =
+            total - paid;
+
+
+        document
+            .getElementById("subtotal")
+            .textContent =
+                money(subtotal);
+
+
+        document
+            .getElementById("vat")
+            .textContent =
+                money(vat);
+
+
+        document
+            .getElementById("total")
+            .textContent =
+                money(total);
+
+
+        document
+            .getElementById("balance")
+            .textContent =
+                money(balance);
+
+    }
+
+
+    function addLine() {
+
+        const tbody =
+            document.getElementById(
+                "lineItems"
+            );
+
+        const row =
+            document.createElement(
+                "tr"
+            );
+
+        row.innerHTML = `
+
+            <td>
+                <input
+                    class="line-input"
+                    placeholder="Description"
+                >
+            </td>
+
+            <td>
+                <input
+                    class="quantity-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="1"
+                    oninput="calculateInvoice()"
+                >
+            </td>
+
+            <td>
+                <input
+                    class="line-input numeric"
+                    placeholder="unit"
+                >
+            </td>
+
+            <td>
+                <input
+                    class="price-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                    oninput="calculateInvoice()"
+                >
+            </td>
+
+            <td class="numeric line-total">
+                R0.00
+            </td>
+
+            <td class="remove-column">
+                <button
+                    type="button"
+                    class="remove-line"
+                    onclick="removeLine(this)"
+                >
+                    ×
+                </button>
+            </td>
+
+        `;
+
+        tbody.appendChild(row);
+
+        calculateInvoice();
+
+    }
+
+
+    function removeLine(button) {
+
+        const row =
+            button.closest("tr");
+
+        if (row) {
+
+            row.remove();
+
+            calculateInvoice();
+
+        }
+
+    }
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        calculateInvoice
+    );
+
+</script>
+
+</body>
+</html>
+```
 
