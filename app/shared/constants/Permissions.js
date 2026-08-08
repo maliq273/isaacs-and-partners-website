@@ -1,1 +1,91 @@
+/**
+ * ============================================================
+ * ISAACS & PARTNERS ENTERPRISE PLATFORM
+ * Permissions
+ * ============================================================
+ */
 
+export const Permissions = Object.freeze({
+
+    SYSTEM_ADMIN: "SYSTEM_ADMIN",
+
+    USER_MANAGE: "USER_MANAGE",
+
+    USER_VIEW: "USER_VIEW",
+
+    CLIENT_CREATE: "CLIENT_CREATE",
+
+    CLIENT_VIEW: "CLIENT_VIEW",
+
+    CLIENT_EDIT: "CLIENT_EDIT",
+
+    CLIENT_DELETE: "CLIENT_DELETE",
+
+    MATTER_CREATE: "MATTER_CREATE",
+
+    MATTER_VIEW: "MATTER_VIEW",
+
+    MATTER_EDIT: "MATTER_EDIT",
+
+    MATTER_DELETE: "MATTER_DELETE",
+
+    MATTER_ASSIGN: "MATTER_ASSIGN",
+
+    DOCUMENT_UPLOAD: "DOCUMENT_UPLOAD",
+
+    DOCUMENT_VIEW: "DOCUMENT_VIEW",
+
+    DOCUMENT_EDIT: "DOCUMENT_EDIT",
+
+    DOCUMENT_DELETE: "DOCUMENT_DELETE",
+
+    DOCUMENT_DOWNLOAD: "DOCUMENT_DOWNLOAD",
+
+    DOCUMENT_PRINT: "DOCUMENT_PRINT",
+
+    DOCUMENT_APPROVE: "DOCUMENT_APPROVE",
+
+    AI_USE: "AI_USE",
+
+    AI_ADMIN: "AI_ADMIN",
+
+    WORKFLOW_VIEW: "WORKFLOW_VIEW",
+
+    WORKFLOW_EXECUTE: "WORKFLOW_EXECUTE",
+
+    WORKFLOW_EDIT: "WORKFLOW_EDIT",
+
+    APPOINTMENT_CREATE: "APPOINTMENT_CREATE",
+
+    APPOINTMENT_EDIT: "APPOINTMENT_EDIT",
+
+    APPOINTMENT_CANCEL: "APPOINTMENT_CANCEL",
+
+    COMMUNICATION_SEND: "COMMUNICATION_SEND",
+
+    FINANCE_VIEW: "FINANCE_VIEW",
+
+    INVOICE_CREATE: "INVOICE_CREATE",
+
+    INVOICE_EDIT: "INVOICE_EDIT",
+
+    PAYMENT_RECORD: "PAYMENT_RECORD",
+
+    REPORT_VIEW: "REPORT_VIEW",
+
+    REPORT_EXPORT: "REPORT_EXPORT",
+
+    SETTINGS_VIEW: "SETTINGS_VIEW",
+
+    SETTINGS_EDIT: "SETTINGS_EDIT",
+
+    AUDIT_VIEW: "AUDIT_VIEW"
+
+    // ========================================================
+    // FUTURE INSERT
+    // Fine-grained RBAC / ABAC permissions
+    // ========================================================
+
+});
+
+export default Permissions;
