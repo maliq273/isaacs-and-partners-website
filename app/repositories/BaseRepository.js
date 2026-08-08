@@ -1,366 +1,329 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * ============================================================
+ * BaseRepository
+ * ------------------------------------------------------------
+ * Generic repository foundation.
  *
- * FILE
- * BaseRepository.js
- *
- * FILE ID
- * REP-001
- *
- * LAYER
- * Repository
- *
- * RESPONSIBILITY
- * Base repository used by every repository in the system.
- *
- * EXTENDED BY
- * MatterRepository
- * ClientRepository
- * DocumentRepository
- * BookingRepository
- * KnowledgeRepository
- *
- * DEPENDS ON
- * StorageProvider
- * EventDispatcher
- * AuditLogger
- *
- * VERSION
- * 1.0.0
- *
- * ============================================================
- * FUTURE EXPANSION MAP
- * ============================================================
- *
- * ✔ CRUD
- * ✔ Search
- * ✔ Filters
- * ✔ Pagination
- * ✔ Transactions (Placeholder)
- * ✔ Events (Placeholder)
- * ✔ Audit (Placeholder)
- * ✔ Cache (Placeholder)
- * ✔ Statistics (Placeholder)
- * ✔ AI Hooks (Placeholder)
- * ✔ Import (Placeholder)
- * ✔ Export (Placeholder)
- * ✔ Backup (Placeholder)
- * ✔ Restore (Placeholder)
- *
+ * All repositories should extend this class.
+ * Storage is injected rather than hard-coded.
  * ============================================================
  */
 
 export default class BaseRepository {
 
-    /*=====================================================
-        REP-001
-        Constructor
-    =====================================================*/
+    constructor(options = {}) {
 
-    constructor(storage = null) {
+        this.storage =
+            options.storage ?? null;
+
+        this.serializer =
+            options.serializer ?? null;
+
+        this.entityName =
+            options.entityName ?? "Entity";
+
+        this.collection =
+            options.collection ??
+            this.entityName.toLowerCase();
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Repository caching
+        // Transaction management
+        // Audit logging
+        // Permission enforcement
+        // Soft-delete handling
+        // Optimistic locking
+        // Event publishing
+        //
+        // ====================================================
+    }
+
+
+    setStorage(storage) {
 
         this.storage = storage;
 
-    }
-
-    /*=====================================================
-        CRUD-001
-        Create
-    =====================================================*/
-
-    async create(entity) {
-
-        return this.storage.create(entity);
+        return this;
 
     }
 
-    /*=====================================================
-        CRUD-002
-        Read
-    =====================================================*/
 
-    async findById(id) {
+    setSerializer(serializer) {
 
-        return this.storage.findById(id);
+        this.serializer = serializer;
+
+        return this;
 
     }
 
-    async findAll() {
 
-        return this.storage.findAll();
+    requireStorage() {
 
-    }
+        if (!this.storage) {
 
-    /*=====================================================
-        CRUD-003
-        Update
-    =====================================================*/
+            throw new Error(
+                `${this.entityName}Repository requires a storage provider.`
+            );
 
-    async update(entity) {
+        }
 
-        return this.storage.update(entity);
+        return this.storage;
 
     }
 
-    /*=====================================================
-        CRUD-004
-        Delete
-    =====================================================*/
 
-    async delete(id) {
+    serialize(entity) {
 
-        return this.storage.delete(id);
+        if (!entity) {
+            return null;
+        }
 
-    }
+        if (
+            this.serializer &&
+            typeof this.serializer.serialize ===
+            "function"
+        ) {
 
-    /*=====================================================
-        CRUD-005
-        Exists
-    =====================================================*/
+            return this.serializer.serialize(
+                entity
+            );
 
-    async exists(id) {
+        }
 
-        return this.storage.exists(id);
+        if (
+            this.serializer &&
+            typeof this.serializer.toJSON ===
+            "function"
+        ) {
 
-    }
+            return this.serializer.toJSON(
+                entity
+            );
 
-    /*=====================================================
-        CRUD-006
-        Count
-    =====================================================*/
+        }
 
-    async count() {
+        if (
+            typeof entity.toJSON ===
+            "function"
+        ) {
 
-        return this.storage.count();
+            return entity.toJSON();
 
-    }
-
-    /*=====================================================
-        CRUD-007
-        Search
-    =====================================================*/
-
-    async search(criteria = {}) {
-
-        return this.storage.search(criteria);
-
-    }
-
-    /*=====================================================
-        CRUD-008
-        Filters
-    =====================================================*/
-
-    async filter(filters = {}) {
-
-        return this.storage.filter(filters);
-
-    }
-
-    /*=====================================================
-        CRUD-009
-        Pagination
-    =====================================================*/
-
-    async paginate(page = 1, pageSize = 20) {
-
-        return this.storage.paginate(
-            page,
-            pageSize
-        );
-
-    }
-
-    /*=====================================================
-        CRUD-010
-        Sorting
-    =====================================================*/
-
-    async sort(field, direction = "asc") {
-
-        return this.storage.sort(
-            field,
-            direction
-        );
-
-    }
-
-    /*=====================================================
-        CRUD-011
-        Transactions
-    =====================================================*/
-
-    async beginTransaction() {
-
-        // Reserved
-
-    }
-
-    async commitTransaction() {
-
-        // Reserved
-
-    }
-
-    async rollbackTransaction() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-012
-        Batch Operations
-    =====================================================*/
-
-    async createMany() {
-
-        // Reserved
-
-    }
-
-    async updateMany() {
-
-        // Reserved
-
-    }
-
-    async deleteMany() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-013
-        Cache
-    =====================================================*/
-
-    clearCache() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-014
-        Events
-    =====================================================*/
-
-    publishEvent() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-015
-        Audit
-    =====================================================*/
-
-    audit() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-016
-        Statistics
-    =====================================================*/
-
-    statistics() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-017
-        AI Hooks
-    =====================================================*/
-
-    beforeCreate() {
-
-    }
-
-    afterCreate() {
-
-    }
-
-    beforeUpdate() {
-
-    }
-
-    afterUpdate() {
-
-    }
-
-    beforeDelete() {
-
-    }
-
-    afterDelete() {
-
-    }
-
-    /*=====================================================
-        CRUD-018
-        Import
-    =====================================================*/
-
-    import() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-019
-        Export
-    =====================================================*/
-
-    export() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-020
-        Backup & Restore
-    =====================================================*/
-
-    backup() {
-
-        // Reserved
-
-    }
-
-    restore() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        CRUD-021
-        Health
-    =====================================================*/
-
-    healthCheck() {
+        }
 
         return {
-
-            healthy: true,
-
-            repository: this.constructor.name,
-
-            timestamp: new Date()
-
+            ...entity
         };
+
+    }
+
+
+    serializeMany(
+        entities = []
+    ) {
+
+        return entities.map(
+            entity =>
+                this.serialize(entity)
+        );
+
+    }
+
+
+    async create(
+        entity
+    ) {
+
+        const storage =
+            this.requireStorage();
+
+        const data =
+            this.serialize(entity);
+
+        return storage.create(
+            this.collection,
+            data
+        );
+
+    }
+
+
+    async findById(
+        id
+    ) {
+
+        if (!id) {
+            return null;
+        }
+
+        const storage =
+            this.requireStorage();
+
+        return storage.findById(
+            this.collection,
+            id
+        );
+
+    }
+
+
+    async findAll(
+        options = {}
+    ) {
+
+        const storage =
+            this.requireStorage();
+
+        return storage.findAll(
+            this.collection,
+            options
+        );
+
+    }
+
+
+    async update(
+        id,
+        changes
+    ) {
+
+        if (!id) {
+
+            throw new Error(
+                `${this.entityName} update requires an id.`
+            );
+
+        }
+
+        const storage =
+            this.requireStorage();
+
+        return storage.update(
+            this.collection,
+            id,
+            changes
+        );
+
+    }
+
+
+    async delete(
+        id
+    ) {
+
+        if (!id) {
+
+            return false;
+
+        }
+
+        const storage =
+            this.requireStorage();
+
+        return storage.delete(
+            this.collection,
+            id
+        );
+
+    }
+
+
+    async exists(
+        id
+    ) {
+
+        return Boolean(
+            await this.findById(id)
+        );
+
+    }
+
+
+    async count(
+        options = {}
+    ) {
+
+        const storage =
+            this.requireStorage();
+
+        if (
+            typeof storage.count ===
+            "function"
+        ) {
+
+            return storage.count(
+                this.collection,
+                options
+            );
+
+        }
+
+        const records =
+            await this.findAll(
+                options
+            );
+
+        return records.length;
+
+    }
+
+
+    async findWhere(
+        filters = {},
+        options = {}
+    ) {
+
+        const storage =
+            this.requireStorage();
+
+        if (
+            typeof storage.findWhere ===
+            "function"
+        ) {
+
+            return storage.findWhere(
+                this.collection,
+                filters,
+                options
+            );
+
+        }
+
+        const records =
+            await this.findAll(
+                options
+            );
+
+        return records.filter(
+            record =>
+                Object.entries(filters)
+                    .every(
+                        ([key, value]) =>
+                            record?.[key] === value
+                    )
+        );
+
+    }
+
+
+    async firstWhere(
+        filters = {},
+        options = {}
+    ) {
+
+        const records =
+            await this.findWhere(
+                filters,
+                {
+                    ...options,
+                    limit: 1
+                }
+            );
+
+        return records[0] ?? null;
 
     }
 
