@@ -1,64 +1,207 @@
 /**
  * ============================================================
- * FILE: SupabaseAdapter.js
- * ID: STO-009
- * LOCATION: app/storage/SupabaseAdapter.js
+ * ISAACS & PARTNERS ENTERPRISE PLATFORM
+ * SupabaseAdapter
  * ============================================================
  */
 
-export default class SupabaseAdapter {
+import StorageProvider
+    from "./StorageProvider.js";
 
-    constructor(config = {}) {
+export default class SupabaseAdapter
+    extends StorageProvider {
 
-        this.client = config.client || null;
+    constructor(options = {}) {
+
+        super({
+            ...options,
+            name: "SupabaseAdapter"
+        });
+
+        this.client =
+            options.client ?? null;
+
+        this.table =
+            options.table ??
+            "application_storage";
+
+        this.keyColumn =
+            options.keyColumn ??
+            "key";
+
+        this.valueColumn =
+            options.valueColumn ??
+            "value";
 
     }
 
-    /*=====================================================
-        SUP-001
-        Connection
-    =====================================================*/
 
-    async connect() {
+    async initialize() {
 
-        return this.client;
+        if (!this.client) {
+
+            throw new Error(
+                "SupabaseAdapter requires a Supabase client."
+            );
+
+        }
+
+        this.initialized = true;
+
+        return this;
 
     }
 
-    /*=====================================================
-        SUP-002
-        CRUD
-    =====================================================*/
 
-    async create(entity) {}
+    async get(key) {
 
-    async findById(id) {}
+        this.assertInitialized();
 
-    async findAll() {}
+        const {
+            data,
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .select(this.valueColumn)
+                .eq(this.keyColumn, key)
+                .maybeSingle();
 
-    async update(entity) {}
+        if (error) {
 
-    async delete(id) {}
+            throw error;
 
-    async exists(id) {}
+        }
 
-    async count() {}
+        return data
+            ? data[this.valueColumn]
+            : null;
 
-    async search(criteria) {}
+    }
 
-    async filter(filters) {}
 
-    async paginate(page, size) {}
+    async set(key, value) {
 
-    async sort(field, direction) {}
+        this.assertInitialized();
 
-    /*=====================================================
-        SUP-003
-        Realtime
-    =====================================================*/
+        const {
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .upsert({
+                    [this.keyColumn]: key,
+                    [this.valueColumn]: value
+                });
 
-    subscribe() {}
+        if (error) {
 
-    unsubscribe() {}
+            throw error;
+
+        }
+
+        return value;
+
+    }
+
+
+    async delete(key) {
+
+        this.assertInitialized();
+
+        const {
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .delete()
+                .eq(
+                    this.keyColumn,
+                    key
+                );
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        return true;
+
+    }
+
+
+    async has(key) {
+
+        return (
+            await this.get(key)
+        ) !== null;
+
+    }
+
+
+    async clear() {
+
+        this.assertInitialized();
+
+        const {
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .delete()
+                .not(
+                    this.keyColumn,
+                    "is",
+                    null
+                );
+
+        if (error) {
+
+            throw error;
+
+        }
+
+    }
+
+
+    async keys() {
+
+        this.assertInitialized();
+
+        const {
+            data,
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .select(this.keyColumn);
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        return (
+            data ?? []
+        ).map(
+            row =>
+                row[this.keyColumn]
+        );
+
+    }
+
+
+    // =========================================================
+    // FUTURE INSERT
+    // Supabase:
+    // Authentication
+    // RLS
+    // Company isolation
+    // User isolation
+    // Audit logging
+    // Realtime synchronization
+    // =========================================================
 
 }
