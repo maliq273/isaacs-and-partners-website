@@ -1,1 +1,467 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Matter Bundle Cover Sheet - Isaacs & Partners
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111827;
+            background: #ffffff;
+        }
+
+        .cover {
+            max-width: 900px;
+            margin: auto;
+            min-height: 1120px;
+            border: 2px solid #111827;
+            padding: 45px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-area {
+            text-align: center;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 25px;
+        }
+
+        .logo-area h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .logo-area p {
+            margin: 6px 0;
+        }
+
+        .bundle-title {
+            text-align: center;
+            margin: 45px 0;
+        }
+
+        .bundle-title h2 {
+            font-size: 27px;
+            margin: 0;
+        }
+
+        .reference {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .information {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .box {
+            border: 1px solid #9ca3af;
+            padding: 18px;
+            min-height: 130px;
+        }
+
+        .heading {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #4b5563;
+            margin-bottom: 10px;
+        }
+
+        .submission {
+            margin-top: 30px;
+            border: 2px solid #111827;
+            padding: 20px;
+        }
+
+        .submission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .checklist {
+            margin-top: 30px;
+        }
+
+        .checklist table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .checklist th,
+        .checklist td {
+            border: 1px solid #9ca3af;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .checklist th {
+            background: #f3f4f6;
+        }
+
+        .status {
+            text-align: center;
+            width: 100px;
+        }
+
+        .footer {
+            margin-top: auto;
+            border-top: 1px solid #9ca3af;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        @media print {
+
+            body {
+                padding: 0;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="cover">
+
+    <!-- =====================================================
+         FUTURE INSERT
+         MatterService → DocumentService
+         → BundleGenerationService
+         ===================================================== -->
+
+    <section class="logo-area">
+
+        <h1>
+            ISAACS AND PARTNERS
+        </h1>
+
+        <p>
+            Isaacs and Partners Pty(Ltd)
+        </p>
+
+        <p>
+            Registration No. 2025/474736/07
+        </p>
+
+        <p>
+            SARS Income Tax No. 9293784261
+        </p>
+
+        <p>
+            13 Middel Street, Kempenville,
+            Cape Town, 7530
+        </p>
+
+        <p>
+            info@isaacsandpartners.online
+            |
+            +27 71 883 1097
+        </p>
+
+    </section>
+
+
+    <section class="bundle-title">
+
+        <h2>
+            MATTER DOCUMENT BUNDLE
+        </h2>
+
+        <div class="reference">
+
+            Matter Reference:
+            {{matter.referenceNumber}}
+
+        </div>
+
+        <div>
+
+            Bundle No:
+            {{bundle.number}}
+
+        </div>
+
+    </section>
+
+
+    <section class="information">
+
+        <div class="box">
+
+            <div class="heading">
+                Applicant / Client
+            </div>
+
+            <strong>
+                {{client.fullName}}
+            </strong>
+
+            <br>
+
+            Passport / ID:
+            {{client.passportNumber}}
+
+            <br>
+
+            Nationality:
+            {{client.nationality}}
+
+            <br>
+
+            Date of Birth:
+            {{client.dateOfBirth}}
+
+        </div>
+
+
+        <div class="box">
+
+            <div class="heading">
+                Matter
+            </div>
+
+            Matter:
+            {{matter.title}}
+
+            <br>
+
+            Type:
+            {{matter.type}}
+
+            <br>
+
+            Department:
+            {{matter.department}}
+
+            <br>
+
+            Stage:
+            {{matter.stage}}
+
+        </div>
+
+    </section>
+
+
+    <section class="submission">
+
+        <div class="heading">
+            Submission Information
+        </div>
+
+        <div class="submission-grid">
+
+            <div>
+                <strong>
+                    Submission Authority
+                </strong>
+
+                <br>
+
+                {{bundle.authority}}
+            </div>
+
+            <div>
+                <strong>
+                    Application Type
+                </strong>
+
+                <br>
+
+                {{bundle.applicationType}}
+            </div>
+
+            <div>
+                <strong>
+                    Submission Date
+                </strong>
+
+                <br>
+
+                {{bundle.submissionDate}}
+            </div>
+
+            <div>
+                <strong>
+                    Prepared By
+                </strong>
+
+                <br>
+
+                {{bundle.preparedBy}}
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="checklist">
+
+        <div class="heading">
+            Bundle Checklist
+        </div>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Document
+                    </th>
+
+                    <th>
+                        Required
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th class="status">
+                        Included
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="bundleChecklist">
+
+                <tr>
+
+                    <td>
+                        {{document.name}}
+                    </td>
+
+                    <td>
+                        {{document.required}}
+                    </td>
+
+                    <td>
+                        {{document.status}}
+                    </td>
+
+                    <td class="status">
+                        {{document.included}}
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+
+    <section
+        style="
+            margin-top:30px;
+            border:1px solid #9ca3af;
+            padding:15px;
+        "
+    >
+
+        <div class="heading">
+            Bundle Status
+        </div>
+
+        <strong>
+            {{bundle.status}}
+        </strong>
+
+        <br><br>
+
+        Outstanding Documents:
+        {{bundle.outstandingCount}}
+
+        <br>
+
+        Documents Included:
+        {{bundle.includedCount}}
+
+        <br>
+
+        Total Documents:
+        {{bundle.totalDocuments}}
+
+    </section>
+
+
+    <!-- =====================================================
+         FUTURE INSERT
+         AI DOCUMENT MATCHING
+         =====================================================
+
+         Uploaded document
+                ↓
+         OCR
+                ↓
+         DocumentAnalysis
+                ↓
+         Document classification
+                ↓
+         KnowledgeService
+                ↓
+         Required-document matching
+                ↓
+         Bundle checklist
+                ↓
+         Bundle PDF
+         ===================================================== -->
+
+
+    <footer class="footer">
+
+        CONFIDENTIAL MATTER DOCUMENT
+
+        <br>
+
+        Isaacs and Partners
+        |
+        {{matter.referenceNumber}}
+
+        <br>
+
+        This cover sheet forms part of the generated matter bundle.
+
+    </footer>
+
+</div>
+
+</body>
+
+</html>
+```
 
