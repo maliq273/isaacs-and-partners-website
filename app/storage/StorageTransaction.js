@@ -1,73 +1,207 @@
 /**
  * ============================================================
- * FILE: StorageTransaction.js
- * ID: STO-010
- * LOCATION: app/storage/StorageTransaction.js
+ * ISAACS & PARTNERS ENTERPRISE PLATFORM
+ * SupabaseAdapter
  * ============================================================
  */
 
-export default class StorageTransaction {
+import StorageProvider
+    from "./StorageProvider.js";
 
-    constructor() {
+export default class SupabaseAdapter
+    extends StorageProvider {
 
-        this.operations = [];
+    constructor(options = {}) {
 
-        this.active = false;
+        super({
+            ...options,
+            name: "SupabaseAdapter"
+        });
 
-    }
+        this.client =
+            options.client ?? null;
 
-    /*=====================================================
-        TX-001
-        Begin
-    =====================================================*/
+        this.table =
+            options.table ??
+            "application_storage";
 
-    begin() {
+        this.keyColumn =
+            options.keyColumn ??
+            "key";
 
-        this.active = true;
-
-        this.operations = [];
-
-    }
-
-    /*=====================================================
-        TX-002
-        Add
-    =====================================================*/
-
-    add(operation) {
-
-        this.operations.push(operation);
+        this.valueColumn =
+            options.valueColumn ??
+            "value";
 
     }
 
-    /*=====================================================
-        TX-003
-        Commit
-    =====================================================*/
 
-    async commit() {
+    async initialize() {
 
-        for (const op of this.operations) {
+        if (!this.client) {
 
-            await op();
+            throw new Error(
+                "SupabaseAdapter requires a Supabase client."
+            );
 
         }
 
-        this.active = false;
+        this.initialized = true;
+
+        return this;
 
     }
 
-    /*=====================================================
-        TX-004
-        Rollback
-    =====================================================*/
 
-    rollback() {
+    async get(key) {
 
-        this.operations = [];
+        this.assertInitialized();
 
-        this.active = false;
+        const {
+            data,
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .select(this.valueColumn)
+                .eq(this.keyColumn, key)
+                .maybeSingle();
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        return data
+            ? data[this.valueColumn]
+            : null;
 
     }
+
+
+    async set(key, value) {
+
+        this.assertInitialized();
+
+        const {
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .upsert({
+                    [this.keyColumn]: key,
+                    [this.valueColumn]: value
+                });
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        return value;
+
+    }
+
+
+    async delete(key) {
+
+        this.assertInitialized();
+
+        const {
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .delete()
+                .eq(
+                    this.keyColumn,
+                    key
+                );
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        return true;
+
+    }
+
+
+    async has(key) {
+
+        return (
+            await this.get(key)
+        ) !== null;
+
+    }
+
+
+    async clear() {
+
+        this.assertInitialized();
+
+        const {
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .delete()
+                .not(
+                    this.keyColumn,
+                    "is",
+                    null
+                );
+
+        if (error) {
+
+            throw error;
+
+        }
+
+    }
+
+
+    async keys() {
+
+        this.assertInitialized();
+
+        const {
+            data,
+            error
+        } =
+            await this.client
+                .from(this.table)
+                .select(this.keyColumn);
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        return (
+            data ?? []
+        ).map(
+            row =>
+                row[this.keyColumn]
+        );
+
+    }
+
+
+    // =========================================================
+    // FUTURE INSERT
+    // Supabase:
+    // Authentication
+    // RLS
+    // Company isolation
+    // User isolation
+    // Audit logging
+    // Realtime synchronization
+    // =========================================================
 
 }
