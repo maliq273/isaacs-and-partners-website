@@ -1,407 +1,183 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * ============================================================
- *
- * FILE
- * KnowledgeRepository.js
- *
- * FILE ID
- * REP-006
- *
- * LOCATION
- * app/repositories/KnowledgeRepository.js
- *
- * LAYER
- * Repository
- *
- * RESPONSIBILITY
- * Retrieval of structured knowledge assets.
- *
- * EXTENDS
- * BaseRepository
- *
- * VERSION
- * 1.0.0
- *
- * ============================================================
- * FUTURE EXPANSION MAP
- * ============================================================
- *
- * ✔ Services
- * ✔ Countries
- * ✔ Visa Types
- * ✔ Occupations
- * ✔ HR
- * ✔ Labour
- * ✔ Business
- * ✔ Immigration
- * ✔ CCMA
- * ✔ Contracts
- * ✔ Search
- * ✔ Statistics
- *
- * □ AI Embeddings
- * □ Semantic Search
- * □ Knowledge Graph
- * □ Versioning
- * □ Cache Refresh
+ * KnowledgeRepository
  * ============================================================
  */
 
-import BaseRepository from "./BaseRepository.js";
+import BaseRepository
+    from "./BaseRepository.js";
 
-export default class KnowledgeRepository extends BaseRepository {
+export default class KnowledgeRepository
+    extends BaseRepository {
 
-    /*=====================================================
-        KNOW-REP-001
-        Constructor
-    =====================================================*/
+    constructor(options = {}) {
 
-    constructor(storage) {
+        super({
 
-        super(storage);
+            ...options,
 
+            entityName: "Knowledge",
+
+            collection:
+                options.collection ??
+                "knowledge"
+
+        });
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Immigration knowledge
+        // Visa requirements
+        // DHA rules
+        // VFS requirements
+        // CCMA rules
+        // HR rules
+        // Legal knowledge
+        // Knowledge versioning
+        // Effective dates
+        //
+        // ====================================================
     }
 
-    /*=====================================================
-        KNOW-REP-002
-        Services
-    =====================================================*/
 
-    async getServices() {
+    async findByType(
+        type
+    ) {
 
-        return this.search({
-
-            category: "SERVICE"
-
+        return this.findWhere({
+            type
         });
 
     }
 
-    /*=====================================================
-        KNOW-REP-003
-        Visa Types
-    =====================================================*/
 
-    async getVisaTypes() {
+    async findByCategory(
+        category
+    ) {
 
-        return this.search({
-
-            category: "VISA"
-
+        return this.findWhere({
+            category
         });
 
     }
 
-    /*=====================================================
-        KNOW-REP-004
-        Countries
-    =====================================================*/
 
-    async getCountries() {
+    async findByCountry(
+        country
+    ) {
 
-        return this.search({
-
-            category: "COUNTRY"
-
+        return this.findWhere({
+            country
         });
 
     }
 
-    /*=====================================================
-        KNOW-REP-005
-        Occupations
-    =====================================================*/
 
-    async getOccupations() {
+    async findActive() {
 
-        return this.search({
+        const records =
+            await this.findAll();
 
-            category: "OCCUPATION"
-
-        });
+        return records.filter(
+            record =>
+                record.active !== false
+        );
 
     }
 
-    /*=====================================================
-        KNOW-REP-006
-        Workflows
-    =====================================================*/
 
-    async getWorkflows() {
+    async search(
+        query
+    ) {
 
-        return this.search({
+        const text =
+            String(query ?? "")
+                .trim()
+                .toLowerCase();
 
-            category: "WORKFLOW"
+        if (!text) {
 
-        });
+            return this.findActive();
 
-    }
+        }
 
-    /*=====================================================
-        KNOW-REP-007
-        Contracts
-    =====================================================*/
+        const records =
+            await this.findActive();
 
-    async getContracts() {
+        return records.filter(
+            record => {
 
-        return this.search({
+                const searchable = [
 
-            category: "CONTRACT"
+                    record.title,
 
-        });
+                    record.name,
 
-    }
+                    record.description,
 
-    /*=====================================================
-        KNOW-REP-008
-        Practice Areas
-    =====================================================*/
+                    record.content,
 
-    async getImmigrationKnowledge() {
+                    record.type,
 
-        return this.search({
+                    record.category,
 
-            category: "IMMIGRATION"
+                    record.country,
 
-        });
+                    record.keywords
 
-    }
+                ]
+                    .filter(Boolean)
+                    .flat()
+                    .join(" ")
+                    .toLowerCase();
 
-    async getHRKnowledge() {
+                return searchable.includes(
+                    text
+                );
 
-        return this.search({
-
-            category: "HR"
-
-        });
-
-    }
-
-    async getLabourKnowledge() {
-
-        return this.search({
-
-            category: "LABOUR"
-
-        });
+            }
+        );
 
     }
 
-    async getBusinessKnowledge() {
 
-        return this.search({
-
-            category: "BUSINESS"
-
-        });
-
-    }
-
-    async getCCMAKnowledge() {
-
-        return this.search({
-
-            category: "CCMA"
-
-        });
-
-    }
-
-    async getNotaryKnowledge() {
-
-        return this.search({
-
-            category: "NOTARY"
-
-        });
-
-    }
-
-    /*=====================================================
-        KNOW-REP-009
-        Search
-    =====================================================*/
-
-    async searchKnowledge(query) {
-
-        return this.search({
-
-            query
-
-        });
-
-    }
-
-    /*=====================================================
-        KNOW-REP-010
-        Statistics
-    =====================================================*/
-
-    async statistics() {
-
-        return {
-
-            total: await this.count(),
-
-            services: (await this.getServices()).length,
-
-            visaTypes: (await this.getVisaTypes()).length,
-
-            countries: (await this.getCountries()).length,
-
-            occupations: (await this.getOccupations()).length,
-
-            workflows: (await this.getWorkflows()).length
-
-        };
-
-    }
-
-    /*=====================================================
-        KNOW-REP-011
-        AI Embeddings
-        Reserved
-    =====================================================*/
-
-    async buildEmbeddings() {
-
-        // Reserved
-
-    }
-
-    async updateEmbeddings() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        KNOW-REP-012
-        Semantic Search
-        Reserved
-    =====================================================*/
-
-    async semanticSearch(query) {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        KNOW-REP-013
-        Knowledge Graph
-        Reserved
-    =====================================================*/
-
-    async buildKnowledgeGraph() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        KNOW-REP-014
-        Versioning
-        Reserved
-    =====================================================*/
-
-    async createVersion() {
-
-        // Reserved
-
-    }
-
-    async restoreVersion() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        KNOW-REP-015
-        Cache
-        Reserved
-    =====================================================*/
-
-    async refreshCache() {
-
-        // Reserved
-
-    }
-
-    async clearCache() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        KNOW-REP-016
-        Translation
-        Reserved
-    =====================================================*/
-
-    async translate(language) {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        KNOW-REP-017
-        External Knowledge Sources
-        Reserved
-    =====================================================*/
-
-    async importFromDHA() {
-
-        // Reserved
-
-    }
-
-    async importFromVFS() {
-
-        // Reserved
-
-    }
-
-    async importFromGovernmentGazette() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        KNOW-REP-018
-        Repository Maintenance
-        Reserved
-    =====================================================*/
-
-    async optimise() {
-
-        // Reserved
-
-    }
-
-    async rebuildIndexes() {
-
-        // Reserved
-
-    }
-
-    async healthCheck() {
-
-        return {
-
-            repository: "KnowledgeRepository",
-
-            healthy: true,
-
-            timestamp: new Date()
-
-        };
+    async findEffectiveOn(
+        date = new Date()
+    ) {
+
+        const target =
+            new Date(date)
+                .getTime();
+
+        const records =
+            await this.findActive();
+
+        return records.filter(
+            record => {
+
+                const effectiveFrom =
+                    record.effectiveFrom
+                        ? new Date(
+                            record.effectiveFrom
+                        ).getTime()
+                        : -Infinity;
+
+                const effectiveUntil =
+                    record.effectiveUntil
+                        ? new Date(
+                            record.effectiveUntil
+                        ).getTime()
+                        : Infinity;
+
+                return (
+                    target >= effectiveFrom &&
+                    target <= effectiveUntil
+                );
+
+            }
+        );
 
     }
 
