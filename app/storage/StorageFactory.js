@@ -1,244 +1,177 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * ============================================================
- *
- * FILE
- * StorageFactory.js
- *
- * FILE ID
- * STO-002
- *
- * LOCATION
- * app/storage/StorageFactory.js
- *
- * RESPONSIBILITY
- * Creates storage adapters based on application configuration.
- *
- * USED BY
- * bootstrap.js
- * application.js
- * BaseRepository
- *
- * DEPENDS ON
- * StorageProvider
- *
- * VERSION
- * 1.0.0
- *
- * ============================================================
- * FUTURE EXPANSION MAP
- * ============================================================
- *
- * ✔ Adapter Resolution
- * ✔ Provider Creation
- * ✔ Configuration Validation
- *
- * □ Plugin Registration
- * □ Dynamic Discovery
- * □ Multi-Tenant Storage
- * □ Read Replicas
- * □ Cloud Failover
- * □ Metrics
- * □ Health Monitoring
+ * StorageFactory
+ * ------------------------------------------------------------
+ * Central storage provider factory.
  * ============================================================
  */
 
-import StorageProvider from "./StorageProvider.js";
+import MemoryAdapter
+    from "./MemoryAdapter.js";
 
-// Future adapters
-import SQLiteAdapter from "./SQLiteAdapter.js";
-import SupabaseAdapter from "./SupabaseAdapter.js";
-import MemoryAdapter from "./MemoryAdapter.js";
-import IndexedDBAdapter from "./IndexedDBAdapter.js";
-import LocalStorageAdapter from "./LocalStorageAdapter.js";
-import SessionStorageAdapter from "./SessionStorageAdapter.js";
+import LocalStorageAdapter
+    from "./LocalStorageAdapter.js";
+
+import SessionStorageAdapter
+    from "./SessionStorageAdapter.js";
+
+import IndexedDBAdapter
+    from "./IndexedDBAdapter.js";
+
+import SQLiteAdapter
+    from "./SQLiteAdapter.js";
+
+import SupabaseAdapter
+    from "./SupabaseAdapter.js";
+
+import Database
+    from "./Database.js";
+
 
 export default class StorageFactory {
 
-    /*=====================================================
-        STO-002
-        Factory Entry Point
-    =====================================================*/
+    static create(
+        type = "local",
+        options = {}
+    ) {
 
-    static create(config = {}) {
+        let provider;
 
-        const provider = new StorageProvider();
 
-        provider.register(
+        switch (
+            type.toLowerCase()
+        ) {
 
-            this.createAdapter(config)
+            case "memory":
 
-        );
+                provider =
+                    new MemoryAdapter(
+                        options
+                    );
+
+                break;
+
+
+            case "local":
+
+            case "localstorage":
+
+                provider =
+                    new LocalStorageAdapter(
+                        options
+                    );
+
+                break;
+
+
+            case "session":
+
+            case "sessionstorage":
+
+                provider =
+                    new SessionStorageAdapter(
+                        options
+                    );
+
+                break;
+
+
+            case "indexeddb":
+
+                provider =
+                    new IndexedDBAdapter(
+                        options
+                    );
+
+                break;
+
+
+            case "sqlite":
+
+                provider =
+                    new SQLiteAdapter(
+                        options
+                    );
+
+                break;
+
+
+            case "supabase":
+
+                provider =
+                    new SupabaseAdapter(
+                        options
+                    );
+
+                break;
+
+
+            default:
+
+                throw new Error(
+                    `Unsupported storage provider: ${type}`
+                );
+
+        }
+
 
         return provider;
 
     }
 
-    /*=====================================================
-        STO-003
-        Adapter Resolution
-    =====================================================*/
 
-    static createAdapter(config = {}) {
+    static createDatabase(
+        type = "local",
+        options = {}
+    ) {
 
-        const type = (
-
-            config.storage ||
-
-            "memory"
-
-        ).toLowerCase();
-
-        switch (type) {
-
-            case "sqlite":
-
-                return new SQLiteAdapter(config);
-
-            case "supabase":
-
-                return new SupabaseAdapter(config);
-
-            case "indexeddb":
-
-                return new IndexedDBAdapter(config);
-
-            case "localstorage":
-
-                return new LocalStorageAdapter(config);
-
-            case "sessionstorage":
-
-                return new SessionStorageAdapter(config);
-
-            case "memory":
-
-            default:
-
-                return new MemoryAdapter(config);
-
-        }
-
-    }
-
-    /*=====================================================
-        STO-004
-        Supported Providers
-    =====================================================*/
-
-    static supportedProviders() {
-
-        return [
-
-            "sqlite",
-
-            "supabase",
-
-            "indexeddb",
-
-            "localstorage",
-
-            "sessionstorage",
-
-            "memory"
-
-        ];
-
-    }
-
-    /*=====================================================
-        STO-005
-        Validation
-    =====================================================*/
-
-    static isSupported(type) {
-
-        return this.supportedProviders()
-
-            .includes(
-
-                String(type)
-
-                .toLowerCase()
-
+        const provider =
+            this.create(
+                type,
+                options
             );
 
-    }
+        return new Database({
 
-    /*=====================================================
-        STO-006
-        Provider Information
-    =====================================================*/
+            ...options,
 
-    static info() {
+            provider
 
-        return {
-
-            factory: "StorageFactory",
-
-            providers: this.supportedProviders(),
-
-            version: "1.0.0"
-
-        };
+        });
 
     }
 
-    /*=====================================================
-        STO-007
-        Plugin Registration
-        Reserved
-    =====================================================*/
 
-    static registerAdapter() {
+    static async createInitializedDatabase(
+        type = "local",
+        options = {}
+    ) {
 
-        // Reserved
+        const database =
+            this.createDatabase(
+                type,
+                options
+            );
 
-    }
+        await database.initialize();
 
-    /*=====================================================
-        STO-008
-        Dynamic Discovery
-        Reserved
-    =====================================================*/
-
-    static discoverAdapters() {
-
-        // Reserved
+        return database;
 
     }
 
-    /*=====================================================
-        STO-009
-        Health Monitoring
-        Reserved
-    =====================================================*/
 
-    static healthCheck() {
-
-        return {
-
-            healthy: true,
-
-            adapters: this.supportedProviders(),
-
-            timestamp: new Date()
-
-        };
-
-    }
-
-    /*=====================================================
-        STO-010
-        Future Expansion
-        Reserved
-    =====================================================*/
-
-    static metrics() {}
-
-    static diagnostics() {}
-
-    static benchmark() {}
+    // =========================================================
+    // FUTURE INSERT
+    //
+    // Environment selection:
+    //
+    // Development → Memory / IndexedDB
+    // Production  → SQLite / Supabase
+    //
+    // Tenant selection
+    // Offline-first selection
+    // Failover provider
+    // =========================================================
 
 }
