@@ -1,99 +1,296 @@
 /**
  * ============================================================
- * FILE: IndexedDBAdapter.js
- * ID: STO-007
- * LOCATION: app/storage/IndexedDBAdapter.js
+ * ISAACS & PARTNERS ENTERPRISE PLATFORM
+ * IndexedDBAdapter
  * ============================================================
  */
 
-export default class IndexedDBAdapter {
+import StorageProvider from "./StorageProvider.js";
 
-    constructor(config = {}) {
+export default class IndexedDBAdapter
+    extends StorageProvider {
 
-        this.databaseName = config.database || "isaacs_db";
+    constructor(options = {}) {
 
-        this.version = config.version || 1;
+        super({
+            ...options,
+            name: "IndexedDBAdapter"
+        });
+
+        this.databaseName =
+            options.databaseName ??
+            "IsaacsPartners";
+
+        this.storeName =
+            options.storeName ??
+            "application";
+
+        this.version =
+            options.version ??
+            1;
 
         this.db = null;
 
     }
 
-    /*=====================================================
-        IDX-001
-        Connect
-    =====================================================*/
 
-    async connect() {
+    async initialize() {
 
-        return new Promise((resolve, reject) => {
+        if (!globalThis.indexedDB) {
 
-            const request = indexedDB.open(
-
-                this.databaseName,
-                this.version
-
+            throw new Error(
+                "IndexedDB is unavailable."
             );
 
-            request.onsuccess = () => {
+        }
 
-                this.db = request.result;
+        this.db =
+            await this.openDatabase();
 
-                resolve(this.db);
+        this.initialized = true;
 
-            };
-
-            request.onerror = () => {
-
-                reject(request.error);
-
-            };
-
-        });
+        return this;
 
     }
 
-    /*=====================================================
-        IDX-002
-        CRUD PLACEHOLDERS
-    =====================================================*/
 
-    async create(entity) {}
+    openDatabase() {
 
-    async findById(id) {}
+        return new Promise(
+            (resolve, reject) => {
 
-    async findAll() {}
+                const request =
+                    indexedDB.open(
+                        this.databaseName,
+                        this.version
+                    );
 
-    async update(entity) {}
+                request.onupgradeneeded =
+                    event => {
 
-    async delete(id) {}
+                        const db =
+                            event.target.result;
 
-    async exists(id) {}
+                        if (
+                            !db.objectStoreNames
+                                .contains(
+                                    this.storeName
+                                )
+                        ) {
 
-    async count() {}
+                            db.createObjectStore(
+                                this.storeName
+                            );
 
-    async search(criteria) {}
+                        }
 
-    async filter(filters) {}
+                        // =====================================
+                        // FUTURE INSERT
+                        // IndexedDB schema migrations
+                        // =====================================
 
-    async paginate(page, size) {}
+                    };
 
-    async sort(field, direction) {}
 
-    /*=====================================================
-        IDX-003
-        Health
-    =====================================================*/
+                request.onsuccess =
+                    () => resolve(
+                        request.result
+                    );
 
-    healthCheck() {
 
-        return {
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
 
-            healthy: true,
-
-            adapter: "IndexedDB"
-
-        };
+            }
+        );
 
     }
+
+
+    transaction(mode = "readonly") {
+
+        return this.db.transaction(
+            this.storeName,
+            mode
+        ).objectStore(
+            this.storeName
+        );
+
+    }
+
+
+    async get(key) {
+
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction()
+                        .get(key);
+
+                request.onsuccess =
+                    () => resolve(
+                        request.result ??
+                        null
+                    );
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async set(key, value) {
+
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction(
+                        "readwrite"
+                    ).put(
+                        value,
+                        key
+                    );
+
+                request.onsuccess =
+                    () => resolve(value);
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async delete(key) {
+
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction(
+                        "readwrite"
+                    ).delete(key);
+
+                request.onsuccess =
+                    () => resolve(true);
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async has(key) {
+
+        const value =
+            await this.get(key);
+
+        return value !== null;
+
+    }
+
+
+    async clear() {
+
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction(
+                        "readwrite"
+                    ).clear();
+
+                request.onsuccess =
+                    () => resolve();
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async keys() {
+
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction()
+                        .getAllKeys();
+
+                request.onsuccess =
+                    () => resolve(
+                        request.result
+                    );
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async close() {
+
+        if (this.db) {
+
+            this.db.close();
+
+            this.db = null;
+
+        }
+
+        this.initialized = false;
+
+    }
+
+
+    // =========================================================
+    // FUTURE INSERT
+    // Object stores:
+    // matters
+    // clients
+    // documents
+    // appointments
+    // communications
+    // workflows
+    // =========================================================
 
 }
