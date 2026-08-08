@@ -1,141 +1,293 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * ============================================================
- *
- * FILE
- * MatterRepository.js
- *
- * FILE ID
- * REP-002
- *
- * LOCATION
- * app/repositories/MatterRepository.js
- *
- * EXTENDS
- * BaseRepository
- *
- * VERSION
- * 1.0.0
+ * MatterRepository
+ * ------------------------------------------------------------
+ * Repository for Matter aggregate roots.
  * ============================================================
  */
 
-import BaseRepository from "./BaseRepository.js";
+import BaseRepository
+    from "./BaseRepository.js";
 
-export default class MatterRepository extends BaseRepository {
+import MatterSerializer
+    from "../serializers/MatterSerializer.js";
 
-    /*=====================================================
-        MAT-REP-001
-        Constructor
-    =====================================================*/
+export default class MatterRepository
+    extends BaseRepository {
 
-    constructor(storage) {
+    constructor(options = {}) {
 
-        super(storage);
+        super({
 
+            ...options,
+
+            entityName: "Matter",
+
+            collection:
+                options.collection ??
+                "matters",
+
+            serializer:
+                options.serializer ??
+                MatterSerializer
+
+        });
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Matter intelligence
+        // AI case analysis
+        // Workflow state
+        // Document bundle readiness
+        // VFS/DHA destination
+        // SLA monitoring
+        // Matter audit history
+        //
+        // ====================================================
     }
 
-    /*=====================================================
-        MAT-REP-002
-        Queries
-    =====================================================*/
 
-    async findByReference(referenceNumber) {
+    async findByReferenceNumber(
+        referenceNumber
+    ) {
 
-        return this.search({
+        if (!referenceNumber) {
+            return null;
+        }
 
-            referenceNumber
-
+        return this.firstWhere({
+            referenceNumber:
+                String(
+                    referenceNumber
+                ).trim()
         });
 
     }
 
-    async findByClient(clientId) {
 
-        return this.search({
+    async findByClient(
+        clientId
+    ) {
 
+        if (!clientId) {
+            return [];
+        }
+
+        return this.findWhere({
             clientId
-
         });
 
     }
 
-    async findByConsultant(consultantId) {
 
-        return this.search({
+    async findByCompany(
+        companyId
+    ) {
 
-            consultantId
+        if (!companyId) {
+            return [];
+        }
 
+        return this.findWhere({
+            companyId
         });
 
     }
 
-    async findByDepartment(department) {
 
-        return this.search({
+    async findByStatus(
+        status
+    ) {
 
-            department
-
-        });
-
-    }
-
-    async findByStatus(status) {
-
-        return this.search({
-
+        return this.findWhere({
             status
-
         });
 
     }
 
-    async findByStage(stage) {
 
-        return this.search({
+    async findByStage(
+        stage
+    ) {
 
+        return this.findWhere({
             stage
-
         });
 
     }
 
-    async findByPriority(priority) {
 
-        return this.search({
+    async findByDepartment(
+        department
+    ) {
 
-            priority
-
+        return this.findWhere({
+            department
         });
 
     }
 
-    /*=====================================================
-        MAT-REP-003
-        Statistics
-    =====================================================*/
 
-    async statistics() {
+    async findAssignedTo(
+        userId
+    ) {
 
-        return {
+        if (!userId) {
+            return [];
+        }
 
-            total: await this.count()
-
-        };
+        return this.findWhere({
+            assignedTo:
+                userId
+        });
 
     }
 
-    /*=====================================================
-        MAT-REP-004
-        Reserved
-    =====================================================*/
 
-    fullTextSearch() {}
+    async findOpen() {
 
-    archive() {}
+        const matters =
+            await this.findAll();
 
-    restore() {}
+        return matters.filter(
+            matter =>
+                ![
+                    "CLOSED",
+                    "ARCHIVED",
+                    "CANCELLED"
+                ].includes(
+                    matter.status
+                )
+        );
 
-    rebuildIndexes() {}
+    }
+
+
+    async findOutstandingDocuments() {
+
+        const matters =
+            await this.findOpen();
+
+        return matters.filter(
+            matter =>
+                Array.isArray(
+                    matter.documents
+                ) &&
+                matter.documents.some(
+                    document =>
+                        document.status ===
+                        "OUTSTANDING"
+                )
+        );
+
+    }
+
+
+    async search(
+        query,
+        options = {}
+    ) {
+
+        const text =
+            String(query ?? "")
+                .trim()
+                .toLowerCase();
+
+        const matters =
+            await this.findAll(
+                options
+            );
+
+        if (!text) {
+
+            return matters;
+
+        }
+
+        return matters.filter(
+            matter => {
+
+                const searchable = [
+
+                    matter.referenceNumber,
+
+                    matter.title,
+
+                    matter.description,
+
+                    matter.type,
+
+                    matter.department,
+
+                    matter.status,
+
+                    matter.stage,
+
+                    matter.clientId
+
+                ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
+
+                return searchable.includes(
+                    text
+                );
+
+            }
+        );
+
+    }
+
+
+    async save(
+        matter
+    ) {
+
+        if (!matter) {
+
+            throw new Error(
+                "MatterRepository.save requires a matter."
+            );
+
+        }
+
+        if (
+            typeof matter.validate ===
+            "function"
+        ) {
+
+            matter.validate();
+
+        }
+
+        const existing =
+            matter.id
+                ? await this.findById(
+                    matter.id
+                )
+                : null;
+
+        const serialized =
+            this.serialize(
+                matter
+            );
+
+        if (existing) {
+
+            return this.update(
+                matter.id,
+                serialized
+            );
+
+        }
+
+        return this.create(
+            serialized
+        );
+
+    }
 
 }
