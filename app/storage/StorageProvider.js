@@ -1,293 +1,240 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * ============================================================
- *
- * FILE
- * StorageProvider.js
- *
- * FILE ID
- * STO-001
- *
- * LAYER
- * Storage
- *
- * RESPONSIBILITY
- * Central gateway between repositories and storage adapters.
- *
- * LOCATION
- * app/storage/StorageProvider.js
- *
- * USED BY
- * BaseRepository
- * MatterRepository
- * ClientRepository
- * DocumentRepository
- * BookingRepository
- * KnowledgeRepository
- *
- * VERSION
- * 1.0.0
- *
- * ============================================================
- * FUTURE EXPANSION MAP
- * ============================================================
- *
- * ✔ Provider Registration
- * ✔ Active Provider
- * ✔ CRUD Delegation
- *
- * □ Transactions
- * □ Encryption
- * □ Synchronisation
- * □ Backup
- * □ Restore
- * □ Read Replicas
- * □ Metrics
- * □ Health Monitoring
- * □ Offline Queue
- * □ Multi-Tenant Routing
+ * StorageProvider
+ * ------------------------------------------------------------
+ * Base contract for every storage adapter.
  * ============================================================
  */
 
 export default class StorageProvider {
 
-    /*=====================================================
-        STO-001
-        Constructor
-    =====================================================*/
+    constructor(options = {}) {
 
-    constructor() {
+        this.name = options.name ?? "StorageProvider";
 
-        this.provider = null;
+        this.initialized = false;
+
+        this.options = options;
+
+        // =====================================================
+        // FUTURE INSERT
+        // Storage telemetry configuration
+        // Encryption configuration
+        // Tenant isolation configuration
+        // =====================================================
 
     }
 
-    /*=====================================================
-        STO-002
-        Provider Registration
-    =====================================================*/
 
-    register(provider) {
+    async initialize() {
 
-        this.provider = provider;
+        this.initialized = true;
 
         return this;
 
     }
 
-    /*=====================================================
-        STO-003
-        Active Provider
-    =====================================================*/
 
-    getProvider() {
+    async close() {
 
-        return this.provider;
+        this.initialized = false;
 
     }
 
-    hasProvider() {
 
-        return this.provider !== null;
+    assertInitialized() {
 
-    }
-
-    ensureProvider() {
-
-        if (!this.provider) {
+        if (!this.initialized) {
 
             throw new Error(
-                "No storage provider has been registered."
+                `${this.name} has not been initialized.`
             );
 
         }
 
     }
 
-    /*=====================================================
-        STO-004
-        CRUD Delegation
-    =====================================================*/
 
-    async create(entity) {
+    async get() {
 
-        this.ensureProvider();
-
-        return this.provider.create(entity);
+        throw new Error(
+            `${this.name}.get() must be implemented.`
+        );
 
     }
 
-    async findById(id) {
 
-        this.ensureProvider();
+    async set() {
 
-        return this.provider.findById(id);
-
-    }
-
-    async findAll() {
-
-        this.ensureProvider();
-
-        return this.provider.findAll();
+        throw new Error(
+            `${this.name}.set() must be implemented.`
+        );
 
     }
 
-    async update(entity) {
 
-        this.ensureProvider();
+    async delete() {
 
-        return this.provider.update(entity);
-
-    }
-
-    async delete(id) {
-
-        this.ensureProvider();
-
-        return this.provider.delete(id);
+        throw new Error(
+            `${this.name}.delete() must be implemented.`
+        );
 
     }
 
-    async exists(id) {
 
-        this.ensureProvider();
+    async has() {
 
-        return this.provider.exists(id);
-
-    }
-
-    async count() {
-
-        this.ensureProvider();
-
-        return this.provider.count();
+        throw new Error(
+            `${this.name}.has() must be implemented.`
+        );
 
     }
 
-    async search(criteria = {}) {
 
-        this.ensureProvider();
+    async clear() {
 
-        return this.provider.search(criteria);
-
-    }
-
-    async filter(filters = {}) {
-
-        this.ensureProvider();
-
-        return this.provider.filter(filters);
+        throw new Error(
+            `${this.name}.clear() must be implemented.`
+        );
 
     }
 
-    async paginate(page = 1, pageSize = 20) {
 
-        this.ensureProvider();
+    async keys() {
 
-        return this.provider.paginate(page, pageSize);
-
-    }
-
-    async sort(field, direction = "asc") {
-
-        this.ensureProvider();
-
-        return this.provider.sort(field, direction);
+        throw new Error(
+            `${this.name}.keys() must be implemented.`
+        );
 
     }
 
-    /*=====================================================
-        STO-005
-        Provider Information
-    =====================================================*/
 
-    getProviderName() {
+    async values() {
 
-        if (!this.provider) {
+        const keys = await this.keys();
 
-            return "None";
+        const values = [];
+
+        for (const key of keys) {
+
+            values.push(
+                await this.get(key)
+            );
 
         }
 
-        return this.provider.constructor.name;
+        return values;
 
     }
 
-    /*=====================================================
-        STO-006
-        Health
-    =====================================================*/
 
-    healthCheck() {
+    async entries() {
 
-        return {
+        const keys = await this.keys();
 
-            healthy: this.hasProvider(),
+        const entries = [];
 
-            provider: this.getProviderName(),
+        for (const key of keys) {
 
-            timestamp: new Date()
+            entries.push([
+                key,
+                await this.get(key)
+            ]);
+
+        }
+
+        return entries;
+
+    }
+
+
+    async transaction(callback) {
+
+        const transaction = {
+
+            get: key => this.get(key),
+
+            set: (key, value) =>
+                this.set(key, value),
+
+            delete: key =>
+                this.delete(key),
+
+            has: key =>
+                this.has(key)
 
         };
 
+        return callback(transaction);
+
     }
 
-    /*=====================================================
-        STO-007
-        Transactions
-        Reserved
-    =====================================================*/
 
-    beginTransaction() {}
+    async healthCheck() {
 
-    commitTransaction() {}
+        try {
 
-    rollbackTransaction() {}
+            const key =
+                `__storage_health_${Date.now()}`;
 
-    /*=====================================================
-        STO-008
-        Backup & Restore
-        Reserved
-    =====================================================*/
+            await this.set(
+                key,
+                true
+            );
 
-    backup() {}
+            const result =
+                await this.get(key);
 
-    restore() {}
+            await this.delete(key);
 
-    /*=====================================================
-        STO-009
-        Synchronisation
-        Reserved
-    =====================================================*/
+            return result === true;
 
-    synchronise() {}
+        } catch {
 
-    /*=====================================================
-        STO-010
-        Encryption
-        Reserved
-    =====================================================*/
+            return false;
 
-    encrypt() {}
+        }
 
-    decrypt() {}
+    }
 
-    /*=====================================================
-        STO-011
-        Performance Metrics
-        Reserved
-    =====================================================*/
 
-    metrics() {}
+    serialize(value) {
 
-    /*=====================================================
-        STO-012
-        Multi-Tenant Routing
-        Reserved
-    =====================================================*/
+        return JSON.stringify(value);
 
-    selectTenant() {}
+    }
+
+
+    deserialize(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return null;
+
+        }
+
+        if (
+            typeof value !== "string"
+        ) {
+
+            return value;
+
+        }
+
+        try {
+
+            return JSON.parse(value);
+
+        } catch {
+
+            return value;
+
+        }
+
+    }
 
 }
