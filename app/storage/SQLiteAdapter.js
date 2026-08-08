@@ -1,76 +1,296 @@
 /**
  * ============================================================
- * FILE: SQLiteAdapter.js
- * ID: STO-008
- * LOCATION: app/storage/SQLiteAdapter.js
+ * ISAACS & PARTNERS ENTERPRISE PLATFORM
+ * IndexedDBAdapter
  * ============================================================
  */
 
-export default class SQLiteAdapter {
+import StorageProvider from "./StorageProvider.js";
 
-    constructor(config = {}) {
+export default class IndexedDBAdapter
+    extends StorageProvider {
 
-        this.database = config.database || "isaacs.db";
+    constructor(options = {}) {
 
-        this.connected = false;
+        super({
+            ...options,
+            name: "IndexedDBAdapter"
+        });
+
+        this.databaseName =
+            options.databaseName ??
+            "IsaacsPartners";
+
+        this.storeName =
+            options.storeName ??
+            "application";
+
+        this.version =
+            options.version ??
+            1;
+
+        this.db = null;
 
     }
 
-    /*=====================================================
-        SQL-001
-        Connection
-    =====================================================*/
 
-    async connect() {
+    async initialize() {
 
-        this.connected = true;
+        if (!globalThis.indexedDB) {
 
-        return true;
+            throw new Error(
+                "IndexedDB is unavailable."
+            );
+
+        }
+
+        this.db =
+            await this.openDatabase();
+
+        this.initialized = true;
+
+        return this;
 
     }
 
-    async disconnect() {
 
-        this.connected = false;
+    openDatabase() {
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    indexedDB.open(
+                        this.databaseName,
+                        this.version
+                    );
+
+                request.onupgradeneeded =
+                    event => {
+
+                        const db =
+                            event.target.result;
+
+                        if (
+                            !db.objectStoreNames
+                                .contains(
+                                    this.storeName
+                                )
+                        ) {
+
+                            db.createObjectStore(
+                                this.storeName
+                            );
+
+                        }
+
+                        // =====================================
+                        // FUTURE INSERT
+                        // IndexedDB schema migrations
+                        // =====================================
+
+                    };
+
+
+                request.onsuccess =
+                    () => resolve(
+                        request.result
+                    );
+
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
 
     }
 
-    /*=====================================================
-        SQL-002
-        CRUD
-    =====================================================*/
 
-    async create(entity) {}
+    transaction(mode = "readonly") {
 
-    async findById(id) {}
+        return this.db.transaction(
+            this.storeName,
+            mode
+        ).objectStore(
+            this.storeName
+        );
 
-    async findAll() {}
+    }
 
-    async update(entity) {}
 
-    async delete(id) {}
+    async get(key) {
 
-    async exists(id) {}
+        this.assertInitialized();
 
-    async count() {}
+        return new Promise(
+            (resolve, reject) => {
 
-    async search(criteria) {}
+                const request =
+                    this.transaction()
+                        .get(key);
 
-    async filter(filters) {}
+                request.onsuccess =
+                    () => resolve(
+                        request.result ??
+                        null
+                    );
 
-    async paginate(page, size) {}
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
 
-    async sort(field, direction) {}
+            }
+        );
 
-    /*=====================================================
-        SQL-003
-        Transactions
-    =====================================================*/
+    }
 
-    beginTransaction() {}
 
-    commitTransaction() {}
+    async set(key, value) {
 
-    rollbackTransaction() {}
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction(
+                        "readwrite"
+                    ).put(
+                        value,
+                        key
+                    );
+
+                request.onsuccess =
+                    () => resolve(value);
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async delete(key) {
+
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction(
+                        "readwrite"
+                    ).delete(key);
+
+                request.onsuccess =
+                    () => resolve(true);
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async has(key) {
+
+        const value =
+            await this.get(key);
+
+        return value !== null;
+
+    }
+
+
+    async clear() {
+
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction(
+                        "readwrite"
+                    ).clear();
+
+                request.onsuccess =
+                    () => resolve();
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async keys() {
+
+        this.assertInitialized();
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const request =
+                    this.transaction()
+                        .getAllKeys();
+
+                request.onsuccess =
+                    () => resolve(
+                        request.result
+                    );
+
+                request.onerror =
+                    () => reject(
+                        request.error
+                    );
+
+            }
+        );
+
+    }
+
+
+    async close() {
+
+        if (this.db) {
+
+            this.db.close();
+
+            this.db = null;
+
+        }
+
+        this.initialized = false;
+
+    }
+
+
+    // =========================================================
+    // FUTURE INSERT
+    // Object stores:
+    // matters
+    // clients
+    // documents
+    // appointments
+    // communications
+    // workflows
+    // =========================================================
 
 }
