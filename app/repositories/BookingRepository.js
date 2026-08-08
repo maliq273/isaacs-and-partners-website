@@ -1,437 +1,234 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * ============================================================
- *
- * FILE
- * BookingRepository.js
- *
- * FILE ID
- * REP-005
- *
- * LOCATION
- * app/repositories/BookingRepository.js
- *
- * LAYER
- * Repository
- *
- * RESPONSIBILITY
- * Handles persistence and retrieval of bookings.
- *
- * EXTENDS
- * BaseRepository
- *
- * VERSION
- * 1.0.0
- *
- * ============================================================
- * FUTURE EXPANSION MAP
- * ============================================================
- *
- * ✔ CRUD
- * ✔ Matter Queries
- * ✔ Client Queries
- * ✔ Consultant Queries
- * ✔ Date Queries
- * ✔ Statistics
- *
- * □ Calendar Sync
- * □ Outlook
- * □ Google
- * □ VFS
- * □ DHA
- * □ AI Scheduler
+ * BookingRepository
  * ============================================================
  */
 
-import BaseRepository from "./BaseRepository.js";
+import BaseRepository
+    from "./BaseRepository.js";
 
-export default class BookingRepository extends BaseRepository {
+export default class BookingRepository
+    extends BaseRepository {
 
-    /*=====================================================
-        BOOK-REP-001
-        Constructor
-    =====================================================*/
+    constructor(options = {}) {
 
-    constructor(storage) {
+        super({
 
-        super(storage);
+            ...options,
 
+            entityName: "Booking",
+
+            collection:
+                options.collection ??
+                "bookings",
+
+            serializer:
+                options.serializer ??
+                null
+
+        });
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Calendar integration
+        // Google Calendar
+        // Microsoft Calendar
+        // WhatsApp reminders
+        // Staff availability
+        // Booking conflicts
+        //
+        // ====================================================
     }
 
-    /*=====================================================
-        BOOK-REP-002
-        Matter Queries
-    =====================================================*/
 
-    async findByMatter(matterId) {
+    async findByMatter(
+        matterId
+    ) {
 
-        return this.search({
+        if (!matterId) {
+            return [];
+        }
 
+        return this.findWhere({
             matterId
-
         });
 
     }
 
-    /*=====================================================
-        BOOK-REP-003
-        Client Queries
-    =====================================================*/
 
-    async findByClient(clientId) {
+    async findByClient(
+        clientId
+    ) {
 
-        return this.search({
+        if (!clientId) {
+            return [];
+        }
 
+        return this.findWhere({
             clientId
-
         });
 
     }
 
-    /*=====================================================
-        BOOK-REP-004
-        Consultant Queries
-    =====================================================*/
 
-    async findByConsultant(consultantId) {
+    async findByStaff(
+        staffId
+    ) {
 
-        return this.search({
+        if (!staffId) {
+            return [];
+        }
 
-            consultantId
-
+        return this.findWhere({
+            staffId
         });
 
     }
 
-    /*=====================================================
-        BOOK-REP-005
-        Attorney Queries
-    =====================================================*/
 
-    async findByAttorney(attorneyId) {
+    async findByStatus(
+        status
+    ) {
 
-        return this.search({
-
-            attorneyId
-
+        return this.findWhere({
+            status
         });
 
     }
 
-    /*=====================================================
-        BOOK-REP-006
-        Company Queries
-    =====================================================*/
 
-    async findByCompany(companyId) {
+    async findBetween(
+        start,
+        end
+    ) {
 
-        return this.search({
+        const startTime =
+            new Date(start)
+                .getTime();
 
-            companyId
+        const endTime =
+            new Date(end)
+                .getTime();
 
-        });
+        const bookings =
+            await this.findAll();
 
-    }
+        return bookings.filter(
+            booking => {
 
-    /*=====================================================
-        BOOK-REP-007
-        Date Queries
-    =====================================================*/
+                const bookingStart =
+                    new Date(
+                        booking.startTime ??
+                        booking.start ??
+                        booking.date
+                    ).getTime();
 
-    async findByDate(date) {
+                return (
+                    bookingStart >= startTime &&
+                    bookingStart <= endTime
+                );
 
-        return this.search({
-
-            date
-
-        });
-
-    }
-
-    async findBetween(startDate, endDate) {
-
-        return this.filter({
-
-            startDate,
-
-            endDate
-
-        });
+            }
+        );
 
     }
 
-    /*=====================================================
-        BOOK-REP-008
-        Status Queries
-    =====================================================*/
 
-    async upcoming() {
+    async findUpcoming(
+        from = new Date()
+    ) {
 
-        return this.search({
+        const fromTime =
+            new Date(from)
+                .getTime();
 
-            status: "UPCOMING"
+        const bookings =
+            await this.findAll();
 
-        });
+        return bookings
+            .filter(
+                booking => {
 
-    }
+                    const time =
+                        new Date(
+                            booking.startTime ??
+                            booking.start ??
+                            booking.date
+                        ).getTime();
 
-    async completed() {
+                    return time >= fromTime;
 
-        return this.search({
-
-            status: "COMPLETED"
-
-        });
-
-    }
-
-    async cancelled() {
-
-        return this.search({
-
-            status: "CANCELLED"
-
-        });
-
-    }
-
-    async noShow() {
-
-        return this.search({
-
-            status: "NO_SHOW"
-
-        });
-
-    }
-
-    /*=====================================================
-        BOOK-REP-009
-        Statistics
-    =====================================================*/
-
-    async statistics() {
-
-        return {
-
-            total: await this.count(),
-
-            upcoming: (await this.upcoming()).length,
-
-            completed: (await this.completed()).length,
-
-            cancelled: (await this.cancelled()).length,
-
-            noShow: (await this.noShow()).length
-
-        };
+                }
+            )
+            .sort(
+                (a, b) =>
+                    new Date(
+                        a.startTime ??
+                        a.start ??
+                        a.date
+                    ).getTime()
+                    -
+                    new Date(
+                        b.startTime ??
+                        b.start ??
+                        b.date
+                    ).getTime()
+            );
 
     }
 
-    /*=====================================================
-        BOOK-REP-010
-        Calendar Integration
-        Reserved
-    =====================================================*/
 
-    async syncCalendar() {
-
-        // Reserved
-
-    }
-
-    async importCalendar() {
-
-        // Reserved
-
-    }
-
-    async exportCalendar() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-011
-        Outlook
-        Reserved
-    =====================================================*/
-
-    async syncOutlook() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-012
-        Google Calendar
-        Reserved
-    =====================================================*/
-
-    async syncGoogleCalendar() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-013
-        VFS Appointments
-        Reserved
-    =====================================================*/
-
-    async createVFSBooking() {
-
-        // Reserved
-
-    }
-
-    async updateVFSBooking() {
-
-        // Reserved
-
-    }
-
-    async cancelVFSBooking() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-014
-        DHA Appointments
-        Reserved
-    =====================================================*/
-
-    async createDHABooking() {
-
-        // Reserved
-
-    }
-
-    async updateDHABooking() {
-
-        // Reserved
-
-    }
-
-    async cancelDHABooking() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-015
-        AI Scheduling
-        Reserved
-    =====================================================*/
-
-    async findAvailableSlots() {
-
-        // Reserved
-
-    }
-
-    async detectConflicts() {
-
-        // Reserved
-
-    }
-
-    async optimiseSchedule() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-016
-        Reminder Queue
-        Reserved
-    =====================================================*/
-
-    async queueWhatsAppReminder() {
-
-        // Reserved
-
-    }
-
-    async queueSMSReminder() {
-
-        // Reserved
-
-    }
-
-    async queueEmailReminder() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-017
-        Waiting List
-        Reserved
-    =====================================================*/
-
-    async waitingList() {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-018
-        Archive
-        Reserved
-    =====================================================*/
-
-    async archive(bookingId) {
-
-        // Reserved
-
-    }
-
-    async restore(bookingId) {
-
-        // Reserved
-
-    }
-
-    /*=====================================================
-        BOOK-REP-019
-        Repository Maintenance
-        Reserved
-    =====================================================*/
-
-    async optimise() {
-
-        // Reserved
-
-    }
-
-    async rebuildIndexes() {
-
-        // Reserved
-
-    }
-
-    async healthCheck() {
-
-        return {
-
-            repository: "BookingRepository",
-
-            healthy: true,
-
-            timestamp: new Date()
-
-        };
+    async hasConflict(
+        start,
+        end,
+        options = {}
+    ) {
+
+        const startTime =
+            new Date(start)
+                .getTime();
+
+        const endTime =
+            new Date(end)
+                .getTime();
+
+        const bookings =
+            await this.findAll();
+
+        return bookings.some(
+            booking => {
+
+                if (
+                    options.excludeId &&
+                    booking.id ===
+                    options.excludeId
+                ) {
+
+                    return false;
+
+                }
+
+                const bookingStart =
+                    new Date(
+                        booking.startTime ??
+                        booking.start
+                    ).getTime();
+
+                const bookingEnd =
+                    new Date(
+                        booking.endTime ??
+                        booking.end
+                    ).getTime();
+
+                return (
+                    startTime < bookingEnd &&
+                    endTime > bookingStart
+                );
+
+            }
+        );
 
     }
 
