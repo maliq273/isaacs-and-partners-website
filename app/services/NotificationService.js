@@ -7,7 +7,7 @@
  * NotificationService.js
  *
  * FILE ID
- * SER-007
+ * SER-011
  *
  * LOCATION
  * app/services/NotificationService.js
@@ -20,213 +20,225 @@
  *
  * ============================================================
  *
- * NOTIFICATION ARCHITECTURE
+ * NOTIFICATION FLOW
  *
- *                         NotificationService
- *                                  │
- *              ┌───────────────────┼───────────────────┐
- *              ↓                   ↓                   ↓
- *          WhatsApp              Email               SMS
- *              │                   │                   │
- *              └───────────────────┼───────────────────┘
- *                                  ↓
- *                         In-App / Portal
- *                                  ↓
- *                           Notification Log
- *
- * ============================================================
- *
- * CURRENT EXISTING SYSTEM
- *
- * app/js/notifications.js
- *
- * app/shared/notifications.js
- *
- * app/services/notification.service.js
+ * Matter / Workflow / Appointment / Document / AI
+ *                     ↓
+ *              NotificationService
+ *                     ↓
+ *              Channel Resolver
+ *                     ↓
+ *       ┌─────────────┼──────────────┐
+ *       ↓             ↓              ↓
+ *     Email        WhatsApp        In-App
+ *       ↓             ↓              ↓
+ *                 SMS / Future Channels
  *
  * ============================================================
  *
  * IMPORTANT
  *
- * Do NOT delete the existing notification modules.
+ * This service determines WHAT should be sent and through
+ * WHICH channel.
  *
- * This service becomes the future application-level
- * orchestration layer.
+ * Actual provider integrations should remain behind provider
+ * adapters.
  *
- * ============================================================
- *
- * FUTURE CHANNELS
- *
- * □ WhatsApp
- * □ Email
- * □ SMS
- * □ In-App
- * □ Applicant Portal
- * □ Staff Dashboard
- * □ Push Notifications
- * □ Automated Voice
- *
- * ============================================================
- *
- * FUTURE AUTOMATION
- *
- * □ Booking reminders
- * □ Document outstanding notices
- * □ Matter status updates
- * □ Payment reminders
- * □ Consultation confirmations
- * □ Application milestones
- * □ VFS / DHA submission alerts
- * □ Bundle ready alerts
- * □ AI escalation alerts
- * □ Staff task alerts
  * ============================================================
  */
 
 
 /*=============================================================
-    OPTIONAL EXISTING NOTIFICATION MODULE
+    NOTIFICATION SERVICE
 =============================================================*/
-
-import existingNotifications
-    from "../shared/notifications.js";
-
 
 export default class NotificationService {
 
 
     /*=========================================================
         SER-NOT-001
-        Constructor / Dependency Injection
+        Constructor
     =========================================================*/
 
     constructor({
 
-        provider = null,
+        providers = {},
 
-        whatsappProvider = null,
-
-        emailProvider = null,
-
-        smsProvider = null,
-
-        portalProvider = null,
+        storage = null,
 
         logger = null,
 
-        storage = null
+        state = null,
+
+        settings = null
 
     } = {}) {
 
 
-        this.provider =
-            provider;
-
-
-        this.whatsappProvider =
-            whatsappProvider;
-
-
-        this.emailProvider =
-            emailProvider;
-
-
-        this.smsProvider =
-            smsProvider;
-
-
-        this.portalProvider =
-            portalProvider;
-
-
-        this.logger =
-            logger;
+        this.providers =
+            providers || {};
 
 
         this.storage =
             storage;
 
 
+        this.logger =
+            logger;
+
+
+        this.state =
+            state;
+
+
+        this.settings =
+            settings;
+
+
+        /*
+         *=====================================================
+         * SUPPORTED CHANNELS
+         *=====================================================
+         */
+
+        this.channels = new Map();
+
+
+        this.registerDefaultChannels();
+
+
+        /*
+         *=====================================================
+         * NOTIFICATION HISTORY
+         *=====================================================
+         */
+
+        this.history = [];
+
+
         /*
          *=====================================================
          * FUTURE INSERT
          *
-         * NOTIFICATION PROVIDER REGISTRY
+         * PERSISTENT NOTIFICATION REPOSITORY
          *
-         * Future providers:
+         * Future production repository:
          *
-         * WhatsApp Business API
-         * Email provider
-         * SMS provider
-         * Push provider
-         * Applicant Portal
+         * NotificationRepository
          *
-         * All providers should eventually be registered
-         * through a central dependency container.
+         * It should store:
+         *
+         * notification ID
+         * matter ID
+         * client ID
+         * recipient
+         * channel
+         * event
+         * template
+         * status
+         * provider response
+         * timestamps
+         * delivery result
+         * failure reason
          *=====================================================
          */
 
 
-        this.channels = {
+        /*
+         *=====================================================
+         * NOTIFICATION TEMPLATES
+         *=====================================================
+         */
 
-            whatsapp:
-                Boolean(
-                    whatsappProvider
-                ),
+        this.templates = new Map();
 
-            email:
-                Boolean(
-                    emailProvider
-                ),
 
-            sms:
-                Boolean(
-                    smsProvider
-                ),
-
-            portal:
-                Boolean(
-                    portalProvider
-                )
-
-        };
+        this.registerDefaultTemplates();
 
     }
 
 
     /*=========================================================
         SER-NOT-002
-        Configure Provider
+        Register Default Channels
     =========================================================*/
 
-    setProvider(
-        provider
-    ) {
+    registerDefaultChannels() {
 
-        this.provider =
-            provider;
 
-        return this;
+        this.channels.set(
+            "email",
+            this.providers.email || null
+        );
+
+
+        this.channels.set(
+            "whatsapp",
+            this.providers.whatsapp || null
+        );
+
+
+        this.channels.set(
+            "sms",
+            this.providers.sms || null
+        );
+
+
+        this.channels.set(
+            "in-app",
+            this.providers.inApp || null
+        );
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * ADDITIONAL CHANNELS
+         *
+         * portal
+         * push
+         * Teams
+         * Slack
+         *=====================================================
+         */
 
     }
 
 
     /*=========================================================
         SER-NOT-003
-        Configure WhatsApp
+        Register Channel
     =========================================================*/
 
-    setWhatsAppProvider(
+    registerChannel(
+        name,
         provider
     ) {
 
-        this.whatsappProvider =
-            provider;
 
-        this.channels.whatsapp =
-            Boolean(
-                provider
+        if (!name) {
+
+            throw new Error(
+                "Notification channel name is required."
             );
+
+        }
+
+
+        const key =
+            String(
+                name
+            )
+                .trim()
+                .toLowerCase();
+
+
+        this.channels.set(
+            key,
+            provider
+        );
+
 
         return this;
 
@@ -235,42 +247,71 @@ export default class NotificationService {
 
     /*=========================================================
         SER-NOT-004
-        Configure Email
+        Get Channel
     =========================================================*/
 
-    setEmailProvider(
-        provider
+    getChannel(
+        name
     ) {
 
-        this.emailProvider =
-            provider;
 
-        this.channels.email =
-            Boolean(
-                provider
-            );
+        if (!name) {
 
-        return this;
+            return null;
+
+        }
+
+
+        return this.channels.get(
+            String(
+                name
+            )
+                .trim()
+                .toLowerCase()
+        ) || null;
 
     }
 
 
     /*=========================================================
         SER-NOT-005
-        Configure SMS
+        Register Template
     =========================================================*/
 
-    setSMSProvider(
-        provider
+    registerTemplate(
+        name,
+        template
     ) {
 
-        this.smsProvider =
-            provider;
 
-        this.channels.sms =
-            Boolean(
-                provider
+        if (!name) {
+
+            throw new Error(
+                "Notification template name is required."
             );
+
+        }
+
+
+        if (
+            typeof template !==
+            "function" &&
+            typeof template !==
+            "string"
+        ) {
+
+            throw new Error(
+                "Notification template must be a string or function."
+            );
+
+        }
+
+
+        this.templates.set(
+            name,
+            template
+        );
+
 
         return this;
 
@@ -279,504 +320,546 @@ export default class NotificationService {
 
     /*=========================================================
         SER-NOT-006
-        Configure Portal
+        Register Default Templates
     =========================================================*/
 
-    setPortalProvider(
-        provider
-    ) {
+    registerDefaultTemplates() {
 
-        this.portalProvider =
-            provider;
 
-        this.channels.portal =
-            Boolean(
-                provider
-            );
+        this.registerTemplate(
+            "matter.created",
+            data =>
+                `Your matter ${data.referenceNumber || ""} has been created.`
+        );
 
-        return this;
+
+        this.registerTemplate(
+            "matter.updated",
+            data =>
+                `Your matter ${data.referenceNumber || ""} has been updated.`
+        );
+
+
+        this.registerTemplate(
+            "document.required",
+            data =>
+                `A document is required for matter ${data.referenceNumber || ""}.`
+        );
+
+
+        this.registerTemplate(
+            "document.approved",
+            data =>
+                `A document for matter ${data.referenceNumber || ""} has been approved.`
+        );
+
+
+        this.registerTemplate(
+            "document.rejected",
+            data =>
+                `A document for matter ${data.referenceNumber || ""} requires attention.`
+        );
+
+
+        this.registerTemplate(
+            "appointment.created",
+            data =>
+                `Your appointment has been scheduled${data.date ? ` for ${data.date}` : ""}.`
+        );
+
+
+        this.registerTemplate(
+            "appointment.reminder",
+            data =>
+                `Reminder: your appointment is approaching${data.date ? ` on ${data.date}` : ""}.`
+        );
+
+
+        this.registerTemplate(
+            "workflow.updated",
+            data =>
+                `Your matter workflow has been updated.`
+        );
+
+
+        this.registerTemplate(
+            "workflow.completed",
+            data =>
+                `The workflow for your matter has been completed.`
+        );
+
+
+        this.registerTemplate(
+            "task.assigned",
+            data =>
+                `A new task has been assigned to you.`
+        );
+
+
+        this.registerTemplate(
+            "system.alert",
+            data =>
+                data.message ||
+                "A system alert requires your attention."
+        );
+
+
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * IMMIGRATION-SPECIFIC TEMPLATES
+         *
+         * VFS appointment
+         * DHA submission
+         * visa outcome
+         * appeal outcome
+         * document expiry
+         * passport expiry
+         * permit expiry
+         * outstanding documents
+         * bundle ready for printing
+         *=====================================================
+         */
 
     }
 
 
     /*=========================================================
         SER-NOT-007
-        Validate Notification
+        Build Notification
     =========================================================*/
 
-    validateNotification(
-        notification = {}
-    ) {
+    buildNotification({
 
-        if (!notification) {
+        event,
+
+        recipient,
+
+        channel = "in-app",
+
+        subject = null,
+
+        message = null,
+
+        template = null,
+
+        data = {},
+
+        priority = "NORMAL",
+
+        metadata = {}
+
+    } = {}) {
+
+
+        if (!event) {
 
             throw new Error(
-                "Notification data is required."
+                "Notification event is required."
             );
 
         }
 
 
-        if (
-            !notification.recipient &&
-            !notification.recipientId &&
-            !notification.phone &&
-            !notification.email
-        ) {
-
-            throw new Error(
-                "Notification recipient is required."
+        const generatedMessage =
+            message ||
+            this.renderTemplate(
+                template || event,
+                data
             );
 
-        }
 
+        return {
 
-        if (!notification.message) {
+            id:
+                this.generateNotificationId(),
 
-            throw new Error(
-                "Notification message is required."
-            );
+            event,
 
-        }
+            recipient,
 
+            channel,
 
-        return true;
+            subject,
+
+            message:
+                generatedMessage,
+
+            data,
+
+            priority,
+
+            metadata,
+
+            status:
+                "PENDING",
+
+            createdAt:
+                new Date(),
+
+            sentAt:
+                null,
+
+            deliveredAt:
+                null,
+
+            failureReason:
+                null
+
+        };
 
     }
 
 
     /*=========================================================
         SER-NOT-008
-        Send Notification
+        Generate Notification ID
     =========================================================*/
 
-    async send(
-        notification = {}
-    ) {
+    generateNotificationId() {
 
-        this.validateNotification(
-            notification
+
+        return (
+            `NOT-${Date.now()}-` +
+            Math.random()
+                .toString(36)
+                .slice(2, 10)
         );
-
-
-        const channel =
-            notification.channel ||
-            "portal";
-
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * NOTIFICATION POLICY ENGINE
-         *
-         * Determine:
-         *
-         * - Which channel should be used
-         * - Whether consent exists
-         * - Whether the message is urgent
-         * - Whether a fallback channel is required
-         * - Whether notification may be sent automatically
-         *=====================================================
-         */
-
-
-        let result;
-
-
-        switch (
-            String(
-                channel
-            ).toLowerCase()
-        ) {
-
-
-            case "whatsapp":
-
-                result =
-                    await this.sendWhatsApp(
-                        notification
-                    );
-
-                break;
-
-
-            case "email":
-
-                result =
-                    await this.sendEmail(
-                        notification
-                    );
-
-                break;
-
-
-            case "sms":
-
-                result =
-                    await this.sendSMS(
-                        notification
-                    );
-
-                break;
-
-
-            case "portal":
-
-            case "in-app":
-
-            case "inapp":
-
-                result =
-                    await this.sendPortal(
-                        notification
-                    );
-
-                break;
-
-
-            default:
-
-                throw new Error(
-                    `Unsupported notification channel: ${channel}`
-                );
-
-        }
-
-
-        await this.logNotification({
-
-            ...notification,
-
-            channel,
-
-            result
-
-        });
-
-
-        return result;
 
     }
 
 
     /*=========================================================
         SER-NOT-009
-        WhatsApp
+        Render Template
     =========================================================*/
 
-    async sendWhatsApp(
-        notification = {}
+    renderTemplate(
+        templateName,
+        data = {}
     ) {
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * WHATSAPP BUSINESS API
-         *
-         * Future integration:
-         *
-         * WhatsApp Business API
-         * Approved templates
-         * Message status
-         * Delivery status
-         * Read status
-         * Opt-in / opt-out
-         * Media messages
-         * Document messages
-         *
-         * This is also where applicant updates will
-         * eventually be routed.
-         *=====================================================
-         */
+        const template =
+            this.templates.get(
+                templateName
+            );
 
 
-        if (
-            this.whatsappProvider &&
-            typeof this.whatsappProvider.send ===
-            "function"
-        ) {
+        if (!template) {
 
-            return this.whatsappProvider.send(
-                notification
+            return (
+                data.message ||
+                ""
             );
 
         }
 
 
-        /*
-         * Fallback to the existing notification
-         * infrastructure where supported.
-         */
-
-
         if (
-            existingNotifications &&
-            typeof existingNotifications.sendWhatsApp ===
+            typeof template ===
             "function"
         ) {
 
-            return existingNotifications.sendWhatsApp(
-                notification
+            return template(
+                data
             );
 
         }
 
 
-        return {
+        return template.replace(
+            /\{\{(.*?)\}\}/g,
+            (
+                match,
+                key
+            ) => {
 
-            success:
-                false,
+                const value =
+                    key
+                        .trim()
+                        .split(".")
+                        .reduce(
+                            (
+                                current,
+                                property
+                            ) =>
+                                current?.[property],
+                            data
+                        );
 
-            channel:
-                "whatsapp",
 
-            status:
-                "WHATSAPP_PROVIDER_NOT_CONNECTED"
+                return (
+                    value ??
+                    ""
+                );
 
-        };
+            }
+        );
 
     }
 
 
     /*=========================================================
         SER-NOT-010
-        Email
+        Send Notification
     =========================================================*/
 
-    async sendEmail(
-        notification = {}
+    async send(
+        notification
     ) {
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * EMAIL PROVIDER
-         *
-         * Future capabilities:
-         *
-         * - HTML email
-         * - Templates
-         * - Attachments
-         * - Matter references
-         * - Application references
-         * - Delivery tracking
-         * - Reply handling
-         *=====================================================
-         */
+        if (!notification) {
 
-
-        if (
-            this.emailProvider &&
-            typeof this.emailProvider.send ===
-            "function"
-        ) {
-
-            return this.emailProvider.send(
-                notification
+            throw new Error(
+                "Notification is required."
             );
 
         }
 
 
-        return {
+        const channel =
+            this.getChannel(
+                notification.channel
+            );
 
-            success:
-                false,
 
-            channel:
-                "email",
+        if (!channel) {
 
-            status:
-                "EMAIL_PROVIDER_NOT_CONNECTED"
+            notification.status =
+                "QUEUED";
 
-        };
+
+            await this.persistNotification(
+                notification
+            );
+
+
+            /*
+             *=================================================
+             * FUTURE INSERT
+             *
+             * QUEUE SYSTEM
+             *
+             * Notifications without a live provider should
+             * enter a persistent queue.
+             *
+             *=================================================
+             */
+
+
+            return notification;
+
+        }
+
+
+        try {
+
+
+            let result;
+
+
+            if (
+                typeof channel.send ===
+                "function"
+            ) {
+
+                result =
+                    await channel.send(
+                        notification
+                    );
+
+            } else if (
+                typeof channel.notify ===
+                "function"
+            ) {
+
+                result =
+                    await channel.notify(
+                        notification
+                    );
+
+            } else {
+
+                throw new Error(
+                    `Notification provider for ${notification.channel} has no send method.`
+                );
+
+            }
+
+
+            notification.status =
+                "SENT";
+
+
+            notification.sentAt =
+                new Date();
+
+
+            notification.providerResponse =
+                result;
+
+
+            await this.persistNotification(
+                notification
+            );
+
+
+            return notification;
+
+
+        } catch (error) {
+
+
+            notification.status =
+                "FAILED";
+
+
+            notification.failureReason =
+                error.message;
+
+
+            await this.persistNotification(
+                notification
+            );
+
+
+            await this.logError(
+                error,
+                notification
+            );
+
+
+            throw error;
+
+        }
 
     }
 
 
     /*=========================================================
         SER-NOT-011
-        SMS
+        Send By Event
     =========================================================*/
 
-    async sendSMS(
-        notification = {}
-    ) {
+    async sendEvent({
+
+        event,
+
+        recipient,
+
+        channel = "in-app",
+
+        subject = null,
+
+        data = {},
+
+        priority = "NORMAL",
+
+        metadata = {}
+
+    } = {}) {
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * SMS PROVIDER
-         *
-         * Future capabilities:
-         *
-         * - Transactional SMS
-         * - Appointment reminders
-         * - Urgent matter alerts
-         * - OTP
-         * - Delivery reports
-         *=====================================================
-         */
+        const notification =
+            this.buildNotification({
+
+                event,
+
+                recipient,
+
+                channel,
+
+                subject,
+
+                template:
+                    event,
+
+                data,
+
+                priority,
+
+                metadata
+
+            });
 
 
-        if (
-            this.smsProvider &&
-            typeof this.smsProvider.send ===
-            "function"
-        ) {
-
-            return this.smsProvider.send(
-                notification
-            );
-
-        }
-
-
-        return {
-
-            success:
-                false,
-
-            channel:
-                "sms",
-
-            status:
-                "SMS_PROVIDER_NOT_CONNECTED"
-
-        };
+        return this.send(
+            notification
+        );
 
     }
 
 
     /*=========================================================
         SER-NOT-012
-        Portal Notification
+        Send To Client
     =========================================================*/
 
-    async sendPortal(
-        notification = {}
-    ) {
+    async sendToClient({
+
+        client,
+
+        event,
+
+        channel = "in-app",
+
+        subject = null,
+
+        data = {},
+
+        priority = "NORMAL"
+
+    } = {}) {
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * CLIENT / APPLICANT PORTAL
-         *
-         * Future destination:
-         *
-         * app/client/
-         *
-         * and future Applicant Portal.
-         *
-         * Notifications may include:
-         *
-         * - Outstanding documents
-         * - Matter status
-         * - Appointment confirmation
-         * - Bundle ready
-         * - Payment status
-         * - Messages
-         *=====================================================
-         */
-
-
-        if (
-            this.portalProvider &&
-            typeof this.portalProvider.send ===
-            "function"
-        ) {
-
-            return this.portalProvider.send(
-                notification
-            );
-
-        }
-
-
-        return {
-
-            success:
-                false,
-
-            channel:
-                "portal",
-
-            status:
-                "PORTAL_PROVIDER_NOT_CONNECTED"
-
-        };
-
-    }
-
-
-    /*=========================================================
-        SER-NOT-013
-        Booking Confirmation
-    =========================================================*/
-
-    async sendBookingConfirmation(
-        booking
-    ) {
-
-        if (!booking) {
+        if (!client) {
 
             throw new Error(
-                "Booking is required."
+                "Client is required."
             );
 
         }
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * BOOKING CONFIRMATION TEMPLATE ENGINE
-         *
-         * Future template fields:
-         *
-         * - Client name
-         * - Appointment date
-         * - Appointment time
-         * - Consultant
-         * - Matter reference
-         * - Location
-         * - Online meeting link
-         *=====================================================
-         */
+        const recipient =
+            this.resolveClientRecipient(
+                client,
+                channel
+            );
 
 
-        return this.send({
+        if (!recipient) {
 
-            recipient:
-                booking.clientId,
+            throw new Error(
+                `No ${channel} recipient available for client.`
+            );
 
-            phone:
-                booking.phone,
+        }
 
-            email:
-                booking.email,
 
-            message:
-                "Your appointment has been confirmed.",
+        return this.sendEvent({
 
-            channel:
-                "whatsapp",
+            event,
 
-            type:
-                "BOOKING_CONFIRMATION",
+            recipient,
 
-            bookingId:
-                booking.id
+            channel,
+
+            subject,
+
+            data: {
+
+                ...data,
+
+                clientId:
+                    client.id
+
+            },
+
+            priority
 
         });
 
@@ -784,63 +867,139 @@ export default class NotificationService {
 
 
     /*=========================================================
-        SER-NOT-014
-        Appointment Reminder
+        SER-NOT-013
+        Resolve Client Recipient
     =========================================================*/
 
-    async sendAppointmentReminder(
-        booking,
-        channel = "whatsapp"
+    resolveClientRecipient(
+        client,
+        channel
     ) {
 
-        if (!booking) {
+
+        switch (
+            String(
+                channel
+            )
+                .toLowerCase()
+        ) {
+
+
+            case "email":
+
+                return (
+                    client.email ||
+                    client.contactEmail ||
+                    null
+                );
+
+
+            case "whatsapp":
+
+                return (
+                    client.whatsapp ||
+                    client.phone ||
+                    client.mobile ||
+                    null
+                );
+
+
+            case "sms":
+
+                return (
+                    client.phone ||
+                    client.mobile ||
+                    null
+                );
+
+
+            case "in-app":
+
+                return (
+                    client.id ||
+                    null
+                );
+
+
+            default:
+
+                return (
+                    client.id ||
+                    null
+                );
+
+        }
+
+    }
+
+
+    /*=========================================================
+        SER-NOT-014
+        Send To Staff
+    =========================================================*/
+
+    async sendToStaff({
+
+        user,
+
+        event,
+
+        channel = "in-app",
+
+        subject = null,
+
+        data = {},
+
+        priority = "NORMAL"
+
+    } = {}) {
+
+
+        if (!user) {
 
             throw new Error(
-                "Booking is required."
+                "Staff user is required."
             );
 
         }
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * REMINDER ENGINE
-         *
-         * Default future schedule:
-         *
-         * 7 days before
-         * 48 hours before
-         * 24 hours before
-         * 2 hours before
-         *
-         * Exact schedule should be configurable.
-         *=====================================================
-         */
+        const recipient =
+            this.resolveStaffRecipient(
+                user,
+                channel
+            );
 
 
-        return this.send({
+        if (!recipient) {
 
-            recipient:
-                booking.clientId,
+            throw new Error(
+                `No ${channel} recipient available for staff user.`
+            );
 
-            phone:
-                booking.phone,
+        }
 
-            email:
-                booking.email,
 
-            message:
-                "This is a reminder of your upcoming appointment.",
+        return this.sendEvent({
+
+            event,
+
+            recipient,
 
             channel,
 
-            type:
-                "APPOINTMENT_REMINDER",
+            subject,
 
-            bookingId:
-                booking.id
+            data: {
+
+                ...data,
+
+                userId:
+                    user.id
+
+            },
+
+            priority
 
         });
 
@@ -849,60 +1008,91 @@ export default class NotificationService {
 
     /*=========================================================
         SER-NOT-015
-        Booking Cancellation
+        Resolve Staff Recipient
     =========================================================*/
 
-    async sendBookingCancellation(
-        booking,
-        reason = ""
+    resolveStaffRecipient(
+        user,
+        channel
     ) {
 
-        if (!booking) {
 
-            throw new Error(
-                "Booking is required."
-            );
+        switch (
+            String(
+                channel
+            )
+                .toLowerCase()
+        ) {
+
+
+            case "email":
+
+                return (
+                    user.email ||
+                    null
+                );
+
+
+            case "whatsapp":
+
+                return (
+                    user.whatsapp ||
+                    user.phone ||
+                    user.mobile ||
+                    null
+                );
+
+
+            case "sms":
+
+                return (
+                    user.phone ||
+                    user.mobile ||
+                    null
+                );
+
+
+            case "in-app":
+
+                return (
+                    user.id ||
+                    null
+                );
+
+
+            default:
+
+                return (
+                    user.id ||
+                    null
+                );
 
         }
-
-
-        return this.send({
-
-            recipient:
-                booking.clientId,
-
-            phone:
-                booking.phone,
-
-            email:
-                booking.email,
-
-            message:
-                `Your appointment has been cancelled.${reason ? ` Reason: ${reason}` : ""}`,
-
-            channel:
-                "whatsapp",
-
-            type:
-                "BOOKING_CANCELLED",
-
-            bookingId:
-                booking.id
-
-        });
 
     }
 
 
     /*=========================================================
         SER-NOT-016
-        Matter Status Update
+        Notify Matter
     =========================================================*/
 
-    async sendMatterStatusUpdate(
+    async notifyMatter({
+
         matter,
-        status
-    ) {
+
+        event,
+
+        channel = "in-app",
+
+        subject = null,
+
+        data = {},
+
+        priority = "NORMAL"
+
+    } = {}) {
+
 
         if (!matter) {
 
@@ -917,41 +1107,48 @@ export default class NotificationService {
          *=====================================================
          * FUTURE INSERT
          *
-         * MATTER EVENT → NOTIFICATION ENGINE
+         * MATTER → CLIENT RESOLUTION
          *
-         * Examples:
+         * The service should eventually resolve:
          *
-         * NEW
-         * UNDER_REVIEW
-         * DOCUMENTS_REQUIRED
-         * READY_FOR_SUBMISSION
-         * SUBMITTED
-         * APPROVED
-         * REFUSED
-         * CLOSED
+         * matter.clientId
+         * ↓
+         * ClientRepository
+         * ↓
+         * Client
+         * ↓
+         * preferred notification channel
          *=====================================================
          */
 
 
-        return this.send({
+        return this.sendEvent({
+
+            event,
 
             recipient:
                 matter.clientId,
 
-            message:
-                `Your matter status has been updated to ${status}.`,
+            channel,
 
-            channel:
-                "portal",
+            subject,
 
-            type:
-                "MATTER_STATUS_UPDATE",
+            data: {
 
-            matterId:
-                matter.id,
+                ...data,
 
-            matterStatus:
-                status
+                matterId:
+                    matter.id,
+
+                referenceNumber:
+                    matter.referenceNumber,
+
+                matterTitle:
+                    matter.title
+
+            },
+
+            priority
 
         });
 
@@ -960,68 +1157,43 @@ export default class NotificationService {
 
     /*=========================================================
         SER-NOT-017
-        Document Outstanding
+        Document Notification
     =========================================================*/
 
-    async sendDocumentOutstanding(
+    async notifyDocument({
+
         matter,
-        documents = []
-    ) {
 
-        if (!matter) {
+        document,
 
-            throw new Error(
-                "Matter is required."
-            );
+        event = "document.required",
 
-        }
+        channel = "in-app",
 
+        data = {}
 
-        const documentList =
-            Array.isArray(
-                documents
-            )
-                ? documents
-                : [];
+    } = {}) {
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * DOCUMENT REQUEST ENGINE
-         *
-         * AI will eventually determine:
-         *
-         * - Which document is missing
-         * - Why it is required
-         * - Whether it is conditional
-         * - Expiry requirements
-         * - Certification requirements
-         * - Translation requirements
-         *=====================================================
-         */
+        return this.notifyMatter({
 
+            matter,
 
-        return this.send({
+            event,
 
-            recipient:
-                matter.clientId,
+            channel,
 
-            message:
-                "Documents are outstanding on your matter.",
+            data: {
 
-            channel:
-                "whatsapp",
+                ...data,
 
-            type:
-                "DOCUMENTS_OUTSTANDING",
+                documentId:
+                    document?.id,
 
-            matterId:
-                matter.id,
+                documentName:
+                    document?.name
 
-            documents:
-                documentList
+            }
 
         });
 
@@ -1030,63 +1202,46 @@ export default class NotificationService {
 
     /*=========================================================
         SER-NOT-018
-        Bundle Ready
+        Appointment Notification
     =========================================================*/
 
-    async sendBundleReady(
-        matter,
-        bundle = {}
-    ) {
+    async notifyAppointment({
 
-        if (!matter) {
+        client,
 
-            throw new Error(
-                "Matter is required."
-            );
+        appointment,
 
-        }
+        event = "appointment.created",
 
+        channel = "in-app",
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * APPLICATION BUNDLE ENGINE
-         *
-         * This notification will eventually be triggered
-         * when the automated bundle system determines:
-         *
-         * ✔ Required documents present
-         * ✔ Forms complete
-         * ✔ Supporting documents matched
-         * ✔ Quality checks passed
-         * ✔ Bundle generated
-         * ✔ Bundle saved
-         *
-         * It should then notify the responsible staff member
-         * that the bundle is ready for printing.
-         *=====================================================
-         */
+        data = {}
+
+    } = {}) {
 
 
-        return this.send({
+        return this.sendToClient({
 
-            recipient:
-                matter.assignedTo,
+            client,
 
-            message:
-                "The application bundle is ready for review and printing.",
+            event,
 
-            channel:
-                "portal",
+            channel,
 
-            type:
-                "BUNDLE_READY",
+            data: {
 
-            matterId:
-                matter.id,
+                ...data,
 
-            bundle
+                appointmentId:
+                    appointment?.id,
+
+                date:
+                    appointment?.date,
+
+                time:
+                    appointment?.time
+
+            }
 
         });
 
@@ -1095,55 +1250,35 @@ export default class NotificationService {
 
     /*=========================================================
         SER-NOT-019
-        Payment Reminder
+        Workflow Notification
     =========================================================*/
 
-    async sendPaymentReminder(
-        invoice
-    ) {
+    async notifyWorkflow({
 
-        if (!invoice) {
+        matter,
 
-            throw new Error(
-                "Invoice is required."
-            );
+        event = "workflow.updated",
 
-        }
+        channel = "in-app",
 
+        data = {},
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * PAYMENT NOTIFICATION ENGINE
-         *
-         * Future:
-         *
-         * - Deposit reminder
-         * - Final balance
-         * - Overdue invoice
-         * - Payment confirmation
-         * - Receipt
-         *=====================================================
-         */
+        priority = "NORMAL"
+
+    } = {}) {
 
 
-        return this.send({
+        return this.notifyMatter({
 
-            recipient:
-                invoice.clientId,
+            matter,
 
-            message:
-                "A payment is due on your account.",
+            event,
 
-            channel:
-                "whatsapp",
+            channel,
 
-            type:
-                "PAYMENT_REMINDER",
+            data,
 
-            invoiceId:
-                invoice.id
+            priority
 
         });
 
@@ -1152,173 +1287,90 @@ export default class NotificationService {
 
     /*=========================================================
         SER-NOT-020
-        Staff Notification
+        Broadcast
     =========================================================*/
 
-    async notifyStaff(
-        userId,
-        message,
-        options = {}
-    ) {
+    async broadcast({
 
-        if (!userId) {
+        recipients = [],
 
-            throw new Error(
-                "Staff user ID is required."
-            );
+        event,
 
-        }
+        channel = "in-app",
 
+        subject = null,
 
-        return this.send({
+        data = {},
 
-            recipientId:
-                userId,
+        priority = "NORMAL"
 
-            message,
+    } = {}) {
 
-            channel:
-                options.channel ||
-                "portal",
-
-            type:
-                options.type ||
-                "STAFF_NOTIFICATION",
-
-            ...options
-
-        });
-
-    }
-
-
-    /*=========================================================
-        SER-NOT-021
-        AI Escalation Notification
-    =========================================================*/
-
-    async notifyAIEscalation(
-        matter,
-        reasons = []
-    ) {
-
-        if (!matter) {
-
-            throw new Error(
-                "Matter is required."
-            );
-
-        }
-
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * AI HUMAN-REVIEW ESCALATION
-         *
-         * Trigger when:
-         *
-         * - Confidence below threshold
-         * - Conflicting evidence
-         * - Legal uncertainty
-         * - High-risk matter
-         * - Knowledge conflict
-         * - AI authority exceeded
-         *=====================================================
-         */
-
-
-        return this.send({
-
-            recipientId:
-                matter.assignedTo,
-
-            message:
-                "AI has flagged this matter for human review.",
-
-            channel:
-                "portal",
-
-            type:
-                "AI_ESCALATION",
-
-            matterId:
-                matter.id,
-
-            reasons
-
-        });
-
-    }
-
-
-    /*=========================================================
-        SER-NOT-022
-        Send Bulk
-    =========================================================*/
-
-    async sendBulk(
-        notifications = []
-    ) {
 
         if (
             !Array.isArray(
-                notifications
+                recipients
             )
         ) {
 
             throw new Error(
-                "Notifications must be an array."
+                "Recipients must be an array."
             );
 
         }
-
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * BULK NOTIFICATION ENGINE
-         *
-         * Must eventually support:
-         *
-         * - Rate limiting
-         * - Queueing
-         * - Retry
-         * - Provider limits
-         * - Delivery tracking
-         *=====================================================
-         */
 
 
         const results = [];
 
 
         for (
-            const notification
-            of notifications
+            const recipient
+            of recipients
         ) {
+
+
+            const notification =
+                this.buildNotification({
+
+                    event,
+
+                    recipient,
+
+                    channel,
+
+                    subject,
+
+                    template:
+                        event,
+
+                    data,
+
+                    priority
+
+                });
+
 
             try {
 
-                results.push(
+                const result =
                     await this.send(
                         notification
-                    )
+                    );
+
+
+                results.push(
+                    result
                 );
+
 
             } catch (error) {
 
                 results.push({
 
-                    success:
-                        false,
+                    notification,
 
                     error:
-                        error.message,
-
-                    notification
+                        error.message
 
                 });
 
@@ -1333,122 +1385,14 @@ export default class NotificationService {
 
 
     /*=========================================================
-        SER-NOT-023
-        Notification Log
+        SER-NOT-021
+        Queue Notification
     =========================================================*/
 
-    async logNotification(
+    async queue(
         notification
     ) {
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * NOTIFICATION AUDIT LOG
-         *
-         * Record:
-         *
-         * - Recipient
-         * - Channel
-         * - Message type
-         * - Matter
-         * - Booking
-         * - User
-         * - Provider
-         * - Delivery status
-         * - Timestamp
-         * - Error
-         *=====================================================
-         */
-
-
-        const record = {
-
-            ...notification,
-
-            timestamp:
-                new Date()
-
-        };
-
-
-        if (
-            this.storage &&
-            typeof this.storage.saveNotification ===
-            "function"
-        ) {
-
-            return this.storage.saveNotification(
-                record
-            );
-
-        }
-
-
-        if (
-            this.logger &&
-            typeof this.logger.info ===
-            "function"
-        ) {
-
-            this.logger.info(
-                "Notification dispatched",
-                record
-            );
-
-        }
-
-
-        return record;
-
-    }
-
-
-    /*=========================================================
-        SER-NOT-024
-        Notification History
-    =========================================================*/
-
-    async getHistory(
-        criteria = {}
-    ) {
-
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * NOTIFICATION HISTORY REPOSITORY
-         *=====================================================
-         */
-
-
-        if (
-            this.storage &&
-            typeof this.storage.getNotifications ===
-            "function"
-        ) {
-
-            return this.storage.getNotifications(
-                criteria
-            );
-
-        }
-
-
-        return [];
-
-    }
-
-
-    /*=========================================================
-        SER-NOT-025
-        Retry Failed Notification
-    =========================================================*/
-
-    async retry(
-        notification
-    ) {
 
         if (!notification) {
 
@@ -1459,22 +1403,45 @@ export default class NotificationService {
         }
 
 
-        /*
-         *=====================================================
-         * FUTURE INSERT
-         *
-         * RETRY / QUEUE ENGINE
-         *
-         * Future retry policy:
-         *
-         * Attempt 1
-         * Attempt 2
-         * Attempt 3
-         * Exponential backoff
-         * Provider failover
-         * Human escalation
-         *=====================================================
-         */
+        notification.status =
+            "QUEUED";
+
+
+        await this.persistNotification(
+            notification
+        );
+
+
+        return notification;
+
+    }
+
+
+    /*=========================================================
+        SER-NOT-022
+        Retry Notification
+    =========================================================*/
+
+    async retry(
+        notification
+    ) {
+
+
+        if (!notification) {
+
+            throw new Error(
+                "Notification is required."
+            );
+
+        }
+
+
+        notification.status =
+            "PENDING";
+
+
+        notification.failureReason =
+            null;
 
 
         return this.send(
@@ -1485,37 +1452,275 @@ export default class NotificationService {
 
 
     /*=========================================================
-        SER-NOT-026
-        Channel Availability
+        SER-NOT-023
+        Persist Notification
     =========================================================*/
 
-    getChannelStatus() {
+    async persistNotification(
+        notification
+    ) {
 
-        return {
 
-            whatsapp:
-                this.channels.whatsapp,
+        this.history.push(
+            notification
+        );
 
-            email:
-                this.channels.email,
 
-            sms:
-                this.channels.sms,
+        /*
+         *=====================================================
+         * FUTURE INSERT
+         *
+         * NotificationRepository.save()
+         *=====================================================
+         */
 
-            portal:
-                this.channels.portal
 
-        };
+        if (
+            this.storage &&
+            typeof this.storage.saveNotification ===
+            "function"
+        ) {
+
+            return this.storage.saveNotification(
+                notification
+            );
+
+        }
+
+
+        return notification;
+
+    }
+
+
+    /*=========================================================
+        SER-NOT-024
+        Get Notification History
+    =========================================================*/
+
+    async getHistory(
+        filters = {}
+    ) {
+
+
+        let records =
+            [...this.history];
+
+
+        if (
+            filters.recipient
+        ) {
+
+            records =
+                records.filter(
+                    notification =>
+                        notification.recipient ===
+                        filters.recipient
+                );
+
+        }
+
+
+        if (
+            filters.channel
+        ) {
+
+            records =
+                records.filter(
+                    notification =>
+                        notification.channel ===
+                        filters.channel
+                );
+
+        }
+
+
+        if (
+            filters.status
+        ) {
+
+            records =
+                records.filter(
+                    notification =>
+                        notification.status ===
+                        filters.status
+                );
+
+        }
+
+
+        if (
+            filters.event
+        ) {
+
+            records =
+                records.filter(
+                    notification =>
+                        notification.event ===
+                        filters.event
+                );
+
+        }
+
+
+        return records;
+
+    }
+
+
+    /*=========================================================
+        SER-NOT-025
+        Mark Delivered
+    =========================================================*/
+
+    async markDelivered(
+        notificationId
+    ) {
+
+
+        const notification =
+            this.history.find(
+                item =>
+                    item.id ===
+                    notificationId
+            );
+
+
+        if (!notification) {
+
+            return null;
+
+        }
+
+
+        notification.status =
+            "DELIVERED";
+
+
+        notification.deliveredAt =
+            new Date();
+
+
+        await this.persistNotification(
+            notification
+        );
+
+
+        return notification;
+
+    }
+
+
+    /*=========================================================
+        SER-NOT-026
+        Cancel Notification
+    =========================================================*/
+
+    async cancel(
+        notificationId
+    ) {
+
+
+        const notification =
+            this.history.find(
+                item =>
+                    item.id ===
+                    notificationId
+            );
+
+
+        if (!notification) {
+
+            return null;
+
+        }
+
+
+        notification.status =
+            "CANCELLED";
+
+
+        notification.cancelledAt =
+            new Date();
+
+
+        await this.persistNotification(
+            notification
+        );
+
+
+        return notification;
 
     }
 
 
     /*=========================================================
         SER-NOT-027
-        Service Health
+        Log Error
+    =========================================================*/
+
+    async logError(
+        error,
+        notification = null
+    ) {
+
+
+        if (
+            this.logger &&
+            typeof this.logger.error ===
+            "function"
+        ) {
+
+            this.logger.error(
+                "Notification delivery failed.",
+                {
+
+                    error:
+                        error?.message,
+
+                    notificationId:
+                        notification?.id,
+
+                    channel:
+                        notification?.channel,
+
+                    event:
+                        notification?.event
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /*=========================================================
+        SER-NOT-028
+        Notification Health Check
     =========================================================*/
 
     async healthCheck() {
+
+
+        const channels = {};
+
+
+        for (
+            const [
+                name,
+                provider
+            ]
+            of this.channels.entries()
+        ) {
+
+            channels[name] =
+                Boolean(
+                    provider
+                );
+
+        }
+
 
         return {
 
@@ -1525,13 +1730,13 @@ export default class NotificationService {
             healthy:
                 true,
 
-            channels:
-                this.getChannelStatus(),
+            channels,
 
-            existingNotificationModule:
-                Boolean(
-                    existingNotifications
-                ),
+            templates:
+                this.templates.size,
+
+            history:
+                this.history.length,
 
             timestamp:
                 new Date()
@@ -1542,7 +1747,7 @@ export default class NotificationService {
 
 
     /*=========================================================
-        SER-NOT-028
+        SER-NOT-029
         FUTURE MASTER NOTIFICATION ENGINE
     =========================================================*/
 
@@ -1554,86 +1759,104 @@ export default class NotificationService {
      * CHANNELS
      * --------------------------------------------------------
      *
-     * sendWhatsApp()
-     * sendEmail()
-     * sendSMS()
-     * sendPortal()
-     * sendPush()
+     * registerChannel()
+     * getChannel()
+     * removeChannel()
      *
      *
-     * BOOKINGS
+     * TEMPLATES
      * --------------------------------------------------------
      *
-     * sendBookingConfirmation()
-     * sendAppointmentReminder()
-     * sendBookingCancellation()
-     * sendRescheduleNotice()
+     * registerTemplate()
+     * renderTemplate()
+     * versionTemplate()
      *
      *
-     * MATTERS
+     * DELIVERY
      * --------------------------------------------------------
      *
-     * sendMatterCreated()
-     * sendMatterStatusUpdate()
-     * sendMatterClosed()
+     * send()
+     * queue()
+     * retry()
+     * cancel()
      *
      *
-     * DOCUMENTS
+     * CLIENT
      * --------------------------------------------------------
      *
-     * sendDocumentOutstanding()
-     * sendDocumentReceived()
-     * sendDocumentRejected()
-     * sendDocumentApproved()
-     *
-     *
-     * APPLICATIONS
-     * --------------------------------------------------------
-     *
-     * sendBundleReady()
-     * sendSubmissionNotice()
-     * sendVFSNotice()
-     * sendDHANotice()
-     *
-     *
-     * PAYMENTS
-     * --------------------------------------------------------
-     *
-     * sendPaymentReminder()
-     * sendPaymentConfirmation()
-     * sendReceipt()
-     *
-     *
-     * AI
-     * --------------------------------------------------------
-     *
-     * notifyAIEscalation()
-     * notifyLowConfidence()
-     * notifyKnowledgeConflict()
+     * sendToClient()
+     * notifyMatter()
+     * notifyDocument()
+     * notifyAppointment()
      *
      *
      * STAFF
      * --------------------------------------------------------
      *
-     * notifyStaff()
-     * notifySupervisor()
-     * notifyAttorney()
+     * sendToStaff()
+     * broadcast()
+     *
+     *
+     * WORKFLOW
+     * --------------------------------------------------------
+     *
+     * notifyWorkflow()
+     * notifyWorkflowStep()
+     * notifyWorkflowFailure()
+     *
+     *
+     * IMMIGRATION
+     * --------------------------------------------------------
+     *
+     * notifyOutstandingDocuments()
+     * notifyBundleReady()
+     * notifyVFSAppointment()
+     * notifyDHASubmission()
+     * notifyVisaOutcome()
+     * notifyPermitExpiry()
+     * notifyPassportExpiry()
+     *
+     *
+     * DELIVERY TRACKING
+     * --------------------------------------------------------
+     *
+     * markDelivered()
+     * markRead()
+     * markFailed()
+     * getDeliveryStatus()
+     *
+     *
+     * SCHEDULING
+     * --------------------------------------------------------
+     *
+     * schedule()
+     * cancelScheduled()
+     * processScheduled()
      *
      *
      * QUEUE
      * --------------------------------------------------------
      *
-     * queueNotification()
-     * retryNotification()
-     * cancelNotification()
+     * processQueue()
+     * retryFailed()
+     * deadLetterQueue()
+     *
+     *
+     * PREFERENCES
+     * --------------------------------------------------------
+     *
+     * getUserPreferences()
+     * updateUserPreferences()
+     * resolvePreferredChannel()
      *
      *
      * AUDIT
      * --------------------------------------------------------
      *
-     * logNotification()
      * getHistory()
-     * getDeliveryStatus()
+     * getDeliveryHistory()
+     * getFailureHistory()
+     *
      *
      * ========================================================
      */
