@@ -13,25 +13,88 @@ export default class Task extends Record {
 
         super(data);
 
-        this.title = data.title ?? "";
+        this.matterId =
+            data.matterId ?? null;
 
-        this.description = data.description ?? "";
+        this.assignedTo =
+            data.assignedTo ?? null;
 
-        this.assignedTo = data.assignedTo ?? null;
+        this.createdBy =
+            data.createdBy ?? null;
 
-        this.completed = data.completed ?? false;
+        this.title =
+            data.title ?? "";
 
-        this.completedAt = null;
+        this.description =
+            data.description ?? "";
 
-        this.dueDate = data.dueDate ?? null;
+        this.priority =
+            data.priority ?? "NORMAL";
+
+        this.status =
+            data.status ?? "OPEN";
+
+        this.dueDate =
+            data.dueDate ?? null;
+
+        this.completed =
+            data.completed === true;
+
+        this.completedAt =
+            data.completedAt ?? null;
+
+        this.tags = [
+            ...(data.tags ?? [])
+        ];
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Automated task generation
+        // AI next-action planner
+        // SLA monitoring
+        // Escalation
+        // ====================================================
+    }
+
+
+    setMatter(
+        matterId
+    ) {
+
+        this.matterId =
+            matterId;
+
+        this.touch();
+
+        return this;
 
     }
+
+
+    assign(
+        userId
+    ) {
+
+        this.assignedTo =
+            userId;
+
+        this.touch();
+
+        return this;
+
+    }
+
 
     complete() {
 
         this.completed = true;
 
-        this.completedAt = new Date().toISOString();
+        this.status =
+            "COMPLETED";
+
+        this.completedAt =
+            new Date().toISOString();
 
         this.touch();
 
@@ -39,15 +102,37 @@ export default class Task extends Record {
 
     }
 
+
     reopen() {
 
         this.completed = false;
 
-        this.completedAt = null;
+        this.status =
+            "OPEN";
+
+        this.completedAt =
+            null;
 
         this.touch();
 
         return this;
+
+    }
+
+
+    validate() {
+
+        super.validate();
+
+        if (!this.title) {
+
+            throw new Error(
+                "Task title is required."
+            );
+
+        }
+
+        return true;
 
     }
 
