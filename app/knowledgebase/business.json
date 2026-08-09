@@ -1,1 +1,162 @@
-
+{
+  "knowledgeBase": {
+    "id": "business",
+    "name": "South African Business & Corporate Compliance",
+    "version": "1.0.0",
+    "status": "active",
+    "jurisdiction": "South Africa",
+    "language": "en-ZA",
+    "description": "Business establishment, corporate compliance, commercial administration, tax-administration interfaces and business regulatory knowledge relevant to Isaacs & Partners.",
+    "authorityHierarchy": [
+      "CONSTITUTION",
+      "PRIMARY_LEGISLATION",
+      "REGULATIONS",
+      "GOVERNMENT_GAZETTE",
+      "COURT_JUDGMENT",
+      "OFFICIAL_GUIDANCE",
+      "PROFESSIONAL_GUIDANCE",
+      "SECONDARY_COMMENTARY",
+      "INTERNAL_CASE_STUDY"
+    ],
+    "legalDomains": [
+      "company_law",
+      "corporate_governance",
+      "business_compliance",
+      "commercial_contracts",
+      "consumer_law",
+      "electronic_transactions",
+      "privacy",
+      "tax_administration",
+      "employment_compliance",
+      "business_registration"
+    ],
+    "legislation": [
+      {
+        "id": "companies-act-71-2008",
+        "name": "Companies Act 71 of 2008",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "incorporation",
+          "registration",
+          "directors",
+          "shareholders",
+          "company administration",
+          "corporate governance",
+          "financially distressed companies",
+          "business rescue",
+          "mergers",
+          "takeovers",
+          "CIPC"
+        ],
+        "officialSource": "SOUTH_AFRICAN_GOVERNMENT",
+        "sourceReference": "GOV-ZA-COMPANIES-ACT-71-2008",
+        "versionControl": true
+      },
+      {
+        "id": "consumer-protection-act-68-2008",
+        "name": "Consumer Protection Act 68 of 2008",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "consumer_rights",
+          "services",
+          "contracts",
+          "disclosures",
+          "unfair_terms",
+          "consumer_remedies"
+        ],
+        "officialSource": "SOUTH_AFRICAN_GOVERNMENT",
+        "sourceReference": "GOV-ZA-CPA-68-2008",
+        "versionControl": true
+      },
+      {
+        "id": "ecta-25-2002",
+        "name": "Electronic Communications and Transactions Act 25 of 2002",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "electronic_contracts",
+          "electronic_signatures",
+          "electronic_records",
+          "online_transactions"
+        ],
+        "officialSource": "SOUTH_AFRICAN_GOVERNMENT",
+        "sourceReference": "GOV-ZA-ECTA-25-2002",
+        "versionControl": true
+      },
+      {
+        "id": "popia-4-2013",
+        "name": "Protection of Personal Information Act 4 of 2013",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "personal_information",
+          "processing",
+          "consent",
+          "operator_management",
+          "data_security",
+          "cross_border_processing",
+          "automated_processing"
+        ],
+        "officialSource": "SOUTH_AFRICAN_GOVERNMENT",
+        "sourceReference": "GOV-ZA-POPIA-4-2013",
+        "versionControl": true
+      },
+      {
+        "id": "paia-2-2000",
+        "name": "Promotion of Access to Information Act 2 of 2000",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "access_to_information",
+          "private_bodies",
+          "public_bodies",
+          "records"
+        ],
+        "officialSource": "SOUTH_AFRICAN_GOVERNMENT",
+        "sourceReference": "GOV-ZA-PAIA-2-2000",
+        "versionControl": true
+      }
+    ],
+    "regulations": [],
+    "caseLaw": [],
+    "articles": [],
+    "handbooks": [],
+    "internalCaseStudies": [],
+    "procedures": [
+      "company_registration",
+      "company_changes",
+      "director_changes",
+      "shareholder_changes",
+      "beneficial_ownership",
+      "corporate_resolutions",
+      "business_compliance_review",
+      "contract_compliance_review"
+    ],
+    "riskRules": [
+      {
+        "id": "business-source-verification",
+        "rule": "Do not treat secondary commentary as primary legal authority."
+      },
+      {
+        "id": "business-current-law",
+        "rule": "A legal proposition must be checked against the applicable version effective on the relevant date."
+      }
+    ],
+    "sourceMetadata": {
+      "primaryOfficialSources": [
+        "SOUTH_AFRICAN_GOVERNMENT",
+        "CIPC",
+        "SARS",
+        "INFORMATION_REGULATOR"
+      ],
+      "lastVerified": "2026-08-09",
+      "verificationRequired": true,
+      "historicalVersionsSupported": true
+    },
+    "futureInsertionPoints": {
+      "caseLaw": "INSERT_VERIFIED_CASE_LAW_RECORDS_HERE",
+      "regulations": "INSERT_CURRENT_AND_HISTORICAL_REGULATIONS_HERE",
+      "articles": "INSERT_VERIFIED_SECONDARY_ARTICLES_HERE",
+      "handbooks": "INSERT_OFFICIAL_AND_PROFESSIONAL_HANDBOOKS_HERE",
+      "internalCaseStudies": "INSERT_ISAACS_AND_PARTNERS_CASE_STUDIES_HERE",
+      "sourceDocuments": "INSERT_SOURCE_DOCUMENT_REGISTRY_HERE"
+    }
+  }
+}
