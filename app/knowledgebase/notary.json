@@ -1,1 +1,93 @@
-
+{
+  "knowledgeBase": {
+    "id": "notary",
+    "name": "South African Notarial & Legal Practice Compliance",
+    "version": "1.0.0",
+    "status": "active",
+    "jurisdiction": "South Africa",
+    "legalDomains": [
+      "notarial_practice",
+      "legal_practice",
+      "authentication",
+      "certification",
+      "affidavits",
+      "powers_of_attorney",
+      "notarial_deeds",
+      "professional_conduct",
+      "client_authority"
+    ],
+    "legislation": [
+      {
+        "name": "Legal Practice Act 28 of 2014",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-LPA-28-2014",
+        "topics": [
+          "legal_practitioners",
+          "admission",
+          "enrolment",
+          "professional_conduct",
+          "Legal Practice Council"
+        ]
+      }
+    ],
+    "regulations": [],
+    "professionalRules": [
+      {
+        "id": "lpc-professional-conduct",
+        "name": "Legal Practice Council Rules and Professional Conduct",
+        "authority": "PROFESSIONAL_RULES",
+        "requiresCurrentVerification": true
+      }
+    ],
+    "caseLaw": [],
+    "articles": [],
+    "handbooks": [],
+    "documentTypes": [
+      "power_of_attorney",
+      "affidavit",
+      "certified_copy",
+      "notarial_deed",
+      "acknowledgement",
+      "authority_to_act",
+      "legalisation_document"
+    ],
+    "mandatoryChecks": [
+      "identity_verification",
+      "capacity",
+      "authority",
+      "signature",
+      "witness_requirements",
+      "notarial_formality",
+      "jurisdiction",
+      "professional_authority",
+      "document_integrity"
+    ],
+    "internalCaseStudies": [],
+    "riskRules": [
+      {
+        "id": "regulated-practice-boundary",
+        "rule": "The system must not represent a person or business as authorised to perform a regulated legal or notarial act unless the required professional authority has been verified."
+      },
+      {
+        "id": "notarial-authentication",
+        "rule": "Authentication and certification requirements must be determined from the applicable instrument, jurisdiction and intended use."
+      }
+    ],
+    "sourceMetadata": {
+      "primaryOfficialSources": [
+        "SOUTH_AFRICAN_GOVERNMENT",
+        "LEGAL_PRACTICE_COUNCIL",
+        "SAFLII"
+      ],
+      "lastVerified": "2026-08-09",
+      "currentRulesCheckRequired": true
+    },
+    "futureInsertionPoints": {
+      "caseLaw": "INSERT_NOTARIAL_CASE_LAW_HERE",
+      "professionalRules": "INSERT_CURRENT_LPC_RULES_HERE",
+      "articles": "INSERT_NOTARIAL_ARTICLES_HERE",
+      "handbooks": "INSERT_NOTARIAL_HANDBOOKS_HERE",
+      "internalCaseStudies": "INSERT_INTERNAL_NOTARIAL_CASES_HERE"
+    }
+  }
+}
