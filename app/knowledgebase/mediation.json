@@ -1,1 +1,96 @@
-
+{
+  "knowledgeBase": {
+    "id": "mediation",
+    "name": "South African Mediation & Alternative Dispute Resolution",
+    "version": "1.0.0",
+    "status": "active",
+    "jurisdiction": "South Africa",
+    "legalDomains": [
+      "mediation",
+      "alternative_dispute_resolution",
+      "commercial_mediation",
+      "labour_mediation",
+      "settlement",
+      "consent_orders",
+      "court_annexed_mediation"
+    ],
+    "legislation": [
+      {
+        "name": "Constitution of the Republic of South Africa, 1996",
+        "authority": "CONSTITUTION"
+      },
+      {
+        "name": "Rules Board for Courts of Law Act 107 of 1985",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-RBCLA-107-1985"
+      }
+    ],
+    "regulations": [
+      {
+        "id": "magistrates-court-mediation-rules",
+        "name": "Magistrates' Courts Mediation Rules",
+        "authority": "RULES_OF_COURT",
+        "sourceReference": "JUSTICE-MEDIATION-RULES"
+      }
+    ],
+    "caseLaw": [],
+    "articles": [],
+    "handbooks": [
+      {
+        "id": "justice-mediation-guide",
+        "name": "Department of Justice Mediation Guidance",
+        "authority": "OFFICIAL_GUIDANCE",
+        "sourceReference": "JUSTICE-MEDIATION",
+        "verified": true
+      }
+    ],
+    "internalCaseStudies": [],
+    "principles": [
+      "voluntary_participation",
+      "party_autonomy",
+      "neutrality",
+      "confidentiality",
+      "informed_decision_making",
+      "structured_negotiation",
+      "settlement"
+    ],
+    "process": [
+      "intake",
+      "jurisdiction",
+      "conflict_identification",
+      "authority_verification",
+      "mediation_agreement",
+      "opening",
+      "issue_identification",
+      "private_sessions",
+      "negotiation",
+      "settlement",
+      "settlement_document",
+      "enforcement_assessment"
+    ],
+    "outcomes": [
+      "settlement",
+      "partial_settlement",
+      "no_settlement",
+      "consent_order",
+      "further_litigation",
+      "arbitration"
+    ],
+    "sourceMetadata": {
+      "primaryOfficialSources": [
+        "DEPARTMENT_OF_JUSTICE",
+        "SOUTH_AFRICAN_GOVERNMENT",
+        "SAFLII"
+      ],
+      "lastVerified": "2026-08-09",
+      "verificationRequired": true
+    },
+    "futureInsertionPoints": {
+      "caseLaw": "INSERT_MEDIATION_CASE_LAW_HERE",
+      "rules": "INSERT_CURRENT_MEDIATION_RULES_HERE",
+      "articles": "INSERT_MEDIATION_ARTICLES_HERE",
+      "handbooks": "INSERT_MEDIATION_HANDBOOKS_HERE",
+      "internalCaseStudies": "INSERT_INTERNAL_MEDIATION_CASES_HERE"
+    }
+  }
+}
