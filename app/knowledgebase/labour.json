@@ -1,1 +1,171 @@
-
+{
+  "knowledgeBase": {
+    "id": "labour",
+    "name": "South African Labour Relations & Industrial Relations",
+    "version": "1.0.0",
+    "status": "active",
+    "jurisdiction": "South Africa",
+    "legalDomains": [
+      "labour_relations",
+      "unfair_dismissal",
+      "automatically_unfair_dismissal",
+      "unfair_labour_practice",
+      "collective_bargaining",
+      "trade_unions",
+      "strikes",
+      "lockouts",
+      "retrenchment",
+      "misconduct",
+      "incapacity",
+      "poor_performance",
+      "workplace_safety",
+      "drug_and_alcohol_testing",
+      "restraint_of_trade",
+      "employment_discrimination"
+    ],
+    "legislation": [
+      {
+        "name": "Labour Relations Act 66 of 1995",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-LRA-66-1995"
+      },
+      {
+        "name": "Basic Conditions of Employment Act 75 of 1997",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-BCEA-75-1997"
+      },
+      {
+        "name": "Employment Equity Act 55 of 1998",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-EEA-55-1998"
+      },
+      {
+        "name": "Occupational Health and Safety Act 85 of 1993",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-OHSA-85-1993"
+      },
+      {
+        "name": "National Minimum Wage Act 9 of 2018",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-NMWA-9-2018"
+      },
+      {
+        "name": "Protection of Personal Information Act 4 of 2013",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-POPIA-4-2013"
+      }
+    ],
+    "regulations": [],
+    "codesOfGoodPractice": [
+      "DISMISSAL",
+      "HARASSMENT",
+      "EMPLOYMENT_EQUITY"
+    ],
+    "caseLaw": [
+      {
+        "id": "mhe-electronics-v-toffie-2026",
+        "name": "MHE Electronics v Toffie and Lettman and Others",
+        "citation": "[2026] ZALCD 5",
+        "authority": "COURT_JUDGMENT",
+        "topics": [
+          "drug_testing",
+          "zero_tolerance_policy",
+          "workplace_safety",
+          "dismissal"
+        ],
+        "sourceReference": "SAFLII-ZALCD-2026-5",
+        "verified": true
+      },
+      {
+        "id": "cipla-v-mwale-2026",
+        "name": "CIPLA Distribution Gateway v Mwale and Others",
+        "citation": "[2026] ZALCCT 22",
+        "authority": "COURT_JUDGMENT",
+        "topics": [
+          "alcohol_testing",
+          "testing_reliability",
+          "calibration",
+          "impairment",
+          "dismissal"
+        ],
+        "sourceReference": "SAFLII-ZALCCT-2026-22",
+        "verified": true
+      },
+      {
+        "id": "numsa-v-pfg-building-glass-2022",
+        "name": "NUMSA obo Nhlabathi v PFG Building Glass",
+        "citation": "[2022] ZALCJHB 292",
+        "authority": "COURT_JUDGMENT",
+        "topics": [
+          "drug_testing",
+          "dismissal"
+        ],
+        "sourceReference": "SAFLII-ZALCJHB-2022-292",
+        "verified": true
+      },
+      {
+        "id": "bearing-man-group-v-herholdt-2024",
+        "name": "Bearing Man Group v Herholdt and Another",
+        "citation": "[2024] ZALCCT 54",
+        "authority": "COURT_JUDGMENT",
+        "topics": [
+          "restraint_of_trade",
+          "confidential_information"
+        ],
+        "sourceReference": "SAFLII-ZALCCT-2024-54",
+        "verified": true
+      }
+    ],
+    "articles": [],
+    "handbooks": [],
+    "internalCaseStudies": [
+      {
+        "id": "internal-ccma-retrenchment-case",
+        "name": "Isaacs & Partners Internal CCMA Arbitration Case Study",
+        "authority": "INTERNAL_CASE_STUDY",
+        "sourceType": "INTERNAL",
+        "bindingAuthority": false,
+        "useFor": [
+          "case_preparation",
+          "bundle_structure",
+          "chronology",
+          "evidence_management",
+          "cross_examination",
+          "argument_structure"
+        ]
+      }
+    ],
+    "decisionFrameworks": [
+      "jurisdiction",
+      "referral_deadline",
+      "conciliation",
+      "arbitration",
+      "con_arbitration",
+      "evidence",
+      "burden_of_proof",
+      "procedural_fairness",
+      "substantive_fairness",
+      "sanction",
+      "remedy",
+      "review"
+    ],
+    "sourceMetadata": {
+      "primaryOfficialSources": [
+        "SOUTH_AFRICAN_GOVERNMENT",
+        "CCMA",
+        "DEPARTMENT_OF_EMPLOYMENT_AND_LABOUR",
+        "SAFLII"
+      ],
+      "lastVerified": "2026-08-09",
+      "verificationRequired": true,
+      "caseLawMustBeVerified": true
+    },
+    "futureInsertionPoints": {
+      "caseLaw": "INSERT_RELEVANT_LABOUR_CASE_LAW_HERE",
+      "ccmaAwards": "INSERT_VERIFIED_CCMA_AWARDS_HERE",
+      "articles": "INSERT_LABOUR_LAW_ARTICLES_HERE",
+      "handbooks": "INSERT_LABOUR_HANDBOOKS_HERE",
+      "internalCaseStudies": "INSERT_INTERNAL_CASE_STUDIES_HERE"
+    }
+  }
+}
