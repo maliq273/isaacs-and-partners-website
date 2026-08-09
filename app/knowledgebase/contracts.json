@@ -1,1 +1,177 @@
-
+{
+  "knowledgeBase": {
+    "id": "contracts",
+    "name": "South African Contract & Commercial Agreement Law",
+    "version": "1.0.0",
+    "status": "active",
+    "jurisdiction": "South Africa",
+    "authorityHierarchy": [
+      "CONSTITUTION",
+      "PRIMARY_LEGISLATION",
+      "REGULATIONS",
+      "COURT_JUDGMENT",
+      "OFFICIAL_GUIDANCE",
+      "SECONDARY_COMMENTARY",
+      "INTERNAL_CASE_STUDY"
+    ],
+    "legalDomains": [
+      "contract_formation",
+      "contract_interpretation",
+      "breach",
+      "termination",
+      "damages",
+      "specific_performance",
+      "restraint_of_trade",
+      "confidentiality",
+      "non_solicitation",
+      "employment_contracts",
+      "commercial_contracts",
+      "retainers",
+      "settlement_agreements",
+      "powers_of_attorney"
+    ],
+    "legislation": [
+      {
+        "id": "constitution-1996",
+        "name": "Constitution of the Republic of South Africa, 1996",
+        "authority": "CONSTITUTION",
+        "topics": [
+          "constitutional_values",
+          "public_policy",
+          "rights",
+          "legality"
+        ]
+      },
+      {
+        "id": "consumer-protection-act-68-2008",
+        "name": "Consumer Protection Act 68 of 2008",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "consumer_contracts",
+          "unfair_terms",
+          "disclosures",
+          "consumer_remedies"
+        ]
+      },
+      {
+        "id": "ecta-25-2002",
+        "name": "Electronic Communications and Transactions Act 25 of 2002",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "electronic_contracts",
+          "electronic_signatures",
+          "electronic_records"
+        ]
+      },
+      {
+        "id": "popia-4-2013",
+        "name": "Protection of Personal Information Act 4 of 2013",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "confidentiality",
+          "personal_information",
+          "data_processing"
+        ]
+      },
+      {
+        "id": "legal-practice-act-28-2014",
+        "name": "Legal Practice Act 28 of 2014",
+        "authority": "PRIMARY_LEGISLATION",
+        "topics": [
+          "legal_practice",
+          "professional_conduct",
+          "legal_practitioners",
+          "client_relationships"
+        ],
+        "officialSource": "SOUTH_AFRICAN_GOVERNMENT",
+        "sourceReference": "GOV-ZA-LPA-28-2014"
+      }
+    ],
+    "contractTypes": [
+      "employment_agreement",
+      "independent_contractor_agreement",
+      "service_agreement",
+      "retainer_agreement",
+      "confidentiality_agreement",
+      "restraint_of_trade",
+      "non_solicitation_agreement",
+      "settlement_agreement",
+      "mediation_agreement",
+      "power_of_attorney",
+      "authority_to_act",
+      "commercial_agreement"
+    ],
+    "caseLaw": [
+      {
+        "id": "bearing-man-group-v-herholdt-2024",
+        "name": "Bearing Man Group v Herholdt and Another",
+        "citation": "[2024] ZALCCT 54",
+        "authority": "COURT_JUDGMENT",
+        "topics": [
+          "restraint_of_trade",
+          "confidential_information",
+          "protectable_interest"
+        ],
+        "sourceReference": "SAFLII-ZALCCT-2024-54",
+        "verified": true
+      },
+      {
+        "id": "automation-control-components-v-searle-2024",
+        "name": "Automation & Control Components Gauteng v Searle",
+        "citation": "[2024] ZALCJHB 305",
+        "authority": "COURT_JUDGMENT",
+        "topics": [
+          "restraint_of_trade",
+          "confidential_information"
+        ],
+        "sourceReference": "SAFLII-ZALCJHB-2024-305",
+        "verified": true
+      },
+      {
+        "id": "eoh-mthombo-v-bheekie-odhav",
+        "name": "EOH Mthombo v Bheekie-Odhav",
+        "citation": "[2012] ZALCCT 10",
+        "authority": "COURT_JUDGMENT",
+        "topics": [
+          "restraint_of_trade"
+        ],
+        "sourceReference": "SAFLII-ZALCCT-2012-10",
+        "verified": true
+      }
+    ],
+    "articles": [],
+    "handbooks": [],
+    "internalCaseStudies": [],
+    "analysisRules": [
+      "identify_parties",
+      "identify_capacity",
+      "identify_authority",
+      "identify_obligations",
+      "identify_conditions",
+      "identify_breach",
+      "identify_remedies",
+      "identify_termination",
+      "identify_dispute_resolution",
+      "identify_jurisdiction",
+      "identify_protectable_interest",
+      "assess_public_policy"
+    ],
+    "sourceMetadata": {
+      "primaryOfficialSources": [
+        "SOUTH_AFRICAN_GOVERNMENT",
+        "SAFLII",
+        "LEGAL_PRACTICE_COUNCIL"
+      ],
+      "lastVerified": "2026-08-09",
+      "verificationRequired": true,
+      "historicalVersionsSupported": true
+    },
+    "futureInsertionPoints": {
+      "caseLaw": "INSERT_VERIFIED_CONTRACT_CASES_HERE",
+      "restraintCaseLaw": "INSERT_RESTRAINT_CASE_LAW_HERE",
+      "articles": "INSERT_CONTRACT_LAW_ARTICLES_HERE",
+      "handbooks": "INSERT_CONTRACT_HANDBOOKS_HERE",
+      "internalCaseStudies": "INSERT_INTERNAL_CONTRACT_CASES_HERE"
+    }
+  }
+}
