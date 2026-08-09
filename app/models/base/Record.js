@@ -3,52 +3,222 @@
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * Record
  * ------------------------------------------------------------
- * Base class for lightweight records that belong to a Matter.
+ * Base persistence model for application records.
+ *
+ * All models should ultimately inherit from this class.
  * ============================================================
  */
 
-import Entity from "../../domain/Entity.js";
-
-export default class Record extends Entity {
+export default class Record {
 
     constructor(data = {}) {
 
-        super(data.id);
+        this.id =
+            data.id ??
+            Record.generateId();
 
-        this.matterId = data.matterId ?? null;
+        this.createdAt =
+            data.createdAt ??
+            new Date().toISOString();
 
-        this.createdBy = data.createdBy ?? null;
+        this.updatedAt =
+            data.updatedAt ??
+            this.createdAt;
 
-        this.updatedBy = data.updatedBy ?? null;
+        this.deletedAt =
+            data.deletedAt ??
+            null;
 
-        this.metadata = data.metadata ?? {};
+        this.version =
+            Number.isInteger(data.version)
+                ? data.version
+                : 1;
 
-    }
-
-    setMatter(matterId) {
-
-        this.matterId = matterId;
-
-        this.touch();
-
-        return this;
-
-    }
-
-    setMetadata(metadata = {}) {
+        this.active =
+            data.active !== false;
 
         this.metadata = {
-
-            ...this.metadata,
-
-            ...metadata
-
+            ...(data.metadata ?? {})
         };
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Audit fields
+        // Created-by / updated-by
+        // Tenant/company isolation
+        // Soft-delete policy
+        // Record locking
+        // Record version history
+        // ====================================================
+    }
+
+
+    static generateId() {
+
+        return (
+            `${Date.now()}_` +
+            Math.random()
+                .toString(36)
+                .slice(2, 10)
+        );
+
+    }
+
+
+    touch() {
+
+        this.updatedAt =
+            new Date().toISOString();
+
+        this.version += 1;
+
+        return this;
+
+    }
+
+
+    activate() {
+
+        this.active = true;
 
         this.touch();
 
         return this;
 
     }
+
+
+    deactivate() {
+
+        this.active = false;
+
+        this.touch();
+
+        return this;
+
+    }
+
+
+    softDelete() {
+
+        this.deletedAt =
+            new Date().toISOString();
+
+        this.active = false;
+
+        this.touch();
+
+        return this;
+
+    }
+
+
+    restore() {
+
+        this.deletedAt = null;
+
+        this.active = true;
+
+        this.touch();
+
+        return this;
+
+    }
+
+
+    isDeleted() {
+
+        return Boolean(
+            this.deletedAt
+        );
+
+    }
+
+
+    isActive() {
+
+        return (
+            this.active === true &&
+            !this.isDeleted()
+        );
+
+    }
+
+
+    setMetadata(
+        key,
+        value
+    ) {
+
+        this.metadata[key] =
+            value;
+
+        this.touch();
+
+        return this;
+
+    }
+
+
+    getMetadata(
+        key,
+        fallback = null
+    ) {
+
+        return (
+            this.metadata[key] ??
+            fallback
+        );
+
+    }
+
+
+    toJSON() {
+
+        return {
+            ...this
+        };
+
+    }
+
+
+    clone() {
+
+        return new this.constructor(
+            JSON.parse(
+                JSON.stringify(
+                    this.toJSON()
+                )
+            )
+        );
+
+    }
+
+
+    validate() {
+
+        if (!this.id) {
+
+            throw new Error(
+                "Record ID is required."
+            );
+
+        }
+
+        return true;
+
+    }
+
+
+    // ========================================================
+    // FUTURE INSERT
+    //
+    // Encryption hooks
+    // Persistence hooks
+    // Change tracking
+    // Domain events
+    // Validation pipeline
+    // ========================================================
 
 }
