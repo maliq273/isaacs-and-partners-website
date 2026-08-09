@@ -1,1 +1,180 @@
-
+{
+  "knowledgeBase": {
+    "id": "immigration",
+    "name": "South African Immigration, Refugee & Administrative Law",
+    "version": "1.0.0",
+    "status": "active",
+    "jurisdiction": "South Africa",
+    "legalDomains": [
+      "immigration",
+      "temporary_residence",
+      "visas",
+      "permanent_residence",
+      "refugee_law",
+      "asylum",
+      "citizenship",
+      "waivers",
+      "appeals",
+      "reviews",
+      "administrative_law",
+      "deportation",
+      "unlawful_status",
+      "vfs_procedures",
+      "dha_procedures"
+    ],
+    "legislation": [
+      {
+        "name": "Immigration Act 13 of 2002",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-IMMIGRATION-ACT-13-2002",
+        "versionControl": true
+      },
+      {
+        "name": "Immigration Amendment Act 8 of 2016",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-IMMIGRATION-AMENDMENT-8-2016",
+        "versionControl": true
+      },
+      {
+        "name": "Refugees Act 130 of 1998",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-REFUGEES-ACT-130-1998",
+        "versionControl": true
+      },
+      {
+        "name": "Promotion of Administrative Justice Act 3 of 2000",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-PAJA-3-2000",
+        "versionControl": true
+      },
+      {
+        "name": "Promotion of Access to Information Act 2 of 2000",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-PAIA-2-2000",
+        "versionControl": true
+      },
+      {
+        "name": "Protection of Personal Information Act 4 of 2013",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-POPIA-4-2013",
+        "versionControl": true
+      },
+      {
+        "name": "Prevention and Combating of Trafficking in Persons Act 7 of 2013",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-TRAFFICKING-7-2013",
+        "versionControl": true
+      },
+      {
+        "name": "South African Citizenship Act 88 of 1995",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-CITIZENSHIP-88-1995",
+        "versionControl": true
+      }
+    ],
+    "regulations": [
+      {
+        "id": "immigration-regulations",
+        "name": "Immigration Regulations",
+        "authority": "REGULATIONS",
+        "versionControl": true,
+        "requiresDateMatching": true
+      },
+      {
+        "id": "refugees-regulations",
+        "name": "Refugees Regulations",
+        "authority": "REGULATIONS",
+        "versionControl": true,
+        "requiresDateMatching": true
+      }
+    ],
+    "visaCategories": [
+      "visitor",
+      "study",
+      "business",
+      "general_work",
+      "critical_skills",
+      "intra_company_transfer",
+      "corporate",
+      "relative",
+      "retirement",
+      "financially_independent",
+      "medical_treatment",
+      "treaty",
+      "permanent_residence"
+    ],
+    "refugeeCategories": [
+      "asylum",
+      "section_21",
+      "section_22",
+      "section_24",
+      "refugee_status",
+      "appeal",
+      "review"
+    ],
+    "administrativeRemedies": [
+      "waiver",
+      "appeal",
+      "review",
+      "reconsideration",
+      "extension",
+      "administrative_challenge"
+    ],
+    "caseLaw": [],
+    "articles": [],
+    "handbooks": [
+      {
+        "id": "dha-immigration-guidance",
+        "name": "Department of Home Affairs Immigration Guidance",
+        "authority": "OFFICIAL_GUIDANCE",
+        "requiresIngestion": true
+      },
+      {
+        "id": "vfs-immigration-procedure",
+        "name": "VFS Global South Africa Immigration Application Procedures",
+        "authority": "PROCEDURAL_SOURCE",
+        "requiresCurrentVerification": true
+      }
+    ],
+    "internalCaseStudies": [],
+    "applicationEngineRequirements": [
+      "passport",
+      "identity_documents",
+      "current_status",
+      "previous_status",
+      "travel_history",
+      "employment",
+      "qualifications",
+      "financial_position",
+      "family_relationships",
+      "criminal_history",
+      "medical_requirements",
+      "police_clearance",
+      "supporting_documents",
+      "application_history"
+    ],
+    "sourceMetadata": {
+      "primaryOfficialSources": [
+        "SOUTH_AFRICAN_GOVERNMENT",
+        "DEPARTMENT_OF_HOME_AFFAIRS",
+        "VFS_GLOBAL",
+        "SAFLII",
+        "DEPARTMENT_OF_JUSTICE"
+      ],
+      "lastVerified": "2026-08-09",
+      "currentLawCheckRequired": true,
+      "historicalLawSupported": true,
+      "effectiveDateMatchingRequired": true
+    },
+    "futureInsertionPoints": {
+      "caseLaw": "INSERT_VERIFIED_IMMIGRATION_CASE_LAW_HERE",
+      "regulations": "INSERT_CURRENT_AND_HISTORICAL_IMMIGRATION_REGULATIONS_HERE",
+      "visaRequirements": "INSERT_CURRENT_DHA_VISA_REQUIREMENTS_HERE",
+      "vfsProcedures": "INSERT_CURRENT_VFS_PROCEDURES_HERE",
+      "refugeeProcedures": "INSERT_REFUGEE_PROCEDURES_HERE",
+      "articles": "INSERT_IMMIGRATION_LAW_ARTICLES_HERE",
+      "handbooks": "INSERT_DHA_AND_PROFESSIONAL_HANDBOOKS_HERE",
+      "internalCaseStudies": "INSERT_INTERNAL_IMMIGRATION_CASES_HERE"
+    }
+  }
+}
