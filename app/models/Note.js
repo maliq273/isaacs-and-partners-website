@@ -13,17 +13,54 @@ export default class Note extends Record {
 
         super(data);
 
-        this.title = data.title ?? "";
+        this.matterId =
+            data.matterId ?? null;
 
-        this.content = data.content ?? "";
+        this.clientId =
+            data.clientId ?? null;
 
-        this.author = data.author ?? null;
+        this.authorId =
+            data.authorId ?? null;
 
-        this.private = data.private ?? false;
+        this.title =
+            data.title ?? "";
 
-        this.pinned = data.pinned ?? false;
+        this.content =
+            data.content ?? "";
+
+        this.type =
+            data.type ?? "GENERAL";
+
+        this.private =
+            data.private === true;
+
+        this.pinned =
+            data.pinned === true;
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Legal privilege
+        // Confidential notes
+        // AI-generated notes
+        // Note versioning
+        // ====================================================
+    }
+
+
+    setMatter(
+        matterId
+    ) {
+
+        this.matterId =
+            matterId;
+
+        this.touch();
+
+        return this;
 
     }
+
 
     pin() {
 
@@ -35,6 +72,7 @@ export default class Note extends Record {
 
     }
 
+
     unpin() {
 
         this.pinned = false;
@@ -45,11 +83,16 @@ export default class Note extends Record {
 
     }
 
+
     validate() {
+
+        super.validate();
 
         if (!this.content) {
 
-            throw new Error("Note content is required.");
+            throw new Error(
+                "Note content is required."
+            );
 
         }
 
