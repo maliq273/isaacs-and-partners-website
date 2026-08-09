@@ -3,179 +3,120 @@
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * Matter
  * ------------------------------------------------------------
- * Aggregate Root
- * Every client matter in the platform starts here.
+ * Application persistence model.
+ *
+ * NOTE:
+ * The domain aggregate remains in:
+ * app/domain/...
+ *
+ * This model is the persistence/application representation.
  * ============================================================
  */
 
-import AggregateRoot from "../domain/AggregateRoot.js";
+import Record from "./base/Record.js";
 
-import {
-    MatterStatus,
-    MatterPriority,
-    MatterStage,
-    MatterType,
-    MatterDepartment,
-    MatterSource,
-    MatterVisibility,
-    MatterOutcome
-} from "../domain/enums/index.js";
-
-import CaseAnalysis from "../ai/analysis/CaseAnalysis.js";
-import KnowledgeEngine from "../knowledgebase/engine/KnowledgeEngine.js";
-
-import Document from "./Document.js";
-import Note from "./Note.js";
-import TimelineEntry from "./TimelineEntry.js";
-import Task from "./Task.js";
-import Appointment from "./Appointment.js";
-import Communication from "./Communication.js";
-
-export default class Matter extends AggregateRoot {
+export default class Matter extends Record {
 
     constructor(data = {}) {
 
-        super(data.id);
+        super(data);
 
-        /*=====================================================
-            SERVICES
-        =====================================================*/
+        this.referenceNumber =
+            data.referenceNumber ?? "";
 
-        this.knowledge = new KnowledgeEngine();
+        this.title =
+            data.title ?? "";
 
-        /*=====================================================
-            BASIC INFORMATION
-        =====================================================*/
+        this.description =
+            data.description ?? "";
 
-        this.referenceNumber = data.referenceNumber ?? "";
+        this.type =
+            data.type ?? "IMMIGRATION";
 
-        this.title = data.title ?? "";
+        this.department =
+            data.department ?? "IMMIGRATION";
 
-        this.description = data.description ?? "";
+        this.status =
+            data.status ?? "NEW";
 
-        this.type = data.type ?? MatterType.IMMIGRATION;
+        this.stage =
+            data.stage ?? "ENQUIRY";
 
-        this.department = data.department ?? MatterDepartment.IMMIGRATION;
+        this.priority =
+            data.priority ?? "NORMAL";
 
-        this.status = data.status ?? MatterStatus.NEW;
+        this.outcome =
+            data.outcome ?? "PENDING";
 
-        this.stage = data.stage ?? MatterStage.ENQUIRY;
+        this.visibility =
+            data.visibility ?? "INTERNAL";
 
-        this.priority = data.priority ?? MatterPriority.NORMAL;
+        this.source =
+            data.source ?? "WEBSITE";
 
-        this.outcome = data.outcome ?? MatterOutcome.PENDING;
+        this.clientId =
+            data.clientId ?? null;
 
-        this.visibility = data.visibility ?? MatterVisibility.INTERNAL;
+        this.companyId =
+            data.companyId ?? null;
 
-        this.source = data.source ?? MatterSource.WEBSITE;
+        this.consultantId =
+            data.consultantId ?? null;
 
-        /*=====================================================
-            RELATIONSHIPS
-        =====================================================*/
+        this.attorneyId =
+            data.attorneyId ?? null;
 
-        this.clientId = data.clientId ?? null;
+        this.assignedTo =
+            data.assignedTo ?? null;
 
-        this.companyId = data.companyId ?? null;
-
-        this.consultantId = data.consultantId ?? null;
-
-        this.attorneyId = data.attorneyId ?? null;
-
-        this.assignedTo = data.assignedTo ?? null;
-
-        /*=====================================================
-            TYPED COLLECTIONS
-        =====================================================*/
-
-        this.documents = [];
-
-        this.appointments = [];
-
-        this.communications = [];
-
-        this.tasks = [];
-
-        this.notes = [];
-
-        this.timeline = [];
-
-        this.quotes = [];
-
-        this.invoices = [];
-
-        this.payments = [];
-
-        this.tags = [];
-
-        /*=====================================================
-            AI
-        =====================================================*/
+        this.workflowId =
+            data.workflowId ?? null;
 
         this.ai = {
+            eligibility:
+                data.ai?.eligibility ?? null,
 
-            eligibility: null,
+            riskScore:
+                data.ai?.riskScore ?? 0,
 
-            riskScore: 0,
+            confidence:
+                data.ai?.confidence ?? 0,
 
-            confidence: 0,
+            recommendations:
+                data.ai?.recommendations ?? [],
 
-            recommendations: [],
-
-            workflow: null,
-
-            summary: ""
-
+            summary:
+                data.ai?.summary ?? ""
         };
 
-        /*=====================================================
-            METADATA
-        =====================================================*/
+        this.tags = [
+            ...(data.tags ?? [])
+        ];
 
         this.metadata = {
-
-            createdFrom: "Website",
-
-            imported: false,
-
-            migrated: false,
-
-            archived: false
-
+            ...this.metadata,
+            ...(data.metadata ?? {})
         };
 
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // AI case intelligence
+        // Immigration eligibility
+        // Risk scoring
+        // Document completeness
+        // Automated workflows
+        // VFS/DHA bundle status
+        // ====================================================
     }
 
-    /*=====================================================
-        AI
-    =====================================================*/
 
-    analyse() {
+    setStatus(
+        status
+    ) {
 
-        this.ai = CaseAnalysis.analyse(this);
-
-        this.touch();
-
-        return this.ai;
-
-    }
-
-    /*=====================================================
-        KNOWLEDGE
-    =====================================================*/
-
-    getRequiredDocuments() {
-
-        return this.knowledge.getDocuments(this.type);
-
-    }
-
-    /*=====================================================
-        STATUS MANAGEMENT
-    =====================================================*/
-
-    setStatus(status) {
-
-        this.status = status;
+        this.status =
+            status;
 
         this.touch();
 
@@ -183,19 +124,13 @@ export default class Matter extends AggregateRoot {
 
     }
 
-    setStage(stage) {
 
-        this.stage = stage;
+    setStage(
+        stage
+    ) {
 
-        this.touch();
-
-        return this;
-
-    }
-
-    setPriority(priority) {
-
-        this.priority = priority;
+        this.stage =
+            stage;
 
         this.touch();
 
@@ -203,23 +138,13 @@ export default class Matter extends AggregateRoot {
 
     }
 
-    setOutcome(outcome) {
 
-        this.outcome = outcome;
+    assign(
+        userId
+    ) {
 
-        this.touch();
-
-        return this;
-
-    }
-
-    /*=====================================================
-        ASSIGNMENTS
-    =====================================================*/
-
-    assignConsultant(consultantId) {
-
-        this.consultantId = consultantId;
+        this.assignedTo =
+            userId;
 
         this.touch();
 
@@ -227,33 +152,15 @@ export default class Matter extends AggregateRoot {
 
     }
 
-    assignAttorney(attorneyId) {
 
-        this.attorneyId = attorneyId;
+    addTag(
+        tag
+    ) {
 
-        this.touch();
-
-        return this;
-
-    }
-
-    assignUser(userId) {
-
-        this.assignedTo = userId;
-
-        this.touch();
-
-        return this;
-
-    }
-
-    /*=====================================================
-        TAGS
-    =====================================================*/
-
-    addTag(tag) {
-
-        if (!this.tags.includes(tag)) {
+        if (
+            tag &&
+            !this.tags.includes(tag)
+        ) {
 
             this.tags.push(tag);
 
@@ -265,44 +172,16 @@ export default class Matter extends AggregateRoot {
 
     }
 
-    removeTag(tag) {
 
-        this.tags = this.tags.filter(t => t !== tag);
+    removeTag(
+        tag
+    ) {
 
-        this.touch();
-
-        return this;
-
-    }
-
-    /*=====================================================
-        DOCUMENT MANAGEMENT
-    =====================================================*/
-
-    addDocument(document) {
-
-        if (!(document instanceof Document)) {
-
-            throw new Error("Expected Document instance.");
-
-        }
-
-        document.setMatter(this.id);
-
-        document.validate();
-
-        if (this.documents.some(d => d.id === document.id)) {
-
-            throw new Error("Document already exists.");
-
-        }
-
-        this.documents.push(document);
-
-        this.addTimelineEntry(
-            "Document Added",
-            document.name
-        );
+        this.tags =
+            this.tags.filter(
+                item =>
+                    item !== tag
+            );
 
         this.touch();
 
@@ -310,200 +189,40 @@ export default class Matter extends AggregateRoot {
 
     }
 
-    removeDocument(documentId) {
-
-        this.documents = this.documents.filter(
-            d => d.id !== documentId
-        );
-
-        this.touch();
-
-        return this;
-
-    }
-
-    getDocument(documentId) {
-
-        return this.documents.find(
-            d => d.id === documentId
-        );
-
-    }
-
-    getDocumentsByStatus(status) {
-
-        return this.documents.filter(
-            d => d.status === status
-        );
-
-    }
-
-    /*=====================================================
-        NOTES
-    =====================================================*/
-
-    addNote(note) {
-
-        if (!(note instanceof Note)) {
-
-            throw new Error("Expected Note instance.");
-
-        }
-
-        note.setMatter(this.id);
-
-        note.validate();
-
-        this.notes.push(note);
-
-        this.touch();
-
-        return this;
-
-    }
-
-    removeNote(noteId) {
-
-        this.notes = this.notes.filter(
-            n => n.id !== noteId
-        );
-
-        this.touch();
-
-        return this;
-
-    }
-
-    /*=====================================================
-        TIMELINE
-    =====================================================*/
-
-    addTimelineEntry(title, description = "") {
-
-        const entry = new TimelineEntry({
-
-            matterId: this.id,
-
-            title,
-
-            description
-
-        });
-
-        this.timeline.push(entry);
-
-        this.touch();
-
-        return entry;
-
-    }
-
-    /*=====================================================
-        TASKS
-    =====================================================*/
-
-    addTask(task) {
-
-        if (!(task instanceof Task)) {
-
-            throw new Error("Expected Task instance.");
-
-        }
-
-        task.setMatter(this.id);
-
-        this.tasks.push(task);
-
-        this.touch();
-
-        return this;
-
-    }
-
-    getOpenTasks() {
-
-        return this.tasks.filter(
-            task => !task.completed
-        );
-
-    }
-
-    /*=====================================================
-        APPOINTMENTS
-    =====================================================*/
-
-    scheduleAppointment(appointment) {
-
-        if (!(appointment instanceof Appointment)) {
-
-            throw new Error("Expected Appointment instance.");
-
-        }
-
-        appointment.setMatter(this.id);
-
-        this.appointments.push(appointment);
-
-        this.touch();
-
-        return this;
-
-    }
-
-    getUpcomingAppointments() {
-
-        return this.appointments;
-
-    }
-
-    /*=====================================================
-        COMMUNICATIONS
-    =====================================================*/
-
-    addCommunication(communication) {
-
-        if (!(communication instanceof Communication)) {
-
-            throw new Error("Expected Communication instance.");
-
-        }
-
-        communication.setMatter(this.id);
-
-        this.communications.push(communication);
-
-        this.touch();
-
-        return this;
-
-    }
-
-    /*=====================================================
-        VALIDATION
-    =====================================================*/
 
     validate() {
 
+        super.validate();
+
         if (!this.title) {
 
-            throw new Error("Matter title is required.");
+            throw new Error(
+                "Matter title is required."
+            );
 
         }
 
         if (!this.type) {
 
-            throw new Error("Matter type is required.");
-
-        }
-
-        if (!this.department) {
-
-            throw new Error("Matter department is required.");
+            throw new Error(
+                "Matter type is required."
+            );
 
         }
 
         return true;
 
     }
+
+
+    // ========================================================
+    // FUTURE INSERT
+    //
+    // Matter lifecycle
+    // AI analysis
+    // Document requirements
+    // Case chronology
+    // Workflow orchestration
+    // ========================================================
 
 }
