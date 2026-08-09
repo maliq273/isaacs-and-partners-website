@@ -2,8 +2,6 @@
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * Document
- * ------------------------------------------------------------
- * Represents a single document belonging to a Matter.
  * ============================================================
  */
 
@@ -13,51 +11,150 @@ export default class Document extends Record {
 
     constructor(data = {}) {
 
-        super(data.id);
+        super(data);
 
-        this.name = data.name ?? "";
+        this.matterId =
+            data.matterId ?? null;
 
-        this.type = data.type ?? "";
+        this.clientId =
+            data.clientId ?? null;
 
-        this.category = data.category ?? "";
+        this.name =
+            data.name ?? "";
 
-        this.fileName = data.fileName ?? "";
+        this.fileName =
+            data.fileName ?? "";
 
-        this.fileSize = data.fileSize ?? 0;
+        this.originalName =
+            data.originalName ?? "";
 
-        this.mimeType = data.mimeType ?? "";
+        this.path =
+            data.path ?? "";
 
-        this.extension = data.extension ?? "";
+        this.url =
+            data.url ?? "";
 
-        this.path = data.path ?? "";
+        this.mimeType =
+            data.mimeType ?? "";
 
-        this.status = data.status ?? DocumentStatus.REQUIRED;
+        this.extension =
+            data.extension ?? "";
 
-        this.required = data.required ?? true;
+        this.size =
+            Number(data.size ?? 0);
 
-        this.verified = data.verified ?? false;
+        this.type =
+            data.type ?? "OTHER";
 
-        this.verifiedBy = data.verifiedBy ?? null;
+        this.status =
+            data.status ?? "UPLOADED";
 
-        this.verifiedAt = data.verifiedAt ?? null;
+        this.uploadedBy =
+            data.uploadedBy ?? null;
 
-        this.expiryDate = data.expiryDate ?? null;
+        this.hash =
+            data.hash ?? null;
 
-        this.issueDate = data.issueDate ?? null;
+        this.verified =
+            data.verified === true;
 
-        this.country = data.country ?? null;
+        this.ocr = {
+            completed:
+                data.ocr?.completed === true,
 
-        this.notes = [];
+            text:
+                data.ocr?.text ?? "",
 
-        this.metadata = {};
+            confidence:
+                data.ocr?.confidence ?? 0
+        };
+
+        this.aiAnalysis = {
+            completed:
+                data.aiAnalysis?.completed === true,
+
+            classification:
+                data.aiAnalysis?.classification ?? null,
+
+            confidence:
+                data.aiAnalysis?.confidence ?? 0,
+
+            summary:
+                data.aiAnalysis?.summary ?? ""
+        };
+
+        this.metadata = {
+            ...this.metadata,
+            ...(data.metadata ?? {})
+        };
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // OCR engine
+        // AI document matching
+        // Document classification
+        // Virus scanning
+        // Hash verification
+        // VFS/DHA bundle matching
+        // ====================================================
+    }
+
+
+    setMatter(
+        matterId
+    ) {
+
+        this.matterId =
+            matterId;
+
+        this.touch();
+
+        return this;
 
     }
 
+
+    verify() {
+
+        this.verified = true;
+
+        this.status = "VERIFIED";
+
+        this.touch();
+
+        return this;
+
+    }
+
+
+    reject(
+        reason = ""
+    ) {
+
+        this.verified = false;
+
+        this.status = "REJECTED";
+
+        this.metadata.rejectionReason =
+            reason;
+
+        this.touch();
+
+        return this;
+
+    }
+
+
     validate() {
 
-        if (!this.name) {
+        super.validate();
 
-            throw new Error("Document name is required.");
+        if (!this.name && !this.originalName) {
+
+            throw new Error(
+                "Document name is required."
+            );
 
         }
 
@@ -65,58 +162,15 @@ export default class Document extends Record {
 
     }
 
-    verify(userId) {
 
-        this.verified = true;
-
-        this.status = DocumentStatus.VERIFIED;
-
-        this.verifiedBy = userId;
-
-        this.verifiedAt = new Date().toISOString();
-
-        this.touch();
-
-        return this;
-
-    }
-
-    reject(reason = "") {
-
-        this.verified = false;
-
-        this.status = DocumentStatus.REJECTED;
-
-        this.notes.push({
-
-            timestamp: new Date().toISOString(),
-
-            reason
-
-        });
-
-        this.touch();
-
-        return this;
-
-    }
-
-    addNote(note) {
-
-        this.notes.push({
-
-            id: crypto.randomUUID(),
-
-            note,
-
-            createdAt: new Date().toISOString()
-
-        });
-
-        this.touch();
-
-        return this;
-
-    }
+    // ========================================================
+    // FUTURE INSERT
+    //
+    // Document versioning
+    // AI matching
+    // OCR processing
+    // Translation matching
+    // Submission bundle mapping
+    // ========================================================
 
 }
