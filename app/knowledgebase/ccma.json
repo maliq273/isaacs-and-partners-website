@@ -1,1 +1,121 @@
-
+{
+  "knowledgeBase": {
+    "id": "ccma",
+    "name": "CCMA & Labour Dispute Resolution",
+    "version": "1.0.0",
+    "status": "active",
+    "jurisdiction": "South Africa",
+    "legalDomains": [
+      "ccma_jurisdiction",
+      "conciliation",
+      "arbitration",
+      "con_arbitration",
+      "unfair_dismissal",
+      "unfair_labour_practice",
+      "retrenchment",
+      "misconduct",
+      "incapacity",
+      "poor_performance",
+      "evidence",
+      "remedies",
+      "reviews"
+    ],
+    "legislation": [
+      {
+        "name": "Labour Relations Act 66 of 1995",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-LRA-66-1995"
+      },
+      {
+        "name": "Basic Conditions of Employment Act 75 of 1997",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-BCEA-75-1997"
+      },
+      {
+        "name": "Employment Equity Act 55 of 1998",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-EEA-55-1998"
+      }
+    ],
+    "regulations": [],
+    "codesOfGoodPractice": [
+      "CODE_GOOD_PRACTICE_DISMISSAL",
+      "CODE_GOOD_PRACTICE_HARASSMENT"
+    ],
+    "caseLaw": [],
+    "articles": [],
+    "handbooks": [
+      {
+        "id": "ccma-official-material",
+        "name": "CCMA Official Rules, Guidelines and Practice Material",
+        "authority": "OFFICIAL_GUIDANCE",
+        "sourceReference": "CCMA_OFFICIAL_SOURCE",
+        "verified": false,
+        "requiresIngestion": true
+      }
+    ],
+    "internalCaseStudies": [
+      {
+        "id": "internal-ccma-retrenchment",
+        "name": "Isaacs & Partners CCMA Retrenchment Arbitration Bundle",
+        "authority": "INTERNAL_CASE_STUDY",
+        "bindingAuthority": false,
+        "topics": [
+          "retrenchment",
+          "arbitration",
+          "evidence",
+          "chronology",
+          "cross_examination",
+          "heads_of_argument"
+        ]
+      }
+    ],
+    "process": [
+      "matter_intake",
+      "jurisdiction_check",
+      "limitation_check",
+      "referral",
+      "conciliation",
+      "arbitration",
+      "evidence_preparation",
+      "witness_preparation",
+      "opening_address",
+      "cross_examination",
+      "closing_argument",
+      "award",
+      "review_assessment"
+    ],
+    "evidenceCategories": [
+      "employment_contract",
+      "disciplinary_records",
+      "warnings",
+      "policies",
+      "emails",
+      "whatsapp",
+      "attendance_records",
+      "payroll",
+      "performance_records",
+      "investigation_records",
+      "medical_records",
+      "test_results",
+      "witness_statements",
+      "expert_evidence"
+    ],
+    "sourceMetadata": {
+      "primaryOfficialSources": [
+        "CCMA",
+        "SOUTH_AFRICAN_GOVERNMENT",
+        "SAFLII"
+      ],
+      "lastVerified": "2026-08-09",
+      "verificationRequired": true
+    },
+    "futureInsertionPoints": {
+      "caseLaw": "INSERT_CCMA_AND_LABOUR_COURT_CASES_HERE",
+      "awards": "INSERT_VERIFIED_CCMA_AWARDS_HERE",
+      "guidelines": "INSERT_CURRENT_CCMA_GUIDELINES_HERE",
+      "handbooks": "INSERT_CCMA_HANDBOOKS_HERE",
+      "internalCaseStudies": "INSERT_INTERNAL_CCMA_CASE_STUDIES_HERE"
+    }
+  }
+}
