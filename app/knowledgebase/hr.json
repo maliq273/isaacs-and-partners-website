@@ -1,1 +1,135 @@
-
+{
+  "knowledgeBase": {
+    "id": "hr",
+    "name": "South African Human Resources Compliance",
+    "version": "1.0.0",
+    "status": "active",
+    "jurisdiction": "South Africa",
+    "legalDomains": [
+      "employment",
+      "discipline",
+      "misconduct",
+      "incapacity",
+      "poor_performance",
+      "grievances",
+      "leave",
+      "working_time",
+      "remuneration",
+      "contracts",
+      "termination",
+      "retrenchment",
+      "harassment",
+      "discrimination",
+      "employee_records",
+      "workplace_policies",
+      "occupational_health_and_safety"
+    ],
+    "legislation": [
+      {
+        "name": "Labour Relations Act 66 of 1995",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-LRA-66-1995"
+      },
+      {
+        "name": "Basic Conditions of Employment Act 75 of 1997",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-BCEA-75-1997"
+      },
+      {
+        "name": "Employment Equity Act 55 of 1998",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-EEA-55-1998"
+      },
+      {
+        "name": "Occupational Health and Safety Act 85 of 1993",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-OHSA-85-1993"
+      },
+      {
+        "name": "Compensation for Occupational Injuries and Diseases Act 130 of 1993",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-COIDA-130-1993"
+      },
+      {
+        "name": "Unemployment Insurance Act 63 of 2001",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-UIA-63-2001"
+      },
+      {
+        "name": "Skills Development Act 97 of 1998",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-SDA-97-1998"
+      },
+      {
+        "name": "Skills Development Levies Act 9 of 1999",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-SDLA-9-1999"
+      },
+      {
+        "name": "National Minimum Wage Act 9 of 2018",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-NMWA-9-2018"
+      },
+      {
+        "name": "Protection of Personal Information Act 4 of 2013",
+        "authority": "PRIMARY_LEGISLATION",
+        "sourceReference": "GOV-ZA-POPIA-4-2013"
+      }
+    ],
+    "regulations": [],
+    "codesOfGoodPractice": [
+      "CODE_GOOD_PRACTICE_DISMISSAL",
+      "CODE_GOOD_PRACTICE_HARASSMENT",
+      "CODE_GOOD_PRACTICE_EMPLOYMENT_EQUITY",
+      "CODE_GOOD_PRACTICE_INCENTIVE_AND_PERFORMANCE"
+    ],
+    "caseLaw": [],
+    "articles": [],
+    "handbooks": [],
+    "internalCaseStudies": [],
+    "hrProcesses": [
+      "recruitment",
+      "onboarding",
+      "probation",
+      "performance_management",
+      "disciplinary_investigation",
+      "disciplinary_hearing",
+      "grievance",
+      "incapacity_process",
+      "suspension",
+      "dismissal",
+      "retrenchment",
+      "offboarding"
+    ],
+    "mandatoryChecks": [
+      "employment_contract",
+      "employee_classification",
+      "working_hours",
+      "leave",
+      "remuneration",
+      "deductions",
+      "payslip",
+      "disciplinary_fairness",
+      "procedural_fairness",
+      "substantive_fairness",
+      "privacy",
+      "health_and_safety"
+    ],
+    "sourceMetadata": {
+      "primaryOfficialSources": [
+        "SOUTH_AFRICAN_GOVERNMENT",
+        "DEPARTMENT_OF_EMPLOYMENT_AND_LABOUR",
+        "CCMA"
+      ],
+      "lastVerified": "2026-08-09",
+      "verificationRequired": true
+    },
+    "futureInsertionPoints": {
+      "caseLaw": "INSERT_HR_CASE_LAW_HERE",
+      "codes": "INSERT_CURRENT_CODES_OF_GOOD_PRACTICE_HERE",
+      "articles": "INSERT_HR_ARTICLES_HERE",
+      "handbooks": "INSERT_HR_HANDBOOKS_HERE",
+      "internalCaseStudies": "INSERT_INTERNAL_HR_CASES_HERE"
+    }
+  }
+}
