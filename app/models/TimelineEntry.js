@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * Timeline Entry
+ * TimelineEntry
  * ============================================================
  */
 
@@ -13,23 +13,70 @@ export default class TimelineEntry extends Record {
 
         super(data);
 
-        this.title = data.title ?? "";
+        this.matterId =
+            data.matterId ?? null;
 
-        this.description = data.description ?? "";
+        this.type =
+            data.type ?? "GENERAL";
 
-        this.type = data.type ?? "GENERAL";
+        this.title =
+            data.title ?? "";
 
-        this.icon = data.icon ?? "";
+        this.description =
+            data.description ?? "";
 
-        this.visibleToClient = data.visibleToClient ?? true;
+        this.actorId =
+            data.actorId ?? null;
+
+        this.timestamp =
+            data.timestamp ??
+            new Date().toISOString();
+
+        this.relatedEntityType =
+            data.relatedEntityType ?? null;
+
+        this.relatedEntityId =
+            data.relatedEntityId ?? null;
+
+        this.metadata = {
+            ...this.metadata,
+            ...(data.metadata ?? {})
+        };
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Automated chronology
+        // Audit events
+        // Legal case chronology
+        // AI chronology generation
+        // ====================================================
+    }
+
+
+    setMatter(
+        matterId
+    ) {
+
+        this.matterId =
+            matterId;
+
+        this.touch();
+
+        return this;
 
     }
 
+
     validate() {
+
+        super.validate();
 
         if (!this.title) {
 
-            throw new Error("Timeline title is required.");
+            throw new Error(
+                "Timeline title is required."
+            );
 
         }
 
