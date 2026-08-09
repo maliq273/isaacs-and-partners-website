@@ -7,49 +7,101 @@
 
 import Record from "./base/Record.js";
 
-import {
-
-    AppointmentStatus
-
-} from "../domain/enums/index.js";
-
 export default class Appointment extends Record {
 
     constructor(data = {}) {
 
         super(data);
 
-        this.subject = data.subject ?? "";
+        this.matterId =
+            data.matterId ?? null;
 
-        this.start = data.start ?? null;
+        this.clientId =
+            data.clientId ?? null;
 
-        this.end = data.end ?? null;
+        this.staffId =
+            data.staffId ?? null;
 
-        this.location = data.location ?? "";
+        this.title =
+            data.title ?? "";
 
-        this.meetingType = data.meetingType ?? "IN_PERSON";
+        this.description =
+            data.description ?? "";
 
-        this.consultantId = data.consultantId ?? null;
+        this.type =
+            data.type ?? "CONSULTATION";
 
-        this.status = data.status ?? AppointmentStatus.PENDING;
+        this.status =
+            data.status ?? "SCHEDULED";
 
-        this.notes = [];
+        this.startAt =
+            data.startAt ?? null;
 
+        this.endAt =
+            data.endAt ?? null;
+
+        this.location =
+            data.location ?? null;
+
+        this.meetingUrl =
+            data.meetingUrl ?? null;
+
+        this.notes =
+            data.notes ?? "";
+
+        this.reminderSent =
+            data.reminderSent === true;
+
+        this.metadata = {
+            ...this.metadata,
+            ...(data.metadata ?? {})
+        };
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // Calendar provider integration
+        // WhatsApp reminders
+        // Google/Outlook synchronisation
+        // Recurring appointments
+        // Appointment conflict detection
+        // ====================================================
     }
 
-    confirm() {
 
-        this.status = AppointmentStatus.CONFIRMED;
+    schedule(
+        startAt,
+        endAt
+    ) {
+
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.status = "SCHEDULED";
 
         this.touch();
 
         return this;
 
     }
+
+
+    cancel(
+        reason = ""
+    ) {
+
+        this.status = "CANCELLED";
+        this.notes = reason;
+
+        this.touch();
+
+        return this;
+
+    }
+
 
     complete() {
 
-        this.status = AppointmentStatus.COMPLETED;
+        this.status = "COMPLETED";
 
         this.touch();
 
@@ -57,13 +109,48 @@ export default class Appointment extends Record {
 
     }
 
-    cancel() {
 
-        this.status = AppointmentStatus.CANCELLED;
+    setMatter(
+        matterId
+    ) {
+
+        this.matterId =
+            matterId;
 
         this.touch();
 
         return this;
+
+    }
+
+
+    setStaff(
+        staffId
+    ) {
+
+        this.staffId =
+            staffId;
+
+        this.touch();
+
+        return this;
+
+    }
+
+
+    validate() {
+
+        super.validate();
+
+        if (!this.title) {
+
+            throw new Error(
+                "Appointment title is required."
+            );
+
+        }
+
+        return true;
 
     }
 
