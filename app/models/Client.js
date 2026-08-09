@@ -5,61 +5,136 @@
  * ============================================================
  */
 
-import Entity from "../domain/Entity.js";
+import Record from "./base/Record.js";
 
-export default class Client extends Entity {
+export default class Client extends Record {
 
     constructor(data = {}) {
 
-        super(data.id);
+        super(data);
 
-        this.firstName = data.firstName ?? "";
+        this.clientNumber =
+            data.clientNumber ?? "";
 
-        this.lastName = data.lastName ?? "";
+        this.type =
+            data.type ?? "INDIVIDUAL";
 
-        this.fullName = data.fullName ?? "";
+        this.firstName =
+            data.firstName ?? "";
 
-        this.email = data.email ?? "";
+        this.middleName =
+            data.middleName ?? "";
 
-        this.phone = data.phone ?? "";
+        this.lastName =
+            data.lastName ?? "";
 
-        this.whatsapp = data.whatsapp ?? "";
+        this.companyName =
+            data.companyName ?? "";
 
-        this.idNumber = data.idNumber ?? "";
+        this.idNumber =
+            data.idNumber ?? "";
 
-        this.passportNumber = data.passportNumber ?? "";
+        this.passportNumber =
+            data.passportNumber ?? "";
 
-        this.nationality = data.nationality ?? "";
+        this.dateOfBirth =
+            data.dateOfBirth ?? null;
 
-        this.dateOfBirth = data.dateOfBirth ?? null;
+        this.nationality =
+            data.nationality ?? "";
 
-        this.gender = data.gender ?? "";
+        this.country =
+            data.country ?? "";
 
-        this.language = data.language ?? "English";
+        this.email =
+            data.email ?? "";
 
-        this.address = data.address ?? {};
+        this.phone =
+            data.phone ?? "";
 
-        this.emergencyContact = data.emergencyContact ?? {};
+        this.whatsapp =
+            data.whatsapp ?? data.phone ?? "";
 
-        this.notes = [];
+        this.address = {
+            ...(data.address ?? {})
+        };
 
-        this.tags = [];
+        this.status =
+            data.status ?? "ACTIVE";
 
-        this.metadata = {};
+        this.source =
+            data.source ?? "WEBSITE";
+
+        this.tags = [
+            ...(data.tags ?? [])
+        ];
+
+        this.notes =
+            data.notes ?? "";
+
+        this.consent = {
+            popia:
+                data.consent?.popia === true,
+
+            marketing:
+                data.consent?.marketing === true,
+
+            communications:
+                data.consent?.communications !== false
+        };
+
+        // ====================================================
+        // FUTURE INSERT
+        //
+        // POPIA consent history
+        // Passport verification
+        // Client portal
+        // WhatsApp identity verification
+        // Duplicate client detection
+        // ====================================================
+    }
+
+
+    getFullName() {
+
+        return [
+            this.firstName,
+            this.middleName,
+            this.lastName
+        ]
+            .filter(Boolean)
+            .join(" ");
 
     }
 
-    getDisplayName() {
 
-        if (this.fullName) return this.fullName;
+    setContact(
+        email,
+        phone
+    ) {
 
-        return `${this.firstName} ${this.lastName}`.trim();
+        this.email = email ?? this.email;
+        this.phone = phone ?? this.phone;
+
+        if (!this.whatsapp) {
+            this.whatsapp = this.phone;
+        }
+
+        this.touch();
+
+        return this;
 
     }
 
-    addTag(tag) {
 
-        if (!this.tags.includes(tag)) {
+    addTag(
+        tag
+    ) {
+
+        if (
+            tag &&
+            !this.tags.includes(tag)
+        ) {
 
             this.tags.push(tag);
 
@@ -71,17 +146,15 @@ export default class Client extends Entity {
 
     }
 
-    addNote(note) {
 
-        this.notes.push({
+    removeTag(
+        tag
+    ) {
 
-            id: crypto.randomUUID(),
-
-            note,
-
-            createdAt: new Date().toISOString()
-
-        });
+        this.tags =
+            this.tags.filter(
+                item => item !== tag
+            );
 
         this.touch();
 
@@ -89,16 +162,35 @@ export default class Client extends Entity {
 
     }
 
+
     validate() {
 
-        if (!this.firstName && !this.fullName) {
+        super.validate();
 
-            throw new Error("Client name is required.");
+        if (
+            this.type === "INDIVIDUAL" &&
+            !this.getFullName()
+        ) {
+
+            throw new Error(
+                "Client name is required."
+            );
 
         }
 
         return true;
 
     }
+
+
+    // ========================================================
+    // FUTURE INSERT
+    //
+    // Client risk profile
+    // Client classification
+    // AI profile
+    // Immigration history
+    // Matter history
+    // ========================================================
 
 }
