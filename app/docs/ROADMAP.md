@@ -1,501 +1,469 @@
-# Architecture
+# Roadmap
 
-## 1. System Overview
+## 1. Objective
 
-Isaacs and Partners uses a layered application architecture designed around
-domain models, services, repositories, engines and storage adapters.
+The objective is to complete the Isaacs and Partners application as a
+production-ready legal, immigration, HR, labour, business and document
+management platform.
+
+Development must continue incrementally without unnecessarily restructuring
+the existing application.
+
+---
+
+# Phase 1 — Core Architecture
+
+Status: Completed / Established
+
+Core layers established:
+
+- domain;
+- models;
+- repositories;
+- services;
+- managers;
+- engines;
+- storage;
+- validators;
+- policies;
+- serializers;
+- mappers;
+- results;
+- exceptions;
+- events.
+
+---
+
+# Phase 2 — Persistence
+
+Objectives:
+
+- complete repository implementations;
+- complete SQLite persistence;
+- establish migration handling;
+- implement storage abstraction;
+- implement backup and restore;
+- validate transaction behaviour;
+- support local-first operation.
+
+Key areas:
 
 ```text
-                         USER INTERFACE
-                               │
-                               ▼
-                         APPLICATION JS
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │      SERVICES       │
-                    └─────────────────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │      MANAGERS       │
-                    └─────────────────────┘
-                               │
-                ┌──────────────┼──────────────┐
-                ▼              ▼              ▼
-             ENGINES       WORKFLOWS         AI
-                │              │              │
-                └──────────────┼──────────────┘
-                               ▼
-                         DOMAIN LAYER
-                               │
-                               ▼
-                         REPOSITORIES
-                               │
-                               ▼
-                           STORAGE
-2. Domain Layer
-
-The domain layer defines core business concepts.
-
-app/domain/
-
-It contains:
-
-Entity;
-ValueObject;
-AggregateRoot;
-DomainEvent;
-BaseModel;
-Repository;
-domain enums.
-
-The domain layer should remain independent of UI concerns.
-
-3. Models
-
-Application models represent important business entities.
-
-app/models/
-
-Examples:
-
-Client;
-Matter;
-Appointment;
-Document;
-Invoice;
-Payment;
-Quote;
-User;
-Task;
-Note;
-Communication;
-TimelineEntry;
-Workflow.
-
-Models should contain business state and model-level behaviour where
-appropriate.
-
-4. Repositories
-
-Repositories provide persistence boundaries.
-
-app/repositories/
-
-Current repository architecture:
-
-BaseRepository
-├── BookingRepository
-├── ClientRepository
-├── DocumentRepository
-├── KnowledgeRepository
-└── MatterRepository
-
-Repositories must not contain UI logic.
-
-5. Storage
-
-Storage adapters isolate persistence technologies.
-
 app/storage/
+app/repositories/
+app/models/
+Phase 3 — Authentication and Security
 
-Supported architecture includes:
+Objectives:
 
-StorageProvider
-├── SQLiteAdapter
-├── IndexedDBAdapter
-├── LocalStorageAdapter
-├── SessionStorageAdapter
-├── MemoryAdapter
-└── SupabaseAdapter
+complete authentication;
+session management;
+role management;
+permissions;
+security policies;
+audit logging;
+session timeout;
+secure document access.
 
-SQLite/local storage remains suitable for local-first operation.
+Key areas:
 
-External synchronization should occur through explicit integration logic.
+AuthenticationService
+SecurityManager
+SecurityPolicy
+SecurityValidator
+AuditEvents
+Phase 4 — Client and Matter Management
 
-6. Services
+Objectives:
 
-Services provide application-level operations.
+client creation;
+client search;
+client profiles;
+matter creation;
+matter assignment;
+matter status;
+matter timeline;
+notes;
+tasks;
+communications;
+document association.
 
-app/services/
+Matter lifecycle:
 
-They coordinate:
-
-Validation
-   ↓
-Authorisation
-   ↓
-Business Logic
-   ↓
-Repository
-   ↓
-Result
-
-Services should not directly manipulate UI elements.
-
-7. Managers
-
-Managers coordinate complex application operations.
-
-app/managers/
-
-Examples:
-
-AIManager;
-BookingManager;
-ClientManager;
-KnowledgeManager;
-MatterManager;
-NotificationManager;
-SecurityManager;
-UploadManager;
-WorkflowManager.
-
-Managers may coordinate multiple services and engines.
-
-8. Engines
-
-Engines implement specialised processing.
-
-app/engines/
-
-Current engines include:
-
-AIEngine
-AutomationEngine
-BookingEngine
-BundleEngine
-ComplianceEngine
-DocumentEngine
-EligibilityEngine
-KnowledgeEngine
-MatterEngine
-NotificationEngine
-PortalEngine
-ReportingEngine
-RiskEngine
-TimelineEngine
-WorkflowEngine
-
-Engines should expose deterministic processing wherever practical.
-
-9. Knowledgebase
-
-The knowledgebase is located at:
-
-app/knowledgebase/
-
-Domains:
-
-business.json
-ccma.json
-contracts.json
-hr.json
-immigration.json
-labour.json
-mediation.json
-notary.json
-
-Knowledge processing is supported by:
-
-engine/
-loader/
-
-The knowledgebase must maintain source and version metadata.
-
-10. Workflows
-
-Workflow definitions are stored under:
-
-app/workflows/
-
-Current domains:
-
-appeals.js
-business.js
-hr.js
-immigration.js
-legal.js
-
-Workflows should define structured steps rather than embedding workflow
-logic throughout the UI.
-
-11. Events
-
-The event system is located at:
-
-app/events/
-
-It supports:
-
-domain events;
-workflow events;
-audit events;
-notification events;
-integration events;
-system events;
-AI events.
-
-Events allow components to communicate without tightly coupling every module.
-
-12. Jobs
-
-Background operations are located under:
-
-app/jobs/
-
-Examples:
-
-AIJob;
-BackupJob;
-BundleJob;
-CleanupJob;
-NotificationJob;
-OCRJob;
-ReminderJob;
-ReportingJob;
-SyncJob.
-
-Jobs should be retryable where appropriate.
-
-13. Upload Architecture
-
-Uploads are handled through:
-
-app/uploads/
-
-The upload pipeline is:
-
-Upload
+Intake
  ↓
-Validation
+Consultation
  ↓
-Security Validation
+Eligibility
  ↓
-Storage
+Document Collection
  ↓
-OCR / Processing
+Preparation
  ↓
-Classification
+Review
  ↓
-Matter Association
- ↓
-Verification
-14. Search
-
-Search functionality is isolated under:
-
-app/search/
-
-Components include:
-
-SearchEngine
-SearchHistory
-SearchIndex
-SearchParser
-SearchQuery
-SearchRanking
-SearchResult
-SearchSuggestion
-
-Search should operate against indexed application data rather than forcing
-every screen to implement its own search logic.
-
-15. Pipeline
-
-The pipeline layer provides controlled execution of processing stages.
-
-Pipeline
-PipelineBuilder
-PipelineContext
-PipelineExecutor
-PipelineStage
-
-Typical pipeline:
-
-Input
- ↓
-Validation
- ↓
-Authorisation
+Submission
  ↓
 Processing
  ↓
-Persistence
+Outcome
  ↓
-Events
+Closure
+Phase 5 — Consultation Engine
+
+Objectives:
+
+consultation intake;
+structured fact capture;
+service classification;
+eligibility screening;
+risk identification;
+consultation notes;
+matter generation.
+
+The AI should assist the consultation process without replacing professional
+review.
+
+Phase 6 — Knowledgebase
+
+Objectives:
+
+maintain legal knowledge domains;
+maintain legislation;
+maintain regulations;
+maintain case law;
+maintain authoritative guidance;
+maintain articles and handbooks;
+maintain internal case studies;
+maintain source metadata;
+maintain version metadata;
+implement indexing;
+implement knowledge search;
+implement source validation.
+
+Primary domains:
+
+Immigration
+Labour
+CCMA
+HR
+Contracts
+Business
+Mediation
+Notary
+
+The knowledgebase must distinguish authoritative law from secondary material
+and internal case studies.
+
+Phase 7 — Immigration Intelligence
+
+Objectives:
+
+immigration matter classification;
+visa requirement engine;
+document requirement engine;
+eligibility engine;
+document checklist;
+VFS/DHA bundle preparation;
+missing-document detection;
+application bundle generation;
+applicant notifications;
+document matching;
+printable bundle generation.
+
+Workflow:
+
+Applicant
  ↓
-Result
-16. Policies
-
-Policies control authorisation and business access.
-
-app/policies/
-
-Policies should answer whether an operation is permitted.
-
-They should not perform the operation themselves.
-
-17. Validators
-
-Validators enforce input and business constraints.
-
-app/validators/
-
-Validation occurs at multiple boundaries:
-
-UI
+Consultation
  ↓
-Service
+Eligibility
  ↓
-Repository
+Matter
  ↓
-Storage
+Required Documents
+ ↓
+Uploads
+ ↓
+Verification
+ ↓
+Bundle
+ ↓
+Quality Control
+ ↓
+Print / Submit
+Phase 8 — Legal and Labour Workflows
 
-The server/storage boundary must never rely solely on UI validation.
+Objectives:
 
-18. Serializers and Mappers
+HR workflows;
+disciplinary workflows;
+employment contracts;
+labour disputes;
+CCMA workflows;
+mediation;
+appeals;
+legal drafting;
+notarial workflows.
 
-Serializers control external representation.
+Each workflow should be represented as structured application logic.
 
-Mappers convert between:
+Phase 9 — Document Intelligence
 
-Persistence
-      ↕
-Domain
-      ↕
-Application
-      ↕
-API/UI
+Objectives:
 
-This prevents storage-specific structures from leaking throughout the
-application.
+secure uploads;
+OCR;
+document classification;
+document extraction;
+document verification;
+expiry detection;
+document matching;
+automated checklists;
+document versioning;
+bundle generation.
 
-19. Results
+Pipeline:
 
-Operations should return structured result objects.
+Upload
+ ↓
+Validate
+ ↓
+OCR
+ ↓
+Extract
+ ↓
+Classify
+ ↓
+Match
+ ↓
+Verify
+ ↓
+Bundle
+Phase 10 — AI Engine
 
-app/results/
+Objectives:
 
-This avoids inconsistent return formats across services.
+consultation intelligence;
+matter classification;
+knowledge retrieval;
+document analysis;
+eligibility analysis;
+risk analysis;
+recommendation engine;
+AI-assisted drafting;
+explainable results;
+source attribution;
+human review controls.
 
-20. Exceptions
+AI must never fabricate legal authorities.
 
-Application exceptions are centralised under:
+Phase 11 — Workflow Automation
 
-app/exceptions/
+Objectives:
 
-This allows the application to distinguish:
+workflow execution;
+task generation;
+reminders;
+deadlines;
+follow-ups;
+notifications;
+escalation;
+automated document requests;
+status transitions.
+Phase 12 — Communications
 
-validation failures;
-authentication failures;
-authorisation failures;
-repository failures;
-storage failures;
-workflow failures;
-document failures;
-AI failures;
-knowledge failures.
-21. Security Boundary
+Objectives:
 
-Security should be enforced in layers.
-
-Authentication
-      ↓
-Authorisation
-      ↓
-Policy
-      ↓
-Validation
-      ↓
-Service
-      ↓
-Repository
-      ↓
-Storage
-
-No single UI control should be treated as a security boundary.
-
-22. Local-First Principle
-
-The system should continue operating where possible when external services are
-unavailable.
-
-External services include:
-
-Supabase;
-AI providers;
-WhatsApp;
 email;
-remote APIs.
+WhatsApp;
+internal notifications;
+client portal notifications;
+appointment reminders;
+document outstanding notifications;
+matter status notifications.
 
-The application should queue or defer non-critical external operations rather
-than corrupting local application state.
+External delivery failures should be retryable.
 
-23. Source of Truth
+Phase 13 — Billing and Financial Management
 
-Each category of information should have one authoritative source.
+Objectives:
 
-Transactional Data
-        ↓
-Domain / Repository
+quotes;
+invoices;
+deposits;
+retainers;
+payments;
+receipts;
+payment tracking;
+outstanding balances;
+reporting;
+banking references.
 
-Legal Knowledge
-        ↓
-Knowledgebase
+Financial documents should use the central business information configured
+for Isaacs and Partners.
 
-Application Configuration
-        ↓
-Constants / Configuration
+The application must distinguish VAT-registered and non-VAT-registered
+business treatment according to the current business configuration.
 
-Authentication
-        ↓
-Authentication Layer
+Phase 14 — Reporting
 
-External Integration State
-        ↓
-Integration Adapter
+Objectives:
 
-AI output is not automatically authoritative.
+matter reports;
+client reports;
+document reports;
+workflow reports;
+financial reports;
+staff activity;
+performance;
+communication logs;
+operational dashboards.
 
-24. Production Rule
+Exports:
 
-Existing modules must be reused wherever possible.
+PDF
+Excel
+CSV
+Phase 15 — Applicant / Client Portal
 
-Do not introduce duplicate implementations merely to satisfy a new feature.
+Objectives:
 
-When functionality already exists in:
+secure client login;
+matter dashboard;
+outstanding documents;
+upload documents;
+appointment information;
+communication history;
+matter status;
+notifications;
+downloadable documents.
 
-services/
-repositories/
-engines/
-managers/
-models/
-domain/
-storage/
+Immigration applicants should be able to see exactly what remains
+outstanding.
 
-new modules should integrate with the existing implementation instead of
-creating parallel logic.
+Phase 16 — Automation and Background Jobs
 
-25. Folder Structure Principle
+Objectives:
 
-The existing application structure is intentionally preserved.
+backups;
+OCR;
+notifications;
+reminders;
+reporting;
+synchronisation;
+bundle generation;
+cleanup;
+AI processing.
 
-Future additions should fit the existing architecture rather than requiring
-a broad restructuring of the project.
+Jobs must be safe to retry.
 
-26. Architectural Goal
+Phase 17 — Search
 
-The final system should provide:
+Objectives:
 
-predictable business workflows;
-strong validation;
-auditable operations;
-secure document handling;
-structured legal knowledge;
-AI-assisted analysis;
-local-first resilience;
-controlled external integrations;
-maintainable domain models;
-reusable production services.
+global search;
+client search;
+matter search;
+document search;
+knowledge search;
+workflow search;
+search history;
+suggestions;
+ranking.
+Phase 18 — Compliance and Audit
+
+Objectives:
+
+audit trail;
+user activity;
+login/logout records;
+document access;
+matter changes;
+financial changes;
+workflow changes;
+security events.
+
+The audit trail should be append-oriented and protected from ordinary user
+modification.
+
+Phase 19 — Testing
+
+Required testing areas:
+
+Unit Tests
+Integration Tests
+Repository Tests
+Service Tests
+Workflow Tests
+Knowledgebase Tests
+AI Tests
+Document Tests
+Security Tests
+Upload Tests
+
+Existing test areas include:
+
+ai.test.js
+knowledgebase.test.js
+workflow.test.js
+Phase 20 — Production Hardening
+
+Before production release:
+
+validate all imports;
+remove dead code;
+remove duplicated services;
+validate all repository contracts;
+validate storage fallbacks;
+test authentication;
+test authorisation;
+test backups;
+test restore;
+test document security;
+test AI failure handling;
+test external-service failure handling;
+validate generated PDFs;
+validate invoice/receipt output;
+validate bundle generation;
+validate audit logging.
+Phase 21 — Deployment
+
+Production deployment should include:
+
+Build
+ ↓
+Automated Tests
+ ↓
+Validation
+ ↓
+Database Migration
+ ↓
+Backup
+ ↓
+Deployment
+ ↓
+Smoke Tests
+ ↓
+Monitoring
+
+No production deployment should proceed if a migration could result in
+irreversible data loss without a verified backup.
+
+Development Rule
+
+The application should be completed folder-by-folder.
+
+For each folder:
+
+preserve the existing folder structure;
+inspect dependencies;
+complete each file;
+connect it to existing modules;
+avoid rewriting already completed files;
+maintain compatible imports and exports;
+identify missing dependencies rather than silently inventing replacements;
+test integration before moving to the next folder.
+
+The objective is a single coherent production codebase rather than isolated
+code snippets.
