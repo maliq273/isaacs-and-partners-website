@@ -1,1 +1,40 @@
+<article class="ip-card" data-component="card">
+    <div class="ip-card__header">
+        <div class="ip-card__title-group">
+            <span class="ip-card__icon" data-card-icon aria-hidden="true"></span>
+            <div>
+                <h3 class="ip-card__title" data-card-title>Card Title</h3>
+                <p class="ip-card__subtitle" data-card-subtitle></p>
+            </div>
+        </div>
 
+        <button
+            type="button"
+            class="ip-card__action"
+            data-card-action
+            aria-label="Card actions"
+            hidden
+        >
+            ⋮
+        </button>
+    </div>
+
+    <div class="ip-card__body" data-card-body>
+        <div class="ip-card__value" data-card-value></div>
+        <div class="ip-card__content" data-card-content></div>
+    </div>
+
+    <div class="ip-card__footer" data-card-footer hidden></div>
+</article>
+
+<template id="stat-card-template">
+    <article class="ip-stat-card" data-component="stat-card">
+        <div class="ip-stat-card__icon" data-stat-icon aria-hidden="true"></div>
+
+        <div class="ip-stat-card__content">
+            <span class="ip-stat-card__label" data-stat-label></span>
+            <strong class="ip-stat-card__value" data-stat-value>0</strong>
+            <span class="ip-stat-card__change" data-stat-change></span>
+        </div>
+    </article>
+</template>
