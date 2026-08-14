@@ -1,1 +1,233 @@
+:root {
+  /* =========================================================
+     Isaacs and Partners
+     Global Design Tokens
+     ========================================================= */
 
+  /* Brand */
+  --brand-primary: #0b1f33;
+  --brand-secondary: #163b5c;
+  --brand-accent: #c9a227;
+  --brand-accent-dark: #9d7b12;
+  --brand-light: #f5f7fa;
+
+  /* Semantic Colours */
+  --color-primary: var(--brand-primary);
+  --color-secondary: var(--brand-secondary);
+  --color-accent: var(--brand-accent);
+
+  --color-success: #198754;
+  --color-success-light: #e9f7ef;
+
+  --color-warning: #f0ad00;
+  --color-warning-light: #fff8df;
+
+  --color-danger: #dc3545;
+  --color-danger-light: #fdebec;
+
+  --color-info: #0d6efd;
+  --color-info-light: #eaf2ff;
+
+  /* Text */
+  --text-primary: #17202a;
+  --text-secondary: #5f6b76;
+  --text-muted: #7b8794;
+  --text-light: #ffffff;
+  --text-link: var(--brand-secondary);
+
+  /* Backgrounds */
+  --background: #f5f7fa;
+  --background-primary: #ffffff;
+  --background-secondary: #eef2f6;
+  --background-dark: #0b1f33;
+
+  /* Borders */
+  --border-color: #dce2e8;
+  --border-light: #e9edf1;
+  --border-dark: #b8c1ca;
+
+  /* Typography */
+  --font-family-base:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-family-heading:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 76px;
+  --header-height: 68px;
+
+  --container-width: 1440px;
+  --content-padding: 24px;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-xs:
+    0 1px 2px rgba(11, 31, 51, 0.05);
+
+  --shadow-sm:
+    0 2px 6px rgba(11, 31, 51, 0.08);
+
+  --shadow-md:
+    0 6px 18px rgba(11, 31, 51, 0.10);
+
+  --shadow-lg:
+    0 12px 32px rgba(11, 31, 51, 0.14);
+
+  /* Forms */
+  --input-height: 42px;
+  --input-padding-x: 12px;
+  --input-padding-y: 10px;
+  --input-border: var(--border-color);
+  --input-focus-border: var(--brand-secondary);
+  --input-focus-ring: rgba(22, 59, 92, 0.15);
+
+  /* Tables */
+  --table-header-background: #f1f4f7;
+  --table-row-hover: #f8fafc;
+  --table-row-border: var(--border-light);
+
+  /* Z-index */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-header: 300;
+  --z-sidebar: 400;
+  --z-overlay: 900;
+  --z-modal: 1000;
+  --z-toast: 1100;
+  --z-tooltip: 1200;
+
+  /* Transitions */
+  --transition-fast: 120ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 350ms ease;
+
+  /* Breakpoints */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1440px;
+}
+
+
+/* =========================================================
+   Dark Theme
+   Activated through data-theme="dark"
+   ========================================================= */
+
+[data-theme="dark"] {
+  --text-primary: #f1f5f9;
+  --text-secondary: #b7c2cc;
+  --text-muted: #8e9aa6;
+
+  --background: #0f1720;
+  --background-primary: #16212c;
+  --background-secondary: #1c2935;
+  --background-dark: #081522;
+
+  --border-color: #2d3b48;
+  --border-light: #24313d;
+  --border-dark: #40505f;
+
+  --table-header-background: #1c2935;
+  --table-row-hover: #1b2834;
+  --table-row-border: #2a3743;
+
+  --brand-light: #1d2b38;
+
+  --shadow-xs:
+    0 1px 2px rgba(0, 0, 0, 0.18);
+
+  --shadow-sm:
+    0 2px 6px rgba(0, 0, 0, 0.22);
+
+  --shadow-md:
+    0 6px 18px rgba(0, 0, 0, 0.28);
+
+  --shadow-lg:
+    0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+
+/* =========================================================
+   Accessibility
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+    --transition-slow: 0ms;
+  }
+}
+
+
+/* =========================================================
+   High Contrast Support
+   ========================================================= */
+
+@media (prefers-contrast: more) {
+  :root {
+    --border-color: #66717c;
+    --border-dark: #3f4a54;
+
+    --text-secondary: #3f4a54;
+
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+  }
+}
