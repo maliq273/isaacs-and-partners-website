@@ -1,1 +1,174 @@
+/* =========================================================
+   Responsive Layout
+   ========================================================= */
 
+@media (max-width: 1200px) {
+  :root {
+    --sidebar-width: 230px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  :root {
+    --content-padding: 20px;
+  }
+
+  .app-sidebar {
+    width: var(--sidebar-width-collapsed);
+  }
+
+  .app-main {
+    margin-left: var(--sidebar-width-collapsed);
+  }
+
+  .sidebar-label {
+    display: none;
+  }
+
+  .sidebar-logo-text {
+    display: none;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .page-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --content-padding: 16px;
+    --space-8: 1.5rem;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    width: 0;
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+  }
+
+  .app-sidebar.is-open {
+    width: var(--sidebar-width);
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .app-main {
+    margin-left: 0;
+  }
+
+  .app-header {
+    padding: 0 var(--content-padding);
+  }
+
+  .dashboard-page {
+    padding: var(--space-6) var(--content-padding);
+  }
+
+  .page-header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-toolbar {
+    align-items: stretch;
+  }
+
+  .panel-toolbar .form-control,
+  .search-box {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  th,
+  td {
+    padding: var(--space-3);
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-actions .btn,
+  .page-actions .form-control {
+    width: 100%;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-header {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+
+  .dashboard-page {
+    padding-top: var(--space-5);
+  }
+}
+
+@media print {
+  .app-sidebar,
+  .app-header,
+  .page-actions,
+  .panel-toolbar,
+  .pagination {
+    display: none !important;
+  }
+
+  .app-main {
+    margin-left: 0;
+  }
+
+  .dashboard-page {
+    width: 100%;
+    padding: 0;
+  }
+
+  .panel,
+  .stat-card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  body {
+    background: #ffffff;
+  }
+}
