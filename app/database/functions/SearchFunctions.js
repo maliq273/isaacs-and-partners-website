@@ -1,112 +1,187 @@
-/**
- * SearchFunctions
- * ------------------------------------------------------------
- * Common SQL search helpers.
- */
-
 import {
-    normalizeIdentifier,
     quoteIdentifier
 } from "./DatabaseFunctions.js";
 
-export function escapeLike(value) {
+/**
+ * Normalize user-entered search text.
+ */
+export function normalizeSearchText(
+    value
+) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
+
     return String(value)
+        .trim()
+        .replace(/\s+/g, " ");
+}
+
+/**
+ * Escape SQLite LIKE wildcard characters.
+ */
+export function escapeLikeValue(
+    value
+) {
+    return normalizeSearchText(
+        value
+    )
         .replace(/\\/g, "\\\\")
         .replace(/%/g, "\\%")
         .replace(/_/g, "\\_");
 }
 
+/**
+ * Create a parameter suitable for a LIKE search.
+ */
 export function createSearchPattern(
     value
 ) {
-    const escaped =
-        escapeLike(value);
+    const normalized =
+        escapeLikeValue(value);
 
-    return `%${escaped}%`;
+    return `%${normalized}%`;
 }
 
-export function createPrefixPattern(
-    value
-) {
-    return `${escapeLike(value)}%`;
-}
-
-export function createExactPattern(
-    value
-) {
-    return escapeLike(value);
-}
-
-export function buildLikeCondition({
-    column,
-    parameter = "search",
-    caseInsensitive = true
-} = {}) {
-    const safeColumn =
-        quoteIdentifier(
-            normalizeIdentifier(
-                column
-            )
-        );
-
-    const expression =
-        caseInsensitive
-            ? `LOWER(${safeColumn}) LIKE LOWER(:${parameter}) ESCAPE '\\'`
-            : `${safeColumn} LIKE :${parameter} ESCAPE '\\'`;
-
-    return {
-        sql: expression,
-        parameter
-    };
-}
-
+/**
+ * Build a search condition across multiple columns.
+ *
+ * Example:
+ *
+ * (
+ *   "first_name" LIKE :search ESCAPE '\'
+ *   OR
+ *   "last_name" LIKE :search ESCAPE '\'
+ * )
+ */
 export function buildMultiColumnSearch({
     columns = [],
     parameter = "search"
 } = {}) {
-    if (!Array.isArray(columns)) {
-        throw new TypeError(
-            "columns must be an array"
-        );
-    }
-
-    if (!columns.length) {
+    if (
+        !Array.isArray(columns) ||
+        !columns.length
+    ) {
         return {
             sql: "1 = 1",
-            parameter
+            parameters: {}
         };
     }
 
     const conditions =
-        columns.map((column) => {
-            return buildLikeCondition({
-                column,
-                parameter
-            }).sql;
-        });
+        columns.map(
+            (column) =>
+                `${quoteIdentifier(
+                    column
+                )} LIKE :${parameter} ESCAPE '\\'`
+        );
 
     return {
         sql: `(${conditions.join(
             " OR "
         )})`,
-        parameter
+        parameters: {
+            [parameter]: null
+        }
     };
 }
 
-export function normalizeSearchTerm(
+/**
+ * Build a token-based search.
+ *
+ * Every token must occur in at least one
+ * of the supplied columns.
+ */
+export function buildTokenSearch({
+    columns = [],
+    tokens = [],
+    parameterPrefix = "token"
+} = {}) {
+    if (
+        !columns.length ||
+        !tokens.length
+    ) {
+        return {
+            sql: "1 = 1",
+            parameters: {}
+        };
+    }
+
+    const groups = [];
+    const parameters = {};
+
+    tokens.forEach(
+        (token, tokenIndex) => {
+            const parameter =
+                `${parameterPrefix}_${tokenIndex}`;
+
+            const conditions =
+                columns.map(
+                    (column) =>
+                        `${quoteIdentifier(
+                            column
+                        )} LIKE :${parameter} ESCAPE '\\'`
+                );
+
+            groups.push(
+                `(${conditions.join(
+                    " OR "
+                )})`
+            );
+
+            parameters[
+                parameter
+            ] =
+                createSearchPattern(
+                    token
+                );
+        }
+    );
+
+    return {
+        sql: groups.join(
+            " AND "
+        ),
+        parameters
+    };
+}
+
+/**
+ * Split a search phrase into normalized tokens.
+ */
+export function tokenizeSearch(
     value
 ) {
-    return String(value || "")
-        .trim()
-        .replace(/\s+/g, " ");
+    const normalized =
+        normalizeSearchText(
+            value
+        );
+
+    if (!normalized) {
+        return [];
+    }
+
+    return [
+        ...new Set(
+            normalized
+                .split(/\s+/)
+                .map(
+                    (token) =>
+                        token.trim()
+                )
+                .filter(Boolean)
+        )
+    ];
 }
 
 export default {
-    escapeLike,
+    normalizeSearchText,
+    escapeLikeValue,
     createSearchPattern,
-    createPrefixPattern,
-    createExactPattern,
-    buildLikeCondition,
     buildMultiColumnSearch,
-    normalizeSearchTerm
+    buildTokenSearch,
+    tokenizeSearch
 };
