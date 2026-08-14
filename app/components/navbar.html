@@ -1,1 +1,124 @@
+<header class="ip-navbar" data-component="navbar">
+    <div class="ip-navbar__inner">
 
+        <a
+            href="/dashboard/index.html"
+            class="ip-navbar__brand"
+            aria-label="Isaacs and Partners Dashboard"
+        >
+            <img
+                src="/images/brand-isaacs-partners.png"
+                alt="Isaacs and Partners"
+                class="ip-navbar__logo"
+                loading="eager"
+            >
+
+            <span class="ip-navbar__brand-text">
+                <strong>Isaacs &amp; Partners</strong>
+                <small>Professional Services Platform</small>
+            </span>
+        </a>
+
+        <button
+            type="button"
+            class="ip-navbar__menu-toggle"
+            data-navbar-toggle
+            aria-controls="main-navigation"
+            aria-expanded="false"
+            aria-label="Open navigation"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav
+            id="main-navigation"
+            class="ip-navbar__navigation"
+            data-navbar-navigation
+            aria-label="Main navigation"
+        >
+            <a
+                href="/dashboard/index.html"
+                data-nav-link="dashboard"
+            >
+                Dashboard
+            </a>
+
+            <a
+                href="/dashboard/clients.html"
+                data-nav-link="clients"
+            >
+                Clients
+            </a>
+
+            <a
+                href="/dashboard/matters.html"
+                data-nav-link="matters"
+            >
+                Matters
+            </a>
+
+            <a
+                href="/consultation/index.html"
+                data-nav-link="consultation"
+            >
+                Consultation
+            </a>
+
+            <a
+                href="/dashboard/reports.html"
+                data-nav-link="reports"
+            >
+                Reports
+            </a>
+
+            <a
+                href="/knowledgebase/"
+                data-nav-link="knowledgebase"
+            >
+                Knowledge Base
+            </a>
+        </nav>
+
+        <div class="ip-navbar__account">
+            <button
+                type="button"
+                class="ip-navbar__user"
+                data-user-menu-toggle
+                aria-expanded="false"
+                aria-haspopup="true"
+            >
+                <span
+                    class="ip-navbar__user-avatar"
+                    data-user-avatar
+                    aria-hidden="true"
+                >
+                    U
+                </span>
+
+                <span class="ip-navbar__user-name" data-user-name>
+                    User
+                </span>
+            </button>
+
+            <div
+                class="ip-navbar__user-menu"
+                data-user-menu
+                hidden
+            >
+                <a href="/dashboard/staff.html">
+                    Profile
+                </a>
+
+                <button
+                    type="button"
+                    data-action="logout"
+                >
+                    Sign out
+                </button>
+            </div>
+        </div>
+
+    </div>
+</header>
