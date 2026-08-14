@@ -1,11 +1,9 @@
-const MatterVisibility = Object.freeze({
-
-    PRIVATE: "PRIVATE",
-
-    INTERNAL: "INTERNAL",
-
-    CLIENT: "CLIENT"
-
+export const MatterVisibility = Object.freeze({
+    PRIVATE: "private",
+    INTERNAL: "internal",
+    CLIENT: "client",
+    TEAM: "team",
+    RESTRICTED: "restricted"
 });
 
 export default MatterVisibility;
