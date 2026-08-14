@@ -1,17 +1,9 @@
-const MatterPriority = Object.freeze({
-
-    LOW: "LOW",
-
-    NORMAL: "NORMAL",
-
-    MEDIUM: "MEDIUM",
-
-    HIGH: "HIGH",
-
-    URGENT: "URGENT",
-
-    CRITICAL: "CRITICAL"
-
+export const MatterPriority = Object.freeze({
+    LOW: "low",
+    NORMAL: "normal",
+    HIGH: "high",
+    URGENT: "urgent",
+    CRITICAL: "critical"
 });
 
 export default MatterPriority;
