@@ -1,19 +1,15 @@
-const MatterSource = Object.freeze({
-
-    WEBSITE: "WEBSITE",
-
-    WALK_IN: "WALK_IN",
-
-    WHATSAPP: "WHATSAPP",
-
-    PHONE: "PHONE",
-
-    EMAIL: "EMAIL",
-
-    REFERRAL: "REFERRAL",
-
-    SOCIAL_MEDIA: "SOCIAL_MEDIA"
-
+export const MatterSource = Object.freeze({
+    WEBSITE: "website",
+    PORTAL: "portal",
+    REFERRAL: "referral",
+    WALK_IN: "walk_in",
+    PHONE: "phone",
+    EMAIL: "email",
+    WHATSAPP: "whatsapp",
+    EXISTING_CLIENT:
+        "existing_client",
+    INTERNAL: "internal",
+    OTHER: "other"
 });
 
 export default MatterSource;
