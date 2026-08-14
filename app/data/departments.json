@@ -1,1 +1,92 @@
-
+{
+  "version": "1.0.0",
+  "departments": [
+    {
+      "id": "immigration",
+      "name": "Immigration",
+      "active": true,
+      "services": [
+        "work",
+        "critical-skills",
+        "general-work",
+        "business",
+        "corporate",
+        "study",
+        "relative",
+        "spousal",
+        "visitor",
+        "permanent-residence",
+        "citizenship",
+        "refugee-asylum",
+        "section-22",
+        "section-24",
+        "visa-appeal",
+        "dha-representation",
+        "vfs-application",
+        "status-verification"
+      ]
+    },
+    {
+      "id": "hr-ir",
+      "name": "HR & Industrial Relations",
+      "active": true,
+      "services": [
+        "employment-contracts",
+        "hr-policies",
+        "disciplinary-hearings",
+        "chairperson-services",
+        "grievance-hearings",
+        "performance-management",
+        "retrenchment-consulting",
+        "ccma-representation",
+        "bargaining-council-matters",
+        "payroll-advisory",
+        "labour-compliance-audits",
+        "employment-equity",
+        "recruitment-assistance",
+        "hr-outsourcing"
+      ]
+    },
+    {
+      "id": "business-compliance",
+      "name": "Business Compliance",
+      "active": true,
+      "services": [
+        "company-registration",
+        "cipc-amendments",
+        "business-name-reservations",
+        "sars-registration",
+        "vat-registration",
+        "paye-registration",
+        "uif-registration",
+        "coida-registration",
+        "tax-clearance",
+        "business-bank-account",
+        "compliance-certificates",
+        "annual-returns",
+        "director-amendments",
+        "business-consulting"
+      ]
+    },
+    {
+      "id": "legal",
+      "name": "Legal Services",
+      "active": true,
+      "services": [
+        "legal-advice",
+        "contract-drafting",
+        "contract-vetting",
+        "commercial-agreements",
+        "settlement-agreements",
+        "power-of-attorney",
+        "affidavits",
+        "appeal-drafting",
+        "mediation",
+        "negotiations",
+        "notary-services",
+        "legal-opinions",
+        "corporate-advisory"
+      ]
+    }
+  ]
+}
