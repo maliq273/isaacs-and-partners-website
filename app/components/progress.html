@@ -1,1 +1,63 @@
+<div
+    class="ip-progress"
+    data-component="progress"
+    data-progress
+    role="progressbar"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuenow="0"
+>
+    <div class="ip-progress__header">
+        <span
+            class="ip-progress__label"
+            data-progress-label
+        >
+            Progress
+        </span>
 
+        <span
+            class="ip-progress__value"
+            data-progress-value
+        >
+            0%
+        </span>
+    </div>
+
+    <div class="ip-progress__track">
+        <div
+            class="ip-progress__bar"
+            data-progress-bar
+            style="width: 0%"
+        ></div>
+    </div>
+
+    <div
+        class="ip-progress__message"
+        data-progress-message
+    ></div>
+</div>
+
+<template id="step-progress-template">
+    <ol
+        class="ip-step-progress"
+        data-step-progress
+        aria-label="Process progress"
+    ></ol>
+</template>
+
+<template id="step-progress-item-template">
+    <li
+        class="ip-step-progress__item"
+        data-step
+    >
+        <span
+            class="ip-step-progress__indicator"
+            data-step-indicator
+        ></span>
+
+        <span
+            class="ip-step-progress__label"
+            data-step-label
+        ></span>
+    </li>
+</template>
