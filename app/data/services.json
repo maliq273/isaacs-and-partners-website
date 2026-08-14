@@ -1,1 +1,170 @@
-
+{
+  "version": "1.0.0",
+  "currency": "ZAR",
+  "business": {
+    "registeredName": "Isaacs and Partners Pty(Ltd)",
+    "tradingName": "Isaacs and Partners",
+    "registrationNumber": "2025/474736/07"
+  },
+  "departments": [
+    {
+      "id": "immigration",
+      "name": "Immigration Services",
+      "active": true,
+      "services": [
+        {
+          "id": "work-visas",
+          "name": "Work Visas",
+          "active": true
+        },
+        {
+          "id": "critical-skills-visas",
+          "name": "Critical Skills Visas",
+          "active": true
+        },
+        {
+          "id": "general-work-visas",
+          "name": "General Work Visas",
+          "active": true
+        },
+        {
+          "id": "business-visas",
+          "name": "Business Visas",
+          "active": true
+        },
+        {
+          "id": "corporate-visas",
+          "name": "Corporate Visas",
+          "active": true
+        },
+        {
+          "id": "study-visas",
+          "name": "Study Visas",
+          "active": true
+        },
+        {
+          "id": "relative-visas",
+          "name": "Relative Visas",
+          "active": true
+        },
+        {
+          "id": "spousal-visas",
+          "name": "Spousal Visas",
+          "active": true
+        },
+        {
+          "id": "visitor-visas",
+          "name": "Visitor Visas",
+          "active": true
+        },
+        {
+          "id": "permanent-residence",
+          "name": "Permanent Residence",
+          "active": true
+        },
+        {
+          "id": "citizenship-applications",
+          "name": "Citizenship Applications",
+          "active": true
+        },
+        {
+          "id": "refugee-asylum-assistance",
+          "name": "Refugee & Asylum Assistance",
+          "active": true
+        },
+        {
+          "id": "section-22-applications",
+          "name": "Section 22 Applications",
+          "active": true
+        },
+        {
+          "id": "section-24-applications",
+          "name": "Section 24 Applications",
+          "active": true
+        },
+        {
+          "id": "visa-appeals",
+          "name": "Visa Appeals",
+          "active": true
+        },
+        {
+          "id": "dha-representations",
+          "name": "DHA Representations",
+          "active": true
+        },
+        {
+          "id": "vfs-global-applications",
+          "name": "VFS Global Applications",
+          "active": true
+        },
+        {
+          "id": "status-verification",
+          "name": "Status Verification",
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": "hr-industrial-relations",
+      "name": "HR & Industrial Relations",
+      "active": true,
+      "services": [
+        { "id": "employment-contracts", "name": "Employment Contracts", "active": true },
+        { "id": "hr-policies", "name": "HR Policies", "active": true },
+        { "id": "disciplinary-hearings", "name": "Disciplinary Hearings", "active": true },
+        { "id": "chairperson-services", "name": "Chairperson Services", "active": true },
+        { "id": "grievance-hearings", "name": "Grievance Hearings", "active": true },
+        { "id": "performance-management", "name": "Performance Management", "active": true },
+        { "id": "retrenchment-consulting", "name": "Retrenchment Consulting", "active": true },
+        { "id": "ccma-representation", "name": "CCMA Representation", "active": true },
+        { "id": "bargaining-council-matters", "name": "Bargaining Council Matters", "active": true },
+        { "id": "payroll-advisory", "name": "Payroll Advisory", "active": true },
+        { "id": "labour-compliance-audits", "name": "Labour Compliance Audits", "active": true },
+        { "id": "employment-equity", "name": "Employment Equity", "active": true },
+        { "id": "recruitment-assistance", "name": "Recruitment Assistance", "active": true },
+        { "id": "hr-outsourcing", "name": "HR Outsourcing", "active": true }
+      ]
+    },
+    {
+      "id": "business-compliance",
+      "name": "Business Compliance",
+      "active": true,
+      "services": [
+        { "id": "company-registration", "name": "Company Registration", "active": true },
+        { "id": "cipc-amendments", "name": "CIPC Amendments", "active": true },
+        { "id": "business-name-reservations", "name": "Business Name Reservations", "active": true },
+        { "id": "sars-registration", "name": "SARS Registration", "active": true },
+        { "id": "vat-registration", "name": "VAT Registration", "active": true },
+        { "id": "paye-registration", "name": "PAYE Registration", "active": true },
+        { "id": "uif-registration", "name": "UIF Registration", "active": true },
+        { "id": "coida-registration", "name": "COIDA Registration", "active": true },
+        { "id": "tax-clearance", "name": "Tax Clearance", "active": true },
+        { "id": "business-bank-account", "name": "Business Bank Account Setup", "active": true },
+        { "id": "compliance-certificates", "name": "Compliance Certificates", "active": true },
+        { "id": "annual-returns", "name": "Annual Returns", "active": true },
+        { "id": "director-amendments", "name": "Director Amendments", "active": true },
+        { "id": "business-consulting", "name": "Business Consulting", "active": true }
+      ]
+    },
+    {
+      "id": "legal",
+      "name": "Legal Services",
+      "active": true,
+      "services": [
+        { "id": "legal-advice", "name": "Legal Advice", "active": true },
+        { "id": "contract-drafting", "name": "Contract Drafting", "active": true },
+        { "id": "contract-vetting", "name": "Contract Vetting", "active": true },
+        { "id": "commercial-agreements", "name": "Commercial Agreements", "active": true },
+        { "id": "settlement-agreements", "name": "Settlement Agreements", "active": true },
+        { "id": "power-of-attorney", "name": "Power of Attorney", "active": true },
+        { "id": "affidavits", "name": "Affidavits", "active": true },
+        { "id": "appeal-drafting", "name": "Appeal Drafting", "active": true },
+        { "id": "mediation", "name": "Mediation", "active": true },
+        { "id": "negotiations", "name": "Negotiations", "active": true },
+        { "id": "notary-services", "name": "Notary Services", "active": true },
+        { "id": "legal-opinions", "name": "Legal Opinions", "active": true },
+        { "id": "corporate-advisory", "name": "Corporate Advisory", "active": true }
+      ]
+    }
+  ]
+}
