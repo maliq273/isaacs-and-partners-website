@@ -1,17 +1,15 @@
-const DocumentStatus = Object.freeze({
-
-    REQUIRED: "REQUIRED",
-
-    REQUESTED: "REQUESTED",
-
-    RECEIVED: "RECEIVED",
-
-    VERIFIED: "VERIFIED",
-
-    REJECTED: "REJECTED",
-
-    GENERATED: "GENERATED"
-
+export const DocumentStatus = Object.freeze({
+    REQUIRED: "required",
+    REQUESTED: "requested",
+    PENDING: "pending",
+    RECEIVED: "received",
+    UPLOADED: "uploaded",
+    PROCESSING: "processing",
+    VERIFIED: "verified",
+    REJECTED: "rejected",
+    EXPIRED: "expired",
+    MISSING: "missing",
+    ARCHIVED: "archived"
 });
 
 export default DocumentStatus;
