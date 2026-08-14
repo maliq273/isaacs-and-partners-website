@@ -1,1 +1,117 @@
+<section
+    class="ip-chat"
+    data-component="chat"
+    aria-label="Isaacs and Partners AI Assistant"
+>
+    <header class="ip-chat__header">
+        <div class="ip-chat__identity">
+            <div class="ip-chat__avatar" aria-hidden="true">
+                <span>IP</span>
+            </div>
 
+            <div>
+                <h2 class="ip-chat__title">Isaacs &amp; Partners AI</h2>
+                <span class="ip-chat__status" data-chat-status>
+                    Ready
+                </span>
+            </div>
+        </div>
+
+        <div class="ip-chat__actions">
+            <button
+                type="button"
+                class="ip-chat__button"
+                data-chat-clear
+                aria-label="Clear conversation"
+            >
+                Clear
+            </button>
+
+            <button
+                type="button"
+                class="ip-chat__button"
+                data-chat-close
+                aria-label="Close chat"
+            >
+                ×
+            </button>
+        </div>
+    </header>
+
+    <div
+        class="ip-chat__messages"
+        data-chat-messages
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
+    >
+        <div class="ip-chat__welcome" data-chat-welcome>
+            <strong>How can I assist?</strong>
+            <p>
+                Ask about a matter, document, workflow, client,
+                or knowledge-base topic.
+            </p>
+        </div>
+    </div>
+
+    <div
+        class="ip-chat__typing"
+        data-chat-typing
+        hidden
+        aria-live="polite"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+        <span class="sr-only">AI is responding</span>
+    </div>
+
+    <form class="ip-chat__composer" data-chat-form autocomplete="off">
+        <label for="chat-message" class="sr-only">
+            Message
+        </label>
+
+        <textarea
+            id="chat-message"
+            name="message"
+            class="ip-chat__input"
+            rows="1"
+            maxlength="10000"
+            placeholder="Type your message..."
+            data-chat-input
+            required
+        ></textarea>
+
+        <button
+            type="submit"
+            class="ip-chat__send"
+            data-chat-send
+            aria-label="Send message"
+        >
+            Send
+        </button>
+    </form>
+
+    <footer class="ip-chat__disclaimer">
+        AI output is subject to verification and does not replace
+        professional review or authoritative legal sources.
+    </footer>
+</section>
+
+<template id="chat-message-template">
+    <div class="ip-chat__message" data-message>
+        <div class="ip-chat__message-avatar" data-message-avatar></div>
+
+        <div class="ip-chat__message-content">
+            <div class="ip-chat__message-meta">
+                <span data-message-author></span>
+                <time data-message-time></time>
+            </div>
+
+            <div
+                class="ip-chat__message-text"
+                data-message-text
+            ></div>
+        </div>
+    </div>
+</template>
