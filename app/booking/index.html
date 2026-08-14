@@ -1,1 +1,505 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Book an Appointment | Isaacs & Partners</title>
+
+    <meta
+        name="description"
+        content="Book an appointment with Isaacs and Partners."
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/variables.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/layout.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/components.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/forms.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/responsive.css"
+    >
+
+</head>
+
+<body class="booking-page">
+
+    <header class="ip-navbar">
+
+        <div class="ip-navbar__inner">
+
+            <a
+                href="../../index.html"
+                class="ip-navbar__brand"
+            >
+
+                <img
+                    src="../images/brand-isaacs-partners.png"
+                    alt="Isaacs and Partners"
+                    class="ip-navbar__logo"
+                >
+
+                <span class="ip-navbar__brand-text">
+                    <strong>
+                        Isaacs &amp; Partners
+                    </strong>
+
+                    <small>
+                        Appointment Booking
+                    </small>
+                </span>
+
+            </a>
+
+            <a
+                href="../../index.html"
+                class="ip-button ip-button--secondary"
+            >
+                Back to Website
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <main class="ip-page">
+
+        <section class="ip-page__header">
+
+            <div>
+
+                <span class="ip-page__eyebrow">
+                    Appointment Booking
+                </span>
+
+                <h1>
+                    Book a Consultation
+                </h1>
+
+                <p>
+                    Select your service, preferred date and
+                    available appointment time.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <div
+            class="ip-alert ip-alert--error"
+            data-booking-error
+            role="alert"
+            hidden
+        ></div>
+
+
+        <section class="ip-grid ip-grid--two-column">
+
+            <article class="ip-card">
+
+                <header class="ip-card__header">
+
+                    <div>
+
+                        <h2 class="ip-card__title">
+                            Appointment Details
+                        </h2>
+
+                        <p class="ip-card__subtitle">
+                            Complete the information below.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <div class="ip-card__body">
+
+                    <form
+                        id="booking-form"
+                        data-booking-form
+                        novalidate
+                    >
+
+                        <div class="ip-form-group">
+
+                            <label for="service">
+                                Service
+                            </label>
+
+                            <select
+                                id="service"
+                                name="serviceId"
+                                required
+                            >
+
+                                <option value="">
+                                    Loading services...
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="ip-form-group">
+
+                            <label for="provider">
+                                Preferred Professional
+                            </label>
+
+                            <select
+                                id="provider"
+                                name="providerId"
+                            >
+
+                                <option value="">
+                                    Any available professional
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="ip-form-group">
+
+                            <label for="booking-date">
+                                Date
+                            </label>
+
+                            <input
+                                id="booking-date"
+                                name="date"
+                                type="date"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="ip-form-group">
+
+                            <label for="booking-time">
+                                Selected Time
+                            </label>
+
+                            <input
+                                id="booking-time"
+                                name="time"
+                                type="text"
+                                readonly
+                                placeholder="Select a time below"
+                                required
+                            >
+
+                        </div>
+
+
+                        <hr>
+
+
+                        <h3>
+                            Your Contact Details
+                        </h3>
+
+
+                        <div class="ip-form-group">
+
+                            <label for="client-name">
+                                Full Name
+                            </label>
+
+                            <input
+                                id="client-name"
+                                name="clientName"
+                                type="text"
+                                maxlength="200"
+                                autocomplete="name"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="ip-form-group">
+
+                            <label for="client-email">
+                                Email Address
+                            </label>
+
+                            <input
+                                id="client-email"
+                                name="clientEmail"
+                                type="email"
+                                maxlength="254"
+                                autocomplete="email"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="ip-form-group">
+
+                            <label for="client-phone">
+                                Telephone / WhatsApp
+                            </label>
+
+                            <input
+                                id="client-phone"
+                                name="clientPhone"
+                                type="tel"
+                                maxlength="30"
+                                autocomplete="tel"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="ip-form-group">
+
+                            <label for="booking-notes">
+                                Additional Information
+                            </label>
+
+                            <textarea
+                                id="booking-notes"
+                                name="notes"
+                                rows="4"
+                                maxlength="2000"
+                                placeholder="Optional"
+                            ></textarea>
+
+                        </div>
+
+
+                        <div
+                            class="ip-card"
+                            data-booking-summary
+                        >
+
+                            <p>
+                                Select your appointment details
+                                to see a summary.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="ip-button ip-button--primary ip-button--full"
+                        >
+                            Confirm Booking
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </article>
+
+
+            <aside>
+
+                <article class="ip-card">
+
+                    <header class="ip-card__header">
+
+                        <div>
+
+                            <h2 class="ip-card__title">
+                                Select Date &amp; Time
+                            </h2>
+
+                            <p class="ip-card__subtitle">
+                                Available appointment slots
+                                are shown below.
+                            </p>
+
+                        </div>
+
+                    </header>
+
+
+                    <div class="ip-card__body">
+
+                        <div
+                            id="booking-calendar"
+                            aria-label="Appointment calendar"
+                        ></div>
+
+                    </div>
+
+                </article>
+
+
+                <article class="ip-card">
+
+                    <div class="ip-card__body">
+
+                        <h3>
+                            Need assistance?
+                        </h3>
+
+                        <p>
+                            If you cannot find a suitable
+                            appointment, contact Isaacs &amp;
+                            Partners directly.
+                        </p>
+
+                        <a
+                            href="mailto:info@isaacsandpartners.online"
+                            class="ip-button ip-button--secondary"
+                        >
+                            Contact Us
+                        </a>
+
+                    </div>
+
+                </article>
+
+            </aside>
+
+        </section>
+
+    </main>
+
+
+    <div
+        id="booking-confirmation"
+        data-booking-confirmation
+        hidden
+    ></div>
+
+
+    <footer class="ip-footer">
+
+        <div class="ip-footer__inner">
+
+            <strong>
+                Isaacs &amp; Partners
+            </strong>
+
+            <span>
+                © <span data-current-year></span>
+                Isaacs and Partners Pty(Ltd)
+            </span>
+
+            <a
+                href="mailto:info@isaacsandpartners.online"
+            >
+                info@isaacsandpartners.online
+            </a>
+
+        </div>
+
+    </footer>
+
+
+    <script type="module">
+
+        import BookingController
+            from "./booking.js";
+
+        import BookingCalendar
+            from "./calendar.js";
+
+        import BookingConfirmation
+            from "./confirmation.js";
+
+
+        const form =
+            document.querySelector(
+                "[data-booking-form]"
+            );
+
+        const calendar =
+            new BookingCalendar({
+                container:
+                    "#booking-calendar",
+            });
+
+
+        const confirmation =
+            new BookingConfirmation({
+                container:
+                    "#booking-confirmation",
+            });
+
+
+        const booking =
+            new BookingController({
+                form,
+                calendar,
+                confirmation,
+            });
+
+
+        calendar.onDateSelected =
+            date => {
+
+                const input =
+                    form.querySelector(
+                        '[name="date"]'
+                    );
+
+                if (input) {
+                    input.value = date;
+                }
+
+                booking.state.date =
+                    date;
+
+                booking.refreshAvailability();
+            };
+
+
+        calendar.onTimeSelected =
+            time => {
+                booking.selectTime(time);
+            };
+
+
+        calendar.render();
+
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            async () => {
+                await booking.initialise();
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
