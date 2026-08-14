@@ -1,79 +1,58 @@
 /**
- * ============================================================
- * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * Repository
  * ------------------------------------------------------------
- * Abstract repository for all data persistence.
- * Every repository in the platform extends this class.
- * ============================================================
+ * Abstract repository contract.
+ *
+ * Concrete implementations belong in:
+ * app/repositories/
+ * app/storage/
+ *
+ * This class intentionally does not decide whether storage is
+ * SQLite, IndexedDB, Supabase, memory, etc.
  */
 
-export default class Repository {
-
-    constructor(storage = null) {
-
-        this.storage = storage;
-
+export class Repository {
+    async findById(_id) {
+        throw new Error(
+            "Repository.findById() must be implemented"
+        );
     }
 
-    /**
-     * Find entity by ID
-     */
-
-    async findById(id) {
-
-        throw new Error("findById() must be implemented.");
-
+    async findAll(_criteria = {}) {
+        throw new Error(
+            "Repository.findAll() must be implemented"
+        );
     }
 
-    /**
-     * Return all entities
-     */
-
-    async findAll() {
-
-        throw new Error("findAll() must be implemented.");
-
+    async create(_entity) {
+        throw new Error(
+            "Repository.create() must be implemented"
+        );
     }
 
-    /**
-     * Save entity
-     */
-
-    async save(entity) {
-
-        throw new Error("save() must be implemented.");
-
+    async update(_id, _changes) {
+        throw new Error(
+            "Repository.update() must be implemented"
+        );
     }
 
-    /**
-     * Update entity
-     */
-
-    async update(entity) {
-
-        throw new Error("update() must be implemented.");
-
+    async delete(_id) {
+        throw new Error(
+            "Repository.delete() must be implemented"
+        );
     }
 
-    /**
-     * Delete entity
-     */
-
-    async delete(id) {
-
-        throw new Error("delete() must be implemented.");
-
+    async exists(_criteria = {}) {
+        throw new Error(
+            "Repository.exists() must be implemented"
+        );
     }
 
-    /**
-     * Check existence
-     */
-
-    async exists(id) {
-
-        throw new Error("exists() must be implemented.");
-
+    async count(_criteria = {}) {
+        throw new Error(
+            "Repository.count() must be implemented"
+        );
     }
-
 }
+
+export default Repository;
