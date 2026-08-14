@@ -1,1 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Clients | Isaacs and Partners</title>
+  <link rel="stylesheet" href="../css/app.css">
+</head>
 
+<body data-page="clients-dashboard">
+  <div id="app-shell"></div>
+
+  <main class="dashboard-page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Client Management</p>
+        <h1>Clients</h1>
+        <p class="page-description">
+          Manage client records, matters, documents and communication history.
+        </p>
+      </div>
+
+      <div class="page-actions">
+        <button type="button" class="btn btn-secondary" id="export-clients">
+          Export
+        </button>
+
+        <button type="button" class="btn btn-primary" id="add-client">
+          Add Client
+        </button>
+      </div>
+    </header>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">Total Clients</span>
+        <strong id="total-clients">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Active Clients</span>
+        <strong id="active-clients">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">New This Month</span>
+        <strong id="new-clients-month">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Outstanding Documents</span>
+        <strong id="client-outstanding-documents">0</strong>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-toolbar">
+        <div class="search-box">
+          <label for="client-search" class="sr-only">
+            Search clients
+          </label>
+
+          <input
+            id="client-search"
+            type="search"
+            class="form-control"
+            placeholder="Search name, passport, email or matter number..."
+            autocomplete="off"
+          >
+        </div>
+
+        <select id="client-status-filter" class="form-control">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="archived">Archived</option>
+        </select>
+
+        <select id="client-department-filter" class="form-control">
+          <option value="">All departments</option>
+          <option value="immigration">Immigration</option>
+          <option value="hr-ir">HR & Industrial Relations</option>
+          <option value="business-compliance">Business Compliance</option>
+          <option value="legal">Legal Services</option>
+        </select>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Passport / ID</th>
+              <th>Contact</th>
+              <th>Matters</th>
+              <th>Documents</th>
+              <th>Status</th>
+              <th>Updated</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody id="clients-table">
+            <tr>
+              <td colspan="8">Loading clients...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="clients-pagination"></div>
+    </section>
+  </main>
+
+  <script type="module" src="../js/app.js"></script>
+</body>
+</html>
