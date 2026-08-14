@@ -1,1 +1,21 @@
-
+CREATE TABLE IF NOT EXISTS knowledge (
+    id TEXT PRIMARY KEY,
+    domain TEXT NOT NULL,
+    category TEXT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    source_type TEXT,
+    source_name TEXT,
+    source_url TEXT,
+    citation TEXT,
+    source_date TEXT,
+    effective_date TEXT,
+    version TEXT,
+    jurisdiction TEXT DEFAULT 'South Africa',
+    status TEXT NOT NULL DEFAULT 'active',
+    authority_level TEXT,
+    tags TEXT,
+    metadata TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
