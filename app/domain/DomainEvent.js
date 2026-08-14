@@ -1,79 +1,97 @@
 /**
- * ============================================================
- * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * DomainEvent
  * ------------------------------------------------------------
- * Base class for all domain events.
- * Every event in the platform inherits from this class.
- * ============================================================
+ * Base class for domain events.
+ *
+ * Events are immutable snapshots of something that happened
+ * inside the domain.
  */
 
-export default class DomainEvent {
+export class DomainEvent {
+    constructor({
+        eventName,
+        aggregateId = null,
+        aggregateType = null,
+        payload = {},
+        occurredAt = null,
+        eventId = null,
+        metadata = {}
+    } = {}) {
+        if (!eventName) {
+            throw new TypeError(
+                "eventName is required"
+            );
+        }
 
-    constructor(eventName, payload = {}) {
+        this.eventId =
+            eventId ||
+            DomainEvent.createId();
 
-        this.id = crypto.randomUUID();
+        this.eventName =
+            eventName;
 
-        this.eventName = eventName;
+        this.aggregateId =
+            aggregateId;
 
-        this.payload = payload;
+        this.aggregateType =
+            aggregateType;
 
-        this.timestamp = new Date().toISOString();
-
-        this.version = 1;
-
-    }
-
-    /**
-     * Event name
-     */
-
-    getName() {
-
-        return this.eventName;
-
-    }
-
-    /**
-     * Event payload
-     */
-
-    getPayload() {
-
-        return this.payload;
-
-    }
-
-    /**
-     * Event timestamp
-     */
-
-    getTimestamp() {
-
-        return this.timestamp;
-
-    }
-
-    /**
-     * Convert event to JSON
-     */
-
-    toJSON() {
-
-        return {
-
-            id: this.id,
-
-            eventName: this.eventName,
-
-            payload: this.payload,
-
-            timestamp: this.timestamp,
-
-            version: this.version
-
+        this.payload = {
+            ...payload
         };
 
+        this.occurredAt =
+            occurredAt ||
+            new Date().toISOString();
+
+        this.metadata = {
+            ...metadata
+        };
+
+        Object.freeze(
+            this.payload
+        );
+
+        Object.freeze(
+            this.metadata
+        );
+
+        Object.freeze(this);
     }
 
+    toJSON() {
+        return {
+            eventId:
+                this.eventId,
+            eventName:
+                this.eventName,
+            aggregateId:
+                this.aggregateId,
+            aggregateType:
+                this.aggregateType,
+            payload:
+                this.payload,
+            occurredAt:
+                this.occurredAt,
+            metadata:
+                this.metadata
+        };
+    }
+
+    static createId() {
+        if (
+            typeof crypto !==
+                "undefined" &&
+            typeof crypto.randomUUID ===
+                "function"
+        ) {
+            return crypto.randomUUID();
+        }
+
+        return `${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2)}`;
+    }
 }
+
+export default DomainEvent;
