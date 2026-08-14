@@ -1,1 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Staff | Isaacs and Partners</title>
+  <link rel="stylesheet" href="../css/app.css">
+</head>
 
+<body data-page="staff-dashboard">
+  <div id="app-shell"></div>
+
+  <main class="dashboard-page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Operations</p>
+        <h1>Staff</h1>
+        <p class="page-description">
+          Staff activity, assignments, workload and operational performance.
+        </p>
+      </div>
+
+      <div class="page-actions">
+        <button type="button" class="btn btn-primary" id="add-staff">
+          Add Staff
+        </button>
+      </div>
+    </header>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">Total Staff</span>
+        <strong id="total-staff">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Active</span>
+        <strong id="active-staff">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Online</span>
+        <strong id="online-staff">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Outstanding Tasks</span>
+        <strong id="staff-outstanding-tasks">0</strong>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-toolbar">
+        <input
+          id="staff-search"
+          type="search"
+          class="form-control"
+          placeholder="Search staff..."
+          autocomplete="off"
+        >
+
+        <select id="staff-department-filter" class="form-control">
+          <option value="">All departments</option>
+          <option value="immigration">Immigration</option>
+          <option value="hr-ir">HR & Industrial Relations</option>
+          <option value="business-compliance">Business Compliance</option>
+          <option value="legal">Legal Services</option>
+        </select>
+
+        <select id="staff-status-filter" class="form-control">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="suspended">Suspended</option>
+        </select>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Matters</th>
+              <th>Tasks</th>
+              <th>Status</th>
+              <th>Last Active</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody id="staff-table">
+            <tr>
+              <td colspan="8">Loading staff...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Workload Distribution</h2>
+        </div>
+
+        <div id="staff-workload"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Recent Staff Activity</h2>
+        </div>
+
+        <div id="staff-activity" class="activity-list"></div>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="../js/app.js"></script>
+</body>
+</html>
