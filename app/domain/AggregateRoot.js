@@ -1,67 +1,94 @@
 /**
- * ============================================================
- * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * AggregateRoot
  * ------------------------------------------------------------
- * Base class for aggregate roots.
- * Responsible for managing domain events.
- * ============================================================
+ * Base class for domain aggregates.
+ *
+ * Responsibilities:
+ * - Identity
+ * - Domain event collection
+ * - Event registration/release
+ * - Version tracking
+ * - Aggregate lifecycle metadata
+ *
+ * It intentionally contains no persistence logic.
  */
 
 import Entity from "./Entity.js";
 
-export default class AggregateRoot extends Entity {
+export class AggregateRoot extends Entity {
+    constructor(props = {}) {
+        super(props);
 
-    constructor(id = null) {
-
-        super(id);
-
-        this.domainEvents = [];
-
+        this._domainEvents = [];
+        this._version =
+            Number.isInteger(props.version)
+                ? props.version
+                : 0;
     }
 
-    /**
-     * Add a new domain event
-     */
+    get version() {
+        return this._version;
+    }
+
+    incrementVersion() {
+        this._version += 1;
+        return this._version;
+    }
 
     addDomainEvent(event) {
+        if (!event) {
+            throw new TypeError(
+                "Domain event is required"
+            );
+        }
 
-        this.domainEvents.push(event);
-
-        return this;
-
+        this._domainEvents.push(event);
+        return event;
     }
 
-    /**
-     * Return all pending domain events
-     */
+    addEvent(event) {
+        return this.addDomainEvent(event);
+    }
+
+    pullDomainEvents() {
+        const events = [
+            ...this._domainEvents
+        ];
+
+        this._domainEvents = [];
+
+        return events;
+    }
+
+    releaseEvents() {
+        return this.pullDomainEvents();
+    }
 
     getDomainEvents() {
-
-        return [...this.domainEvents];
-
+        return [
+            ...this._domainEvents
+        ];
     }
-
-    /**
-     * Clear pending events
-     */
 
     clearDomainEvents() {
-
-        this.domainEvents = [];
-
-        return this;
-
+        this._domainEvents = [];
     }
-
-    /**
-     * Check if events exist
-     */
 
     hasDomainEvents() {
-
-        return this.domainEvents.length > 0;
-
+        return this._domainEvents.length > 0;
     }
 
+    markChanged() {
+        this.incrementVersion();
+        return this;
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            version: this.version
+        };
+    }
 }
+
+export default AggregateRoot;
