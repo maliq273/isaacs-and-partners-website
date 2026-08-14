@@ -1,80 +1,86 @@
 /**
- * ============================================================
- * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * Entity
  * ------------------------------------------------------------
- * Base class for all identifiable domain objects.
- * ============================================================
+ * Base domain entity.
+ *
+ * Equality is identity-based rather than property-based.
  */
 
-import BaseModel from "./BaseModel.js";
+export class Entity {
+    constructor(props = {}) {
+        this.id =
+            props.id ||
+            Entity.createId();
 
-export default class Entity extends BaseModel {
+        this._createdAt =
+            props.createdAt ||
+            new Date().toISOString();
 
-    constructor(id = null) {
-
-        super();
-
-        if (id) {
-
-            this.id = id;
-
-        } else {
-
-            this.ensureId();
-
-        }
-
+        this._updatedAt =
+            props.updatedAt ||
+            this._createdAt;
     }
 
-    /**
-     * Compare entities by ID
-     */
-
-    equals(entity) {
-
-        if (!entity) {
-
-            return false;
-
-        }
-
-        return this.id === entity.id;
-
+    get createdAt() {
+        return this._createdAt;
     }
 
-    /**
-     * Clone this entity
-     */
-
-    clone() {
-
-        return new this.constructor().fromJSON(this.toJSON());
-
+    get updatedAt() {
+        return this._updatedAt;
     }
 
-    /**
-     * Mark entity as modified
-     */
-
-    markUpdated(updatedBy = null) {
-
-        this.updatedBy = updatedBy;
-
-        this.touch();
+    touch() {
+        this._updatedAt =
+            new Date().toISOString();
 
         return this;
-
     }
 
-    /**
-     * Returns true if entity is active
-     */
+    equals(other) {
+        if (
+            other === null ||
+            other === undefined
+        ) {
+            return false;
+        }
 
-    isActive() {
+        if (
+            other === this
+        ) {
+            return true;
+        }
 
-        return this.active && !this.deleted;
-
+        return (
+            this.constructor ===
+                other.constructor &&
+            this.id === other.id
+        );
     }
 
+    toJSON() {
+        return {
+            id: this.id,
+            createdAt:
+                this.createdAt,
+            updatedAt:
+                this.updatedAt
+        };
+    }
+
+    static createId() {
+        if (
+            typeof crypto !==
+                "undefined" &&
+            typeof crypto.randomUUID ===
+                "function"
+        ) {
+            return crypto.randomUUID();
+        }
+
+        return `${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2)}`;
+    }
 }
+
+export default Entity;
