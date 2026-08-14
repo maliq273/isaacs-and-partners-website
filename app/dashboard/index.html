@@ -1,1 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Dashboard | Isaacs and Partners</title>
+  <link rel="stylesheet" href="../css/app.css">
+</head>
 
+<body data-page="dashboard">
+  <div id="app-shell"></div>
+
+  <main class="dashboard-page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Isaacs and Partners</p>
+        <h1 id="dashboard-greeting">Dashboard</h1>
+        <p class="page-description">
+          Overview of matters, clients, documents, workflows and operations.
+        </p>
+      </div>
+
+      <div class="page-actions">
+        <button type="button" class="btn btn-primary" id="create-matter">
+          New Matter
+        </button>
+      </div>
+    </header>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">Active Clients</span>
+        <strong id="dashboard-active-clients">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Open Matters</span>
+        <strong id="dashboard-open-matters">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Outstanding Documents</span>
+        <strong id="dashboard-documents">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Outstanding Balance</span>
+        <strong id="dashboard-balance">R0.00</strong>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel panel-large">
+        <div class="panel-header">
+          <div>
+            <h2>Recent Matters</h2>
+            <p>Latest activity across your matters.</p>
+          </div>
+
+          <a href="./matters.html" class="panel-link">
+            View all
+          </a>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Matter</th>
+                <th>Client</th>
+                <th>Department</th>
+                <th>Stage</th>
+                <th>Priority</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+
+            <tbody id="recent-matters">
+              <tr>
+                <td colspan="6">Loading matters...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Tasks</h2>
+            <p>Items requiring attention.</p>
+          </div>
+        </div>
+
+        <div id="dashboard-tasks" class="activity-list">
+          <div class="empty-state">
+            No outstanding tasks.
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Department Overview</h2>
+        </div>
+
+        <div id="department-overview"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <h2>Recent Activity</h2>
+        </div>
+
+        <div id="dashboard-activity" class="activity-list"></div>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="../js/app.js"></script>
+</body>
+</html>
