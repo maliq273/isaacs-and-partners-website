@@ -1,1 +1,210 @@
-
+{
+  "version": "1.0.0",
+  "defaultCountry": "ZA",
+  "countries": [
+    {
+      "code": "ZA",
+      "name": "South Africa",
+      "nationality": "South African",
+      "active": true
+    },
+    {
+      "code": "ZW",
+      "name": "Zimbabwe",
+      "nationality": "Zimbabwean",
+      "active": true
+    },
+    {
+      "code": "MZ",
+      "name": "Mozambique",
+      "nationality": "Mozambican",
+      "active": true
+    },
+    {
+      "code": "MW",
+      "name": "Malawi",
+      "nationality": "Malawian",
+      "active": true
+    },
+    {
+      "code": "ZM",
+      "name": "Zambia",
+      "nationality": "Zambian",
+      "active": true
+    },
+    {
+      "code": "NA",
+      "name": "Namibia",
+      "nationality": "Namibian",
+      "active": true
+    },
+    {
+      "code": "BW",
+      "name": "Botswana",
+      "nationality": "Botswanan",
+      "active": true
+    },
+    {
+      "code": "LS",
+      "name": "Lesotho",
+      "nationality": "Mosotho",
+      "active": true
+    },
+    {
+      "code": "SZ",
+      "name": "Eswatini",
+      "nationality": "Eswatini",
+      "active": true
+    },
+    {
+      "code": "NG",
+      "name": "Nigeria",
+      "nationality": "Nigerian",
+      "active": true
+    },
+    {
+      "code": "GH",
+      "name": "Ghana",
+      "nationality": "Ghanaian",
+      "active": true
+    },
+    {
+      "code": "KE",
+      "name": "Kenya",
+      "nationality": "Kenyan",
+      "active": true
+    },
+    {
+      "code": "TZ",
+      "name": "Tanzania",
+      "nationality": "Tanzanian",
+      "active": true
+    },
+    {
+      "code": "UG",
+      "name": "Uganda",
+      "nationality": "Ugandan",
+      "active": true
+    },
+    {
+      "code": "CD",
+      "name": "Democratic Republic of the Congo",
+      "nationality": "Congolese",
+      "active": true
+    },
+    {
+      "code": "CM",
+      "name": "Cameroon",
+      "nationality": "Cameroonian",
+      "active": true
+    },
+    {
+      "code": "ET",
+      "name": "Ethiopia",
+      "nationality": "Ethiopian",
+      "active": true
+    },
+    {
+      "code": "SO",
+      "name": "Somalia",
+      "nationality": "Somali",
+      "active": true
+    },
+    {
+      "code": "SD",
+      "name": "Sudan",
+      "nationality": "Sudanese",
+      "active": true
+    },
+    {
+      "code": "PK",
+      "name": "Pakistan",
+      "nationality": "Pakistani",
+      "active": true
+    },
+    {
+      "code": "IN",
+      "name": "India",
+      "nationality": "Indian",
+      "active": true
+    },
+    {
+      "code": "BD",
+      "name": "Bangladesh",
+      "nationality": "Bangladeshi",
+      "active": true
+    },
+    {
+      "code": "CN",
+      "name": "China",
+      "nationality": "Chinese",
+      "active": true
+    },
+    {
+      "code": "GB",
+      "name": "United Kingdom",
+      "nationality": "British",
+      "active": true
+    },
+    {
+      "code": "US",
+      "name": "United States",
+      "nationality": "American",
+      "active": true
+    },
+    {
+      "code": "CA",
+      "name": "Canada",
+      "nationality": "Canadian",
+      "active": true
+    },
+    {
+      "code": "AU",
+      "name": "Australia",
+      "nationality": "Australian",
+      "active": true
+    },
+    {
+      "code": "DE",
+      "name": "Germany",
+      "nationality": "German",
+      "active": true
+    },
+    {
+      "code": "FR",
+      "name": "France",
+      "nationality": "French",
+      "active": true
+    },
+    {
+      "code": "NL",
+      "name": "Netherlands",
+      "nationality": "Dutch",
+      "active": true
+    },
+    {
+      "code": "PT",
+      "name": "Portugal",
+      "nationality": "Portuguese",
+      "active": true
+    },
+    {
+      "code": "IT",
+      "name": "Italy",
+      "nationality": "Italian",
+      "active": true
+    },
+    {
+      "code": "ES",
+      "name": "Spain",
+      "nationality": "Spanish",
+      "active": true
+    },
+    {
+      "code": "BR",
+      "name": "Brazil",
+      "nationality": "Brazilian",
+      "active": true
+    }
+  ]
+}
