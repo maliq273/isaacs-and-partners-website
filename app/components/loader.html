@@ -1,1 +1,33 @@
+<div
+    class="ip-loader"
+    data-component="loader"
+    data-loader
+    role="status"
+    aria-live="polite"
+    aria-label="Loading"
+    hidden
+>
+    <div class="ip-loader__spinner" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
 
+    <div class="ip-loader__content">
+        <strong data-loader-title>Loading</strong>
+        <span data-loader-message>
+            Please wait...
+        </span>
+    </div>
+</div>
+
+<template id="inline-loader-template">
+    <span
+        class="ip-inline-loader"
+        data-inline-loader
+        role="status"
+        aria-label="Loading"
+    >
+        <span class="ip-inline-loader__spinner" aria-hidden="true"></span>
+    </span>
+</template>
