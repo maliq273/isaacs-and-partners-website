@@ -1,1 +1,211 @@
-
+{
+  "version": "1.0.0",
+  "jurisdiction": "ZA",
+  "occupations": [
+    {
+      "id": "accountant",
+      "name": "Accountant",
+      "category": "finance"
+    },
+    {
+      "id": "auditor",
+      "name": "Auditor",
+      "category": "finance"
+    },
+    {
+      "id": "financial-manager",
+      "name": "Financial Manager",
+      "category": "finance"
+    },
+    {
+      "id": "engineer",
+      "name": "Engineer",
+      "category": "engineering"
+    },
+    {
+      "id": "civil-engineer",
+      "name": "Civil Engineer",
+      "category": "engineering"
+    },
+    {
+      "id": "mechanical-engineer",
+      "name": "Mechanical Engineer",
+      "category": "engineering"
+    },
+    {
+      "id": "electrical-engineer",
+      "name": "Electrical Engineer",
+      "category": "engineering"
+    },
+    {
+      "id": "software-developer",
+      "name": "Software Developer",
+      "category": "technology"
+    },
+    {
+      "id": "software-engineer",
+      "name": "Software Engineer",
+      "category": "technology"
+    },
+    {
+      "id": "data-scientist",
+      "name": "Data Scientist",
+      "category": "technology"
+    },
+    {
+      "id": "cybersecurity-specialist",
+      "name": "Cybersecurity Specialist",
+      "category": "technology"
+    },
+    {
+      "id": "systems-administrator",
+      "name": "Systems Administrator",
+      "category": "technology"
+    },
+    {
+      "id": "doctor",
+      "name": "Medical Doctor",
+      "category": "healthcare"
+    },
+    {
+      "id": "nurse",
+      "name": "Professional Nurse",
+      "category": "healthcare"
+    },
+    {
+      "id": "pharmacist",
+      "name": "Pharmacist",
+      "category": "healthcare"
+    },
+    {
+      "id": "medical-specialist",
+      "name": "Medical Specialist",
+      "category": "healthcare"
+    },
+    {
+      "id": "teacher",
+      "name": "Teacher",
+      "category": "education"
+    },
+    {
+      "id": "lecturer",
+      "name": "Lecturer",
+      "category": "education"
+    },
+    {
+      "id": "researcher",
+      "name": "Researcher",
+      "category": "education"
+    },
+    {
+      "id": "lawyer",
+      "name": "Legal Practitioner",
+      "category": "legal"
+    },
+    {
+      "id": "architect",
+      "name": "Architect",
+      "category": "professional"
+    },
+    {
+      "id": "quantity-surveyor",
+      "name": "Quantity Surveyor",
+      "category": "construction"
+    },
+    {
+      "id": "project-manager",
+      "name": "Project Manager",
+      "category": "management"
+    },
+    {
+      "id": "business-manager",
+      "name": "Business Manager",
+      "category": "management"
+    },
+    {
+      "id": "human-resources-manager",
+      "name": "Human Resources Manager",
+      "category": "hr"
+    },
+    {
+      "id": "marketing-manager",
+      "name": "Marketing Manager",
+      "category": "marketing"
+    },
+    {
+      "id": "chef",
+      "name": "Chef",
+      "category": "hospitality"
+    },
+    {
+      "id": "hospitality-manager",
+      "name": "Hospitality Manager",
+      "category": "hospitality"
+    },
+    {
+      "id": "electrician",
+      "name": "Electrician",
+      "category": "trades"
+    },
+    {
+      "id": "plumber",
+      "name": "Plumber",
+      "category": "trades"
+    },
+    {
+      "id": "welder",
+      "name": "Welder",
+      "category": "trades"
+    },
+    {
+      "id": "technician",
+      "name": "Technician",
+      "category": "technical"
+    },
+    {
+      "id": "project-coordinator",
+      "name": "Project Coordinator",
+      "category": "administration"
+    },
+    {
+      "id": "administrator",
+      "name": "Administrator",
+      "category": "administration"
+    },
+    {
+      "id": "sales-manager",
+      "name": "Sales Manager",
+      "category": "sales"
+    },
+    {
+      "id": "sales-representative",
+      "name": "Sales Representative",
+      "category": "sales"
+    },
+    {
+      "id": "retail-manager",
+      "name": "Retail Manager",
+      "category": "retail"
+    },
+    {
+      "id": "construction-manager",
+      "name": "Construction Manager",
+      "category": "construction"
+    },
+    {
+      "id": "quantity-surveyor",
+      "name": "Quantity Surveyor",
+      "category": "construction"
+    },
+    {
+      "id": "general-worker",
+      "name": "General Worker",
+      "category": "general"
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "category": "other"
+    }
+  ]
+}
