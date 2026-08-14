@@ -1,11 +1,29 @@
-/**
- * Database Functions Barrel
- * ------------------------------------------------------------
- * Single import point for database utility functions.
- */
+export {
+    generateId,
+    nowISO,
+    quoteIdentifier,
+    buildEquality,
+    buildIsNull,
+    buildIsNotNull,
+    normalizeDatabaseValue,
+    normalizeParameters,
+    buildInsert,
+    buildUpdate,
+    buildDelete
+} from "./DatabaseFunctions.js";
 
-export * from "./DatabaseFunctions.js";
-export * from "./DateFunctions.js";
-export * from "./JsonFunctions.js";
-export * from "./SearchFunctions.js";
-export * from "./AuditFunctions.js";
+export {
+    normalizeSearchText,
+    escapeLikeValue,
+    createSearchPattern,
+    buildMultiColumnSearch,
+    buildTokenSearch,
+    tokenizeSearch
+} from "./SearchFunctions.js";
+
+export {
+    createIndexSQL,
+    dropIndexSQL,
+    tableExistsSQL,
+    indexExistsSQL
+} from "./DatabaseSchemaFunctions.js";
