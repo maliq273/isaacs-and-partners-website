@@ -1,17 +1,14 @@
-const MatterDepartment = Object.freeze({
-
-    IMMIGRATION: "IMMIGRATION",
-
-    HR_IR: "HR_IR",
-
-    LEGAL: "LEGAL",
-
-    BUSINESS_COMPLIANCE: "BUSINESS_COMPLIANCE",
-
-    NOTARY: "NOTARY",
-
-    PAYROLL: "PAYROLL"
-
+export const MatterDepartment = Object.freeze({
+    IMMIGRATION: "immigration",
+    LABOUR: "labour",
+    HR: "hr",
+    LEGAL: "legal",
+    BUSINESS: "business",
+    CONTRACTS: "contracts",
+    MEDIATION: "mediation",
+    NOTARY: "notary",
+    APPEALS: "appeals",
+    GENERAL: "general"
 });
 
 export default MatterDepartment;
