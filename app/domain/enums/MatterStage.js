@@ -1,27 +1,18 @@
-const MatterStage = Object.freeze({
-
-    ENQUIRY: "ENQUIRY",
-
-    AI_CONSULTATION: "AI_CONSULTATION",
-
-    DOCUMENT_COLLECTION: "DOCUMENT_COLLECTION",
-
-    DOCUMENT_REVIEW: "DOCUMENT_REVIEW",
-
-    BOOKING: "BOOKING",
-
-    CONSULTATION: "CONSULTATION",
-
-    PREPARATION: "PREPARATION",
-
-    SUBMISSION: "SUBMISSION",
-
-    WAITING: "WAITING",
-
-    OUTCOME: "OUTCOME",
-
-    COMPLETED: "COMPLETED"
-
+export const MatterStage = Object.freeze({
+    INTAKE: "intake",
+    CONSULTATION: "consultation",
+    ELIGIBILITY: "eligibility",
+    DOCUMENT_COLLECTION:
+        "document_collection",
+    PREPARATION: "preparation",
+    REVIEW: "review",
+    SUBMISSION: "submission",
+    PROCESSING: "processing",
+    HEARING: "hearing",
+    NEGOTIATION: "negotiation",
+    APPEAL: "appeal",
+    OUTCOME: "outcome",
+    CLOSURE: "closure"
 });
 
 export default MatterStage;
