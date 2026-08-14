@@ -1,1 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Isaacs and Partners client consultation and legal eligibility assessment."
+    >
+
+    <title>Client Consultation | Isaacs and Partners</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/variables.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/layout.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/components.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/forms.css"
+    >
+</head>
+
+<body
+    data-page="consultation"
+    data-app-module="consultation"
+>
+
+    <main
+        id="consultation-app"
+        class="consultation-app"
+        aria-labelledby="consultation-title"
+    >
+
+        <header class="consultation-header">
+
+            <div class="consultation-brand">
+                <img
+                    src="../assets/logo.png"
+                    alt="Isaacs and Partners"
+                    class="consultation-logo"
+                >
+
+                <div>
+                    <h1 id="consultation-title">
+                        Client Consultation
+                    </h1>
+
+                    <p>
+                        Confidential preliminary assessment
+                    </p>
+                </div>
+            </div>
+
+            <div
+                id="consultation-status"
+                class="consultation-status"
+                aria-live="polite"
+            >
+                Step 1 of 5
+            </div>
+
+        </header>
+
+
+        <section
+            id="consultation-progress"
+            class="consultation-progress"
+            aria-label="Consultation progress"
+        >
+
+            <ol class="progress-list">
+
+                <li
+                    class="progress-step is-active"
+                    data-step="1"
+                >
+                    <span>1</span>
+                    <strong>Questions</strong>
+                </li>
+
+                <li
+                    class="progress-step"
+                    data-step="2"
+                >
+                    <span>2</span>
+                    <strong>Review</strong>
+                </li>
+
+                <li
+                    class="progress-step"
+                    data-step="3"
+                >
+                    <span>3</span>
+                    <strong>Assessment</strong>
+                </li>
+
+                <li
+                    class="progress-step"
+                    data-step="4"
+                >
+                    <span>4</span>
+                    <strong>Summary</strong>
+                </li>
+
+                <li
+                    class="progress-step"
+                    data-step="5"
+                >
+                    <span>5</span>
+                    <strong>Complete</strong>
+                </li>
+
+            </ol>
+
+        </section>
+
+
+        <section
+            id="consultation-container"
+            class="consultation-container"
+        >
+
+            <div
+                id="consultation-alert"
+                class="form-alert"
+                role="alert"
+                aria-live="assertive"
+                hidden
+            ></div>
+
+
+            <form
+                id="consultation-form"
+                novalidate
+                autocomplete="off"
+            >
+
+                <div
+                    id="consultation-wizard"
+                    class="consultation-wizard"
+                >
+
+                    <!--
+                        wizard.js dynamically renders the active
+                        consultation step into this container.
+                    -->
+                    <div
+                        id="consultation-step"
+                        class="consultation-step"
+                    ></div>
+
+                </div>
+
+
+                <footer class="consultation-actions">
+
+                    <button
+                        type="button"
+                        id="consultation-back"
+                        class="btn btn-secondary"
+                        hidden
+                    >
+                        Back
+                    </button>
+
+                    <div class="consultation-actions-spacer"></div>
+
+                    <button
+                        type="button"
+                        id="consultation-save"
+                        class="btn btn-secondary"
+                    >
+                        Save &amp; Continue Later
+                    </button>
+
+                    <button
+                        type="button"
+                        id="consultation-next"
+                        class="btn btn-primary"
+                    >
+                        Continue
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="consultation-submit"
+                        class="btn btn-primary"
+                        hidden
+                    >
+                        Submit Consultation
+                    </button>
+
+                </footer>
+
+            </form>
+
+        </section>
+
+
+        <footer class="consultation-footer">
+
+            <p>
+                <strong>Isaacs and Partners</strong>
+                &mdash;
+                Confidential information is handled in accordance
+                with applicable privacy and data-protection
+                requirements.
+            </p>
+
+            <p>
+                This consultation is a preliminary assessment and
+                does not itself constitute a final legal opinion,
+                representation mandate, or attorney-client retainer.
+            </p>
+
+        </footer>
+
+    </main>
+
+
+    <noscript>
+        <div class="form-alert">
+            JavaScript is required to complete this consultation.
+            Please enable JavaScript and reload the page.
+        </div>
+    </noscript>
+
+
+    <script
+        type="module"
+        src="./wizard.js"
+    ></script>
+
+</body>
+</html>
