@@ -1,1 +1,114 @@
-
+{
+  "version": "1.0.0",
+  "defaultLanguage": "en",
+  "languages": [
+    {
+      "code": "en",
+      "name": "English",
+      "nativeName": "English",
+      "active": true
+    },
+    {
+      "code": "af",
+      "name": "Afrikaans",
+      "nativeName": "Afrikaans",
+      "active": true
+    },
+    {
+      "code": "zu",
+      "name": "Zulu",
+      "nativeName": "isiZulu",
+      "active": true
+    },
+    {
+      "code": "xh",
+      "name": "Xhosa",
+      "nativeName": "isiXhosa",
+      "active": true
+    },
+    {
+      "code": "st",
+      "name": "Southern Sotho",
+      "nativeName": "Sesotho",
+      "active": true
+    },
+    {
+      "code": "tn",
+      "name": "Tswana",
+      "nativeName": "Setswana",
+      "active": true
+    },
+    {
+      "code": "nso",
+      "name": "Northern Sotho",
+      "nativeName": "Sepedi",
+      "active": true
+    },
+    {
+      "code": "ts",
+      "name": "Tsonga",
+      "nativeName": "Xitsonga",
+      "active": true
+    },
+    {
+      "code": "ss",
+      "name": "Swati",
+      "nativeName": "siSwati",
+      "active": true
+    },
+    {
+      "code": "ve",
+      "name": "Venda",
+      "nativeName": "Tshivenda",
+      "active": true
+    },
+    {
+      "code": "nr",
+      "name": "Southern Ndebele",
+      "nativeName": "isiNdebele",
+      "active": true
+    },
+    {
+      "code": "pt",
+      "name": "Portuguese",
+      "nativeName": "Português",
+      "active": true
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "nativeName": "Français",
+      "active": true
+    },
+    {
+      "code": "sw",
+      "name": "Swahili",
+      "nativeName": "Kiswahili",
+      "active": true
+    },
+    {
+      "code": "ar",
+      "name": "Arabic",
+      "nativeName": "العربية",
+      "active": true
+    },
+    {
+      "code": "zh",
+      "name": "Mandarin Chinese",
+      "nativeName": "普通话",
+      "active": true
+    },
+    {
+      "code": "hi",
+      "name": "Hindi",
+      "nativeName": "हिन्दी",
+      "active": true
+    },
+    {
+      "code": "ur",
+      "name": "Urdu",
+      "nativeName": "اردو",
+      "active": true
+    }
+  ]
+}
