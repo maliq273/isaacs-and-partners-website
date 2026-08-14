@@ -1,12 +1,47 @@
-export { default as MatterStatus } from "./MatterStatus.js";
-export { default as MatterPriority } from "./MatterPriority.js";
-export { default as MatterStage } from "./MatterStage.js";
-export { default as MatterType } from "./MatterType.js";
-export { default as MatterDepartment } from "./MatterDepartment.js";
-export { default as MatterSource } from "./MatterSource.js";
-export { default as MatterVisibility } from "./MatterVisibility.js";
-export { default as MatterOutcome } from "./MatterOutcome.js";
-export { default as DocumentStatus } from "./DocumentStatus.js";
-export { default as AppointmentStatus } from "./AppointmentStatus.js";
-export { default as PaymentStatus } from "./PaymentStatus.js";
-export { default as InvoiceStatus } from "./InvoiceStatus.js";
+export {
+    default as AppointmentStatus
+} from "./AppointmentStatus.js";
+
+export {
+    default as DocumentStatus
+} from "./DocumentStatus.js";
+
+export {
+    default as InvoiceStatus
+} from "./InvoiceStatus.js";
+
+export {
+    default as MatterDepartment
+} from "./MatterDepartment.js";
+
+export {
+    default as MatterOutcome
+} from "./MatterOutcome.js";
+
+export {
+    default as MatterPriority
+} from "./MatterPriority.js";
+
+export {
+    default as MatterSource
+} from "./MatterSource.js";
+
+export {
+    default as MatterStage
+} from "./MatterStage.js";
+
+export {
+    default as MatterStatus
+} from "./MatterStatus.js";
+
+export {
+    default as MatterType
+} from "./MatterType.js";
+
+export {
+    default as MatterVisibility
+} from "./MatterVisibility.js";
+
+export {
+    default as PaymentStatus
+} from "./PaymentStatus.js";
