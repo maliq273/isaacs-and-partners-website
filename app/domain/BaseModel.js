@@ -1,142 +1,93 @@
 /**
- * ============================================================
- * ISAACS & PARTNERS ENTERPRISE PLATFORM
  * BaseModel
  * ------------------------------------------------------------
- * Every domain model inherits from this class.
- * ============================================================
+ * Common model behaviour for application/domain models.
+ *
+ * Designed to remain compatible with the existing model layer.
  */
 
-export default class BaseModel {
+export class BaseModel {
+    constructor(props = {}) {
+        Object.assign(this, props);
 
-    constructor() {
+        this.createdAt =
+            props.createdAt ||
+            new Date().toISOString();
 
-        this.id = null;
-
-        this.createdAt = new Date().toISOString();
-
-        this.updatedAt = new Date().toISOString();
-
-        this.createdBy = null;
-
-        this.updatedBy = null;
-
-        this.version = 1;
-
-        this.deleted = false;
-
-        this.active = true;
-
+        this.updatedAt =
+            props.updatedAt ||
+            this.createdAt;
     }
-
-    /**
-     * Generate a unique ID
-     */
-
-    generateId() {
-
-        return crypto.randomUUID();
-
-    }
-
-    /**
-     * Set model ID
-     */
-
-    setId(id) {
-
-        this.id = id;
-
-        return this;
-
-    }
-
-    /**
-     * Automatically create an ID if one does not exist
-     */
-
-    ensureId() {
-
-        if (!this.id) {
-
-            this.id = this.generateId();
-
-        }
-
-        return this.id;
-
-    }
-
-    /**
-     * Update timestamp
-     */
 
     touch() {
-
-        this.updatedAt = new Date().toISOString();
-
-        this.version++;
-
-    }
-
-    /**
-     * Soft delete
-     */
-
-    delete() {
-
-        this.deleted = true;
-
-        this.active = false;
-
-        this.touch();
-
-    }
-
-    /**
-     * Restore
-     */
-
-    restore() {
-
-        this.deleted = false;
-
-        this.active = true;
-
-        this.touch();
-
-    }
-
-    /**
-     * Basic validation
-     */
-
-    validate() {
-
-        return true;
-
-    }
-
-    /**
-     * Convert to JSON
-     */
-
-    toJSON() {
-
-        return JSON.parse(JSON.stringify(this));
-
-    }
-
-    /**
-     * Load JSON into model
-     */
-
-    fromJSON(data = {}) {
-
-        Object.assign(this, data);
+        this.updatedAt =
+            new Date().toISOString();
 
         return this;
-
     }
 
+    update(props = {}) {
+        Object.assign(this, props);
+        return this.touch();
+    }
+
+    get(key, fallback = undefined) {
+        return Object.prototype.hasOwnProperty.call(
+            this,
+            key
+        )
+            ? this[key]
+            : fallback;
+    }
+
+    set(key, value) {
+        this[key] = value;
+        this.touch();
+
+        return this;
+    }
+
+    toJSON() {
+        const result = {};
+
+        for (const key of Object.keys(this)) {
+            if (
+                key.startsWith("_")
+            ) {
+                continue;
+            }
+
+            const value = this[key];
+
+            if (
+                value &&
+                typeof value.toJSON ===
+                    "function"
+            ) {
+                result[key] =
+                    value.toJSON();
+            } else if (
+                Array.isArray(value)
+            ) {
+                result[key] =
+                    value.map((item) =>
+                        item &&
+                        typeof item.toJSON ===
+                            "function"
+                            ? item.toJSON()
+                            : item
+                    );
+            } else {
+                result[key] = value;
+            }
+        }
+
+        return result;
+    }
+
+    static fromJSON(data = {}) {
+        return new this(data);
+    }
 }
+
+export default BaseModel;
