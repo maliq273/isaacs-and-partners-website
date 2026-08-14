@@ -1,1 +1,71 @@
+<div
+    class="ip-modal"
+    data-component="modal"
+    data-modal
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    aria-describedby="modal-description"
+    hidden
+>
+    <div class="ip-modal__backdrop" data-modal-backdrop></div>
 
+    <div
+        class="ip-modal__dialog"
+        data-modal-dialog
+        tabindex="-1"
+    >
+        <header class="ip-modal__header">
+            <div>
+                <h2
+                    id="modal-title"
+                    class="ip-modal__title"
+                    data-modal-title
+                >
+                    Confirmation
+                </h2>
+
+                <p
+                    id="modal-description"
+                    class="ip-modal__description"
+                    data-modal-description
+                ></p>
+            </div>
+
+            <button
+                type="button"
+                class="ip-modal__close"
+                data-modal-close
+                aria-label="Close dialog"
+            >
+                ×
+            </button>
+        </header>
+
+        <div class="ip-modal__body" data-modal-body></div>
+
+        <footer class="ip-modal__footer" data-modal-footer>
+            <button
+                type="button"
+                class="ip-button ip-button--secondary"
+                data-modal-cancel
+            >
+                Cancel
+            </button>
+
+            <button
+                type="button"
+                class="ip-button ip-button--primary"
+                data-modal-confirm
+            >
+                Confirm
+            </button>
+        </footer>
+    </div>
+</div>
+
+<template id="confirm-modal-template">
+    <div class="ip-confirm-modal">
+        <p data-confirm-message></p>
+    </div>
+</template>
