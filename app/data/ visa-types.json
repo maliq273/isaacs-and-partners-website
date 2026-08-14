@@ -1,1 +1,122 @@
-
+{
+  "version": "1.0.0",
+  "jurisdiction": "ZA",
+  "country": "South Africa",
+  "lastUpdated": "2026-08-14",
+  "types": [
+    {
+      "id": "work",
+      "name": "Work Visas",
+      "category": "immigration",
+      "active": true,
+      "children": [
+        {
+          "id": "critical-skills",
+          "name": "Critical Skills Visa",
+          "section": "Section 19(4)",
+          "active": true
+        },
+        {
+          "id": "general-work",
+          "name": "General Work Visa",
+          "section": "Section 19(2)",
+          "active": true
+        },
+        {
+          "id": "corporate",
+          "name": "Corporate Visa",
+          "section": "Section 21",
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": "business",
+      "name": "Business Visa",
+      "category": "immigration",
+      "section": "Section 15",
+      "active": true
+    },
+    {
+      "id": "study",
+      "name": "Study Visa",
+      "category": "immigration",
+      "section": "Section 13",
+      "active": true
+    },
+    {
+      "id": "relative",
+      "name": "Relative Visa",
+      "category": "immigration",
+      "section": "Section 18",
+      "active": true
+    },
+    {
+      "id": "spousal",
+      "name": "Spousal Visa",
+      "category": "immigration",
+      "active": true
+    },
+    {
+      "id": "visitor",
+      "name": "Visitor Visa",
+      "category": "immigration",
+      "section": "Section 11",
+      "active": true
+    },
+    {
+      "id": "permanent-residence",
+      "name": "Permanent Residence",
+      "category": "immigration",
+      "active": true
+    },
+    {
+      "id": "citizenship",
+      "name": "Citizenship Application",
+      "category": "immigration",
+      "active": true
+    },
+    {
+      "id": "refugee-asylum",
+      "name": "Refugee & Asylum Assistance",
+      "category": "refugee",
+      "active": true
+    },
+    {
+      "id": "section-22",
+      "name": "Section 22 Application",
+      "category": "refugee",
+      "active": true
+    },
+    {
+      "id": "section-24",
+      "name": "Section 24 Application",
+      "category": "refugee",
+      "active": true
+    },
+    {
+      "id": "visa-appeal",
+      "name": "Visa Appeal",
+      "category": "immigration",
+      "active": true
+    },
+    {
+      "id": "dha-representation",
+      "name": "DHA Representation",
+      "category": "immigration",
+      "active": true
+    },
+    {
+      "id": "vfs-application",
+      "name": "VFS Global Application",
+      "category": "immigration",
+      "active": true
+    },
+    {
+      "id": "status-verification",
+      "name": "Status Verification",
+      "category": "immigration",
+      "active": true
+    }
+  ]
+}
