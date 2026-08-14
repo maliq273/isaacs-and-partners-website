@@ -1,1 +1,25 @@
-
+CREATE TABLE IF NOT EXISTS companies (
+    id TEXT PRIMARY KEY,
+    registration_number TEXT UNIQUE,
+    tax_number TEXT,
+    name TEXT NOT NULL,
+    trading_name TEXT,
+    vat_registered INTEGER NOT NULL DEFAULT 0,
+    vat_number TEXT,
+    email TEXT,
+    telephone TEXT,
+    physical_address TEXT,
+    postal_address TEXT,
+    bank_name TEXT,
+    account_holder TEXT,
+    account_number TEXT,
+    branch_code TEXT,
+    account_type TEXT,
+    payment_terms TEXT,
+    banking_reference_format TEXT,
+    legal_representative TEXT,
+    legal_representative_title TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
