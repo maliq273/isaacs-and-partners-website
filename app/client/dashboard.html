@@ -1,1 +1,272 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Client Dashboard | Isaacs & Partners</title>
+
+    <meta
+        name="description"
+        content="Secure client dashboard for Isaacs and Partners."
+    >
+
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+
+    <script type="module">
+        import { requireAuthentication } from "../js/api.js";
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await requireAuthentication({
+                redirect: "./login.html"
+            });
+        });
+    </script>
+</head>
+
+<body class="client-portal">
+
+    <header class="ip-navbar">
+        <div class="ip-navbar__inner">
+
+            <a
+                href="./dashboard.html"
+                class="ip-navbar__brand"
+            >
+                <img
+                    src="../images/brand-isaacs-partners.png"
+                    alt="Isaacs and Partners"
+                    class="ip-navbar__logo"
+                >
+
+                <span class="ip-navbar__brand-text">
+                    <strong>Isaacs &amp; Partners</strong>
+                    <small>Client Portal</small>
+                </span>
+            </a>
+
+            <nav
+                class="ip-navbar__navigation"
+                aria-label="Client navigation"
+            >
+                <a href="./dashboard.html" aria-current="page">
+                    Dashboard
+                </a>
+
+                <a href="./documents.html">
+                    Documents
+                </a>
+
+                <a href="./messages.html">
+                    Messages
+                </a>
+
+                <a href="./timeline.html">
+                    Timeline
+                </a>
+
+                <a href="./settings.html">
+                    Settings
+                </a>
+            </nav>
+
+            <button
+                type="button"
+                class="ip-button ip-button--secondary"
+                data-action="logout"
+            >
+                Sign out
+            </button>
+
+        </div>
+    </header>
+
+    <main class="ip-page">
+
+        <section class="ip-page__header">
+            <div>
+                <span class="ip-page__eyebrow">
+                    Client Portal
+                </span>
+
+                <h1>
+                    Welcome,
+                    <span data-client-name>Client</span>
+                </h1>
+
+                <p>
+                    View your matters, documents, messages and
+                    application progress from one secure location.
+                </p>
+            </div>
+        </section>
+
+        <section
+            class="ip-grid ip-grid--stats"
+            aria-label="Matter summary"
+        >
+
+            <article class="ip-stat-card">
+                <span class="ip-stat-card__label">
+                    Active Matters
+                </span>
+
+                <strong
+                    class="ip-stat-card__value"
+                    data-stat="active-matters"
+                >
+                    —
+                </strong>
+            </article>
+
+            <article class="ip-stat-card">
+                <span class="ip-stat-card__label">
+                    Outstanding Documents
+                </span>
+
+                <strong
+                    class="ip-stat-card__value"
+                    data-stat="outstanding-documents"
+                >
+                    —
+                </strong>
+            </article>
+
+            <article class="ip-stat-card">
+                <span class="ip-stat-card__label">
+                    Upcoming Appointments
+                </span>
+
+                <strong
+                    class="ip-stat-card__value"
+                    data-stat="appointments"
+                >
+                    —
+                </strong>
+            </article>
+
+            <article class="ip-stat-card">
+                <span class="ip-stat-card__label">
+                    Unread Messages
+                </span>
+
+                <strong
+                    class="ip-stat-card__value"
+                    data-stat="messages"
+                >
+                    —
+                </strong>
+            </article>
+
+        </section>
+
+        <section class="ip-grid ip-grid--two-column">
+
+            <article class="ip-card">
+                <header class="ip-card__header">
+                    <div>
+                        <h2 class="ip-card__title">
+                            My Matters
+                        </h2>
+
+                        <p class="ip-card__subtitle">
+                            Current applications and matters
+                        </p>
+                    </div>
+
+                    <a
+                        href="./timeline.html"
+                        class="ip-button ip-button--secondary"
+                    >
+                        View timeline
+                    </a>
+                </header>
+
+                <div
+                    class="ip-card__body"
+                    data-matters-list
+                >
+                    <p class="ip-empty-state">
+                        Loading matters...
+                    </p>
+                </div>
+            </article>
+
+            <article class="ip-card">
+                <header class="ip-card__header">
+                    <div>
+                        <h2 class="ip-card__title">
+                            Action Required
+                        </h2>
+
+                        <p class="ip-card__subtitle">
+                            Items requiring your attention
+                        </p>
+                    </div>
+                </header>
+
+                <div
+                    class="ip-card__body"
+                    data-action-required
+                >
+                    <p class="ip-empty-state">
+                        Checking outstanding items...
+                    </p>
+                </div>
+            </article>
+
+        </section>
+
+        <section class="ip-card">
+            <header class="ip-card__header">
+                <div>
+                    <h2 class="ip-card__title">
+                        Recent Activity
+                    </h2>
+
+                    <p class="ip-card__subtitle">
+                        Latest updates to your matters
+                    </p>
+                </div>
+
+                <a
+                    href="./timeline.html"
+                    class="ip-button ip-button--secondary"
+                >
+                    View all
+                </a>
+            </header>
+
+            <div
+                class="ip-card__body"
+                data-recent-activity
+            >
+                <p class="ip-empty-state">
+                    Loading activity...
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="ip-footer">
+        <div class="ip-footer__inner">
+            <strong>Isaacs &amp; Partners</strong>
+
+            <span>
+                © <span data-current-year></span>
+                Isaacs and Partners Pty(Ltd)
+            </span>
+
+            <a href="mailto:info@isaacsandpartners.online">
+                info@isaacsandpartners.online
+            </a>
+        </div>
+    </footer>
+
+    <script type="module" src="../js/app.js"></script>
+</body>
+</html>
