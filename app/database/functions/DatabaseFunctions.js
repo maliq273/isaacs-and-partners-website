@@ -1,259 +1,336 @@
+import crypto from "crypto";
+
 /**
- * DatabaseFunctions
- * ------------------------------------------------------------
- * Database-level utility functions shared by schema builders,
- * migrations, repositories, queries and storage adapters.
+ * Generate a cryptographically strong application identifier.
  *
- * SQLite-compatible and dependency-free.
+ * UUID v4 is used so IDs remain independent of database
+ * auto-increment behaviour and can safely be generated offline.
  */
-
-export function normalizeIdentifier(value) {
-    if (typeof value !== "string") {
-        throw new TypeError(
-            "Database identifier must be a string"
-        );
-    }
-
-    const identifier = value.trim();
-
-    if (!identifier) {
-        throw new Error(
-            "Database identifier cannot be empty"
-        );
-    }
-
-    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(identifier)) {
-        throw new Error(
-            `Invalid database identifier: ${value}`
-        );
-    }
-
-    return identifier;
-}
-
-export function quoteIdentifier(value) {
-    const identifier =
-        normalizeIdentifier(value);
-
-    return `"${identifier.replace(/"/g, '""')}"`;
-}
-
-export function quoteTableName(tableName) {
-    return quoteIdentifier(tableName);
-}
-
-export function quoteColumnName(columnName) {
-    return quoteIdentifier(columnName);
-}
-
-export function createPlaceholders(
-    count,
-    prefix = "param"
-) {
-    if (!Number.isInteger(count) || count < 0) {
-        throw new TypeError(
-            "Placeholder count must be a non-negative integer"
-        );
-    }
-
-    return Array.from(
-        { length: count },
-        (_, index) =>
-            `:${prefix}${index + 1}`
-    );
-}
-
-export function createParameterObject(
-    values = [],
-    prefix = "param"
-) {
-    if (!Array.isArray(values)) {
-        throw new TypeError(
-            "Values must be an array"
-        );
-    }
-
-    return values.reduce(
-        (params, value, index) => {
-            params[`${prefix}${index + 1}`] =
-                value;
-
-            return params;
-        },
-        {}
-    );
-}
-
-export function normalizeLimit(
-    value,
-    defaultValue = 50,
-    maxValue = 500
-) {
-    const parsed =
-        Number.parseInt(value, 10);
-
-    if (!Number.isFinite(parsed)) {
-        return defaultValue;
-    }
-
-    return Math.min(
-        Math.max(parsed, 1),
-        maxValue
-    );
-}
-
-export function normalizeOffset(value) {
-    const parsed =
-        Number.parseInt(value, 10);
-
-    if (!Number.isFinite(parsed) || parsed < 0) {
-        return 0;
-    }
-
-    return parsed;
-}
-
-export function normalizeBoolean(value) {
-    if (
-        value === true ||
-        value === 1 ||
-        value === "1" ||
-        value === "true"
-    ) {
-        return true;
-    }
-
-    if (
-        value === false ||
-        value === 0 ||
-        value === "0" ||
-        value === "false"
-    ) {
-        return false;
-    }
-
-    return Boolean(value);
-}
-
-export function normalizeNullable(value) {
-    if (
-        value === undefined ||
-        value === null ||
-        value === ""
-    ) {
-        return null;
-    }
-
-    return value;
-}
-
-export function serializeJSON(value, fallback = null) {
-    if (
-        value === undefined ||
-        value === null
-    ) {
-        return fallback;
-    }
-
-    try {
-        return JSON.stringify(value);
-    } catch {
-        return fallback;
-    }
-}
-
-export function parseJSON(
-    value,
-    fallback = null
-) {
-    if (
-        value === undefined ||
-        value === null ||
-        value === ""
-    ) {
-        return fallback;
-    }
-
-    if (typeof value === "object") {
-        return value;
-    }
-
-    try {
-        return JSON.parse(value);
-    } catch {
-        return fallback;
-    }
-}
-
-export function nowISO() {
-    return new Date().toISOString();
-}
-
-export function isValidDate(value) {
-    if (!value) {
-        return false;
-    }
-
-    const date =
-        value instanceof Date
-            ? value
-            : new Date(value);
-
-    return !Number.isNaN(
-        date.getTime()
-    );
-}
-
-export function normalizeDate(
-    value,
-    fallback = null
-) {
-    if (!isValidDate(value)) {
-        return fallback;
-    }
-
-    return (
-        value instanceof Date
-            ? value
-            : new Date(value)
-    ).toISOString();
-}
-
 export function generateId() {
     if (
-        typeof crypto !== "undefined" &&
-        typeof crypto.randomUUID ===
-            "function"
+        crypto &&
+        typeof crypto.randomUUID === "function"
     ) {
         return crypto.randomUUID();
     }
 
     return [
-        Date.now().toString(36),
-        Math.random()
-            .toString(36)
-            .slice(2),
-        Math.random()
-            .toString(36)
-            .slice(2)
+        crypto.randomBytes(4).toString("hex"),
+        crypto.randomBytes(2).toString("hex"),
+        crypto.randomBytes(2).toString("hex"),
+        crypto.randomBytes(2).toString("hex"),
+        crypto.randomBytes(6).toString("hex")
     ].join("-");
 }
 
+/**
+ * Return the current timestamp in UTC ISO-8601 format.
+ */
+export function nowISO() {
+    return new Date().toISOString();
+}
+
+/**
+ * Safely quote a SQLite identifier.
+ *
+ * Identifiers cannot be bound as SQL parameters, therefore they
+ * must be validated before being inserted into SQL statements.
+ */
+export function quoteIdentifier(identifier) {
+    if (
+        typeof identifier !== "string" ||
+        !identifier.trim()
+    ) {
+        throw new TypeError(
+            "SQL identifier must be a non-empty string"
+        );
+    }
+
+    const value = identifier.trim();
+
+    /*
+     * Permit ordinary SQLite identifiers and qualified identifiers.
+     *
+     * Examples:
+     * clients
+     * clients.id
+     * created_at
+     */
+    if (
+        !/^[A-Za-z_][A-Za-z0-9_.]*$/.test(
+            value
+        )
+    ) {
+        throw new Error(
+            `Unsafe SQL identifier: ${identifier}`
+        );
+    }
+
+    return value
+        .split(".")
+        .map(
+            (part) =>
+                `"${part.replace(
+                    /"/g,
+                    '""'
+                )}"`
+        )
+        .join(".");
+}
+
+/**
+ * Build a safe equality predicate for an identifier.
+ */
+export function buildEquality(
+    column,
+    parameter
+) {
+    return `${quoteIdentifier(
+        column
+    )} = :${parameter}`;
+}
+
+/**
+ * Build an IS NULL predicate.
+ */
+export function buildIsNull(column) {
+    return `${quoteIdentifier(
+        column
+    )} IS NULL`;
+}
+
+/**
+ * Build an IS NOT NULL predicate.
+ */
+export function buildIsNotNull(column) {
+    return `${quoteIdentifier(
+        column
+    )} IS NOT NULL`;
+}
+
+/**
+ * Convert JavaScript values into values appropriate for SQLite.
+ */
+export function normalizeDatabaseValue(
+    value
+) {
+    if (
+        value === undefined
+    ) {
+        return null;
+    }
+
+    if (
+        value instanceof Date
+    ) {
+        return value.toISOString();
+    }
+
+    if (
+        typeof value === "boolean"
+    ) {
+        return value ? 1 : 0;
+    }
+
+    if (
+        value !== null &&
+        typeof value === "object"
+    ) {
+        return JSON.stringify(
+            value
+        );
+    }
+
+    return value;
+}
+
+/**
+ * Normalize an object before sending it to the database adapter.
+ */
+export function normalizeParameters(
+    parameters = {}
+) {
+    const result = {};
+
+    for (
+        const [
+            key,
+            value
+        ] of Object.entries(
+            parameters
+        )
+    ) {
+        result[key] =
+            normalizeDatabaseValue(
+                value
+            );
+    }
+
+    return result;
+}
+
+/**
+ * Build a parameterized INSERT statement.
+ */
+export function buildInsert(
+    table,
+    data
+) {
+    if (
+        !data ||
+        typeof data !== "object" ||
+        Array.isArray(data)
+    ) {
+        throw new TypeError(
+            "Insert data must be an object"
+        );
+    }
+
+    const columns =
+        Object.keys(data);
+
+    if (!columns.length) {
+        throw new Error(
+            "Cannot build INSERT without columns"
+        );
+    }
+
+    const quotedColumns =
+        columns
+            .map(quoteIdentifier)
+            .join(", ");
+
+    const parameters =
+        columns
+            .map(
+                (column) =>
+                    `:${column}`
+            )
+            .join(", ");
+
+    return {
+        sql: `
+            INSERT INTO ${quoteIdentifier(
+                table
+            )}
+            (${quotedColumns})
+            VALUES (${parameters})
+        `.trim(),
+
+        parameters:
+            normalizeParameters(
+                data
+            )
+    };
+}
+
+/**
+ * Build a parameterized UPDATE statement.
+ */
+export function buildUpdate(
+    table,
+    data,
+    whereSql,
+    whereParameters = {}
+) {
+    if (
+        !data ||
+        typeof data !== "object" ||
+        Array.isArray(data)
+    ) {
+        throw new TypeError(
+            "Update data must be an object"
+        );
+    }
+
+    const entries =
+        Object.entries(data);
+
+    if (!entries.length) {
+        throw new Error(
+            "Cannot build UPDATE without data"
+        );
+    }
+
+    const assignments =
+        entries
+            .map(
+                ([column]) =>
+                    `${quoteIdentifier(
+                        column
+                    )} = :update_${column}`
+            )
+            .join(", ");
+
+    const parameters = {};
+
+    for (
+        const [
+            column,
+            value
+        ] of entries
+    ) {
+        parameters[
+            `update_${column}`
+        ] =
+            normalizeDatabaseValue(
+                value
+            );
+    }
+
+    Object.assign(
+        parameters,
+        normalizeParameters(
+            whereParameters
+        )
+    );
+
+    return {
+        sql: `
+            UPDATE ${quoteIdentifier(
+                table
+            )}
+            SET ${assignments}
+            WHERE ${whereSql}
+        `.trim(),
+
+        parameters
+    };
+}
+
+/**
+ * Build a parameterized DELETE statement.
+ */
+export function buildDelete(
+    table,
+    whereSql,
+    parameters = {}
+) {
+    return {
+        sql: `
+            DELETE FROM ${quoteIdentifier(
+                table
+            )}
+            WHERE ${whereSql}
+        `.trim(),
+
+        parameters:
+            normalizeParameters(
+                parameters
+            )
+    };
+}
+
 export default {
-    normalizeIdentifier,
-    quoteIdentifier,
-    quoteTableName,
-    quoteColumnName,
-    createPlaceholders,
-    createParameterObject,
-    normalizeLimit,
-    normalizeOffset,
-    normalizeBoolean,
-    normalizeNullable,
-    serializeJSON,
-    parseJSON,
+    generateId,
     nowISO,
-    isValidDate,
-    normalizeDate,
-    generateId
+    quoteIdentifier,
+    buildEquality,
+    buildIsNull,
+    buildIsNotNull,
+    normalizeDatabaseValue,
+    normalizeParameters,
+    buildInsert,
+    buildUpdate,
+    buildDelete
 };
