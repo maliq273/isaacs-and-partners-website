@@ -1,1 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>AI Intelligence | Isaacs and Partners</title>
+  <link rel="stylesheet" href="../css/app.css">
+</head>
 
+<body data-page="ai-dashboard">
+  <div id="app-shell"></div>
+
+  <main class="dashboard-page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Artificial Intelligence</p>
+        <h1>AI Intelligence</h1>
+        <p class="page-description">
+          Case analysis, document intelligence, eligibility assessment,
+          risk detection and workflow recommendations.
+        </p>
+      </div>
+
+      <div class="page-actions">
+        <button type="button" class="btn btn-primary" id="run-ai-analysis">
+          Run Analysis
+        </button>
+      </div>
+    </header>
+
+    <section class="stats-grid" aria-label="AI statistics">
+      <article class="stat-card">
+        <span class="stat-label">Cases Analysed</span>
+        <strong id="cases-analysed">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">High Risk Matters</span>
+        <strong id="high-risk-matters">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Pending Documents</span>
+        <strong id="pending-documents">0</strong>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">AI Recommendations</span>
+        <strong id="ai-recommendations">0</strong>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>AI Case Intelligence</h2>
+            <p>Latest matter analysis and risk assessments.</p>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Matter</th>
+                <th>Client</th>
+                <th>Department</th>
+                <th>Risk</th>
+                <th>Confidence</th>
+                <th>Last Analysis</th>
+              </tr>
+            </thead>
+            <tbody id="ai-matters-table">
+              <tr>
+                <td colspan="6">Loading intelligence...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>AI Recommendations</h2>
+            <p>Recommended next actions requiring attention.</p>
+          </div>
+        </div>
+
+        <div id="recommendations-list" class="activity-list">
+          <div class="empty-state">
+            No recommendations available.
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Eligibility Engine</h2>
+            <p>Current application eligibility results.</p>
+          </div>
+        </div>
+
+        <div id="eligibility-summary"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>AI Activity</h2>
+            <p>Recent AI engine activity.</p>
+          </div>
+        </div>
+
+        <div id="ai-activity" class="activity-list"></div>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="../js/app.js"></script>
+</body>
+</html>
