@@ -1,34 +1,19 @@
-/**
- * ============================================================
- * CASE ANALYSIS
- * Master AI Analysis Coordinator
- * ============================================================
- */
-
-import RiskAnalysis from "./RiskAnalysis.js";
-import EligibilityAnalysis from "./EligibilityAnalysis.js";
-import CompletenessAnalysis from "./CompletenessAnalysis.js";
-import RecommendationAnalysis from "./RecommendationAnalysis.js";
-import SummaryAnalysis from "./SummaryAnalysis.js";
-
 export default class CaseAnalysis {
-
-    static analyse(matter) {
-
+    async analyze(input = {}) {
         return {
-
-            risk: RiskAnalysis.analyse(matter),
-
-            eligibility: EligibilityAnalysis.analyse(matter),
-
-            completeness: CompletenessAnalysis.analyse(matter),
-
-            recommendations: RecommendationAnalysis.analyse(matter),
-
-            summary: SummaryAnalysis.analyse(matter)
-
+            type: "CASE",
+            matterId:
+                input.matterId || null,
+            service:
+                input.service || null,
+            department:
+                input.department || null,
+            issues:
+                input.issues || [],
+            documents:
+                input.documents || [],
+            nextActions:
+                input.nextActions || []
         };
-
     }
-
 }
