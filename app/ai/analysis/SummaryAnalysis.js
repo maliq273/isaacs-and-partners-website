@@ -1,18 +1,13 @@
 export default class SummaryAnalysis {
-
-    static analyse(matter) {
-
+    async analyze(input = {}) {
         return {
-
+            type: "SUMMARY",
             summary:
-
-`Matter "${matter.title}" is currently ${matter.status}
-with ${matter.documents.length} documents,
-${matter.tasks.length} tasks
-and ${matter.appointments.length} appointments.`
-
+                input.summary ||
+                input.description ||
+                "",
+            source:
+                input.source || null
         };
-
     }
-
 }
