@@ -1,45 +1,42 @@
-/**
- * ============================================================
- * AI RISK ANALYSIS
- * ============================================================
- */
-
 export default class RiskAnalysis {
+    async analyze(input = {}) {
+        const risks = [];
 
-    static analyse(matter) {
+        if (input.expiredDocument) {
+            risks.push({
+                code: "EXPIRED_DOCUMENT",
+                severity: "HIGH"
+            });
+        }
 
-        let score = 0;
+        if (input.missingDocument) {
+            risks.push({
+                code: "MISSING_DOCUMENT",
+                severity: "MEDIUM"
+            });
+        }
 
-        if (matter.documents.length === 0)
-
-            score += 50;
-
-        if (matter.status === "ON_HOLD")
-
-            score += 15;
-
-        if (matter.tasks.some(t => !t.completed))
-
-            score += 10;
+        if (input.conflictingInformation) {
+            risks.push({
+                code:
+                    "CONFLICTING_INFORMATION",
+                severity: "HIGH"
+            });
+        }
 
         return {
-
-            score,
-
-            level:
-
-                score >= 70
-
+            type: "RISK",
+            risks,
+            riskLevel:
+                risks.some(
+                    risk =>
+                        risk.severity ===
+                        "HIGH"
+                )
                     ? "HIGH"
-
-                    : score >= 40
-
+                    : risks.length
                     ? "MEDIUM"
-
                     : "LOW"
-
         };
-
     }
-
 }
