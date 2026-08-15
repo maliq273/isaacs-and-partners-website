@@ -1,51 +1,39 @@
-/**
- * ============================================================
- * DOCUMENT COMPLETENESS
- * ============================================================
- */
-
 export default class CompletenessAnalysis {
+    async analyze(input = {}) {
+        const required =
+            input.requiredDocuments ||
+            [];
 
-    static analyse(matter) {
+        const supplied =
+            input.documents ||
+            [];
 
-        const required = matter.documents.filter(
+        const suppliedTypes =
+            new Set(
+                supplied.map(
+                    document =>
+                        document.type
+                )
+            );
 
-            d => d.required
-
-        );
-
-        const received = required.filter(
-
-            d => d.verified
-
-        );
-
-        const percentage =
-
-            required.length === 0
-
-                ? 0
-
-                : Math.round(
-
-                    (received.length / required.length) * 100
-
-                );
+        const missing =
+            required.filter(
+                document =>
+                    !suppliedTypes.has(
+                        document.type ||
+                        document
+                    )
+            );
 
         return {
-
-            percentage,
-
-            required: required.length,
-
-            received: received.length,
-
-            outstanding:
-
-                required.length - received.length
-
+            type: "COMPLETENESS",
+            complete:
+                missing.length === 0,
+            required:
+                required.length,
+            supplied:
+                supplied.length,
+            missing
         };
-
     }
-
 }
