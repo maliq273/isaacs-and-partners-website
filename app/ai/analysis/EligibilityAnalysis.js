@@ -1,19 +1,24 @@
 export default class EligibilityAnalysis {
+    async analyze(input = {}) {
+        const requirements =
+            input.requirements || [];
 
-    static analyse(matter) {
+        const failed =
+            requirements.filter(
+                requirement =>
+                    requirement.required &&
+                    !requirement.satisfied
+            );
 
         return {
-
-            eligible: true,
-
-            confidence: 0.95,
-
-            reason:
-
-                "Initial rule-based assessment."
-
+            type: "ELIGIBILITY",
+            eligible:
+                failed.length === 0,
+            failed,
+            requiresHumanReview:
+                Boolean(
+                    input.requiresHumanReview
+                )
         };
-
     }
-
 }
