@@ -28,12 +28,24 @@ const cloneValue = (value) => {
   if (
     typeof value === "object"
   ) {
-    return JSON.parse(
-      JSON.stringify(value)
-    );
+    try {
+      return JSON.parse(
+        JSON.stringify(value)
+      );
+    } catch {
+      return value;
+    }
   }
 
   return value;
+};
+
+const valuesEqual = (a, b) => {
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return a === b;
+  }
 };
 
 class StateStore {
@@ -80,7 +92,8 @@ class StateStore {
             .split(".")
             .filter(Boolean);
 
-    let current = this.state;
+    let current =
+      this.state;
 
     for (const part of parts) {
       if (
@@ -94,7 +107,8 @@ class StateStore {
         return defaultValue;
       }
 
-      current = current[part];
+      current =
+        current[part];
     }
 
     return cloneValue(current);
@@ -114,45 +128,71 @@ class StateStore {
       );
     }
 
-    let current = this.state;
+    let current =
+      this.state;
 
     for (
       let index = 0;
       index < parts.length - 1;
       index += 1
     ) {
-      const part = parts[index];
+      const part =
+        parts[index];
 
       if (
-        typeof current[part] !== "object" ||
-        current[part] === null
+        typeof current[part] !==
+          "object" ||
+        current[part] === null ||
+        Array.isArray(current[part])
       ) {
         current[part] = {};
       }
 
-      current = current[part];
+      current =
+        current[part];
     }
 
     const finalKey =
       parts[parts.length - 1];
 
     const previousValue =
-      current[finalKey];
+      cloneValue(
+        current[finalKey]
+      );
+
+    const nextValue =
+      cloneValue(value);
+
+    if (
+      valuesEqual(
+        previousValue,
+        nextValue
+      )
+    ) {
+      return cloneValue(
+        nextValue
+      );
+    }
 
     current[finalKey] =
-      cloneValue(value);
+      nextValue;
 
     this._notify(
       parts.join("."),
-      current[finalKey],
+      nextValue,
       previousValue
     );
 
-    return this.get(parts.join("."));
+    return this.get(
+      parts.join(".")
+    );
   }
 
   update(path, updater) {
-    if (typeof updater !== "function") {
+    if (
+      typeof updater !==
+      "function"
+    ) {
       throw new TypeError(
         "State updater must be a function."
       );
@@ -162,7 +202,9 @@ class StateStore {
       this.get(path);
 
     const updated =
-      updater(cloneValue(current));
+      updater(
+        cloneValue(current)
+      );
 
     return this.set(
       path,
@@ -184,10 +226,22 @@ class StateStore {
     const previous =
       this.getState();
 
-    this.state = {
+    const nextState = {
       ...this.state,
       ...cloneValue(values),
     };
+
+    if (
+      valuesEqual(
+        previous,
+        nextState
+      )
+    ) {
+      return this.getState();
+    }
+
+    this.state =
+      nextState;
 
     this._notify(
       "*",
@@ -199,7 +253,10 @@ class StateStore {
   }
 
   subscribe(path, callback) {
-    if (typeof callback !== "function") {
+    if (
+      typeof callback !==
+      "function"
+    ) {
       throw new TypeError(
         "State subscriber must be a function."
       );
@@ -208,7 +265,9 @@ class StateStore {
     const key =
       path || "*";
 
-    if (!this.subscribers.has(key)) {
+    if (
+      !this.subscribers.has(key)
+    ) {
       this.subscribers.set(
         key,
         new Set()
@@ -221,10 +280,16 @@ class StateStore {
     subscribers.add(callback);
 
     return () => {
-      subscribers.delete(callback);
+      subscribers.delete(
+        callback
+      );
 
-      if (subscribers.size === 0) {
-        this.subscribers.delete(key);
+      if (
+        subscribers.size === 0
+      ) {
+        this.subscribers.delete(
+          key
+        );
       }
     };
   }
@@ -234,21 +299,35 @@ class StateStore {
       const previous =
         this.getState();
 
-      this.state =
-        cloneValue(this.initialState);
+      const next =
+        cloneValue(
+          this.initialState
+        );
 
-      this._notify(
-        "*",
-        this.getState(),
-        previous
-      );
+      this.state =
+        next;
+
+      if (
+        !valuesEqual(
+          previous,
+          next
+        )
+      ) {
+        this._notify(
+          "*",
+          this.getState(),
+          previous
+        );
+      }
 
       return this.getState();
     }
 
     return this.set(
       path,
-      this._getInitialValue(path)
+      this._getInitialValue(
+        path
+      )
     );
   }
 
@@ -263,15 +342,29 @@ class StateStore {
       {},
       previous
     );
+
+    return this.getState();
   }
 
   has(path) {
+    const missing =
+      Symbol.for(
+        "state.missing"
+      );
+
     return (
       this.get(
         path,
-        Symbol.for("missing")
-      ) !== Symbol.for("missing")
+        missing
+      ) !== missing
     );
+  }
+
+  destroy() {
+    this.state = {};
+    this.initialState = {};
+    this.subscribers.clear();
+    this.initialised = false;
   }
 
   _getInitialValue(path) {
@@ -293,25 +386,38 @@ class StateStore {
         return undefined;
       }
 
-      current = current[part];
+      current =
+        current[part];
     }
 
-    return cloneValue(current);
+    return cloneValue(
+      current
+    );
   }
 
-  _notify(path, value, previousValue) {
+  _notify(
+    path,
+    value,
+    previousValue
+  ) {
     const event = {
       path,
-      value: cloneValue(value),
+      value:
+        cloneValue(value),
       previousValue:
-        cloneValue(previousValue),
-      state: this.getState(),
+        cloneValue(
+          previousValue
+        ),
+      state:
+        this.getState(),
       timestamp:
         new Date().toISOString(),
     };
 
     const directSubscribers =
-      this.subscribers.get(path);
+      this.subscribers.get(
+        path
+      );
 
     if (directSubscribers) {
       for (
@@ -331,7 +437,9 @@ class StateStore {
     }
 
     const globalSubscribers =
-      this.subscribers.get("*");
+      this.subscribers.get(
+        "*"
+      );
 
     if (globalSubscribers) {
       for (
