@@ -2,9 +2,13 @@
  * Isaacs and Partners
  * Core Storage Facade
  *
- * Provides a stable interface to the application's
- * existing storage layer without coupling the core
- * runtime to a specific storage implementation.
+ * Stable interface to the application's storage layer.
+ *
+ * The core runtime must NOT depend directly on Supabase,
+ * SQLite, IndexedDB or localStorage.
+ *
+ * Those implementations belong behind the storage provider
+ * abstraction.
  */
 
 class CoreStorage {
@@ -14,14 +18,7 @@ class CoreStorage {
   }
 
   /**
-   * Attach an existing storage provider.
-   *
-   * The provider may expose:
-   * - initialise/init
-   * - get
-   * - set
-   * - remove/delete
-   * - clear
+   * Attach a storage provider.
    */
   configure(provider) {
     if (!provider) {
@@ -30,13 +27,35 @@ class CoreStorage {
       );
     }
 
-    this.provider = provider;
+    if (
+      typeof provider !== "object" &&
+      typeof provider !== "function"
+    ) {
+      throw new TypeError(
+        "Storage provider must be an object."
+      );
+    }
+
+    this.provider =
+      provider;
+
+    /*
+     * A newly configured provider may not have been
+     * initialised yet.
+     */
+    this.initialised =
+      false;
 
     return this;
   }
 
+  /**
+   * Initialise storage provider.
+   */
   async initialise() {
-    if (this.initialised) {
+    if (
+      this.initialised
+    ) {
       return this;
     }
 
@@ -57,7 +76,8 @@ class CoreStorage {
       await this.provider.init();
     }
 
-    this.initialised = true;
+    this.initialised =
+      true;
 
     return this;
   }
@@ -66,33 +86,44 @@ class CoreStorage {
     return this.initialise();
   }
 
+  /**
+   * Get stored value.
+   */
   async get(
     key,
     defaultValue = null
   ) {
     this._assertProvider();
 
-    let value;
-
     if (
-      typeof this.provider.get ===
+      typeof this.provider.get !==
       "function"
     ) {
-      value =
-        await this.provider.get(key);
-    } else {
       throw new Error(
         "Configured storage provider does not implement get()."
       );
     }
 
-    return value === undefined ||
+    const value =
+      await this.provider.get(
+        key
+      );
+
+    return (
+      value === undefined ||
       value === null
+    )
       ? defaultValue
       : value;
   }
 
-  async set(key, value) {
+  /**
+   * Set stored value.
+   */
+  async set(
+    key,
+    value
+  ) {
     this._assertProvider();
 
     if (
@@ -110,6 +141,9 @@ class CoreStorage {
     );
   }
 
+  /**
+   * Remove stored value.
+   */
   async remove(key) {
     this._assertProvider();
 
@@ -117,14 +151,18 @@ class CoreStorage {
       typeof this.provider.remove ===
       "function"
     ) {
-      return this.provider.remove(key);
+      return this.provider.remove(
+        key
+      );
     }
 
     if (
       typeof this.provider.delete ===
       "function"
     ) {
-      return this.provider.delete(key);
+      return this.provider.delete(
+        key
+      );
     }
 
     throw new Error(
@@ -132,6 +170,18 @@ class CoreStorage {
     );
   }
 
+  /**
+   * Alias for remove().
+   */
+  async delete(key) {
+    return this.remove(
+      key
+    );
+  }
+
+  /**
+   * Clear storage.
+   */
   async clear() {
     this._assertProvider();
 
@@ -147,6 +197,9 @@ class CoreStorage {
     return this.provider.clear();
   }
 
+  /**
+   * Determine whether a key exists.
+   */
   async has(key) {
     this._assertProvider();
 
@@ -155,24 +208,60 @@ class CoreStorage {
       "function"
     ) {
       return Boolean(
-        await this.provider.has(key)
+        await this.provider.has(
+          key
+        )
       );
     }
+
+    const missing =
+      Symbol.for(
+        "storage.missing"
+      );
 
     const value =
       await this.get(
         key,
-        Symbol.for("missing")
+        missing
       );
 
     return (
-      value !==
-      Symbol.for("missing")
+      value !== missing
     );
   }
 
+  /**
+   * Return configured provider.
+   */
   getProvider() {
     return this.provider;
+  }
+
+  /**
+   * Return provider status.
+   */
+  getStatus() {
+    return {
+      configured:
+        Boolean(
+          this.provider
+        ),
+      initialised:
+        this.initialised,
+      provider:
+        this.provider?.constructor
+          ?.name || null,
+    };
+  }
+
+  /**
+   * Reset facade without destroying provider data.
+   */
+  reset() {
+    this.initialised =
+      false;
+
+    return this;
   }
 
   _assertProvider() {
@@ -185,7 +274,8 @@ class CoreStorage {
 
   _createDefaultProvider() {
     if (
-      typeof window === "undefined"
+      typeof window ===
+      "undefined"
     ) {
       return new MemoryStorageProvider();
     }
@@ -197,31 +287,45 @@ class CoreStorage {
 /**
  * Browser localStorage fallback.
  *
- * This is deliberately isolated behind the CoreStorage
- * facade so it can later be replaced by the application's
- * existing StorageFactory/StorageProvider implementation.
+ * This is only the emergency/default provider.
+ *
+ * Production persistence should be supplied through
+ * the application's StorageFactory.
  */
 class BrowserStorageProvider {
   async initialise() {
     return this;
   }
 
+  async init() {
+    return this.initialise();
+  }
+
   async get(key) {
     const raw =
-      window.localStorage.getItem(key);
+      window.localStorage.getItem(
+        key
+      );
 
-    if (raw === null) {
+    if (
+      raw === null
+    ) {
       return null;
     }
 
     try {
-      return JSON.parse(raw);
+      return JSON.parse(
+        raw
+      );
     } catch {
       return raw;
     }
   }
 
-  async set(key, value) {
+  async set(
+    key,
+    value
+  ) {
     window.localStorage.setItem(
       key,
       JSON.stringify(value)
@@ -231,11 +335,15 @@ class BrowserStorageProvider {
   }
 
   async remove(key) {
-    window.localStorage.removeItem(key);
+    window.localStorage.removeItem(
+      key
+    );
   }
 
   async delete(key) {
-    return this.remove(key);
+    return this.remove(
+      key
+    );
   }
 
   async clear() {
@@ -244,8 +352,9 @@ class BrowserStorageProvider {
 
   async has(key) {
     return (
-      window.localStorage.getItem(key) !==
-      null
+      window.localStorage.getItem(
+        key
+      ) !== null
     );
   }
 }
@@ -255,28 +364,47 @@ class BrowserStorageProvider {
  */
 class MemoryStorageProvider {
   constructor() {
-    this.values = new Map();
+    this.values =
+      new Map();
   }
 
   async initialise() {
     return this;
   }
 
-  async get(key) {
-    return this.values.get(key) ?? null;
+  async init() {
+    return this.initialise();
   }
 
-  async set(key, value) {
-    this.values.set(key, value);
+  async get(key) {
+    return (
+      this.values.get(key) ??
+      null
+    );
+  }
+
+  async set(
+    key,
+    value
+  ) {
+    this.values.set(
+      key,
+      value
+    );
+
     return value;
   }
 
   async remove(key) {
-    this.values.delete(key);
+    this.values.delete(
+      key
+    );
   }
 
   async delete(key) {
-    return this.remove(key);
+    return this.remove(
+      key
+    );
   }
 
   async clear() {
@@ -284,7 +412,9 @@ class MemoryStorageProvider {
   }
 
   async has(key) {
-    return this.values.has(key);
+    return this.values.has(
+      key
+    );
   }
 }
 
