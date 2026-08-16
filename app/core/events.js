@@ -8,8 +8,11 @@
 
 class EventBus {
   constructor() {
-    this.listeners = new Map();
-    this.initialised = false;
+    this.listeners =
+      new Map();
+
+    this.initialised =
+      false;
   }
 
   initialise() {
@@ -22,66 +25,143 @@ class EventBus {
     return this;
   }
 
-  on(eventName, handler) {
-    this._validateEvent(eventName);
-    this._validateHandler(handler);
+  init() {
+    return this.initialise();
+  }
 
-    if (!this.listeners.has(eventName)) {
-      this.listeners.set(eventName, new Set());
+  on(eventName, handler) {
+    this._validateEvent(
+      eventName
+    );
+
+    this._validateHandler(
+      handler
+    );
+
+    if (
+      !this.listeners.has(
+        eventName
+      )
+    ) {
+      this.listeners.set(
+        eventName,
+        new Set()
+      );
     }
 
     const handlers =
-      this.listeners.get(eventName);
+      this.listeners.get(
+        eventName
+      );
 
     handlers.add(handler);
 
     return () => {
-      this.off(eventName, handler);
+      this.off(
+        eventName,
+        handler
+      );
     };
   }
 
   once(eventName, handler) {
-    this._validateEvent(eventName);
-    this._validateHandler(handler);
+    this._validateEvent(
+      eventName
+    );
 
-    const wrappedHandler = (...args) => {
-      this.off(eventName, wrappedHandler);
-      return handler(...args);
-    };
+    this._validateHandler(
+      handler
+    );
 
-    return this.on(eventName, wrappedHandler);
+    const wrappedHandler =
+      (...args) => {
+        this.off(
+          eventName,
+          wrappedHandler
+        );
+
+        return handler(
+          ...args
+        );
+      };
+
+    return this.on(
+      eventName,
+      wrappedHandler
+    );
   }
 
-  off(eventName, handler) {
-    if (!this.listeners.has(eventName)) {
+  off(
+    eventName,
+    handler
+  ) {
+    if (
+      !this.listeners.has(
+        eventName
+      )
+    ) {
       return false;
     }
 
     const handlers =
-      this.listeners.get(eventName);
+      this.listeners.get(
+        eventName
+      );
 
-    const removed = handlers.delete(handler);
+    const removed =
+      handlers.delete(
+        handler
+      );
 
-    if (handlers.size === 0) {
-      this.listeners.delete(eventName);
+    if (
+      handlers.size === 0
+    ) {
+      this.listeners.delete(
+        eventName
+      );
     }
 
     return removed;
   }
 
-  emit(eventName, payload) {
-    this._validateEvent(eventName);
+  emit(
+    eventName,
+    payload
+  ) {
+    this._validateEvent(
+      eventName
+    );
 
     const handlers =
-      this.listeners.get(eventName);
+      this.listeners.get(
+        eventName
+      );
 
-    if (!handlers || handlers.size === 0) {
+    const wildcardHandlers =
+      this.listeners.get(
+        "*"
+      );
+
+    if (
+      (!handlers ||
+        handlers.size === 0) &&
+      (!wildcardHandlers ||
+        wildcardHandlers.size === 0)
+    ) {
       return [];
     }
 
     const results = [];
 
-    for (const handler of [...handlers]) {
+    const combined =
+      new Set([
+        ...(handlers || []),
+        ...(wildcardHandlers || []),
+      ]);
+
+    for (
+      const handler of combined
+    ) {
       try {
         results.push(
           handler(payload)
@@ -97,59 +177,109 @@ class EventBus {
     return results;
   }
 
-  async emitAsync(eventName, payload) {
-    this._validateEvent(eventName);
+  async emitAsync(
+    eventName,
+    payload
+  ) {
+    this._validateEvent(
+      eventName
+    );
 
     const handlers =
-      this.listeners.get(eventName);
+      this.listeners.get(
+        eventName
+      );
 
-    if (!handlers || handlers.size === 0) {
+    const wildcardHandlers =
+      this.listeners.get(
+        "*"
+      );
+
+    const combined =
+      new Set([
+        ...(handlers || []),
+        ...(wildcardHandlers || []),
+      ]);
+
+    if (
+      combined.size === 0
+    ) {
       return [];
     }
 
     return Promise.all(
-      [...handlers].map(async (handler) => {
-        try {
-          return await handler(payload);
-        } catch (error) {
-          console.error(
-            `[EventBus] Async handler failed for "${eventName}":`,
-            error
-          );
+      [...combined].map(
+        async (handler) => {
+          try {
+            return await handler(
+              payload
+            );
+          } catch (error) {
+            console.error(
+              `[EventBus] Async handler failed for "${eventName}":`,
+              error
+            );
 
-          return undefined;
+            return undefined;
+          }
         }
-      })
+      )
     );
   }
 
   clear(eventName = null) {
-    if (eventName === null) {
+    if (
+      eventName === null
+    ) {
       this.listeners.clear();
       return;
     }
 
-    this.listeners.delete(eventName);
-  }
-
-  hasListeners(eventName) {
-    return (
-      this.listeners.has(eventName) &&
-      this.listeners.get(eventName).size > 0
+    this.listeners.delete(
+      eventName
     );
   }
 
-  listenerCount(eventName) {
-    if (!this.listeners.has(eventName)) {
+  destroy() {
+    this.listeners.clear();
+    this.initialised = false;
+  }
+
+  hasListeners(
+    eventName
+  ) {
+    return (
+      this.listeners.has(
+        eventName
+      ) &&
+      this.listeners.get(
+        eventName
+      ).size > 0
+    );
+  }
+
+  listenerCount(
+    eventName
+  ) {
+    if (
+      !this.listeners.has(
+        eventName
+      )
+    ) {
       return 0;
     }
 
-    return this.listeners.get(eventName).size;
+    return this.listeners.get(
+      eventName
+    ).size;
   }
 
-  _validateEvent(eventName) {
+  _validateEvent(
+    eventName
+  ) {
     if (
-      typeof eventName !== "string" ||
+      typeof eventName !==
+        "string" ||
       eventName.trim() === ""
     ) {
       throw new TypeError(
@@ -158,8 +288,13 @@ class EventBus {
     }
   }
 
-  _validateHandler(handler) {
-    if (typeof handler !== "function") {
+  _validateHandler(
+    handler
+  ) {
+    if (
+      typeof handler !==
+      "function"
+    ) {
       throw new TypeError(
         "Event handler must be a function."
       );
@@ -167,6 +302,7 @@ class EventBus {
   }
 }
 
-export const eventBus = new EventBus();
+export const eventBus =
+  new EventBus();
 
 export default eventBus;
