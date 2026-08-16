@@ -3,6 +3,12 @@
  * Client-side Application Router
  *
  * Lightweight History API router.
+ *
+ * IMPORTANT:
+ * The router only intercepts links that correspond to
+ * registered application routes. Static HTML documents,
+ * downloads, external resources and ordinary website links
+ * remain under normal browser navigation.
  */
 
 import { eventBus } from "./events.js";
@@ -11,17 +17,29 @@ class Router {
   constructor() {
     this.routes = new Map();
     this.started = false;
+    this.initialised = false;
     this.currentRoute = null;
     this.notFoundHandler = null;
 
     this.handlePopState =
       this.handlePopState.bind(this);
+
     this.handleClick =
       this.handleClick.bind(this);
   }
 
   initialise() {
+    if (this.initialised) {
+      return this;
+    }
+
+    this.initialised = true;
+
     return this;
+  }
+
+  init() {
+    return this.initialise();
   }
 
   register(path, handler, options = {}) {
@@ -82,6 +100,8 @@ class Router {
       return this;
     }
 
+    this.initialise();
+
     window.addEventListener(
       "popstate",
       this.handlePopState
@@ -94,22 +114,36 @@ class Router {
 
     this.started = true;
 
-    await this.resolve(
+    /*
+     * Only resolve the initial URL if a matching
+     * application route exists.
+     *
+     * This prevents the router from taking over
+     * ordinary static HTML pages.
+     */
+    const initialPath =
       window.location.pathname +
-        window.location.search +
-        window.location.hash,
-      {
+      window.location.search +
+      window.location.hash;
+
+    const initialMatch =
+      this._matchRoute(
+        window.location.pathname
+      );
+
+    if (initialMatch || this.notFoundHandler) {
+      await this.resolve(initialPath, {
         replace: true,
         initial: true,
-      }
-    );
+      });
+    }
 
     return this;
   }
 
   async stop() {
     if (!this.started) {
-      return;
+      return this;
     }
 
     if (typeof window !== "undefined") {
@@ -125,6 +159,8 @@ class Router {
     }
 
     this.started = false;
+
+    return this;
   }
 
   async navigate(
@@ -134,12 +170,37 @@ class Router {
       state = {},
     } = {}
   ) {
-    if (typeof window === "undefined") {
-      return this.resolve(path);
-    }
-
     const target =
       this._normaliseUrl(path);
+
+    const url =
+      this._parseUrl(target);
+
+    const match =
+      this._matchRoute(url.pathname);
+
+    /*
+     * If there is no registered application route,
+     * allow the browser to handle a real document URL.
+     */
+    if (!match && !this.notFoundHandler) {
+      if (typeof window !== "undefined") {
+        if (replace) {
+          window.location.replace(target);
+        } else {
+          window.location.assign(target);
+        }
+      }
+
+      return null;
+    }
+
+    if (typeof window === "undefined") {
+      return this.resolve(target, {
+        state,
+        replace,
+      });
+    }
 
     if (replace) {
       window.history.replaceState(
@@ -210,18 +271,15 @@ class Router {
     const route =
       match.route;
 
-    this._setCurrentRoute(
-      url.pathname,
-      route,
-      context
+    eventBus.emit(
+      "router:beforeNavigate",
+      {
+        path: url.pathname,
+        route,
+        params: match.params,
+        query: url.searchParams,
+      }
     );
-
-    eventBus.emit("router:beforeNavigate", {
-      path: url.pathname,
-      route,
-      params: match.params,
-      query: url.searchParams,
-    });
 
     try {
       const result =
@@ -234,20 +292,33 @@ class Router {
           ...context,
         });
 
-      eventBus.emit("router:navigated", {
-        path: url.pathname,
+      this._setCurrentRoute(
+        url.pathname,
         route,
-        params: match.params,
-        result,
-      });
+        context
+      );
+
+      eventBus.emit(
+        "router:navigated",
+        {
+          path: url.pathname,
+          route,
+          params: match.params,
+          result,
+        }
+      );
 
       return result;
     } catch (error) {
-      eventBus.emit("router:error", {
-        path: url.pathname,
-        route,
-        error,
-      });
+      eventBus.emit(
+        "router:error",
+        {
+          path: url.pathname,
+          route,
+          params: match.params,
+          error,
+        }
+      );
 
       throw error;
     }
@@ -259,6 +330,14 @@ class Router {
 
   getRoutes() {
     return [...this.routes.entries()];
+  }
+
+  hasRoute(path) {
+    return Boolean(
+      this._matchRoute(
+        this._normalisePath(path)
+      )
+    );
   }
 
   handlePopState(event) {
@@ -300,19 +379,33 @@ class Router {
       return;
     }
 
-    const href =
-      link.getAttribute("href");
-
+    /*
+     * Respect explicit browser behaviour.
+     */
     if (
-      !href ||
-      href.startsWith("#") ||
-      href.startsWith("mailto:") ||
-      href.startsWith("tel:")
+      link.target === "_blank" ||
+      link.hasAttribute("download")
     ) {
       return;
     }
 
-    if (link.target === "_blank") {
+    const href =
+      link.getAttribute("href");
+
+    if (!href) {
+      return;
+    }
+
+    /*
+     * Ignore anchors and special protocols.
+     */
+    if (
+      href.startsWith("#") ||
+      href.startsWith("mailto:") ||
+      href.startsWith("tel:") ||
+      href.startsWith("javascript:") ||
+      href.startsWith("data:")
+    ) {
       return;
     }
 
@@ -327,9 +420,25 @@ class Router {
       return;
     }
 
+    /*
+     * External URL.
+     */
     if (
       url.origin !== window.location.origin
     ) {
+      return;
+    }
+
+    /*
+     * IMPORTANT:
+     * Only intercept registered application routes.
+     */
+    const match =
+      this._matchRoute(
+        url.pathname
+      );
+
+    if (!match) {
       return;
     }
 
@@ -348,10 +457,11 @@ class Router {
   }
 
   _matchRoute(pathname) {
+    const normalisedPath =
+      this._normalisePath(pathname);
+
     const direct =
-      this.routes.get(
-        this._normalisePath(pathname)
-      );
+      this.routes.get(normalisedPath);
 
     if (direct) {
       return {
@@ -360,11 +470,14 @@ class Router {
       };
     }
 
-    for (const [routePath, route] of this.routes) {
+    for (
+      const [routePath, route]
+      of this.routes
+    ) {
       const match =
         this._matchPattern(
           routePath,
-          pathname
+          normalisedPath
         );
 
       if (match) {
@@ -389,7 +502,10 @@ class Router {
         .split("/")
         .filter(Boolean);
 
-    if (patternParts.length !== pathParts.length) {
+    if (
+      patternParts.length !==
+      pathParts.length
+    ) {
       return null;
     }
 
@@ -406,14 +522,20 @@ class Router {
       const pathPart =
         pathParts[index];
 
-      if (patternPart.startsWith(":")) {
+      if (
+        patternPart.startsWith(":")
+      ) {
         params[
           patternPart.slice(1)
-        ] = decodeURIComponent(pathPart);
+        ] =
+          decodeURIComponent(pathPart);
+
         continue;
       }
 
-      if (patternPart !== pathPart) {
+      if (
+        patternPart !== pathPart
+      ) {
         return null;
       }
     }
@@ -424,12 +546,13 @@ class Router {
   _setCurrentRoute(
     pathname,
     route,
-    context
+    context = {}
   ) {
     this.currentRoute = {
       pathname,
       route,
-      timestamp: new Date().toISOString(),
+      timestamp:
+        new Date().toISOString(),
       ...context,
     };
   }
@@ -440,10 +563,14 @@ class Router {
     }
 
     const clean =
-      path
+      String(path)
         .split("?")[0]
         .split("#")[0]
         .replace(/\/+/g, "/");
+
+    if (clean === "") {
+      return "/";
+    }
 
     return clean.endsWith("/")
       ? clean.slice(0, -1)
@@ -451,6 +578,12 @@ class Router {
   }
 
   _normaliseUrl(path) {
+    if (
+      typeof window === "undefined"
+    ) {
+      return String(path);
+    }
+
     const url =
       new URL(
         path,
@@ -474,6 +607,7 @@ class Router {
   }
 }
 
-export const router = new Router();
+export const router =
+  new Router();
 
 export default router;
