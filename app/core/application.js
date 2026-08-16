@@ -11,6 +11,7 @@
  * - Connect router, state, storage and events
  * - Prevent duplicate initialisation
  * - Provide controlled shutdown
+ * - Support dependency injection
  */
 
 import { appState } from "./state.js";
@@ -44,18 +45,29 @@ class Application {
 
     this.stopping = false;
 
-    await this._initialiseStorage();
-    this._initialiseState();
-    this._initialiseEvents();
-    this._initialiseRouter();
+    try {
+      await this._initialiseStorage();
+      this._initialiseState();
+      this._initialiseEvents();
+      this._initialiseRouter();
 
-    this.initialised = true;
+      this.initialised = true;
 
-    eventBus.emit("application:initialised", {
-      application: this,
-    });
+      eventBus.emit("application:initialised", {
+        application: this,
+      });
 
-    return this;
+      return this;
+    } catch (error) {
+      this.initialised = false;
+
+      eventBus.emit("application:initialisationFailed", {
+        application: this,
+        error,
+      });
+
+      throw error;
+    }
   }
 
   /**
@@ -72,15 +84,26 @@ class Application {
 
     this.stopping = false;
 
-    await this._startRouter();
+    try {
+      await this._startRouter();
 
-    this.started = true;
+      this.started = true;
 
-    eventBus.emit("application:started", {
-      application: this,
-    });
+      eventBus.emit("application:started", {
+        application: this,
+      });
 
-    return this;
+      return this;
+    } catch (error) {
+      this.started = false;
+
+      eventBus.emit("application:startFailed", {
+        application: this,
+        error,
+      });
+
+      throw error;
+    }
   }
 
   /**
@@ -88,49 +111,55 @@ class Application {
    */
   async stop() {
     if (!this.started || this.stopping) {
-      return;
+      return this;
     }
 
     this.stopping = true;
 
-    for (const cleanup of this.cleanupHandlers.splice(0)) {
+    try {
+      for (const cleanup of this.cleanupHandlers.splice(0)) {
+        try {
+          await cleanup();
+        } catch (error) {
+          console.error(
+            "[Application] Cleanup failed:",
+            error
+          );
+        }
+      }
+
       try {
-        await cleanup();
+        if (
+          router &&
+          typeof router.stop === "function"
+        ) {
+          await router.stop();
+        }
       } catch (error) {
         console.error(
-          "[Application] Cleanup failed:",
+          "[Application] Router shutdown failed:",
           error
         );
       }
+
+      this.started = false;
+
+      eventBus.emit("application:stopped", {
+        application: this,
+      });
+    } finally {
+      this.stopping = false;
     }
 
-    try {
-      if (
-        router &&
-        typeof router.stop === "function"
-      ) {
-        await router.stop();
-      }
-    } catch (error) {
-      console.error(
-        "[Application] Router shutdown failed:",
-        error
-      );
-    }
-
-    this.started = false;
-    this.stopping = false;
-
-    eventBus.emit("application:stopped", {
-      application: this,
-    });
+    return this;
   }
 
   /**
-   * Completely reset runtime state.
+   * Reset runtime state.
    *
-   * Intended for controlled logout/session termination
-   * and testing rather than normal navigation.
+   * This does not destroy persistent storage.
+   * Persistent data must be explicitly cleared by the
+   * storage/repository layer.
    */
   async reset() {
     await this.stop();
@@ -151,10 +180,17 @@ class Application {
 
     this.initialised = false;
     this.started = false;
+    this.stopping = false;
+
+    eventBus.emit("application:reset", {
+      application: this,
+    });
+
+    return this;
   }
 
   /**
-   * Register an application cleanup handler.
+   * Register application cleanup handler.
    */
   registerCleanup(handler) {
     if (typeof handler !== "function") {
@@ -190,75 +226,116 @@ class Application {
    * Return application dependencies.
    */
   getDependencies() {
-    return this.dependencies;
+    return {
+      ...this.dependencies,
+    };
+  }
+
+  /**
+   * Replace a dependency.
+   *
+   * Useful for testing and controlled integration.
+   */
+  setDependency(name, dependency) {
+    if (!name || typeof name !== "string") {
+      throw new TypeError(
+        "Dependency name must be a non-empty string."
+      );
+    }
+
+    if (!dependency) {
+      throw new TypeError(
+        `Dependency "${name}" cannot be empty.`
+      );
+    }
+
+    this.dependencies[name] = dependency;
+
+    return this;
   }
 
   async _initialiseStorage() {
+    const currentStorage =
+      this.dependencies.storage;
+
     if (
-      storage &&
-      typeof storage.initialise === "function"
+      currentStorage &&
+      typeof currentStorage.initialise === "function"
     ) {
-      await storage.initialise();
+      await currentStorage.initialise();
     } else if (
-      storage &&
-      typeof storage.init === "function"
+      currentStorage &&
+      typeof currentStorage.init === "function"
     ) {
-      await storage.init();
+      await currentStorage.init();
     }
   }
 
   _initialiseState() {
+    const currentState =
+      this.dependencies.state;
+
     if (
-      appState &&
-      typeof appState.initialise === "function"
+      currentState &&
+      typeof currentState.initialise === "function"
     ) {
-      appState.initialise();
+      currentState.initialise();
     } else if (
-      appState &&
-      typeof appState.init === "function"
+      currentState &&
+      typeof currentState.init === "function"
     ) {
-      appState.init();
+      currentState.init();
     }
   }
 
   _initialiseEvents() {
+    const currentEvents =
+      this.dependencies.events;
+
     if (
-      eventBus &&
-      typeof eventBus.initialise === "function"
+      currentEvents &&
+      typeof currentEvents.initialise === "function"
     ) {
-      eventBus.initialise();
+      currentEvents.initialise();
     }
   }
 
   _initialiseRouter() {
+    const currentRouter =
+      this.dependencies.router;
+
     if (
-      router &&
-      typeof router.initialise === "function"
+      currentRouter &&
+      typeof currentRouter.initialise === "function"
     ) {
-      router.initialise();
+      currentRouter.initialise();
     } else if (
-      router &&
-      typeof router.init === "function"
+      currentRouter &&
+      typeof currentRouter.init === "function"
     ) {
-      router.init();
+      currentRouter.init();
     }
   }
 
   async _startRouter() {
+    const currentRouter =
+      this.dependencies.router;
+
     if (
-      router &&
-      typeof router.start === "function"
+      currentRouter &&
+      typeof currentRouter.start === "function"
     ) {
-      await router.start();
+      await currentRouter.start();
     } else if (
-      router &&
-      typeof router.listen === "function"
+      currentRouter &&
+      typeof currentRouter.listen === "function"
     ) {
-      await router.listen();
+      await currentRouter.listen();
     }
   }
 }
 
-export const application = new Application();
+export const application =
+  new Application();
 
 export default application;
