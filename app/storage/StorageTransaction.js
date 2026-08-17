@@ -1,207 +1,150 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * SupabaseAdapter
+ * StorageTransaction
  * ============================================================
  */
 
-import StorageProvider
-    from "./StorageProvider.js";
+export default class StorageTransaction {
 
-export default class SupabaseAdapter
-    extends StorageProvider {
+    constructor(provider) {
 
-    constructor(options = {}) {
-
-        super({
-            ...options,
-            name: "SupabaseAdapter"
-        });
-
-        this.client =
-            options.client ?? null;
-
-        this.table =
-            options.table ??
-            "application_storage";
-
-        this.keyColumn =
-            options.keyColumn ??
-            "key";
-
-        this.valueColumn =
-            options.valueColumn ??
-            "value";
-
-    }
-
-
-    async initialize() {
-
-        if (!this.client) {
+        if (!provider) {
 
             throw new Error(
-                "SupabaseAdapter requires a Supabase client."
+                "StorageTransaction requires a provider."
             );
 
         }
 
-        this.initialized = true;
+        this.provider =
+            provider;
 
-        return this;
+        this.active = true;
+
+        this.operations = [];
+
+    }
+
+
+    assertActive() {
+
+        if (!this.active) {
+
+            throw new Error(
+                "Storage transaction is no longer active."
+            );
+
+        }
 
     }
 
 
     async get(key) {
 
-        this.assertInitialized();
+        this.assertActive();
 
-        const {
-            data,
-            error
-        } =
-            await this.client
-                .from(this.table)
-                .select(this.valueColumn)
-                .eq(this.keyColumn, key)
-                .maybeSingle();
-
-        if (error) {
-
-            throw error;
-
-        }
-
-        return data
-            ? data[this.valueColumn]
-            : null;
+        return this.provider.get(
+            key
+        );
 
     }
 
 
     async set(key, value) {
 
-        this.assertInitialized();
+        this.assertActive();
 
-        const {
-            error
-        } =
-            await this.client
-                .from(this.table)
-                .upsert({
-                    [this.keyColumn]: key,
-                    [this.valueColumn]: value
-                });
+        this.operations.push({
+            type: "set",
+            key,
+            value
+        });
 
-        if (error) {
-
-            throw error;
-
-        }
-
-        return value;
+        return this.provider.set(
+            key,
+            value
+        );
 
     }
 
 
     async delete(key) {
 
-        this.assertInitialized();
+        this.assertActive();
 
-        const {
-            error
-        } =
-            await this.client
-                .from(this.table)
-                .delete()
-                .eq(
-                    this.keyColumn,
-                    key
-                );
+        this.operations.push({
+            type: "delete",
+            key
+        });
 
-        if (error) {
-
-            throw error;
-
-        }
-
-        return true;
+        return this.provider.delete(
+            key
+        );
 
     }
 
 
     async has(key) {
 
-        return (
-            await this.get(key)
-        ) !== null;
+        this.assertActive();
 
-    }
-
-
-    async clear() {
-
-        this.assertInitialized();
-
-        const {
-            error
-        } =
-            await this.client
-                .from(this.table)
-                .delete()
-                .not(
-                    this.keyColumn,
-                    "is",
-                    null
-                );
-
-        if (error) {
-
-            throw error;
-
-        }
-
-    }
-
-
-    async keys() {
-
-        this.assertInitialized();
-
-        const {
-            data,
-            error
-        } =
-            await this.client
-                .from(this.table)
-                .select(this.keyColumn);
-
-        if (error) {
-
-            throw error;
-
-        }
-
-        return (
-            data ?? []
-        ).map(
-            row =>
-                row[this.keyColumn]
+        return this.provider.has(
+            key
         );
 
     }
 
 
-    // =========================================================
-    // FUTURE INSERT
-    // Supabase:
-    // Authentication
-    // RLS
-    // Company isolation
-    // User isolation
-    // Audit logging
-    // Realtime synchronization
-    // =========================================================
+    async commit() {
+
+        this.assertActive();
+
+        this.active = false;
+
+        return true;
+
+    }
+
+
+    async rollback() {
+
+        this.active = false;
+
+        /*
+         * Generic storage providers cannot guarantee
+         * rollback after individual operations.
+         *
+         * Native database providers should override
+         * transaction() with true atomic transactions.
+         */
+
+        return false;
+
+    }
+
+
+    async execute(callback) {
+
+        this.assertActive();
+
+        try {
+
+            const result =
+                await callback(this);
+
+            await this.commit();
+
+            return result;
+
+        } catch (error) {
+
+            await this.rollback();
+
+            throw error;
+
+        }
+
+    }
 
 }
