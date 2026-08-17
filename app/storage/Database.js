@@ -18,28 +18,57 @@ export default class Database {
             options.name ??
             "IsaacsPartners";
 
-        this.initialized = false;
-
-        // =====================================================
-        // FUTURE INSERT
-        // Domain repositories
-        // Unit of Work
-        // Database health monitoring
-        // =====================================================
+        this.initialized =
+            false;
 
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * PROVIDER
+     * --------------------------------------------------------
+     */
+
     setProvider(provider) {
 
-        this.provider = provider;
+        if (!provider) {
+
+            throw new Error(
+                "Database provider cannot be empty."
+            );
+
+        }
+
+        this.provider =
+            provider;
 
         return this;
 
     }
 
 
+    getProvider() {
+
+        return this.provider;
+
+    }
+
+
+    /**
+     * --------------------------------------------------------
+     * INITIALISATION
+     * --------------------------------------------------------
+     */
+
     async initialize() {
+
+        if (this.initialized) {
+
+            return this;
+
+        }
+
 
         if (!this.provider) {
 
@@ -49,11 +78,38 @@ export default class Database {
 
         }
 
+
+        if (
+            typeof this.provider.initialize !==
+            "function"
+        ) {
+
+            throw new Error(
+                "Database provider does not support initialization."
+            );
+
+        }
+
+
         await this.provider.initialize();
 
-        this.initialized = true;
+        this.initialized =
+            true;
 
         return this;
+
+    }
+
+
+    /**
+     * --------------------------------------------------------
+     * STATE
+     * --------------------------------------------------------
+     */
+
+    isInitialized() {
+
+        return this.initialized;
 
     }
 
@@ -71,16 +127,27 @@ export default class Database {
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * BASIC OPERATIONS
+     * --------------------------------------------------------
+     */
+
     async get(key) {
 
         this.assertInitialized();
 
-        return this.provider.get(key);
+        return this.provider.get(
+            key
+        );
 
     }
 
 
-    async set(key, value) {
+    async set(
+        key,
+        value
+    ) {
 
         this.assertInitialized();
 
@@ -123,6 +190,24 @@ export default class Database {
     }
 
 
+    async values() {
+
+        this.assertInitialized();
+
+        return this.provider.values();
+
+    }
+
+
+    async entries() {
+
+        this.assertInitialized();
+
+        return this.provider.entries();
+
+    }
+
+
     async clear() {
 
         this.assertInitialized();
@@ -132,9 +217,29 @@ export default class Database {
     }
 
 
-    async transaction(callback) {
+    /**
+     * --------------------------------------------------------
+     * TRANSACTIONS
+     * --------------------------------------------------------
+     */
+
+    async transaction(
+        callback
+    ) {
 
         this.assertInitialized();
+
+        if (
+            typeof callback !==
+            "function"
+        ) {
+
+            throw new TypeError(
+                "Database transaction callback must be a function."
+            );
+
+        }
+
 
         return this.provider.transaction(
             callback
@@ -143,47 +248,78 @@ export default class Database {
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * HEALTH
+     * --------------------------------------------------------
+     */
+
     async healthCheck() {
 
-        if (!this.initialized) {
+        if (
+            !this.initialized ||
+            !this.provider
+        ) {
 
             return false;
 
         }
+
+
+        if (
+            typeof this.provider.healthCheck !==
+            "function"
+        ) {
+
+            return false;
+
+        }
+
 
         return this.provider.healthCheck();
 
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * SHUTDOWN
+     * --------------------------------------------------------
+     */
+
     async close() {
 
-        if (
-            this.provider &&
-            typeof this.provider.close ===
-            "function"
-        ) {
+        if (!this.provider) {
 
-            await this.provider.close();
+            this.initialized =
+                false;
+
+            return true;
 
         }
 
-        this.initialized = false;
+
+        try {
+
+            if (
+                typeof this.provider.close ===
+                "function"
+            ) {
+
+                await this.provider.close();
+
+            }
+
+        } finally {
+
+            this.initialized =
+                false;
+
+        }
+
+
+        return true;
 
     }
-
-
-    // =========================================================
-    // FUTURE INSERT
-    //
-    // Repository registration:
-    //
-    // ClientRepository
-    // MatterRepository
-    // DocumentRepository
-    // BookingRepository
-    // KnowledgeRepository
-    //
-    // =========================================================
 
 }
