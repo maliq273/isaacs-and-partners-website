@@ -8,10 +8,13 @@
  * ============================================================
  */
 
-import StorageProvider from "./StorageProvider.js";
+import StorageProvider
+    from "./StorageProvider.js";
+
 
 export default class MemoryAdapter
     extends StorageProvider {
+
 
     constructor(options = {}) {
 
@@ -20,28 +23,35 @@ export default class MemoryAdapter
             name: "MemoryAdapter"
         });
 
-        this.store = new Map();
+        this.store =
+            new Map();
 
     }
 
 
     async initialize() {
 
-        this.initialized = true;
+        this.initialized =
+            true;
 
         return this;
 
     }
-async key(key) {
-    return this.normaliseKey(key);
-}
+
 
     async get(key) {
 
         this.assertInitialized();
 
-        return this.store.has(key)
-            ? this.store.get(key)
+        const normalisedKey =
+            String(key);
+
+        return this.store.has(
+            normalisedKey
+        )
+            ? this.store.get(
+                normalisedKey
+            )
             : null;
 
     }
@@ -51,8 +61,11 @@ async key(key) {
 
         this.assertInitialized();
 
+        const normalisedKey =
+            String(key);
+
         this.store.set(
-            String(key),
+            normalisedKey,
             value
         );
 
@@ -65,8 +78,11 @@ async key(key) {
 
         this.assertInitialized();
 
+        const normalisedKey =
+            String(key);
+
         return this.store.delete(
-            String(key)
+            normalisedKey
         );
 
     }
@@ -76,8 +92,11 @@ async key(key) {
 
         this.assertInitialized();
 
+        const normalisedKey =
+            String(key);
+
         return this.store.has(
-            String(key)
+            normalisedKey
         );
 
     }
@@ -88,6 +107,8 @@ async key(key) {
         this.assertInitialized();
 
         this.store.clear();
+
+        return true;
 
     }
 
@@ -112,11 +133,13 @@ async key(key) {
     }
 
 
-    // =========================================================
-    // FUTURE INSERT
-    // In-memory cache eviction
-    // TTL support
-    // LRU cache
-    // =========================================================
+    async close() {
+
+        this.store.clear();
+
+        this.initialized =
+            false;
+
+    }
 
 }
