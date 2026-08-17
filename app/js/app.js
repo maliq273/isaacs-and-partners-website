@@ -1,91 +1,114 @@
 /**
  * Isaacs & Partners
- * Application Bootstrap
+ * Frontend Application Entry Point
  *
- * Central frontend entry point.
+ * File:
+ * app/js/app.js
  *
  * Responsibilities:
- * - Initialise global application services
- * - Initialise theme
- * - Register global event handlers
- * - Expose application state
- * - Provide controlled startup/shutdown lifecycle
+ * - Start the central application runtime
+ * - Expose the application instance
+ * - Synchronise application state with the DOM
+ * - Register frontend lifecycle listeners
+ * - Provide controlled startup/shutdown
+ *
+ * IMPORTANT:
+ * The actual application lifecycle is owned by:
+ *
+ * app/core/bootstrap.js
+ * app/core/application.js
+ *
+ * This file must NOT create a second Application runtime.
  */
 
-import api from "./api.js";
-import storage from "./storage.js";
-import notifications from "./notifications.js";
-import theme from "./theme.js";
-import {
-    generateId
-} from "./utils.js";
+"use strict";
 
-class Application {
+import bootstrap, {
+    shutdown as shutdownApplication
+} from "../core/bootstrap.js";
+
+import application from "../core/application.js";
+import { appState } from "../core/state.js";
+import { router } from "../core/router.js";
+
+
+/* =====================================================
+   FRONTEND APPLICATION ADAPTER
+   ===================================================== */
+
+class FrontendApplication {
+
     constructor() {
-        this.id =
-            generateId("app");
 
-        this.started = false;
+        this.application =
+            application;
 
-        this.services = {
-            api,
-            storage,
-            notifications,
-            theme
-        };
+        this.state =
+            appState;
 
-        this.state = {
-            authenticated: false,
-            user: null,
-            currentRoute: null,
-            online:
-                typeof navigator !==
-                "undefined"
-                    ? navigator.onLine
-                    : true
-        };
+        this.router =
+            router;
 
-        this.listeners = [];
+        this.started =
+            false;
+
+        this.listeners =
+            [];
+
     }
 
+
+    /* =================================================
+       START
+       ================================================= */
+
     async start() {
+
         if (this.started) {
             return this;
         }
 
         try {
-            this.initialiseTheme();
-            this.registerNetworkListeners();
-            this.registerGlobalErrorHandlers();
+
+            await bootstrap();
+
             this.initialiseDom();
 
-            await this.restoreApplicationState();
+            this.registerNetworkListeners();
+
+            this.registerApplicationListeners();
+
+            this.syncRouteState();
 
             this.started = true;
 
             this.emit(
                 "app:started",
                 {
-                    applicationId:
-                        this.id
+                    application:
+                        this.application
                 }
             );
 
             return this;
+
         } catch (error) {
-            this.handleStartupError(
-                error
-            );
+
+            this.handleStartupError(error);
 
             throw error;
+
         }
+
     }
 
-    initialiseTheme() {
-        this.services.theme.init();
-    }
+
+    /* =================================================
+       DOM INITIALISATION
+       ================================================= */
 
     initialiseDom() {
+
         if (
             typeof document ===
             "undefined"
@@ -93,61 +116,28 @@ class Application {
             return;
         }
 
-        document.documentElement.dataset
-            .application =
+        document.documentElement.dataset.application =
             "isaacs-and-partners";
 
-        document.documentElement.dataset
-            .applicationVersion =
-            document.documentElement
-                .dataset.version ||
+        document.documentElement.dataset.version =
+            document.documentElement.dataset.version ||
             "1.0.0";
-    }
 
-    async restoreApplicationState() {
-
-    try {
-
-        const user =
-            await this.services.storage.get(
-                "current_user"
-            );
-
-        if (user) {
-
-            this.state.user =
-                user;
-
-            this.state.authenticated =
-                true;
-
-        }
-
-    } catch {
-
-        this.state.user =
-            null;
-
-        this.state.authenticated =
-            false;
+        document.documentElement.dataset.environment =
+            window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1"
+                ? "development"
+                : "production";
 
     }
 
-}
 
-            if (user) {
-                this.state.user = user;
-                this.state.authenticated =
-                    true;
-            }
-        } catch {
-            this.state.user = null;
-            this.state.authenticated =
-                false;
-        }
-    }
+    /* =================================================
+       NETWORK STATUS
+       ================================================= */
 
     registerNetworkListeners() {
+
         if (
             typeof window ===
             "undefined"
@@ -156,34 +146,32 @@ class Application {
         }
 
         const onlineHandler = () => {
-            this.state.online = true;
 
-            this.services.notifications.info(
-                "Connection restored.",
-                {
-                    duration: 3000
-                }
+            this.state.set(
+                "online",
+                true
             );
 
             this.emit(
                 "network:online"
             );
+
         };
 
-        const offlineHandler = () => {
-            this.state.online = false;
 
-            this.services.notifications.warning(
-                "You are currently offline.",
-                {
-                    duration: 5000
-                }
+        const offlineHandler = () => {
+
+            this.state.set(
+                "online",
+                false
             );
 
             this.emit(
                 "network:offline"
             );
+
         };
+
 
         window.addEventListener(
             "online",
@@ -195,6 +183,7 @@ class Application {
             offlineHandler
         );
 
+
         this.listeners.push(
             () =>
                 window.removeEventListener(
@@ -203,6 +192,7 @@ class Application {
                 )
         );
 
+
         this.listeners.push(
             () =>
                 window.removeEventListener(
@@ -210,9 +200,133 @@ class Application {
                     offlineHandler
                 )
         );
+
     }
 
-    registerGlobalErrorHandlers() {
+
+    /* =================================================
+       APPLICATION EVENT LISTENERS
+       ================================================= */
+
+    registerApplicationListeners() {
+
+        if (
+            !this.application ||
+            !this.application.dependencies
+        ) {
+            return;
+        }
+
+        const events =
+            this.application.dependencies.events;
+
+        if (
+            !events ||
+            typeof events.on !==
+            "function"
+        ) {
+            return;
+        }
+
+
+        const startedHandler =
+            (event) => {
+
+                this.emit(
+                    "app:coreStarted",
+                    event
+                );
+
+            };
+
+
+        const stoppedHandler =
+            (event) => {
+
+                this.emit(
+                    "app:coreStopped",
+                    event
+                );
+
+            };
+
+
+        const routeHandler =
+            (event) => {
+
+                if (
+                    event &&
+                    event.path
+                ) {
+
+                    this.setRoute(
+                        event.path
+                    );
+
+                }
+
+            };
+
+
+        const removeStarted =
+            events.on(
+                "application:started",
+                startedHandler
+            );
+
+
+        const removeStopped =
+            events.on(
+                "application:stopped",
+                stoppedHandler
+            );
+
+
+        const removeRoute =
+            events.on(
+                "router:navigated",
+                routeHandler
+            );
+
+
+        if (
+            typeof removeStarted ===
+            "function"
+        ) {
+            this.listeners.push(
+                removeStarted
+            );
+        }
+
+
+        if (
+            typeof removeStopped ===
+            "function"
+        ) {
+            this.listeners.push(
+                removeStopped
+            );
+        }
+
+
+        if (
+            typeof removeRoute ===
+            "function"
+        ) {
+            this.listeners.push(
+                removeRoute
+            );
+        }
+
+    }
+
+
+    /* =================================================
+       ROUTE SYNCHRONISATION
+       ================================================= */
+
+    syncRouteState() {
+
         if (
             typeof window ===
             "undefined"
@@ -220,209 +334,336 @@ class Application {
             return;
         }
 
-        const errorHandler = (
-            event
-        ) => {
-            console.error(
-                "Unhandled application error:",
-                event.error ||
-                    event.message
+        const current =
+            this.router.getCurrentRoute();
+
+        if (current) {
+
+            this.setRoute(
+                current.pathname
             );
 
-            this.emit(
-                "app:error",
-                event.error
-            );
-        };
+            return;
 
-        const rejectionHandler = (
-            event
-        ) => {
-            console.error(
-                "Unhandled promise rejection:",
-                event.reason
-            );
+        }
 
-            this.emit(
-                "app:rejection",
-                event.reason
-            );
-        };
-
-        window.addEventListener(
-            "error",
-            errorHandler
+        this.setRoute(
+            window.location.pathname
         );
 
-        window.addEventListener(
-            "unhandledrejection",
-            rejectionHandler
-        );
-
-        this.listeners.push(
-            () =>
-                window.removeEventListener(
-                    "error",
-                    errorHandler
-                )
-        );
-
-        this.listeners.push(
-            () =>
-                window.removeEventListener(
-                    "unhandledrejection",
-                    rejectionHandler
-                )
-        );
     }
 
+
+    /* =================================================
+       USER MANAGEMENT
+       ================================================= */
+
     setUser(user) {
-        this.state.user =
-            user || null;
 
-        this.state.authenticated =
-            Boolean(user);
+        this.state.set(
+            "authenticated",
+            Boolean(user)
+        );
 
-        if (user) {
+        this.state.set(
+            "user",
+            user || null
+        );
 
-    this.services.storage.set(
-        "current_user",
-        user
-    );
-
-} else {
-
-    this.services.storage.delete(
-        "current_user"
-    );
-
-} else {
-            this.services.storage.remove(
-                "current_user",
-                {
-                    storage:
-                        "session"
-                }
-            );
-        }
 
         this.emit(
             "auth:userchange",
-            user
+            user || null
         );
+
     }
+
 
     clearUser() {
+
         this.setUser(null);
+
     }
+
 
     getUser() {
-        return this.state.user;
+
+        return this.state.get(
+            "user",
+            null
+        );
+
     }
+
 
     isAuthenticated() {
-        return (
-            this.state.authenticated
+
+        return Boolean(
+            this.state.get(
+                "authenticated",
+                false
+            )
         );
+
     }
 
+
+    /* =================================================
+       ROUTE STATE
+       ================================================= */
+
     setRoute(route) {
-        this.state.currentRoute =
-            route;
+
+        this.state.set(
+            "currentRoute",
+            route || null
+        );
 
         this.emit(
             "route:change",
-            route
+            route || null
         );
+
     }
+
 
     getRoute() {
-        return this.state.currentRoute;
-    }
 
-    emit(eventName, detail = null) {
-        if (
-            typeof window !==
-            "undefined"
-        ) {
-            window.dispatchEvent(
-                new CustomEvent(
-                    eventName,
-                    {
-                        detail
-                    }
-                )
-            );
-        }
-    }
-
-    handleStartupError(error) {
-        console.error(
-            "Application startup failed:",
-            error
+        return this.state.get(
+            "currentRoute",
+            null
         );
 
-        try {
-            this.services.notifications.error(
-                "The application could not be started. Please reload the page."
-            );
-        } catch {
-            // Avoid cascading startup failure.
-        }
     }
 
-    async shutdown() {
-        if (!this.started) {
+
+    /* =================================================
+       ONLINE STATUS
+       ================================================= */
+
+    isOnline() {
+
+        if (
+            typeof navigator ===
+            "undefined"
+        ) {
+            return true;
+        }
+
+        return navigator.onLine;
+
+    }
+
+
+    /* =================================================
+       EVENT BRIDGE
+       ================================================= */
+
+    emit(
+        eventName,
+        detail = null
+    ) {
+
+        if (
+            typeof window ===
+            "undefined"
+        ) {
             return;
         }
 
-        this.listeners.forEach(
-            (cleanup) => {
-                try {
-                    cleanup();
-                } catch {
-                    // Ignore cleanup errors.
+        window.dispatchEvent(
+            new CustomEvent(
+                eventName,
+                {
+                    detail
                 }
+            )
+        );
+
+    }
+
+
+    /* =================================================
+       STARTUP ERROR
+       ================================================= */
+
+    handleStartupError(error) {
+
+        console.error(
+            "[App] Application startup failed:",
+            error
+        );
+
+
+        if (
+            typeof document ===
+            "undefined"
+        ) {
+            return;
+        }
+
+
+        this.emit(
+            "app:startupError",
+            {
+                error
             }
         );
 
-        this.listeners = [];
+    }
+
+
+    /* =================================================
+       SHUTDOWN
+       ================================================= */
+
+    async shutdown() {
+
+        if (
+            !this.started
+        ) {
+            return;
+        }
+
+
+        for (
+            const cleanup
+            of this.listeners.splice(0)
+        ) {
+
+            try {
+
+                if (
+                    typeof cleanup ===
+                    "function"
+                ) {
+                    cleanup();
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "[App] Listener cleanup failed:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        try {
+
+            await shutdownApplication();
+
+        } catch (error) {
+
+            console.error(
+                "[App] Application shutdown failed:",
+                error
+            );
+
+        }
+
+
         this.started = false;
+
 
         this.emit(
             "app:shutdown"
         );
+
     }
+
+
+    /* =================================================
+       STATUS
+       ================================================= */
+
+    getStatus() {
+
+        return {
+            started:
+                this.started,
+
+            core:
+                this.application.getStatus(),
+
+            route:
+                this.getRoute(),
+
+            authenticated:
+                this.isAuthenticated(),
+
+            online:
+                this.isOnline()
+        };
+
+    }
+
 }
 
+
+/* =====================================================
+   SINGLE FRONTEND APPLICATION INSTANCE
+   ===================================================== */
+
 export const app =
-    new Application();
+    new FrontendApplication();
+
 
 export {
-    Application
+    FrontendApplication
 };
+
 
 export default app;
 
-/**
- * Browser bootstrap.
- */
+
+/* =====================================================
+   BROWSER BOOTSTRAP
+   ===================================================== */
+
 if (
     typeof document !==
     "undefined"
 ) {
+
+    const startApplication =
+        () => {
+
+            app.start()
+                .catch(
+                    (error) => {
+
+                        console.error(
+                            "[App] Fatal startup error:",
+                            error
+                        );
+
+                    }
+                );
+
+        };
+
+
     if (
         document.readyState ===
         "loading"
     ) {
+
         document.addEventListener(
             "DOMContentLoaded",
-            () => app.start(),
+            startApplication,
             {
                 once: true
             }
         );
+
     } else {
-        app.start();
+
+        startApplication();
+
     }
+
 }
