@@ -58,7 +58,8 @@ class Application {
             this.registerNetworkListeners();
             this.registerGlobalErrorHandlers();
             this.initialiseDom();
-            this.restoreApplicationState();
+
+            await this.restoreApplicationState();
 
             this.started = true;
 
@@ -283,15 +284,19 @@ class Application {
             Boolean(user);
 
         if (user) {
-            this.services.storage.set(
-                "current_user",
-                user,
-                {
-                    storage:
-                        "session"
-                }
-            );
-        } else {
+
+    this.services.storage.set(
+        "current_user",
+        user
+    );
+
+} else {
+
+    this.services.storage.delete(
+        "current_user"
+    );
+
+} else {
             this.services.storage.remove(
                 "current_user",
                 {
