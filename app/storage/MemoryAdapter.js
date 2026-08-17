@@ -32,7 +32,9 @@ export default class MemoryAdapter
         return this;
 
     }
-
+async key(key) {
+    return this.normaliseKey(key);
+}
 
     async get(key) {
 
