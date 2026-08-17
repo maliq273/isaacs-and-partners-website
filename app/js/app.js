@@ -103,16 +103,36 @@ class Application {
             "1.0.0";
     }
 
-    restoreApplicationState() {
-        try {
-            const user =
-                this.services.storage.get(
-                    "current_user",
-                    {
-                        storage:
-                            "session"
-                    }
-                );
+    async restoreApplicationState() {
+
+    try {
+
+        const user =
+            await this.services.storage.get(
+                "current_user"
+            );
+
+        if (user) {
+
+            this.state.user =
+                user;
+
+            this.state.authenticated =
+                true;
+
+        }
+
+    } catch {
+
+        this.state.user =
+            null;
+
+        this.state.authenticated =
+            false;
+
+    }
+
+}
 
             if (user) {
                 this.state.user = user;
