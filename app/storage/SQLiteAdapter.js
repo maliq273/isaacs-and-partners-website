@@ -1,51 +1,72 @@
 /**
  * ============================================================
  * ISAACS & PARTNERS ENTERPRISE PLATFORM
- * IndexedDBAdapter
+ * SQLiteAdapter
  * ============================================================
  */
 
-import StorageProvider from "./StorageProvider.js";
+import StorageProvider
+    from "./StorageProvider.js";
 
-export default class IndexedDBAdapter
+export default class SQLiteAdapter
     extends StorageProvider {
 
     constructor(options = {}) {
 
         super({
             ...options,
-            name: "IndexedDBAdapter"
+            name: "SQLiteAdapter"
         });
 
-        this.databaseName =
-            options.databaseName ??
-            "IsaacsPartners";
+        this.db =
+            options.db ?? null;
 
-        this.storeName =
-            options.storeName ??
-            "application";
+        this.tableName =
+            options.tableName ??
+            "application_storage";
+    }
 
-        this.version =
-            options.version ??
-            1;
 
-        this.db = null;
+    validateIdentifier(value) {
+
+        if (
+            !/^[A-Za-z_][A-Za-z0-9_]*$/.test(
+                value
+            )
+        ) {
+
+            throw new Error(
+                `Unsafe SQLite identifier: ${value}`
+            );
+
+        }
+
+        return value;
 
     }
 
 
     async initialize() {
 
-        if (!globalThis.indexedDB) {
+        if (!this.db) {
 
             throw new Error(
-                "IndexedDB is unavailable."
+                "SQLiteAdapter requires an injected SQLite database instance."
             );
 
         }
 
-        this.db =
-            await this.openDatabase();
+        this.validateIdentifier(
+            this.tableName
+        );
+
+        await this.db.exec(`
+            CREATE TABLE IF NOT EXISTS
+            ${this.tableName} (
+                key TEXT PRIMARY KEY NOT NULL,
+                value TEXT
+            )
+        `);
 
         this.initialized = true;
 
@@ -54,97 +75,28 @@ export default class IndexedDBAdapter
     }
 
 
-    openDatabase() {
-
-        return new Promise(
-            (resolve, reject) => {
-
-                const request =
-                    indexedDB.open(
-                        this.databaseName,
-                        this.version
-                    );
-
-                request.onupgradeneeded =
-                    event => {
-
-                        const db =
-                            event.target.result;
-
-                        if (
-                            !db.objectStoreNames
-                                .contains(
-                                    this.storeName
-                                )
-                        ) {
-
-                            db.createObjectStore(
-                                this.storeName
-                            );
-
-                        }
-
-                        // =====================================
-                        // FUTURE INSERT
-                        // IndexedDB schema migrations
-                        // =====================================
-
-                    };
-
-
-                request.onsuccess =
-                    () => resolve(
-                        request.result
-                    );
-
-
-                request.onerror =
-                    () => reject(
-                        request.error
-                    );
-
-            }
-        );
-
-    }
-
-
-    transaction(mode = "readonly") {
-
-        return this.db.transaction(
-            this.storeName,
-            mode
-        ).objectStore(
-            this.storeName
-        );
-
-    }
-
-
     async get(key) {
 
         this.assertInitialized();
 
-        return new Promise(
-            (resolve, reject) => {
+        const result =
+            await this.db.get(
+                `
+                SELECT value
+                FROM ${this.tableName}
+                WHERE key = ?
+                LIMIT 1
+                `,
+                [
+                    this.normaliseKey(key)
+                ]
+            );
 
-                const request =
-                    this.transaction()
-                        .get(key);
-
-                request.onsuccess =
-                    () => resolve(
-                        request.result ??
-                        null
-                    );
-
-                request.onerror =
-                    () => reject(
-                        request.error
-                    );
-
-            }
-        );
+        return result
+            ? this.deserialize(
+                result.value
+            )
+            : null;
 
     }
 
@@ -153,27 +105,23 @@ export default class IndexedDBAdapter
 
         this.assertInitialized();
 
-        return new Promise(
-            (resolve, reject) => {
+        await this.db.exec(
+            `
+            INSERT INTO ${this.tableName}
+                (key, value)
+            VALUES (?, ?)
 
-                const request =
-                    this.transaction(
-                        "readwrite"
-                    ).put(
-                        value,
-                        key
-                    );
-
-                request.onsuccess =
-                    () => resolve(value);
-
-                request.onerror =
-                    () => reject(
-                        request.error
-                    );
-
-            }
+            ON CONFLICT(key)
+            DO UPDATE SET
+                value = excluded.value
+            `,
+            [
+                this.normaliseKey(key),
+                this.serialize(value)
+            ]
         );
+
+        return value;
 
     }
 
@@ -182,34 +130,39 @@ export default class IndexedDBAdapter
 
         this.assertInitialized();
 
-        return new Promise(
-            (resolve, reject) => {
-
-                const request =
-                    this.transaction(
-                        "readwrite"
-                    ).delete(key);
-
-                request.onsuccess =
-                    () => resolve(true);
-
-                request.onerror =
-                    () => reject(
-                        request.error
-                    );
-
-            }
+        await this.db.exec(
+            `
+            DELETE FROM ${this.tableName}
+            WHERE key = ?
+            `,
+            [
+                this.normaliseKey(key)
+            ]
         );
+
+        return true;
 
     }
 
 
     async has(key) {
 
-        const value =
-            await this.get(key);
+        this.assertInitialized();
 
-        return value !== null;
+        const result =
+            await this.db.get(
+                `
+                SELECT 1 AS present
+                FROM ${this.tableName}
+                WHERE key = ?
+                LIMIT 1
+                `,
+                [
+                    this.normaliseKey(key)
+                ]
+            );
+
+        return Boolean(result);
 
     }
 
@@ -218,23 +171,10 @@ export default class IndexedDBAdapter
 
         this.assertInitialized();
 
-        return new Promise(
-            (resolve, reject) => {
-
-                const request =
-                    this.transaction(
-                        "readwrite"
-                    ).clear();
-
-                request.onsuccess =
-                    () => resolve();
-
-                request.onerror =
-                    () => reject(
-                        request.error
-                    );
-
-            }
+        await this.db.exec(
+            `
+            DELETE FROM ${this.tableName}
+            `
         );
 
     }
@@ -244,53 +184,63 @@ export default class IndexedDBAdapter
 
         this.assertInitialized();
 
-        return new Promise(
-            (resolve, reject) => {
+        const rows =
+            await this.db.all(
+                `
+                SELECT key
+                FROM ${this.tableName}
+                ORDER BY key
+                `
+            );
 
-                const request =
-                    this.transaction()
-                        .getAllKeys();
-
-                request.onsuccess =
-                    () => resolve(
-                        request.result
-                    );
-
-                request.onerror =
-                    () => reject(
-                        request.error
-                    );
-
-            }
+        return (
+            rows ?? []
+        ).map(
+            row => row.key
         );
+
+    }
+
+
+    async healthCheck() {
+
+        if (!this.initialized) {
+            return false;
+        }
+
+        try {
+
+            await this.db.get(
+                "SELECT 1 AS ok"
+            );
+
+            return true;
+
+        } catch {
+
+            return false;
+
+        }
 
     }
 
 
     async close() {
 
-        if (this.db) {
+        if (
+            this.db &&
+            typeof this.db.close ===
+                "function"
+        ) {
 
-            this.db.close();
-
-            this.db = null;
+            await this.db.close();
 
         }
+
+        this.db = null;
 
         this.initialized = false;
 
     }
-
-
-    // =========================================================
-    // FUTURE INSERT
-    // Object stores:
-    // matters
-    // clients
-    // documents
-    // appointments
-    // communications
-    // workflows
-    // =========================================================
 
 }
