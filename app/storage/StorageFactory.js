@@ -4,19 +4,6 @@
  * StorageFactory
  * ------------------------------------------------------------
  * Central storage provider factory.
- *
- * Responsibilities:
- * - Create storage providers
- * - Select providers by explicit configuration
- * - Select safe defaults by environment
- * - Create database instances
- * - Create initialised database instances
- * - Prevent unsafe production fallbacks
- *
- * IMPORTANT:
- * - Never place Supabase service-role keys in frontend code.
- * - Supabase client configuration must use the public
- *   publishable/anon key only.
  * ============================================================
  */
 
@@ -42,110 +29,118 @@ import Database
     from "./Database.js";
 
 
-class StorageFactory {
+export default class StorageFactory {
+
 
     /**
-     * ========================================================
-     * CREATE
-     * ========================================================
-     *
-     * Create a storage provider.
-     *
-     * Supported:
-     *
-     * memory
-     * local
-     * localstorage
-     * session
-     * sessionstorage
-     * indexeddb
-     * sqlite
-     * supabase
-     *
-     * @param {string} type
-     * @param {Object} options
-     * @returns {Object}
+     * --------------------------------------------------------
+     * CREATE STORAGE PROVIDER
+     * --------------------------------------------------------
      */
+
     static create(
-        type = "auto",
+        type = "local",
         options = {}
     ) {
 
-        const resolvedType =
-            this.resolveType(
-                type,
-                options
-            );
+        const providerType =
+            String(type)
+                .trim()
+                .toLowerCase();
 
-        switch (resolvedType) {
+
+        let provider;
+
+
+        switch (providerType) {
+
 
             case "memory":
 
-                return new MemoryAdapter(
-                    options
-                );
+                provider =
+                    new MemoryAdapter(
+                        options
+                    );
+
+                break;
 
 
             case "local":
 
             case "localstorage":
 
-                return new LocalStorageAdapter(
-                    options
-                );
+                provider =
+                    new LocalStorageAdapter(
+                        options
+                    );
+
+                break;
 
 
             case "session":
 
             case "sessionstorage":
 
-                return new SessionStorageAdapter(
-                    options
-                );
+                provider =
+                    new SessionStorageAdapter(
+                        options
+                    );
+
+                break;
 
 
             case "indexeddb":
 
-                return new IndexedDBAdapter(
-                    options
-                );
+                provider =
+                    new IndexedDBAdapter(
+                        options
+                    );
+
+                break;
 
 
             case "sqlite":
 
-                return new SQLiteAdapter(
-                    options
-                );
+                provider =
+                    new SQLiteAdapter(
+                        options
+                    );
+
+                break;
 
 
             case "supabase":
 
-                return new SupabaseAdapter(
-                    options
-                );
+                provider =
+                    new SupabaseAdapter(
+                        options
+                    );
+
+                break;
 
 
             default:
 
                 throw new Error(
-                    `Unsupported storage provider: ${resolvedType}`
+                    `Unsupported storage provider: ${type}`
                 );
 
         }
+
+
+        return provider;
 
     }
 
 
     /**
-     * ========================================================
+     * --------------------------------------------------------
      * CREATE DATABASE
-     * ========================================================
-     *
-     * Creates the database abstraction using the selected
-     * storage provider.
+     * --------------------------------------------------------
      */
+
     static createDatabase(
-        type = "auto",
+        type = "local",
         options = {}
     ) {
 
@@ -168,12 +163,13 @@ class StorageFactory {
 
 
     /**
-     * ========================================================
-     * CREATE INITIALISED DATABASE
-     * ========================================================
+     * --------------------------------------------------------
+     * CREATE + INITIALISE DATABASE
+     * --------------------------------------------------------
      */
+
     static async createInitializedDatabase(
-        type = "auto",
+        type = "local",
         options = {}
     ) {
 
@@ -184,25 +180,7 @@ class StorageFactory {
             );
 
 
-        if (
-            database &&
-            typeof database.initialize ===
-                "function"
-        ) {
-
-            await database.initialize();
-
-        }
-
-        else if (
-            database &&
-            typeof database.initialise ===
-                "function"
-        ) {
-
-            await database.initialise();
-
-        }
+        await database.initialize();
 
 
         return database;
@@ -211,337 +189,83 @@ class StorageFactory {
 
 
     /**
-     * ========================================================
-     * RESOLVE TYPE
-     * ========================================================
-     *
-     * Resolves "auto" into an appropriate provider.
-     *
-     * Production:
-     *     Supabase
-     *
-     * Development:
-     *     IndexedDB
-     *
-     * Test:
-     *     Memory
-     *
-     * Explicit provider selections are always respected.
+     * --------------------------------------------------------
+     * CHECK SUPPORTED PROVIDER
+     * --------------------------------------------------------
      */
-    static resolveType(
-        type = "auto",
-        options = {}
+
+    static isSupported(
+        type
     ) {
 
-        const requested =
-            String(type || "auto")
+        if (
+            type === null ||
+            type === undefined
+        ) {
+
+            return false;
+
+        }
+
+
+        const providerType =
+            String(type)
                 .trim()
                 .toLowerCase();
 
 
-        if (
-            requested !== "auto"
-        ) {
-
-            this.validateProvider(
-                requested,
-                options
-            );
-
-            return requested;
-
-        }
-
-
-        const environment =
-            this.detectEnvironment(
-                options
-            );
-
-
-        if (
-            environment === "test"
-        ) {
-
-            return "memory";
-
-        }
-
-
-        if (
-            environment === "production"
-        ) {
-
-            return "supabase";
-
-        }
-
-
-        /*
-         * Development is deliberately local-first.
-         *
-         * IndexedDB is preferable to localStorage for
-         * application data because it supports structured
-         * records and larger datasets.
-         */
-        return "indexeddb";
-
-    }
-
-
-    /**
-     * ========================================================
-     * DETECT ENVIRONMENT
-     * ========================================================
-     */
-    static detectEnvironment(
-        options = {}
-    ) {
-
-        if (
-            options.environment
-        ) {
-
-            return String(
-                options.environment
-            ).toLowerCase();
-
-        }
-
-
-        if (
-            typeof process !== "undefined" &&
-            process.env &&
-            process.env.NODE_ENV
-        ) {
-
-            const nodeEnvironment =
-                String(
-                    process.env.NODE_ENV
-                ).toLowerCase();
-
-
-            if (
-                nodeEnvironment === "test"
-            ) {
-
-                return "test";
-
-            }
-
-
-            if (
-                nodeEnvironment ===
-                    "production"
-            ) {
-
-                return "production";
-
-            }
-
-
-            return "development";
-
-        }
-
-
-        if (
-            typeof window !== "undefined"
-        ) {
-
-            const hostname =
-                window.location.hostname;
-
-
-            if (
-                hostname ===
-                    "localhost" ||
-                hostname ===
-                    "127.0.0.1"
-            ) {
-
-                return "development";
-
-            }
-
-
-            if (
-                hostname.includes(
-                    "github.io"
-                )
-            ) {
-
-                return "production";
-
-            }
-
-
-            return "production";
-
-        }
-
-
-        return "development";
-
-    }
-
-
-    /**
-     * ========================================================
-     * VALIDATE PROVIDER
-     * ========================================================
-     */
-    static validateProvider(
-        type,
-        options = {}
-    ) {
-
-        const supported =
-            [
-                "memory",
-                "local",
-                "localstorage",
-                "session",
-                "sessionstorage",
-                "indexeddb",
-                "sqlite",
-                "supabase",
-            ];
-
-
-        if (
-            !supported.includes(type)
-        ) {
-
-            throw new Error(
-                `Unsupported storage provider: ${type}`
-            );
-
-        }
-
-
-        /*
-         * Production safety.
-         *
-         * Explicitly selecting an unsafe browser-only
-         * provider in production should require an
-         * explicit override.
-         */
-        const environment =
-            this.detectEnvironment(
-                options
-            );
-
-
-        const unsafeProductionProviders =
-            [
-                "memory",
-                "local",
-                "localstorage",
-                "session",
-                "sessionstorage",
-            ];
-
-
-        if (
-            environment === "production" &&
-            unsafeProductionProviders.includes(
-                type
-            ) &&
-            options.allowUnsafeProductionStorage !==
-                true
-        ) {
-
-            throw new Error(
-                `Storage provider "${type}" is not permitted as a production provider. ` +
-                `Use "supabase" or explicitly set ` +
-                `allowUnsafeProductionStorage: true.`
-            );
-
-        }
-
-    }
-
-
-    /**
-     * ========================================================
-     * IS SUPABASE AVAILABLE
-     * ========================================================
-     */
-    static isSupabaseConfigured(
-        options = {}
-    ) {
-
-        return Boolean(
-            options.supabaseUrl &&
-            options.supabaseKey
+        return [
+            "memory",
+            "local",
+            "localstorage",
+            "session",
+            "sessionstorage",
+            "indexeddb",
+            "sqlite",
+            "supabase"
+        ].includes(
+            providerType
         );
 
     }
 
 
     /**
-     * ========================================================
-     * GET DEFAULT PROVIDER
-     * ========================================================
+     * --------------------------------------------------------
+     * NORMALISE PROVIDER NAME
+     * --------------------------------------------------------
      */
-    static getDefaultProvider(
-        options = {}
+
+    static normaliseType(
+        type
     ) {
 
-        return this.resolveType(
-            "auto",
-            options
-        );
-
-    }
+        const providerType =
+            String(type)
+                .trim()
+                .toLowerCase();
 
 
-    /**
-     * ========================================================
-     * PROVIDER INFORMATION
-     * ========================================================
-     */
-    static getProviderInfo(
-        type = "auto",
-        options = {}
-    ) {
+        switch (
+            providerType
+        ) {
 
-        const resolvedType =
-            this.resolveType(
-                type,
-                options
-            );
+            case "localstorage":
+
+                return "local";
 
 
-        return {
+            case "sessionstorage":
 
-            requested:
-                type,
+                return "session";
 
-            resolved:
-                resolvedType,
 
-            environment:
-                this.detectEnvironment(
-                    options
-                ),
+            default:
 
-            supabaseConfigured:
-                this.isSupabaseConfigured(
-                    options
-                ),
+                return providerType;
 
-        };
+        }
 
     }
 
 }
-
-
-export {
-    StorageFactory
-};
-
-
-export default StorageFactory;
