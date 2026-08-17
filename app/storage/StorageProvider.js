@@ -11,37 +11,56 @@ export default class StorageProvider {
 
     constructor(options = {}) {
 
-        this.name = options.name ?? "StorageProvider";
+        this.name =
+            options.name ??
+            "StorageProvider";
 
-        this.initialized = false;
+        this.initialized =
+            false;
 
-        this.options = options;
-
-        // =====================================================
-        // FUTURE INSERT
-        // Storage telemetry configuration
-        // Encryption configuration
-        // Tenant isolation configuration
-        // =====================================================
+        this.options =
+            options;
 
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * INITIALISATION
+     * --------------------------------------------------------
+     */
+
     async initialize() {
 
-        this.initialized = true;
+        this.initialized =
+            true;
 
         return this;
 
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * SHUTDOWN
+     * --------------------------------------------------------
+     */
+
     async close() {
 
-        this.initialized = false;
+        this.initialized =
+            false;
+
+        return true;
 
     }
 
+
+    /**
+     * --------------------------------------------------------
+     * STATE VALIDATION
+     * --------------------------------------------------------
+     */
 
     assertInitialized() {
 
@@ -55,6 +74,12 @@ export default class StorageProvider {
 
     }
 
+
+    /**
+     * --------------------------------------------------------
+     * REQUIRED STORAGE OPERATIONS
+     * --------------------------------------------------------
+     */
 
     async get() {
 
@@ -110,13 +135,24 @@ export default class StorageProvider {
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * DERIVED OPERATIONS
+     * --------------------------------------------------------
+     */
+
     async values() {
 
-        const keys = await this.keys();
+        this.assertInitialized();
+
+        const keys =
+            await this.keys();
 
         const values = [];
 
-        for (const key of keys) {
+        for (
+            const key of keys
+        ) {
 
             values.push(
                 await this.get(key)
@@ -131,11 +167,16 @@ export default class StorageProvider {
 
     async entries() {
 
-        const keys = await this.keys();
+        this.assertInitialized();
+
+        const keys =
+            await this.keys();
 
         const entries = [];
 
-        for (const key of keys) {
+        for (
+            const key of keys
+        ) {
 
             entries.push([
                 key,
@@ -149,14 +190,46 @@ export default class StorageProvider {
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * TRANSACTION SUPPORT
+     * --------------------------------------------------------
+     *
+     * Individual adapters may override this method when they
+     * have native transaction support.
+     *
+     * The default implementation provides a controlled
+     * transaction interface for simple providers.
+     */
+
     async transaction(callback) {
+
+        this.assertInitialized();
+
+        if (
+            typeof callback !==
+            "function"
+        ) {
+
+            throw new TypeError(
+                "Storage transaction callback must be a function."
+            );
+
+        }
 
         const transaction = {
 
-            get: key => this.get(key),
+            get: key =>
+                this.get(key),
 
-            set: (key, value) =>
-                this.set(key, value),
+            set: (
+                key,
+                value
+            ) =>
+                this.set(
+                    key,
+                    value
+                ),
 
             delete: key =>
                 this.delete(key),
@@ -166,17 +239,34 @@ export default class StorageProvider {
 
         };
 
-        return callback(transaction);
+
+        return callback(
+            transaction
+        );
 
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * HEALTH CHECK
+     * --------------------------------------------------------
+     */
+
     async healthCheck() {
 
-        try {
+        if (!this.initialized) {
 
-            const key =
-                `__storage_health_${Date.now()}`;
+            return false;
+
+        }
+
+        const key =
+            `__storage_health_${Date.now()}_${Math.random()
+                .toString(36)
+                .slice(2)}`;
+
+        try {
 
             await this.set(
                 key,
@@ -186,11 +276,23 @@ export default class StorageProvider {
             const result =
                 await this.get(key);
 
-            await this.delete(key);
+            await this.delete(
+                key
+            );
 
             return result === true;
 
         } catch {
+
+            try {
+
+                await this.delete(
+                    key
+                );
+
+            } catch {
+                // Ignore cleanup failure.
+            }
 
             return false;
 
@@ -199,9 +301,17 @@ export default class StorageProvider {
     }
 
 
+    /**
+     * --------------------------------------------------------
+     * SERIALISATION
+     * --------------------------------------------------------
+     */
+
     serialize(value) {
 
-        return JSON.stringify(value);
+        return JSON.stringify(
+            value
+        );
 
     }
 
@@ -217,17 +327,22 @@ export default class StorageProvider {
 
         }
 
+
         if (
-            typeof value !== "string"
+            typeof value !==
+            "string"
         ) {
 
             return value;
 
         }
 
+
         try {
 
-            return JSON.parse(value);
+            return JSON.parse(
+                value
+            );
 
         } catch {
 
