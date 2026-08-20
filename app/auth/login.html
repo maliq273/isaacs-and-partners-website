@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="robots"
+        content="noindex, nofollow"
+    >
+
+    <meta
+        name="application-name"
+        content="Isaacs and Partners"
+    >
+
+    <title>
+        Sign In | Isaacs and Partners
+    </title>
+
+    <!-- Application version -->
+    <meta
+        name="app-version"
+        content="1.0.0"
+    >
+
+    <!-- Application API configuration -->
+    <meta
+        name="api-base"
+        content="/api"
+    >
+
+    <!-- Main application stylesheet -->
+    <link
+        rel="stylesheet"
+        href="../../style.css"
+    >
+
+    <!-- Login-specific stylesheet -->
+    <link
+        rel="stylesheet"
+        href="../css/login.css"
+    >
+
+</head>
+
+<body>
+
+    <main
+        id="loginPage"
+        class="login-page"
+    >
+
+        <section
+            class="login-container"
+            aria-labelledby="loginTitle"
+        >
+
+            <!-- Branding -->
+            <header class="login-header">
+
+                <div
+                    class="login-logo"
+                    aria-hidden="true"
+                >
+                <img
+                    src="../../assets/logo.png"
+                    alt="Isaacs and Partners"
+                >
+                </div>
+
+                <h1 id="loginTitle">
+                    Isaacs and Partners
+                </h1>
+
+                <p>
+                    Secure Staff Login
+                </p>
+
+            </header>
+
+
+            <!-- Login form -->
+            <form
+                id="loginForm"
+                class="login-form"
+                method="post"
+                novalidate
+                autocomplete="on"
+            >
+
+                <!-- Error message -->
+                <div
+                    id="loginError"
+                    class="login-message login-error"
+                    role="alert"
+                    aria-live="assertive"
+                    hidden
+                ></div>
+
+
+                <!-- Status message -->
+                <div
+                    id="loginStatus"
+                    class="login-message login-status"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+
+
+                <!-- Identifier -->
+                <div class="login-field">
+
+                    <label
+                        for="identifier"
+                    >
+                        Email address or username
+                    </label>
+
+                    <input
+                        id="identifier"
+                        name="identifier"
+                        type="text"
+                        inputmode="email"
+                        autocomplete="username"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        required
+                        maxlength="254"
+                        aria-required="true"
+                    >
+
+                </div>
+
+
+                <!-- Password -->
+                <div class="login-field">
+
+                    <label
+                        for="password"
+                    >
+                        Password
+                    </label>
+
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autocomplete="current-password"
+                        required
+                        maxlength="256"
+                        aria-required="true"
+                    >
+
+                </div>
+
+
+                <!-- Remember session -->
+                <div
+                    class="login-options"
+                >
+
+                    <label
+                        class="remember-me"
+                    >
+
+                        <input
+                            id="rememberMe"
+                            name="rememberMe"
+                            type="checkbox"
+                        >
+
+                        <span>
+                            Keep me signed in
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <!-- Submit -->
+                <button
+                    id="loginButton"
+                    type="submit"
+                    class="login-submit"
+                >
+                    Sign In
+                </button>
+
+            </form>
+
+
+            <!-- Security notice -->
+            <footer
+                class="login-footer"
+            >
+
+                <p>
+                    Authorised personnel only.
+                </p>
+
+                <p>
+                    Isaacs and Partners
+                </p>
+
+            </footer>
+
+        </section>
+
+    </main>
+
+
+    <!--
+        Application Login Controller
+
+        Authentication logic is NOT placed in this HTML
+        document. The controller delegates authentication
+        to AuthService.
+    -->
+    <script type="module">
+
+        import loginController
+            from "./LoginController.js";
+
+
+        /*
+         * Initialise the login controller after
+         * the document has loaded.
+         */
+        loginController.initialise({
+            formSelector: "#loginForm",
+            submitButton:
+                document.querySelector(
+                    "#loginButton"
+                ),
+            errorSelector: "#loginError",
+            statusSelector: "#loginStatus"
+        });
+
+    </script>
+
+</body>
+
+</html>
