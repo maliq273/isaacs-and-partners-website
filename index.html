@@ -1595,22 +1595,7 @@ id="backToTop">
 <!-- ================================================= -->
 
 <script src="script.js"></script>
-<script type="module">
-    import { startApplication } from "./app/core/bootstrap.js";
-
-    startApplication().catch((error) => {
-        console.error(
-            "[Isaacs & Partners] Application bootstrap failed:",
-            error
-        );
-
-        window.dispatchEvent(
-            new CustomEvent("application:bootstrapError", {
-                detail: { error }
-            })
-        );
-    });
-</script>
+<script type="module" src="./app/js/app.js"></script>
 
 </body>
 
