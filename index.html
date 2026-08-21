@@ -198,58 +198,312 @@ SCHEMA.ORG - LEGAL & PROFESSIONAL SERVICES
 <!-- NAVIGATION -->
 <!-- ================================================= -->
 
-<header>
+<header id="site-header">
 
-<nav class="navbar">
+    <nav class="navbar">
 
-<div class="container">
+        <div class="container navbar-container">
 
-<a href="#hero"
-   class="logo">
+            <!-- LOGO -->
 
-<img src="assets/logo.png"
-     alt="Isaacs & Partners">
+            <a href="#hero"
+               class="logo"
+               aria-label="Isaacs & Partners Home">
 
-</a>
+                <img src="assets/logo.png"
+                     alt="Isaacs & Partners">
 
-<ul class="nav-links">
+            </a>
 
-<li><a href="#hero">Home</a></li>
 
-<li><a href="#about">About</a></li>
+            <!-- DESKTOP NAVIGATION -->
 
-<li><a href="#services">Services</a></li>
+            <ul class="nav-links"
+                id="primary-navigation">
 
-<li><a href="#industries">Industries</a></li>
+                <li>
+                    <a href="#hero">Home</a>
+                </li>
 
-<li><a href="#consultation">Consultation</a></li>
+                <li>
+                    <a href="#about">About</a>
+                </li>
 
-<li><a href="#contact">Contact</a></li>
+                <li>
+                    <a href="#services">Services</a>
+                </li>
 
-</ul>
+                <li>
+                    <a href="#industries">Industries</a>
+                </li>
 
-<div class="nav-buttons">
+                <li>
+                    <a href="#consultation">Consultation</a>
+                </li>
 
-<a href="#consultation"
-   class="gold-btn">
+                <li>
+                    <a href="#contact">Contact</a>
+                </li>
 
-Book Consultation
+            </ul>
 
-</a>
 
-</div>
+            <!-- DESKTOP ACCOUNT ACTIONS -->
 
-<div class="hamburger">
+            <div class="nav-buttons">
 
-<span></span>
-<span></span>
-<span></span>
+                <a href="#consultation"
+                   class="gold-btn"
+                   data-auth-action="signup">
 
-</div>
+                    Book Consultation
 
-</div>
+                </a>
 
-</nav>
+                <a href="/login.html"
+                   class="nav-login-btn"
+                   data-auth-action="signin">
+
+                    Sign In
+
+                </a>
+
+            </div>
+
+
+            <!-- MOBILE / TABLET MENU BUTTON -->
+
+            <button
+                class="hamburger"
+                id="mobile-menu-toggle"
+                type="button"
+                aria-label="Open navigation menu"
+                aria-controls="mobile-navigation"
+                aria-expanded="false">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+        </div>
+
+    </nav>
+
+
+    <!-- MOBILE / TABLET NAVIGATION DRAWER -->
+
+    <div
+        class="mobile-menu-overlay"
+        id="mobile-menu-overlay"
+        aria-hidden="true">
+    </div>
+
+
+    <aside
+        class="mobile-navigation"
+        id="mobile-navigation"
+        aria-hidden="true">
+
+        <div class="mobile-navigation-header">
+
+            <div class="mobile-menu-brand">
+
+                <img
+                    src="assets/logo.png"
+                    alt="Isaacs & Partners">
+
+            </div>
+
+            <button
+                type="button"
+                class="mobile-menu-close"
+                id="mobile-menu-close"
+                aria-label="Close navigation menu">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <nav
+            class="mobile-navigation-links"
+            aria-label="Mobile navigation">
+
+            <a href="#hero"
+               data-mobile-nav>
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>Home</span>
+
+            </a>
+
+
+            <a href="#about"
+               data-mobile-nav>
+
+                <i class="fa-solid fa-circle-info"></i>
+
+                <span>About</span>
+
+            </a>
+
+
+            <a href="#services"
+               data-mobile-nav>
+
+                <i class="fa-solid fa-briefcase"></i>
+
+                <span>Services</span>
+
+            </a>
+
+
+            <a href="#industries"
+               data-mobile-nav>
+
+                <i class="fa-solid fa-building"></i>
+
+                <span>Industries</span>
+
+            </a>
+
+
+            <a href="#consultation"
+               data-mobile-nav>
+
+                <i class="fa-solid fa-calendar-check"></i>
+
+                <span>Consultation</span>
+
+            </a>
+
+
+            <a href="#contact"
+               data-mobile-nav>
+
+                <i class="fa-solid fa-envelope"></i>
+
+                <span>Contact</span>
+
+            </a>
+
+
+            <!-- ACCOUNT SECTION -->
+
+            <div class="mobile-menu-divider"></div>
+
+
+            <div class="mobile-account-heading">
+
+                <span>CLIENT ACCESS</span>
+
+            </div>
+
+
+            <!-- BOOK CONSULTATION / SIGN UP -->
+
+            <a
+                href="#consultation"
+                class="mobile-account-link mobile-signup"
+                data-auth-action="signup">
+
+                <i class="fa-solid fa-user-plus"></i>
+
+                <span>
+
+                    <strong>Book Consultation</strong>
+
+                    <small>Create your account</small>
+
+                </span>
+
+            </a>
+
+
+            <!-- CUSTOMER LOGIN -->
+
+            <a
+                href="/login.html"
+                class="mobile-account-link"
+                data-auth-action="signin">
+
+                <i class="fa-solid fa-right-to-bracket"></i>
+
+                <span>
+
+                    <strong>Sign In</strong>
+
+                    <small>Customer dashboard</small>
+
+                </span>
+
+            </a>
+
+
+            <!-- COMPANY STAFF LOGIN -->
+
+            <a
+                href="/client-portal.html"
+                class="mobile-account-link"
+                data-auth-action="client-portal">
+
+                <i class="fa-solid fa-users"></i>
+
+                <span>
+
+                    <strong>Client Portal</strong>
+
+                    <small>Company staff login</small>
+
+                </span>
+
+            </a>
+
+
+            <!-- COMPANY ADMIN -->
+
+            <a
+                href="/company-admin-login.html"
+                class="mobile-account-link"
+                data-auth-action="company-admin">
+
+                <i class="fa-solid fa-building-shield"></i>
+
+                <span>
+
+                    <strong>Company Admin Login</strong>
+
+                    <small>Company administrator</small>
+
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="mobile-navigation-footer">
+
+            <p>
+
+                Isaacs & Partners
+
+            </p>
+
+            <span>
+
+                Business Compliance Specialists
+
+            </span>
+
+        </div>
+
+    </aside>
 
 </header>
 
@@ -1174,7 +1428,842 @@ consultants will contact you within 24 hours.
 
 </div>
 
-<form id="consultationForm">
+<!-- ============================================== -->
+<!-- ACCOUNT TYPE SELECTION -->
+<!-- ============================================== -->
+
+<div
+    id="consultation-account-gateway"
+    class="consultation-account-gateway">
+
+    <div class="account-gateway-header">
+
+        <span>GET STARTED</span>
+
+        <h3>
+
+            Before we begin, tell us who you are
+
+        </h3>
+
+        <p>
+
+            Choose whether you are requesting assistance
+            as an individual or on behalf of a business.
+
+        </p>
+
+    </div>
+
+
+    <div class="account-type-grid">
+
+
+        <!-- INDIVIDUAL -->
+
+        <button
+            type="button"
+            class="account-type-card"
+            data-account-type="individual">
+
+            <div class="account-type-icon">
+
+                <i class="fa-solid fa-user"></i>
+
+            </div>
+
+            <h4>
+
+                Individual
+
+            </h4>
+
+            <p>
+
+                I am applying for myself or
+                dealing with a personal matter.
+
+            </p>
+
+            <span>
+
+                Continue
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </span>
+
+        </button>
+
+
+        <!-- COMPANY -->
+
+        <button
+            type="button"
+            class="account-type-card"
+            data-account-type="company">
+
+            <div class="account-type-icon">
+
+                <i class="fa-solid fa-building"></i>
+
+            </div>
+
+            <h4>
+
+                Company / Business
+
+            </h4>
+
+            <p>
+
+                I am registering or requesting
+                services for a business.
+
+            </p>
+
+            <span>
+
+                Continue
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </span>
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================== -->
+<!-- CONSULTATION FORM -->
+<!-- ============================================== -->
+
+<form
+    id="consultationForm"
+    class="consultation-form"
+    hidden>
+    <!-- ============================================== -->
+<!-- INDIVIDUAL REGISTRATION -->
+<!-- ============================================== -->
+
+<div
+    id="individual-registration"
+    class="registration-panel"
+    data-registration-panel="individual"
+    hidden>
+
+    <div class="registration-panel-header">
+
+        <span>INDIVIDUAL ACCOUNT</span>
+
+        <h3>
+
+            Create Your Client Account
+
+        </h3>
+
+        <p>
+
+            Your account will allow you to track consultations,
+            matters, documents and progress.
+
+        </p>
+
+    </div>
+
+
+    <div class="form-grid">
+
+
+        <div class="form-group">
+
+            <label for="individual-firstname">
+
+                First Name
+
+            </label>
+
+            <input
+                id="individual-firstname"
+                type="text"
+                name="firstname"
+                autocomplete="given-name"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="individual-surname">
+
+                Surname
+
+            </label>
+
+            <input
+                id="individual-surname"
+                type="text"
+                name="surname"
+                autocomplete="family-name"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="individual-email">
+
+                Email Address
+
+            </label>
+
+            <input
+                id="individual-email"
+                type="email"
+                name="email"
+                autocomplete="email"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="individual-phone">
+
+                Mobile Number
+
+            </label>
+
+            <input
+                id="individual-phone"
+                type="tel"
+                name="phone"
+                autocomplete="tel"
+                placeholder="+27">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="individual-password">
+
+                Password
+
+            </label>
+
+            <input
+                id="individual-password"
+                type="password"
+                name="password"
+                autocomplete="new-password"
+                minlength="8"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="individual-password-confirm">
+
+                Confirm Password
+
+            </label>
+
+            <input
+                id="individual-password-confirm"
+                type="password"
+                name="password_confirm"
+                autocomplete="new-password"
+                minlength="8"
+                required>
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <label for="individual-nationality">
+
+                Nationality
+
+            </label>
+
+            <input
+                id="individual-nationality"
+                type="text"
+                name="nationality">
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <label for="individual-service">
+
+                Service Required
+
+            </label>
+
+            <select
+                id="individual-service"
+                name="service"
+                required>
+
+                <option value="">
+
+                    Select a service
+
+                </option>
+
+                <optgroup label="Immigration Services">
+
+                    <option>Critical Skills Visas</option>
+                    <option>General Work Visas</option>
+                    <option>Business Visas</option>
+                    <option>Study Visas</option>
+                    <option>Relative Visas</option>
+                    <option>Spousal Visas</option>
+                    <option>Visitor Visas</option>
+                    <option>Permanent Residence</option>
+                    <option>Citizenship Applications</option>
+                    <option>Refugee & Asylum Assistance</option>
+                    <option>Section 22 Applications</option>
+                    <option>Section 24 Applications</option>
+                    <option>Visa Appeals</option>
+                    <option>DHA Representations</option>
+                    <option>VFS Global Applications</option>
+                    <option>Status Verification</option>
+
+                </optgroup>
+
+                <optgroup label="HR & Industrial Relations">
+
+                    <option>CCMA Representation</option>
+                    <option>Bargaining Council Matters</option>
+
+                </optgroup>
+
+                <optgroup label="Business Compliance & Tax">
+
+                    <option>Company Registration</option>
+                    <option>Business Name Reservations</option>
+                    <option>SARS Registration</option>
+                    <option>Tax Clearance</option>
+
+                </optgroup>
+
+                <optgroup label="Legal Services">
+
+                    <option>Legal Advice</option>
+                    <option>Contract Drafting</option>
+                    <option>Contract Vetting</option>
+                    <option>Settlement Agreements</option>
+                    <option>Power of Attorney</option>
+                    <option>Affidavits</option>
+                    <option>Appeal Drafting</option>
+                    <option>Mediation</option>
+                    <option>Negotiations</option>
+                    <option>Notary Services</option>
+                    <option>Legal Opinions</option>
+
+                </optgroup>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <label for="individual-matter">
+
+                Describe Your Matter
+
+            </label>
+
+            <textarea
+                id="individual-matter"
+                name="message"
+                rows="6"
+                placeholder="Tell us how we can assist you..."
+                required></textarea>
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <label class="checkbox-label">
+
+                <input
+                    type="checkbox"
+                    name="terms"
+                    required>
+
+                <span>
+
+                    I agree to the Terms & Conditions
+                    and Privacy Policy.
+
+                </span>
+
+            </label>
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <button
+                type="submit"
+                class="gold-btn submit-btn">
+
+                Create Account & Request Consultation
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================== -->
+<!-- COMPANY REGISTRATION -->
+<!-- ============================================== -->
+
+<div
+    id="company-registration"
+    class="registration-panel"
+    data-registration-panel="company"
+    hidden>
+
+    <div class="registration-panel-header">
+
+        <span>COMPANY / BUSINESS</span>
+
+        <h3>
+
+            Register Your Business
+
+        </h3>
+
+        <p>
+
+            Company registrations require additional
+            business information and approval by
+            Isaacs & Partners administration.
+
+        </p>
+
+    </div>
+
+
+    <div class="form-grid">
+
+
+        <div class="form-group full-width">
+
+            <label for="company-name">
+
+                Registered Company Name
+
+            </label>
+
+            <input
+                id="company-name"
+                type="text"
+                name="company_name"
+                autocomplete="organization"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-trading-name">
+
+                Trading Name
+
+            </label>
+
+            <input
+                id="company-trading-name"
+                type="text"
+                name="trading_name">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-registration-number">
+
+                Company Registration Number
+
+            </label>
+
+            <input
+                id="company-registration-number"
+                type="text"
+                name="registration_number">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-vat">
+
+                VAT Number
+
+            </label>
+
+            <input
+                id="company-vat"
+                type="text"
+                name="vat_number">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-paye">
+
+                PAYE Number
+
+            </label>
+
+            <input
+                id="company-paye"
+                type="text"
+                name="paye_number">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-uif">
+
+                UIF Number
+
+            </label>
+
+            <input
+                id="company-uif"
+                type="text"
+                name="uif_number">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-coida">
+
+                COIDA Number
+
+            </label>
+
+            <input
+                id="company-coida"
+                type="text"
+                name="coida_number">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-industry">
+
+                Industry
+
+            </label>
+
+            <input
+                id="company-industry"
+                type="text"
+                name="industry">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-employees">
+
+                Number of Employees
+
+            </label>
+
+            <input
+                id="company-employees"
+                type="number"
+                name="employee_count"
+                min="0">
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <label for="company-address">
+
+                Business Address
+
+            </label>
+
+            <textarea
+                id="company-address"
+                name="business_address"
+                rows="3"
+                required></textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-contact-firstname">
+
+                Primary Contact First Name
+
+            </label>
+
+            <input
+                id="company-contact-firstname"
+                type="text"
+                name="contact_firstname"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-contact-surname">
+
+                Primary Contact Surname
+
+            </label>
+
+            <input
+                id="company-contact-surname"
+                type="text"
+                name="contact_surname"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-contact-position">
+
+                Position
+
+            </label>
+
+            <input
+                id="company-contact-position"
+                type="text"
+                name="contact_position">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-email">
+
+                Business Email
+
+            </label>
+
+            <input
+                id="company-email"
+                type="email"
+                name="company_email"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="company-phone">
+
+                Business Mobile
+
+            </label>
+
+            <input
+                id="company-phone"
+                type="tel"
+                name="company_phone"
+                placeholder="+27">
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <label for="company-service">
+
+                Service Required
+
+            </label>
+
+            <select
+                id="company-service"
+                name="company_service"
+                required>
+
+                <option value="">
+
+                    Select a service
+
+                </option>
+
+                <optgroup label="Immigration Services">
+
+                    <option>General Work Visas</option>
+                    <option>Business Visas</option>
+                    <option>Corporate Visas</option>
+                    <option>Visa Appeals</option>
+                    <option>DHA Representations</option>
+                    <option>VFS Global Applications</option>
+                    <option>Status Verification</option>
+
+                </optgroup>
+
+                <optgroup label="HR & Industrial Relations">
+
+                    <option>Employment Contracts</option>
+                    <option>HR Policies</option>
+                    <option>Disciplinary Hearings</option>
+                    <option>Chairperson Services</option>
+                    <option>Grievance Hearings</option>
+                    <option>Performance Management</option>
+                    <option>Retrenchment Consulting</option>
+                    <option>CCMA Representation</option>
+                    <option>Bargaining Council Matters</option>
+                    <option>Payroll Advisory</option>
+                    <option>Labour Compliance Audits</option>
+                    <option>Employment Equity</option>
+                    <option>Recruitment Assistance</option>
+                    <option>HR Outsourcing</option>
+
+                </optgroup>
+
+                <optgroup label="Business Compliance">
+
+                    <option>Company Registration</option>
+                    <option>CIPC Amendments</option>
+                    <option>Business Name Reservations</option>
+                    <option>SARS Registration</option>
+                    <option>VAT Registration</option>
+                    <option>PAYE Registration</option>
+                    <option>UIF Registration</option>
+                    <option>COIDA Registration</option>
+                    <option>Tax Clearance</option>
+                    <option>Business Bank Account Setup</option>
+                    <option>Compliance Certificates</option>
+                    <option>Annual Returns</option>
+                    <option>Director Amendments</option>
+
+                </optgroup>
+
+                <optgroup label="Business Consulting & Legal">
+
+                    <option>Legal Advice</option>
+                    <option>Contract Drafting</option>
+                    <option>Contract Vetting</option>
+                    <option>Commercial Agreements</option>
+                    <option>Settlement Agreements</option>
+                    <option>Power of Attorney</option>
+                    <option>Affidavits</option>
+                    <option>Appeal Drafting</option>
+                    <option>Mediation</option>
+                    <option>Negotiations</option>
+                    <option>Notary Services</option>
+                    <option>Legal Opinions</option>
+                    <option>Corporate Advisory</option>
+
+                </optgroup>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <label for="company-matter">
+
+                Describe Your Business Matter
+
+            </label>
+
+            <textarea
+                id="company-matter"
+                name="company_message"
+                rows="6"
+                placeholder="Tell us how we can assist your business..."
+                required></textarea>
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <label class="checkbox-label">
+
+                <input
+                    type="checkbox"
+                    name="company_terms"
+                    required>
+
+                <span>
+
+                    I agree to the Terms & Conditions
+                    and Privacy Policy.
+
+                </span>
+
+            </label>
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+            <button
+                type="submit"
+                class="gold-btn submit-btn">
+
+                Submit Company Registration
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 
 <input
