@@ -89,53 +89,33 @@ const mobileMenuClose = document.getElementById("mobile-menu-close");
 
 function openMobileMenu(){
 
-    if(!mobileNavigation) return;
+    if(!mobileNavigation || !mobileMenuOverlay) return;
 
     mobileNavigation.classList.add("active");
-
-    if(mobileMenuOverlay){
-        mobileMenuOverlay.classList.add("active");
-    }
+    mobileMenuOverlay.classList.add("active");
 
     if(hamburger){
+        hamburger.classList.add("active");
         hamburger.setAttribute("aria-expanded","true");
-        hamburger.setAttribute("aria-label","Close navigation menu");
-
-        /* Keep the hamburger as three lines.
-           The drawer has its own X close button. */
-        hamburger.classList.remove("active");
-    }
-
-    mobileNavigation.setAttribute("aria-hidden","false");
-
-    if(mobileMenuOverlay){
-        mobileMenuOverlay.setAttribute("aria-hidden","false");
     }
 
     document.body.classList.add("mobile-menu-open");
-
 }
+
 
 function closeMobileMenu(){
 
-    if(mobileNavigation){
-        mobileNavigation.classList.remove("active");
-        mobileNavigation.setAttribute("aria-hidden","true");
-    }
+    if(!mobileNavigation || !mobileMenuOverlay) return;
 
-    if(mobileMenuOverlay){
-        mobileMenuOverlay.classList.remove("active");
-        mobileMenuOverlay.setAttribute("aria-hidden","true");
-    }
+    mobileNavigation.classList.remove("active");
+    mobileMenuOverlay.classList.remove("active");
 
     if(hamburger){
-        hamburger.setAttribute("aria-expanded","false");
-        hamburger.setAttribute("aria-label","Open navigation menu");
         hamburger.classList.remove("active");
+        hamburger.setAttribute("aria-expanded","false");
     }
 
     document.body.classList.remove("mobile-menu-open");
-
 }
 
 if(hamburger){
