@@ -478,10 +478,13 @@ class MemoryStorageProvider {
 }
 
 
-export const storage =
-    new CoreStorage();
+const storage = new CoreStorage();
+
+const coreStorage = storage;
 
 export {
+    storage,
+    coreStorage,
     CoreStorage,
     BrowserStorageProvider,
     MemoryStorageProvider
