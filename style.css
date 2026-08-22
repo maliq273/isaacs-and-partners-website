@@ -423,6 +423,20 @@ align-items:center;
 .logo img{
 
 height:62px;
+width:auto;
+object-fit:contain;
+position:relative;
+z-index:2;
+
+}
+
+header .logo{
+
+display:flex;
+align-items:center;
+flex-shrink:0;
+position:relative;
+z-index:2;
 
 }
 
@@ -1299,6 +1313,46 @@ opacity:0;
 transform:
 translateY(-8px)
 rotate(-45deg);
+
+}
+/*==================================================
+ MOBILE MENU INTERACTION FIX
+==================================================*/
+
+@media(max-width:900px){
+
+.hamburger{
+
+display:flex !important;
+position:relative;
+z-index:9001;
+
+}
+
+.mobile-menu-overlay{
+
+z-index:8998;
+}
+
+.mobile-navigation{
+
+z-index:8999;
+}
+
+.mobile-menu-close{
+
+z-index:9000;
+}
+
+}
+
+@media(min-width:901px){
+
+.hamburger{
+
+display:none !important;
+
+}
 
 }
 
@@ -3070,6 +3124,7 @@ width:92%;
 .logo img{
 
 height:52px;
+}
 
 h1{
 
