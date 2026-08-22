@@ -475,7 +475,7 @@ class AuthGuard {
             new URLSearchParams();
 
         params.set(
-            "return",
+            "returnUrl",
             returnUrl
         );
 
