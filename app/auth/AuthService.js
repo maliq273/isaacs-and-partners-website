@@ -1530,10 +1530,10 @@ class AuthService {
 
         const authenticated =
             Boolean(
-                data.authenticated ??
+                (data.authenticated ??
                 data.success ??
                 data.ok ??
-                token ||
+                token) ||
                 user
             );
 
