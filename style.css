@@ -844,6 +844,50 @@ border-radius:20px;
 }
 
 /*--------------------------------------
+ MOBILE DRAWER SCROLL FIX
+--------------------------------------*/
+
+.mobile-navigation > .mobile-navigation-links{
+
+flex:1;
+
+min-height:0;
+
+overflow-y:auto;
+
+overflow-x:hidden;
+
+-webkit-overflow-scrolling:touch;
+
+scrollbar-width:thin;
+
+scrollbar-color:var(--gold) #111;
+
+padding:20px 20px 30px;
+
+}
+
+.mobile-navigation > .mobile-navigation-links::-webkit-scrollbar{
+
+width:5px;
+
+}
+
+.mobile-navigation > .mobile-navigation-links::-webkit-scrollbar-track{
+
+background:#0b0b0b;
+
+}
+
+.mobile-navigation > .mobile-navigation-links::-webkit-scrollbar-thumb{
+
+background:var(--gold);
+
+border-radius:20px;
+
+}
+
+/*--------------------------------------
  MOBILE NAVIGATION LINKS
 --------------------------------------*/
 
