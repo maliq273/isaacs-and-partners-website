@@ -79,24 +79,129 @@ function initialiseNavigation(){
 }
 
 /*=====================================================
- MOBILE MENU
+ MOBILE / TABLET MENU
 ======================================================*/
 
-const hamburger=document.querySelector(".hamburger");
+const hamburger = document.getElementById("mobile-menu-toggle");
+const mobileNavigation = document.getElementById("mobile-navigation");
+const mobileMenuOverlay = document.getElementById("mobile-menu-overlay");
+const mobileMenuClose = document.getElementById("mobile-menu-close");
 
-const navLinks=document.querySelector(".nav-links");
+function openMobileMenu(){
+
+    if(!mobileNavigation) return;
+
+    mobileNavigation.classList.add("active");
+
+    if(mobileMenuOverlay){
+        mobileMenuOverlay.classList.add("active");
+    }
+
+    if(hamburger){
+        hamburger.setAttribute("aria-expanded","true");
+        hamburger.setAttribute("aria-label","Close navigation menu");
+
+        /* Keep the hamburger as three lines.
+           The drawer has its own X close button. */
+        hamburger.classList.remove("active");
+    }
+
+    mobileNavigation.setAttribute("aria-hidden","false");
+
+    if(mobileMenuOverlay){
+        mobileMenuOverlay.setAttribute("aria-hidden","false");
+    }
+
+    document.body.classList.add("mobile-menu-open");
+
+}
+
+function closeMobileMenu(){
+
+    if(mobileNavigation){
+        mobileNavigation.classList.remove("active");
+        mobileNavigation.setAttribute("aria-hidden","true");
+    }
+
+    if(mobileMenuOverlay){
+        mobileMenuOverlay.classList.remove("active");
+        mobileMenuOverlay.setAttribute("aria-hidden","true");
+    }
+
+    if(hamburger){
+        hamburger.setAttribute("aria-expanded","false");
+        hamburger.setAttribute("aria-label","Open navigation menu");
+        hamburger.classList.remove("active");
+    }
+
+    document.body.classList.remove("mobile-menu-open");
+
+}
 
 if(hamburger){
 
     hamburger.addEventListener("click",()=>{
 
-        navLinks.classList.toggle("show");
+        if(
+            mobileNavigation &&
+            mobileNavigation.classList.contains("active")
+        ){
 
-        hamburger.classList.toggle("active");
+            closeMobileMenu();
+
+        }else{
+
+            openMobileMenu();
+
+        }
 
     });
 
 }
+
+if(mobileMenuClose){
+
+    mobileMenuClose.addEventListener(
+        "click",
+        closeMobileMenu
+    );
+
+}
+
+if(mobileMenuOverlay){
+
+    mobileMenuOverlay.addEventListener(
+        "click",
+        closeMobileMenu
+    );
+
+}
+
+/* Close menu when a mobile navigation link is selected */
+
+document
+.querySelectorAll(".mobile-navigation a")
+.forEach(link=>{
+
+    link.addEventListener("click",()=>{
+
+        closeMobileMenu();
+
+    });
+
+});
+
+/* Close with ESC */
+
+document.addEventListener("keydown",(event)=>{
+
+    if(event.key === "Escape"){
+
+        closeMobileMenu();
+
+    }
+
+});
 
 /*=====================================================
  SMOOTH SCROLL
