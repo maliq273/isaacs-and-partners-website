@@ -152,13 +152,15 @@ function closeMobileMenu(){
         /*
          * Do not restore focus if the menu wasn't actually open.
          */
-        if(document.activeElement !== hamburger){
+        window.addEventListener("resize", () => {
 
-            hamburger.focus({
-                preventScroll:true
-            });
+    if(window.innerWidth > 1024){
 
-        }
+        closeMobileMenu();
+
+    }
+
+});
 
     }
 
@@ -207,9 +209,9 @@ if(mobileMenuOverlay){
 
 document
 .querySelectorAll(".mobile-navigation a")
-.forEach(link=>{
+.forEach(link => {
 
-    link.addEventListener("click",()=>{
+    link.addEventListener("click", () => {
 
         closeMobileMenu();
 
@@ -222,6 +224,18 @@ document
 document.addEventListener("keydown",(event)=>{
 
     if(event.key === "Escape"){
+
+        closeMobileMenu();
+
+    }
+
+});
+
+/* Reset mobile menu when returning to desktop mode */
+
+window.addEventListener("resize", () => {
+
+    if(window.innerWidth > 1024){
 
         closeMobileMenu();
 
