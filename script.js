@@ -1050,6 +1050,105 @@ console.log(
 );
 
 /*=====================================================
+ AUTHENTICATION / ACCESS BUTTONS
+======================================================*/
+
+function initialiseAuthButtons(){
+
+    const authButtons = document.querySelectorAll(
+        "[data-auth-action]"
+    );
+
+    if(!authButtons.length) return;
+
+    authButtons.forEach(button => {
+
+        button.addEventListener("click", function(event){
+
+            const action = this.dataset.authAction;
+
+            /*
+             * Allow normal anchor navigation for real destinations.
+             * We only close the mobile menu before navigation.
+             */
+
+            if(typeof closeMobileMenu === "function"){
+                closeMobileMenu();
+            }
+
+            switch(action){
+
+                case "signup":
+
+                    /*
+                     * Book Consultation
+                     * Keep the user on the consultation section.
+                     */
+
+                    const consultation =
+                        document.getElementById("consultation");
+
+                    if(consultation){
+
+                        event.preventDefault();
+
+                        consultation.scrollIntoView({
+                            behavior:"smooth",
+                            block:"start"
+                        });
+
+                    }
+
+                    break;
+
+
+                case "signin":
+
+                    /*
+                     * Customer sign in
+                     */
+
+                    window.location.href = "/login.html";
+
+                    break;
+
+
+                case "client-portal":
+
+                    /*
+                     * Client portal
+                     */
+
+                    window.location.href = "/client-portal.html";
+
+                    break;
+
+
+                case "company-admin":
+
+                    /*
+                     * Company administrator
+                     */
+
+                    window.location.href =
+                        "/company-admin-login.html";
+
+                    break;
+
+            }
+
+        });
+
+    });
+
+}
+
+
+/* Initialise authentication buttons */
+
+initialiseAuthButtons();
+
+/*=====================================================
  FUTURE MODULES PLACEHOLDERS
 ======================================================*/
 
