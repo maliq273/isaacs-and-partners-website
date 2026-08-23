@@ -13,10 +13,11 @@
  */
 
 import auth from "./AuthService.js";
+import { ROUTES } from "../config/routes.js";
 
 
 const DEFAULT_DASHBOARD =
-    "/app/dashboard/";
+    ROUTES.DASHBOARD;
 
 
 class LoginController {
@@ -324,51 +325,93 @@ class LoginController {
 
 
     isSafeReturnUrl(url) {
-        if (!url) {
+    if (
+        !url ||
+        typeof window === "undefined"
+    ) {
+        return false;
+    }
+
+    try {
+        /*
+         * Reject protocol-relative URLs immediately.
+         */
+        if (
+            String(url).startsWith("//")
+        ) {
             return false;
         }
 
-        try {
-            const parsed =
-                new URL(
-                    url,
-                    window.location.origin
-                );
-
-            /*
-             * Only same-origin application URLs.
-             */
-            if (
-                parsed.origin !==
+        const parsed =
+            new URL(
+                url,
                 window.location.origin
-            ) {
-                return false;
-            }
-
-            if (
-                parsed.protocol !==
-                window.location.protocol
-            ) {
-                return false;
-            }
-
-            /*
-             * Reject protocol-relative URLs.
-             */
-            if (
-                url.startsWith("//")
-            ) {
-                return false;
-            }
-
-            return (
-                parsed.pathname.startsWith("/")
             );
 
-        } catch {
+        /*
+         * Only same-origin URLs are permitted.
+         */
+        if (
+            parsed.origin !==
+            window.location.origin
+        ) {
             return false;
         }
+
+        /*
+         * Only the current application protocol
+         * is permitted.
+         */
+        if (
+            parsed.protocol !==
+            window.location.protocol
+        ) {
+            return false;
+        }
+
+        /*
+         * Only relative application paths are accepted.
+         */
+        if (
+            !parsed.pathname.startsWith("/")
+        ) {
+            return false;
+        }
+
+        /*
+         * Never redirect back to the login page.
+         */
+        const loginPath =
+            new URL(
+                "/login.html",
+                window.location.origin
+            ).pathname;
+
+        if (
+            parsed.pathname ===
+            loginPath
+        ) {
+            return false;
+        }
+
+        /*
+         * Never redirect to an authentication API
+         * endpoint.
+         */
+        if (
+            parsed.pathname.startsWith(
+                "/api/auth/"
+            )
+        ) {
+            return false;
+        }
+
+        return true;
+
+    } catch {
+        return false;
     }
+}
 
 
     showError(message) {
