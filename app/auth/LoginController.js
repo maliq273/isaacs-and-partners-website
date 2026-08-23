@@ -413,7 +413,6 @@ class LoginController {
     }
 }
 
-
     showError(message) {
         if (!this.errorElement) {
             return;
