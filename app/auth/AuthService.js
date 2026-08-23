@@ -719,22 +719,26 @@ configure(options = {}) {
         }
 
         /*
-         * Do not allow a refresh response to silently
-         * replace the session with no token and no user.
-         */
+ * A successful refresh must return a usable
+ * authenticated session.
+ *
+ * Do not allow a partial or malformed refresh
+ * response to replace the existing session.
+ */
         if (
-            !normalised.token &&
+            !normalised.authenticated ||
+            !normalised.token ||
             !normalised.user
         ) {
             await this._expireSession(
                 "invalid_refresh_response"
             );
 
-            return {
-                authenticated:
-                    false
-            };
-        }
+    return {
+        authenticated:
+            false
+    };
+}
 
         await this._establishSession(
             normalised,
@@ -1370,27 +1374,57 @@ configure(options = {}) {
             this.token
         ) {
             try {
-                const refreshed =
-                    await this.refreshSession();
+    const refreshed =
+        await this.refreshSession();
 
-                if (
-                    refreshed?.authenticated
-                ) {
-                    return;
-                }
-            } catch (error) {
-                console.warn(
-                    "[AuthService] Session refresh failed:",
-                    error
-                );
-            }
-        }
-
-        await this._expireSession(
-            "expired"
-        );
+    if (
+        refreshed?.authenticated
+    ) {
+        return;
     }
 
+    /*
+     * refreshSession() returning false means the
+     * authentication server rejected the session.
+     *
+     * The session has already been expired by
+     * refreshSession() / _performSessionRefresh().
+     */
+    return;
+
+} catch (error) {
+
+    /*
+     * A network or temporary infrastructure failure
+     * must not immediately destroy a still-valid session.
+     *
+     * If the current session has not actually expired,
+     * schedule another attempt.
+     */
+    if (
+        this.expiresAt &&
+        !this._isExpired(
+            this.expiresAt
+        )
+    ) {
+        console.warn(
+            "[AuthService] Session refresh temporarily failed. Retrying before expiry.",
+            error
+        );
+
+        this._startExpiryMonitor();
+
+        return;
+    }
+
+    /*
+     * The session has actually expired and refresh
+     * could not restore it.
+     */
+    await this._expireSession(
+        "expired"
+    );
+}
     /**
      * Expire authentication session.
      */
