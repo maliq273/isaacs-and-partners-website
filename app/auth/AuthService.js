@@ -28,69 +28,73 @@
 
 import { storage } from "../core/storage.js";
 import { eventBus } from "../core/events.js";
+import authConfig from "./auth.config.js";
 
 /*
  * Storage keys are deliberately namespaced so that authentication
  * data cannot collide with unrelated application data.
  */
+/*
+ * Authentication configuration is centralised in auth.config.js.
+ *
+ * AuthService deliberately does not maintain a second set of
+ * authentication endpoints, storage keys or session durations.
+ */
+
 const STORAGE_KEYS = Object.freeze({
     AUTH_SESSION:
-        "isaacs_partners.auth.session",
+        authConfig.storageKeys.session,
 
     AUTH_USER:
-        "isaacs_partners.auth.user",
+        authConfig.storageKeys.user,
 
     AUTH_TOKEN:
-        "isaacs_partners.auth.token",
+        authConfig.storageKeys.token,
 
     AUTH_EXPIRES_AT:
-        "isaacs_partners.auth.expiresAt",
+        authConfig.storageKeys.expiresAt,
 
     AUTH_REMEMBER_ME:
-        "isaacs_partners.auth.rememberMe"
+        authConfig.storageKeys.rememberMe
 });
 
-/*
- * Default authentication configuration.
- *
- * The endpoint can be replaced during application bootstrap:
- *
- * auth.configure({
- *     loginEndpoint: "/api/auth/login"
- * });
- *
- * The service deliberately does not hard-code a remote
- * authentication provider such as Supabase.
- */
+
 const DEFAULT_CONFIG = Object.freeze({
     loginEndpoint:
-        "/api/auth/login",
+        authConfig.endpoints.login,
 
     logoutEndpoint:
-        "/api/auth/logout",
+        authConfig.endpoints.logout,
+
+    sessionEndpoint:
+        authConfig.endpoints.session,
 
     refreshEndpoint:
-        "/api/auth/refresh",
+        authConfig.endpoints.refresh,
+
+    meEndpoint:
+        authConfig.endpoints.me,
 
     requestTimeout:
-        15000,
+        authConfig.request.timeout,
 
-    /*
-     * Default session duration when the authentication server
-     * does not provide an explicit expiry.
-     *
-     * 8 hours for a normal browser session.
-     */
     sessionDuration:
-        8 * 60 * 60 * 1000,
+        authConfig.session.sessionDuration,
 
-    /*
-     * Remember Me duration.
-     *
-     * 30 days.
-     */
     rememberMeDuration:
-        30 * 24 * 60 * 60 * 1000
+        authConfig.session.rememberMeDuration,
+
+    refreshBeforeExpiry:
+        authConfig.session.refreshBeforeExpiry,
+
+    activityThrottle:
+        authConfig.session.activityThrottle,
+
+    credentials:
+        authConfig.security.credentials,
+
+    useBearerToken:
+        authConfig.security.useBearerToken
 });
 
 class AuthService {
@@ -229,23 +233,23 @@ class AuthService {
     /**
      * Configure authentication service.
      */
-    configure(options = {}) {
-        if (
-            !options ||
-            typeof options !== "object"
-        ) {
-            throw new TypeError(
-                "AuthService configuration must be an object."
-            );
-        }
-
-        this.config = {
-            ...this.config,
-            ...options
-        };
-
-        return this;
+configure(options = {}) {
+    if (
+        !options ||
+        typeof options !== "object"
+    ) {
+        throw new TypeError(
+            "AuthService configuration must be an object."
+        );
     }
+
+    this.config = {
+        ...this.config,
+        ...options
+    };
+
+    return this;
+}
 
     /**
      * Return authentication configuration.
@@ -1696,7 +1700,10 @@ class AuthService {
                 "application/json";
         }
 
-        if (token) {
+        if (
+             token &&
+             this.config.useBearerToken
+        ) {
             headers.Authorization =
                 `Bearer ${token}`;
         }
@@ -1711,7 +1718,7 @@ class AuthService {
                         headers,
 
                         credentials:
-                            "include",
+                            this.config.credentials,
 
                         body:
                             body !== null
