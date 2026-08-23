@@ -132,6 +132,9 @@ class AuthService {
 
         this.destroyed =
             false;
+        
+        this.refreshing =
+            null;
     }
 
     /**
@@ -666,126 +669,174 @@ configure(options = {}) {
         };
     }
 
-    /**
-     * Refresh authentication session.
-     */
-    async refreshSession() {
-        await this.initialise();
+    async _performSessionRefresh() {
+    const currentToken =
+        this.getToken();
+
+    if (
+        !currentToken
+    ) {
+        return {
+            authenticated:
+                false
+        };
+    }
+
+    try {
+        const response =
+            await this._request(
+                this.config.refreshEndpoint,
+                {
+                    method:
+                        "POST",
+
+                    body: {
+                        token:
+                            currentToken
+                    },
+
+                    token:
+                        currentToken
+                }
+            );
+
+        const normalised =
+            this._normaliseLoginResponse(
+                response
+            );
 
         if (
-            !this.isAuthenticated()
+            !normalised.authenticated
         ) {
+            await this._expireSession(
+                "refresh_failed"
+            );
+
             return {
                 authenticated:
                     false
             };
         }
 
+        /*
+         * Do not allow a refresh response to silently
+         * replace the session with no token and no user.
+         */
         if (
-            !this.config.refreshEndpoint
+            !normalised.token &&
+            !normalised.user
         ) {
+            await this._expireSession(
+                "invalid_refresh_response"
+            );
+
             return {
                 authenticated:
-                    true,
-
-                user:
-                    this.getCurrentUser(),
-
-                token:
-                    this.getToken()
+                    false
             };
         }
 
-        try {
-            const response =
-                await this._request(
-                    this.config.refreshEndpoint,
-                    {
-                        method: "POST",
+        await this._establishSession(
+            normalised,
+            this.rememberMe
+        );
 
-                        body: {
-                            token:
-                                this.getToken()
-                        },
-
-                        token:
-                            this.getToken()
-                    }
-                );
-
-            const normalised =
-                this._normaliseLoginResponse(
-                    response
-                );
-
-            if (
-                !normalised.authenticated
-            ) {
-                await this._expireSession(
-                    "refresh_failed"
-                );
-
-                return {
-                    authenticated:
-                        false
-                };
-            }
-
-            await this._establishSession(
-                normalised,
-                this.rememberMe
-            );
-
-            eventBus.emit(
-                "auth:sessionRefreshed",
-                {
-                    user:
-                        this.getCurrentUser(),
-
-                    expiresAt:
-                        this.expiresAt
-                }
-            );
-
-            return {
-                authenticated:
-                    true,
-
+        eventBus.emit(
+            "auth:sessionRefreshed",
+            {
                 user:
                     this.getCurrentUser(),
-
-                token:
-                    this.getToken(),
 
                 expiresAt:
                     this.expiresAt
-            };
-
-        } catch (error) {
-            /*
-             * A failed refresh does not automatically destroy
-             * a still-valid local session unless the server
-             * explicitly returns an authentication failure.
-             */
-            if (
-                error?.code ===
-                    "HTTP_401" ||
-                error?.code ===
-                    "HTTP_403"
-            ) {
-                await this._expireSession(
-                    "refresh_rejected"
-                );
-
-                return {
-                    authenticated:
-                        false
-                };
             }
+        );
 
-            throw error;
+        return {
+            authenticated:
+                true,
+
+            user:
+                this.getCurrentUser(),
+
+            token:
+                this.getToken(),
+
+            expiresAt:
+                this.expiresAt
+        };
+
+    } catch (error) {
+
+        if (
+            error?.code ===
+                "HTTP_401" ||
+            error?.code ===
+                "HTTP_403"
+        ) {
+            await this._expireSession(
+                "refresh_rejected"
+            );
+
+            return {
+                authenticated:
+                    false
+            };
         }
+
+        throw error;
     }
+}
+
+    /**
+     * Refresh authentication session.
+     */
+    async refreshSession() {
+    await this.initialise();
+
+    if (
+        this.refreshing
+    ) {
+        return this.refreshing;
+    }
+
+    if (
+        !this.isAuthenticated()
+    ) {
+        return {
+            authenticated:
+                false
+        };
+    }
+
+    if (
+        !this.config.refreshEndpoint
+    ) {
+        return {
+            authenticated:
+                true,
+
+            user:
+                this.getCurrentUser(),
+
+            token:
+                this.getToken(),
+
+            expiresAt:
+                this.expiresAt
+        };
+    }
+
+    this.refreshing =
+        this._performSessionRefresh();
+
+    try {
+        return await this.refreshing;
+    } finally {
+        this.refreshing =
+            null;
+    }
+}
 
     /**
      * Restore authentication session from storage.
@@ -1238,40 +1289,49 @@ configure(options = {}) {
      * Start automatic expiry monitoring.
      */
     _startExpiryMonitor() {
-        this._clearExpiryMonitor();
+    this._clearExpiryMonitor();
 
-        if (!this.expiresAt) {
-            return;
-        }
-
-        const expiresAt =
-            new Date(
-                this.expiresAt
-            ).getTime();
-
-        if (
-            Number.isNaN(
-                expiresAt
-            )
-        ) {
-            return;
-        }
-
-        const delay =
-            Math.max(
-                expiresAt -
-                    Date.now(),
-                1000
-            );
-
-        this.refreshTimer =
-            setTimeout(
-                () => {
-                    this._handleSessionExpiry();
-                },
-                delay
-            );
+    if (!this.expiresAt) {
+        return;
     }
+
+    const expiresAt =
+        new Date(
+            this.expiresAt
+        ).getTime();
+
+    if (
+        Number.isNaN(
+            expiresAt
+        )
+    ) {
+        return;
+    }
+
+    const refreshBeforeExpiry =
+        Math.max(
+            Number(
+                this.config.refreshBeforeExpiry
+            ) || 0,
+            0
+        );
+
+    const delay =
+        Math.max(
+            expiresAt -
+                Date.now() -
+                refreshBeforeExpiry,
+            1000
+        );
+
+    this.refreshTimer =
+        setTimeout(
+            () => {
+                this._handleSessionExpiry();
+            },
+            delay
+        );
+}
 
     /**
      * Stop expiry monitoring.
@@ -1532,14 +1592,21 @@ configure(options = {}) {
             data.session?.user ||
             null;
 
+        const explicitAuthenticated =
+    data.authenticated ??
+    data.success ??
+    data.ok ??
+    null;
+
         const authenticated =
-            Boolean(
-                (data.authenticated ??
-                data.success ??
-                data.ok ??
-                token) ||
-                user
-            );
+            explicitAuthenticated !== null
+            ? Boolean(
+                      explicitAuthenticated
+                  )
+                : Boolean(
+                      token &&
+                      user
+                  );
 
         const expiresAt =
             data.expiresAt ||
@@ -1921,6 +1988,8 @@ configure(options = {}) {
      */
     destroy() {
         this._clearExpiryMonitor();
+        this.refreshing =
+            null;
 
         this.authenticated =
             false;
@@ -1957,6 +2026,8 @@ configure(options = {}) {
      */
     reset() {
         this._clearExpiryMonitor();
+        this.refreshing =
+            null;
 
         this.authenticated =
             false;
