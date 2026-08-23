@@ -82,7 +82,6 @@ class LoginController {
          * Restore an existing session before deciding
          * whether the login page should remain visible.
          */
-        await auth.restoreSession();
 
         if (auth.isAuthenticated()) {
             this.redirectAuthenticatedUser();
