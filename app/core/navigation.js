@@ -13,6 +13,9 @@ class Navigation {
     constructor() {
         this.loginRoute = ROUTES.LOGIN;
         this.dashboardRoute = ROUTES.DASHBOARD;
+        this.staffDashboardRoute = ROUTES.STAFF_DASHBOARD;
+        this.individualDashboardRoute = ROUTES.INDIVIDUAL_DASHBOARD;
+        this.businessDashboardRoute = ROUTES.BUSINESS_DASHBOARD;
     }
 
     getLoginRoute() {
@@ -21,6 +24,22 @@ class Navigation {
 
     getDashboardRoute() {
         return this.dashboardRoute;
+    }
+
+    getDashboardRouteForRole(role) {
+        switch (String(role || "").toLowerCase()) {
+            case "staff":
+            case "employee":
+            case "admin":
+                return this.staffDashboardRoute;
+            case "business":
+            case "company":
+                return this.businessDashboardRoute;
+            case "individual":
+            case "client":
+            default:
+                return this.individualDashboardRoute;
+        }
     }
 
     toLogin(returnUrl = null, { replace = true } = {}) {
@@ -36,6 +55,13 @@ class Navigation {
     toDashboard({ replace = true } = {}) {
         return this._navigate(
             this.dashboardRoute,
+            { replace }
+        );
+    }
+
+    toRoleDashboard(role, { replace = true } = {}) {
+        return this._navigate(
+            this.getDashboardRouteForRole(role),
             { replace }
         );
     }
