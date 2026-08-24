@@ -3,12 +3,11 @@
  * Login Controller
  *
  * Controls the public sign-in form and delegates authentication
- * to AuthService. Navigation remains client-side and safe.
+ * to AuthService. Navigation remains centralised and safe.
  */
 
 import auth from "./AuthService.js";
-
-const DEFAULT_DASHBOARD = "../dashboard/";
+import navigation from "../core/navigation.js";
 
 class LoginController {
     constructor() {
@@ -143,7 +142,7 @@ class LoginController {
             return;
         }
 
-        window.location.assign(DEFAULT_DASHBOARD);
+        navigation.toDashboard({ replace: true });
     }
 
     isSafeReturnUrl(url) {
@@ -159,8 +158,8 @@ class LoginController {
             if (!parsed.pathname.startsWith("/")) return false;
 
             const loginPath = new URL(
-                "../auth/login.html",
-                window.location.href
+                navigation.getLoginRoute(),
+                window.location.origin
             ).pathname;
 
             if (parsed.pathname === loginPath) return false;
