@@ -14,6 +14,7 @@ export const ROUTES = Object.freeze({
 
     DASHBOARD: "/app/dashboard/",
     STAFF_DASHBOARD: "/app/dashboard/",
+    SUPER_ADMIN_DASHBOARD: "/app/dashboard/super-admin.html",
     INDIVIDUAL_DASHBOARD: "/app/dashboard/client.html",
     BUSINESS_DASHBOARD: "/app/dashboard/business.html",
 
@@ -57,42 +58,27 @@ export const API_ROUTES = Object.freeze({
     AI: "/ai"
 });
 
-export function resolveRoute(
-    route,
-    base = ""
-) {
+export function resolveRoute(route, base = "") {
     if (!route) {
         return base || "/";
     }
 
-    const normalisedBase =
-        String(base).replace(/\/+$/, "");
-
-    const normalisedRoute =
-        String(route).replace(
-            /^\/+/, ""
-        );
+    const normalisedBase = String(base).replace(/\/+$/, "");
+    const normalisedRoute = String(route).replace(/^\/+/, "");
 
     return normalisedBase
         ? `${normalisedBase}/${normalisedRoute}`
         : `/${normalisedRoute}`;
 }
 
-export function getApiRoute(
-    resource,
-    id = null
-) {
-    const base =
-        API_ROUTES[resource] ||
-        resource;
+export function getApiRoute(resource, id = null) {
+    const base = API_ROUTES[resource] || resource;
 
     if (!id) {
         return `${ROUTES.API}/${base}`;
     }
 
-    return `${ROUTES.API}/${base}/${encodeURIComponent(
-        id
-    )}`;
+    return `${ROUTES.API}/${base}/${encodeURIComponent(id)}`;
 }
 
 export default ROUTES;
