@@ -10,8 +10,12 @@ export const ROUTES = Object.freeze({
     HOME: "/",
 
     LOGIN: "/app/auth/login.html",
+    SIGNUP: "/signup.html",
 
     DASHBOARD: "/app/dashboard/",
+    STAFF_DASHBOARD: "/app/dashboard/",
+    INDIVIDUAL_DASHBOARD: "/app/dashboard/client.html",
+    BUSINESS_DASHBOARD: "/app/dashboard/business.html",
 
     CLIENTS: "/app/dashboard/clients.html",
     MATTERS: "/app/dashboard/matters.html",
@@ -27,7 +31,7 @@ export const ROUTES = Object.freeze({
         "/app/booking/index.html",
 
     CLIENT_PORTAL:
-        "/app/client/index.html",
+        "/app/dashboard/client.html",
 
     DOCUMENTS: "/documents/",
     KNOWLEDGEBASE: "/knowledgebase/",
@@ -66,8 +70,7 @@ export function resolveRoute(
 
     const normalisedRoute =
         String(route).replace(
-            /^\/+/,
-            ""
+            /^\/+/, ""
         );
 
     return normalisedBase
