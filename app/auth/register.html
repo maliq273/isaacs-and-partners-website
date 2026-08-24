@@ -11,14 +11,16 @@
         .wrap{width:min(100%,980px);margin:auto}.brand{text-align:center;margin-bottom:28px}.brand img{width:90px;max-height:90px;object-fit:contain}.brand h1{margin:10px 0 4px;font-size:30px}.brand p{margin:0;color:var(--muted)}
         .panel{background:rgba(23,23,23,.96);border:1px solid var(--border);border-radius:22px;padding:30px;box-shadow:0 24px 70px rgba(0,0,0,.4)}
         .choices{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-bottom:24px}.choice{border:1px solid #3a352c;background:#111;border-radius:18px;padding:24px;text-align:left;color:var(--text);cursor:pointer;transition:.2s}.choice:hover,.choice.active{border-color:var(--gold);transform:translateY(-2px)}.choice .icon{font-size:28px;color:var(--gold)}.choice h2{margin:10px 0 6px}.choice p{color:var(--muted);line-height:1.5;margin:0}.choice span{display:block;margin-top:16px;color:var(--gold);font-weight:700}
-        form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-weight:700;font-size:14px}input,select{width:100%;padding:13px 14px;border-radius:10px;border:1px solid #3b372f;background:#0d0d0d;color:var(--text);font:inherit}input:focus,select:focus{outline:2px solid rgba(201,162,39,.35);border-color:var(--gold)}.actions{display:flex;gap:12px;align-items:center;margin-top:8px}.button{border:0;border-radius:10px;padding:14px 20px;background:var(--gold);color:#111;font-weight:800;cursor:pointer}.button:disabled{opacity:.55;cursor:not-allowed}.back{color:var(--muted);text-decoration:none}.message{padding:12px;border-radius:10px;margin-bottom:15px;background:#211b0d;border:1px solid var(--border);color:var(--text)}.error{background:#321616;border-color:#8d3c3c}.signin{text-align:center;margin-top:22px;color:var(--muted)}.signin a{color:var(--gold)}
-        @media(max-width:700px){.choices,.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{padding:20px}}
+        form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-weight:700;font-size:14px}input,select{width:100%;padding:13px 14px;border-radius:10px;border:1px solid #3b372f;background:#0d0d0d;color:var(--text);font:inherit}input:focus,select:focus{outline:2px solid rgba(201,162,39,.35);border-color:var(--gold)}.actions{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:8px}.button{border:0;border-radius:10px;padding:14px 20px;background:var(--gold);color:#111;font-weight:800;cursor:pointer}.button:disabled{opacity:.55;cursor:not-allowed}.back{color:var(--muted);text-decoration:none}.back:hover,.home-link:hover{color:var(--gold)}.home-link{color:var(--muted);text-decoration:none;font-weight:700}.message{padding:12px;border-radius:10px;margin-bottom:15px;background:#211b0d;border:1px solid var(--border);color:var(--text)}.error{background:#321616;border-color:#8d3c3c}.signin{text-align:center;margin-top:22px;color:var(--muted)}.signin a{color:var(--gold)}
+        @media(max-width:700px){.choices,.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{padding:20px}.actions{align-items:stretch;flex-direction:column}.actions .button,.actions a{width:100%;text-align:center}}
     </style>
 </head>
 <body>
 <main class="wrap">
     <header class="brand">
-        <img src="../../assets/logo.png" alt="Isaacs & Partners">
+        <a href="/index.html" aria-label="Return to Isaacs & Partners homepage">
+            <img src="../../assets/logo.png" alt="Isaacs & Partners">
+        </a>
         <h1>Create your Isaacs & Partners account</h1>
         <p>Choose the account type that matches your matter.</p>
     </header>
@@ -53,26 +55,64 @@
                 <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required></div>
                 <div class="field"><label for="confirmPassword">Confirm password</label><input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required></div>
             </div>
-            <div class="actions"><button id="registrationButton" class="button" type="submit">Create Individual Account</button><a class="back" href="/login.html">Already have an account? Sign in</a></div>
+            <div class="actions">
+                <button id="registrationButton" class="button" type="submit">Create Individual Account</button>
+                <a class="back" href="/login.html">Already have an account? Sign in</a>
+                <a class="home-link" href="/index.html">← Return to Homepage</a>
+            </div>
         </form>
     </section>
 </main>
 <script type="module">
 import registrationController from "./RegistrationController.js";
-const form=document.querySelector("#registrationForm");
-const typeInput=document.querySelector("#accountType");
-const button=document.querySelector("#registrationButton");
-const businessFields=[...document.querySelectorAll(".business-field")];
-const choices=[...document.querySelectorAll(".choice")];
-function setType(type){
-    const business=type==="business";
-    typeInput.value=type;
-    choices.forEach(c=>c.classList.toggle("active",c.dataset.type===type));
-    businessFields.forEach(w=>{w.hidden=!business; const input=w.querySelector("input"); if(input) input.required=business;});
-    button.textContent=business?"Create Business Account":"Create Individual Account";
+
+const form = document.querySelector("#registrationForm");
+const typeInput = document.querySelector("#accountType");
+const button = document.querySelector("#registrationButton");
+const businessFields = [...document.querySelectorAll(".business-field")];
+const choices = [...document.querySelectorAll(".choice")];
+
+function setType(type) {
+    const business = type === "business";
+    typeInput.value = type;
+    choices.forEach(choice => {
+        choice.classList.toggle("active", choice.dataset.type === type);
+    });
+    businessFields.forEach(wrapper => {
+        wrapper.hidden = !business;
+        const input = wrapper.querySelector("input");
+        if (input) input.required = business;
+    });
+    button.textContent = business
+        ? "Create Business Account"
+        : "Create Individual Account";
 }
-choices.forEach(choice=>choice.addEventListener("click",()=>setType(choice.dataset.type)));
-registrationController.initialise({formSelector:"#registrationForm",submitButton:button,errorSelector:"#registrationError",statusSelector:"#registrationStatus"}).catch(error=>{document.querySelector("#registrationError").textContent=error.message;document.querySelector("#registrationError").hidden=false;});
+
+const params = new URLSearchParams(window.location.search);
+const requestedType = params.get("type");
+
+setType(
+    requestedType === "business"
+        ? "business"
+        : "individual"
+);
+
+choices.forEach(choice => {
+    choice.addEventListener("click", () => {
+        setType(choice.dataset.type);
+    });
+});
+
+registrationController.initialise({
+    formSelector: "#registrationForm",
+    submitButton: button,
+    errorSelector: "#registrationError",
+    statusSelector: "#registrationStatus"
+}).catch(error => {
+    const errorBox = document.querySelector("#registrationError");
+    errorBox.textContent = error.message;
+    errorBox.hidden = false;
+});
 </script>
 </body>
 </html>
