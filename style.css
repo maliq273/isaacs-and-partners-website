@@ -3386,6 +3386,369 @@ border-color:#ef4444;
 
 }
 
+/*==================================================
+ACCOUNT TYPE GATEWAY
+GET STARTED / INDIVIDUAL / BUSINESS
+==================================================*/
+
+.consultation-account-gateway {
+    position: relative;
+    width: 100%;
+    max-width: 1180px;
+    margin: 45px auto 0;
+    padding: 55px 50px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.98),
+            rgba(248, 247, 243, 0.98)
+        );
+    border: 1px solid rgba(201, 162, 39, 0.28);
+    border-radius: 24px;
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    overflow: hidden;
+}
+
+/*
+ * Subtle gold accent across the top of the gateway.
+ */
+.consultation-account-gateway::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background:
+        linear-gradient(
+            90deg,
+            #a67c00,
+            #d4af37,
+            #f3d675,
+            #d4af37,
+            #a67c00
+        );
+}
+
+/*
+ * Header
+ */
+.consultation-account-gateway-header {
+    max-width: 760px;
+    margin: 0 auto 38px;
+    text-align: center;
+}
+
+.consultation-account-gateway-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    padding: 7px 15px;
+    border-radius: 999px;
+    background: rgba(201, 162, 39, 0.10);
+    border: 1px solid rgba(201, 162, 39, 0.25);
+    color: #9a7610;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.consultation-account-gateway h2 {
+    margin: 0 0 14px;
+    color: #111111;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.consultation-account-gateway-header p {
+    max-width: 650px;
+    margin: 0 auto;
+    color: #5f5f5f;
+    font-size: 1.05rem;
+    line-height: 1.75;
+}
+
+/*
+ * Account selection grid
+ */
+.account-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+/*
+ * Account selection card
+ */
+.account-type-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 330px;
+    padding: 36px;
+    background: #ffffff;
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 20px;
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.07);
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
+    overflow: hidden;
+}
+
+.account-type-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background:
+        linear-gradient(
+            90deg,
+            #b88a12,
+            #d4af37,
+            #b88a12
+        );
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+.account-type-card:hover {
+    transform: translateY(-7px);
+    border-color: rgba(201, 162, 39, 0.45);
+    box-shadow:
+        0 22px 55px rgba(0, 0, 0, 0.13),
+        0 0 30px rgba(201, 162, 39, 0.08);
+}
+
+.account-type-card:hover::after {
+    transform: scaleX(1);
+}
+
+/*
+ * Card icon
+ */
+.account-type-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    margin-bottom: 24px;
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            #111111,
+            #252525
+        );
+    color: #d4af37;
+    font-size: 1.65rem;
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.16);
+}
+
+.account-type-card h3 {
+    margin: 0 0 12px;
+    color: #111111;
+    font-size: 1.55rem;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+.account-type-card p {
+    margin: 0 0 28px;
+    color: #666666;
+    font-size: 0.98rem;
+    line-height: 1.7;
+}
+
+/*
+ * Card action
+ */
+.account-type-card .account-type-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: fit-content;
+    min-width: 155px;
+    min-height: 48px;
+    margin-top: auto;
+    padding: 12px 22px;
+    border: 1px solid #c9a227;
+    border-radius: 999px;
+    background:
+        linear-gradient(
+            135deg,
+            #111111,
+            #292929
+        );
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        color 0.25s ease;
+}
+
+.account-type-card .account-type-action:hover {
+    transform: translateY(-2px);
+    background:
+        linear-gradient(
+            135deg,
+            #d4af37,
+            #b88a12
+        );
+    color: #111111;
+    box-shadow:
+        0 10px 25px rgba(201, 162, 39, 0.28);
+}
+
+.account-type-card .account-type-action:focus-visible {
+    outline: 3px solid rgba(201, 162, 39, 0.35);
+    outline-offset: 4px;
+}
+
+/*
+ * Arrow on action button
+ */
+.account-type-card .account-type-action::after {
+    content: "→";
+    font-size: 1.05rem;
+    transition: transform 0.2s ease;
+}
+
+.account-type-card .account-type-action:hover::after {
+    transform: translateX(4px);
+}
+
+/*
+ * Existing-account / sign-in footer
+ */
+.consultation-account-gateway-footer {
+    max-width: 760px;
+    margin: 35px auto 0;
+    padding-top: 25px;
+    border-top: 1px solid rgba(17, 17, 17, 0.08);
+    text-align: center;
+}
+
+.consultation-account-gateway-footer p {
+    margin: 0;
+    color: #666666;
+    font-size: 0.95rem;
+}
+
+.consultation-account-gateway-footer a {
+    color: #9a7610;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.consultation-account-gateway-footer a:hover {
+    color: #111111;
+    text-decoration: underline;
+}
+
+/*
+ * Tablet
+ */
+@media (max-width: 900px) {
+
+    .consultation-account-gateway {
+        width: 92%;
+        padding: 45px 30px;
+    }
+
+    .account-type-grid {
+        gap: 20px;
+    }
+
+    .account-type-card {
+        padding: 30px;
+        min-height: 310px;
+    }
+
+}
+
+/*
+ * Mobile
+ */
+@media (max-width: 600px) {
+
+    .consultation-account-gateway {
+        width: 92%;
+        margin-top: 30px;
+        padding: 40px 20px;
+        border-radius: 20px;
+    }
+
+    .consultation-account-gateway-header {
+        margin-bottom: 30px;
+    }
+
+    .consultation-account-gateway h2 {
+        font-size: 2rem;
+    }
+
+    .consultation-account-gateway-header p {
+        font-size: 0.95rem;
+        line-height: 1.65;
+    }
+
+    .account-type-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .account-type-card {
+        min-height: auto;
+        padding: 28px 24px;
+    }
+
+    .account-type-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 20px;
+        border-radius: 16px;
+    }
+
+    .account-type-card h3 {
+        font-size: 1.35rem;
+    }
+
+    .account-type-card p {
+        margin-bottom: 24px;
+    }
+
+    .account-type-card .account-type-action {
+        width: 100%;
+    }
+
+    .consultation-account-gateway-footer {
+        margin-top: 28px;
+        padding-top: 22px;
+    }
+
+}
+
 /*=====================================
 END OF STYLESHEET
 ======================================*/
