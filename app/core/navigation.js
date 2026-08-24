@@ -8,6 +8,7 @@
  */
 
 import ROUTES from "../config/routes.js";
+import { getUserDashboardRole } from "../dashboard/DashboardAccess.js";
 
 class Navigation {
     constructor() {
@@ -16,6 +17,7 @@ class Navigation {
         this.staffDashboardRoute = ROUTES.STAFF_DASHBOARD;
         this.individualDashboardRoute = ROUTES.INDIVIDUAL_DASHBOARD;
         this.businessDashboardRoute = ROUTES.BUSINESS_DASHBOARD;
+        this.superAdminDashboardRoute = ROUTES.SUPER_ADMIN_DASHBOARD || ROUTES.STAFF_DASHBOARD;
     }
 
     getLoginRoute() {
@@ -27,41 +29,46 @@ class Navigation {
     }
 
     getDashboardRouteForRole(role) {
-        switch (String(role || "").toLowerCase()) {
-            case "staff":
-            case "employee":
-            case "admin":
+        switch (String(role || "").toUpperCase()) {
+            case "SUPER_ADMIN":
+                return this.superAdminDashboardRoute;
+            case "STAFF":
                 return this.staffDashboardRoute;
-            case "business":
-            case "company":
+            case "BUSINESS":
                 return this.businessDashboardRoute;
-            case "individual":
-            case "client":
+            case "INDIVIDUAL":
             default:
                 return this.individualDashboardRoute;
         }
     }
 
+    getDashboardRouteForUser(user) {
+        return this.getDashboardRouteForRole(
+            getUserDashboardRole(user)
+        );
+    }
+
     toLogin(returnUrl = null, { replace = true } = {}) {
         return this._navigate(
-            this._withReturnUrl(
-                this.loginRoute,
-                returnUrl
-            ),
+            this._withReturnUrl(this.loginRoute, returnUrl),
             { replace }
         );
     }
 
     toDashboard({ replace = true } = {}) {
-        return this._navigate(
-            this.dashboardRoute,
-            { replace }
-        );
+        return this._navigate(this.dashboardRoute, { replace });
     }
 
     toRoleDashboard(role, { replace = true } = {}) {
         return this._navigate(
             this.getDashboardRouteForRole(role),
+            { replace }
+        );
+    }
+
+    toUserDashboard(user, { replace = true } = {}) {
+        return this._navigate(
+            this.getDashboardRouteForUser(user),
             { replace }
         );
     }
@@ -78,10 +85,7 @@ class Navigation {
                 : "http://localhost"
         );
 
-        url.searchParams.set(
-            "returnUrl",
-            returnUrl
-        );
+        url.searchParams.set("returnUrl", returnUrl);
 
         return url.pathname + url.search;
     }
