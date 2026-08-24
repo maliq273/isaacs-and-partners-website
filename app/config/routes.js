@@ -1,38 +1,39 @@
 /**
  * Isaacs and Partners
  * Application Routes
+ *
+ * These paths map to real static files/directories in the
+ * GitHub Pages deployment.
  */
 
 export const ROUTES = Object.freeze({
     HOME: "/",
-    LOGIN: "/login",
-    DASHBOARD: "/dashboard/",
-    CLIENTS: "/dashboard/clients.html",
-    MATTERS: "/dashboard/matters.html",
-    REPORTS: "/dashboard/reports.html",
-    STAFF: "/dashboard/staff.html",
-    AI: "/dashboard/ai.html",
-    ANALYTICS: "/dashboard/analytics.html",
+
+    LOGIN: "/app/auth/login.html",
+
+    DASHBOARD: "/app/dashboard/",
+
+    CLIENTS: "/app/dashboard/clients.html",
+    MATTERS: "/app/dashboard/matters.html",
+    REPORTS: "/app/dashboard/reports.html",
+    STAFF: "/app/dashboard/staff.html",
+    AI: "/app/dashboard/ai.html",
+    ANALYTICS: "/app/dashboard/analytics.html",
 
     CONSULTATION:
-        "/consultation/index.html",
+        "/app/consultation/index.html",
 
     BOOKING:
-        "/booking/index.html",
+        "/app/booking/index.html",
 
     CLIENT_PORTAL:
-        "/client/index.html",
+        "/app/client/index.html",
 
-    DOCUMENTS:
-        "/documents/",
+    DOCUMENTS: "/documents/",
+    KNOWLEDGEBASE: "/knowledgebase/",
+    UPLOADS: "/uploads/",
 
-    KNOWLEDGEBASE:
-        "/knowledgebase/",
-
-    UPLOADS:
-        "/uploads/",
-
-    API: "/api",
+    API: "/api"
 });
 
 export const API_ROUTES = Object.freeze({
@@ -49,7 +50,7 @@ export const API_ROUTES = Object.freeze({
     REPORTS: "/reports",
     SEARCH: "/search",
     UPLOADS: "/uploads",
-    AI: "/ai",
+    AI: "/ai"
 });
 
 export function resolveRoute(
