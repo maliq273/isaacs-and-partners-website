@@ -1441,16 +1441,13 @@ consultants will contact you within 24 hours.
         <span>GET STARTED</span>
 
         <h3>
-
-            Before we begin, tell us who you are
-
+            Choose how you would like to continue
         </h3>
 
         <p>
-
-            Choose whether you are requesting assistance
-            as an individual or on behalf of a business.
-
+            Select the account that best describes you.
+            You can register as an individual client or
+            on behalf of a business.
         </p>
 
     </div>
@@ -1458,13 +1455,15 @@ consultants will contact you within 24 hours.
 
     <div class="account-type-grid">
 
-
+        <!-- ========================================== -->
         <!-- INDIVIDUAL -->
+        <!-- ========================================== -->
 
-        <button
-            type="button"
+        <a
+            href="/signup.html?type=individual"
             class="account-type-card"
-            data-account-type="individual">
+            data-account-type="individual"
+            aria-label="Register as an individual client">
 
             <div class="account-type-icon">
 
@@ -1472,36 +1471,44 @@ consultants will contact you within 24 hours.
 
             </div>
 
-            <h4>
+            <div class="account-type-content">
 
-                Individual
+                <span class="account-type-label">
+                    INDIVIDUAL CLIENT
+                </span>
 
-            </h4>
+                <h4>
+                    Individual
+                </h4>
 
-            <p>
+                <p>
+                    Create your personal client account
+                    to manage consultations, matters,
+                    documents and application progress.
+                </p>
 
-                I am applying for myself or
-                dealing with a personal matter.
+            </div>
 
-            </p>
+            <span class="account-type-action">
 
-            <span>
-
-                Continue
+                Register as an Individual
 
                 <i class="fa-solid fa-arrow-right"></i>
 
             </span>
 
-        </button>
+        </a>
 
 
-        <!-- COMPANY -->
+        <!-- ========================================== -->
+        <!-- BUSINESS -->
+        <!-- ========================================== -->
 
-        <button
-            type="button"
+        <a
+            href="/signup.html?type=business"
             class="account-type-card"
-            data-account-type="company">
+            data-account-type="company"
+            aria-label="Register a business account">
 
             <div class="account-type-icon">
 
@@ -1509,33 +1516,51 @@ consultants will contact you within 24 hours.
 
             </div>
 
-            <h4>
+            <div class="account-type-content">
 
-                Company / Business
+                <span class="account-type-label">
+                    BUSINESS CLIENT
+                </span>
 
-            </h4>
+                <h4>
+                    Company / Business
+                </h4>
 
-            <p>
+                <p>
+                    Register your business to manage
+                    compliance, legal, HR, immigration
+                    and professional services.
+                </p>
 
-                I am registering or requesting
-                services for a business.
+            </div>
 
-            </p>
+            <span class="account-type-action">
 
-            <span>
-
-                Continue
+                Register a Business
 
                 <i class="fa-solid fa-arrow-right"></i>
 
             </span>
 
-        </button>
+        </a>
+
+    </div>
+
+
+    <div class="account-gateway-login">
+
+        <span>
+            Already have an account?
+        </span>
+
+        <a href="/login.html">
+            Sign in
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
 
     </div>
 
 </div>
-
 
 <!-- ============================================== -->
 <!-- CONSULTATION FORM -->
