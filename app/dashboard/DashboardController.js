@@ -2,13 +2,13 @@
  * Isaacs and Partners
  * Dashboard Controller
  *
- * Protects the dashboard entry page and provides the authenticated
- * user's basic navigation state. AuthService remains the source of
- * truth for authentication.
+ * Protects dashboard entry and sends authenticated users to the
+ * correct dashboard according to their account role/type.
  */
 
 import auth from "../auth/AuthService.js";
 import navigation from "../core/navigation.js";
+import { getUserDashboardRole } from "./DashboardAccess.js";
 
 class DashboardController {
     constructor() {
@@ -25,10 +25,16 @@ class DashboardController {
         await auth.initialise();
 
         if (!auth.isAuthenticated()) {
-            navigation.toLogin(
-                this.getCurrentReturnUrl(),
-                { replace: true }
-            );
+            navigation.toLogin(this.getCurrentReturnUrl(), { replace: true });
+            return this;
+        }
+
+        const user = auth.getCurrentUser();
+        const role = getUserDashboardRole(user);
+        const target = navigation.getDashboardRouteForRole(role);
+
+        if (this.shouldRedirectToRoleDashboard(target)) {
+            navigation.toRoleDashboard(role, { replace: true });
             return this;
         }
 
@@ -37,6 +43,19 @@ class DashboardController {
         this.initialised = true;
 
         return this;
+    }
+
+    shouldRedirectToRoleDashboard(target) {
+        if (typeof window === "undefined" || !target) {
+            return false;
+        }
+
+        const current =
+            window.location.pathname.replace(/\/+$/, "") || "/";
+        const expected =
+            new URL(target, window.location.origin).pathname.replace(/\/+$/, "") || "/";
+
+        return current !== expected;
     }
 
     getCurrentReturnUrl() {
@@ -57,9 +76,7 @@ class DashboardController {
         }
 
         const user = auth.getCurrentUser();
-
-        const greeting =
-            document.querySelector("#dashboard-greeting");
+        const greeting = document.querySelector("#dashboard-greeting");
 
         if (!greeting || !user) {
             return;
@@ -69,12 +86,12 @@ class DashboardController {
             user.name ||
             user.fullName ||
             user.full_name ||
+            [user.firstName, user.lastName].filter(Boolean).join(" ") ||
             user.email ||
             user.username ||
             "Dashboard";
 
-        greeting.textContent =
-            `Welcome, ${displayName}`;
+        greeting.textContent = `Welcome, ${displayName}`;
     }
 
     bindNavigation() {
@@ -83,14 +100,9 @@ class DashboardController {
         }
 
         document
-            .querySelectorAll(
-                "[data-auth-action='logout']"
-            )
+            .querySelectorAll("[data-auth-action='logout']")
             .forEach(button => {
-                button.addEventListener(
-                    "click",
-                    this.handleLogout
-                );
+                button.addEventListener("click", this.handleLogout);
             });
     }
 
@@ -104,19 +116,10 @@ class DashboardController {
         this.loggingOut = true;
 
         try {
-            await auth.logout({
-                remote: true,
-                reason: "user"
-            });
-
-            navigation.toLogin(null, {
-                replace: true
-            });
+            await auth.logout({ remote: true, reason: "user" });
+            navigation.toLogin(null, { replace: true });
         } catch (error) {
-            console.error(
-                "[DashboardController] Logout failed:",
-                error
-            );
+            console.error("[DashboardController] Logout failed:", error);
         } finally {
             this.loggingOut = false;
         }
@@ -125,14 +128,9 @@ class DashboardController {
     destroy() {
         if (typeof document !== "undefined") {
             document
-                .querySelectorAll(
-                    "[data-auth-action='logout']"
-                )
+                .querySelectorAll("[data-auth-action='logout']")
                 .forEach(button => {
-                    button.removeEventListener(
-                        "click",
-                        this.handleLogout
-                    );
+                    button.removeEventListener("click", this.handleLogout);
                 });
         }
 
@@ -141,8 +139,7 @@ class DashboardController {
     }
 }
 
-export const dashboardController =
-    new DashboardController();
+export const dashboardController = new DashboardController();
 
 export { DashboardController };
 
