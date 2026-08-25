@@ -12,6 +12,14 @@ const json = (body: unknown, status = 200) =>
 
 const normaliseRole = (value: unknown) => String(value ?? "STAFF").trim().toUpperCase();
 
+const errorMessage = (error: unknown) => {
+  if (error && typeof error === "object") {
+    const candidate = error as Record<string, unknown>;
+    return String(candidate.message ?? candidate.error_description ?? candidate.error ?? "Unknown database error.");
+  }
+  return String(error ?? "Unknown error.");
+};
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
@@ -42,7 +50,7 @@ Deno.serve(async (request) => {
     .eq("id", callerId)
     .maybeSingle();
 
-  if (profileError) return json({ error: profileError.message }, 500);
+  if (profileError) return json({ error: `Profile verification failed: ${profileError.message}` }, 500);
   if (!callerProfile || normaliseRole(callerProfile.role) !== "SUPER_ADMIN" || callerProfile.is_active === false) {
     return json({ error: "SUPER_ADMIN access is required." }, 403);
   }
@@ -67,11 +75,13 @@ Deno.serve(async (request) => {
   });
 
   if (createError || !created.user) {
-    return json({ error: createError?.message ?? "Staff authentication account could not be created." }, 400);
+    return json({ error: `Authentication account could not be created: ${createError?.message ?? "unknown error"}` }, 400);
   }
 
   const userId = created.user.id;
   let profileInserted = false;
+  let staffId: string | null = null;
+  let stage = "profile";
 
   try {
     const { error: updateProfileError } = await admin
@@ -84,9 +94,10 @@ Deno.serve(async (request) => {
         staff_id: null
       }, { onConflict: "id" });
 
-    if (updateProfileError) throw updateProfileError;
+    if (updateProfileError) throw new Error(`Profile creation failed: ${updateProfileError.message}`);
     profileInserted = true;
 
+    stage = "staff";
     const staffRecord: Record<string, unknown> = { user_id: userId, status: "active" };
     if (firstName) staffRecord.first_name = firstName;
     if (lastName) staffRecord.last_name = lastName;
@@ -98,16 +109,20 @@ Deno.serve(async (request) => {
       .select("*")
       .single();
 
-    if (staffError) throw staffError;
+    if (staffError || !staff) throw new Error(`Staff record creation failed: ${staffError?.message ?? "No staff record was returned."}`);
+    staffId = staff.id;
 
+    stage = "profile-link";
     const { error: linkError } = await admin
       .from("profiles")
       .update({ staff_id: staff.id })
       .eq("id", userId);
 
-    if (linkError) throw linkError;
+    if (linkError) throw new Error(`Profile/staff link failed: ${linkError.message}`);
 
-    await admin.from("audit_logs").insert({
+    // Audit logging must never cause an otherwise valid staff account to be rolled back.
+    stage = "audit";
+    const { error: auditError } = await admin.from("audit_logs").insert({
       actor_id: callerId,
       action: "STAFF_CREATED",
       entity_type: "staff",
@@ -115,10 +130,13 @@ Deno.serve(async (request) => {
       details: { email, role, department }
     });
 
-    return json({ created: true, user_id: userId, staff });
+    const auditWarning = auditError ? ` Staff account created, but audit logging failed: ${auditError.message}` : "";
+
+    return json({ created: true, user_id: userId, staff, warning: auditWarning || null });
   } catch (error) {
+    console.error(`[admin-create-staff] stage=${stage}`, error);
     await admin.auth.admin.deleteUser(userId);
     if (profileInserted) await admin.from("profiles").delete().eq("id", userId);
-    return json({ error: error instanceof Error ? error.message : "Staff record could not be created." }, 400);
+    return json({ error: `${errorMessage(error)} (stage: ${stage})`, stage, staff_id: staffId }, 400);
   }
 });
