@@ -3,17 +3,14 @@
  * Dashboard Page Controller
  *
  * Connects rendered role dashboards to dashboard data services.
- * The authoritative dashboard role is resolved from public.profiles.
+ * The authoritative dashboard role is resolved once from public.profiles.
  */
 
 import auth from "../auth/AuthService.js";
 import navigation from "../core/navigation.js";
 import dashboardData from "./DashboardDataService.js";
 import adminDashboardData from "./AdminDashboardDataService.js";
-import {
-    resolveUserDashboardRole,
-    clearRoleCache
-} from "./DashboardAccess.js";
+import { resolveUserDashboardRole, clearRoleCache } from "./DashboardAccess.js";
 
 const PAGE_ROLES = Object.freeze({
     "client-dashboard": "INDIVIDUAL",
@@ -33,7 +30,6 @@ class DashboardPageController {
     async initialise() {
         if (this.initialised) return this;
         if (this.loading) return this.loading;
-
         this.loading = this._initialise();
         try {
             await this.loading;
@@ -62,9 +58,10 @@ class DashboardPageController {
 
         try {
             if (pageRole === "SUPER_ADMIN") {
-                this.data = await adminDashboardData.getDashboardSummary();
+                /* Pass the role already verified above; do not perform another profile lookup. */
+                this.data = await adminDashboardData.getDashboardSummary(role);
                 this.data.user = user;
-                this.data.role = "SUPER_ADMIN";
+                this.data.role = role;
                 this.data.dashboard = "SUPER_ADMIN";
             } else {
                 this.data = await dashboardData.getCurrentDashboard({ limit: 10 });
@@ -88,9 +85,7 @@ class DashboardPageController {
 
     canUsePage(actualRole, pageRole) {
         if (!pageRole) return true;
-        if (actualRole === "SUPER_ADMIN") {
-            return pageRole === "SUPER_ADMIN" || pageRole === "STAFF";
-        }
+        if (actualRole === "SUPER_ADMIN") return pageRole === "SUPER_ADMIN" || pageRole === "STAFF";
         return actualRole === pageRole;
     }
 
@@ -108,15 +103,7 @@ class DashboardPageController {
 
     renderUser() {
         const user = this.data.user || auth.getCurrentUser();
-        const displayName =
-            user?.name ||
-            user?.fullName ||
-            user?.full_name ||
-            [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
-            user?.email ||
-            user?.username ||
-            "User";
-
+        const displayName = user?.name || user?.fullName || user?.full_name || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email || user?.username || "User";
         document.querySelectorAll("#dashboard-greeting, #admin-greeting").forEach(element => {
             element.textContent = `Welcome, ${displayName}`;
         });
@@ -135,12 +122,10 @@ class DashboardPageController {
         const documents = this.data.documents || [];
         const appointments = this.data.appointments || [];
         const invoices = this.data.invoices || [];
-
         this.setStatByIndex(0, matters.length);
         this.setStatByIndex(1, documents.length);
         this.setStatByIndex(2, appointments.length);
         this.setStatByIndex(3, this.calculateOutstandingBalance(invoices));
-
         this.setEmptyState(0, this.collectionMessage(matters, "matter"));
         this.setEmptyState(1, this.collectionMessage(documents, "outstanding document"));
         this.setEmptyState(2, this.collectionMessage(appointments, "upcoming appointment"));
@@ -150,12 +135,10 @@ class DashboardPageController {
         const matters = this.data.matters || [];
         const documents = this.data.documents || [];
         const invoices = this.data.invoices || [];
-
         this.setStatByIndex(0, matters.length);
         this.setStatByIndex(1, documents.length);
         this.setStatByIndex(2, this.countComplianceItems(documents));
         this.setStatByIndex(3, this.calculateOutstandingBalance(invoices));
-
         this.setEmptyState(0, this.collectionMessage(matters, "business matter"));
         this.setEmptyState(1, this.collectionMessage(documents, "outstanding document"));
     }
@@ -164,7 +147,6 @@ class DashboardPageController {
         const matters = this.data.matters || [];
         const tasks = this.data.tasks || [];
         const staff = this.data.staff || {};
-
         this.setText("#staff-outstanding-tasks", tasks.length);
         this.setText("#active-staff", staff.status === "active" ? 1 : 0);
         this.setText("#online-staff", staff.online ? 1 : 0);
@@ -176,40 +158,20 @@ class DashboardPageController {
 
     renderSuperAdmin() {
         const counts = this.data.counts || {};
-
         this.setText("#admin-open-matters", counts.openMatters ?? 0);
         this.setText("#admin-prequote-count", counts.pendingPreQuotes ?? 0);
         this.setText("#admin-unassigned-count", counts.unassignedMatters ?? 0);
         this.setText("#admin-staff-count", counts.staff ?? 0);
-        this.setText(
-            "#admin-security-status",
-            this.data.role === "SUPER_ADMIN"
-                ? "Authenticated administrator session is active. Live Supabase data is connected."
-                : "Administrator access is unavailable."
-        );
-
-        this.setPanelMessage(
-            "Staff administration is ready for the staff workflow/API connection.",
-            counts.staff ?? 0,
-            "staff"
-        );
-        this.setPanelMessage(
-            "Assignment queue will appear here when the quote workflow is connected.",
-            counts.unassignedMatters ?? 0,
-            "unassigned matter"
-        );
+        this.setText("#admin-security-status", this.data.role === "SUPER_ADMIN" ? "Authenticated administrator session is active. Live Supabase data is connected." : "Administrator access is unavailable.");
+        this.setPanelMessage("Staff administration is ready for the staff workflow/API connection.", counts.staff ?? 0, "staff");
+        this.setPanelMessage("Assignment queue will appear here when the quote workflow is connected.", counts.unassignedMatters ?? 0, "unassigned matter");
     }
 
     setPanelMessage(defaultMessage, count, label) {
         const panels = document.querySelectorAll(".dashboard-grid .activity-list .empty-state");
-        const message = count > 0
-            ? `${count} ${label}${count === 1 ? "" : "s"} currently require attention.`
-            : defaultMessage;
-
+        const message = count > 0 ? `${count} ${label}${count === 1 ? "" : "s"} currently require attention.` : defaultMessage;
         panels.forEach(panel => {
-            if (panel.textContent?.includes(defaultMessage.slice(0, 20))) {
-                panel.textContent = message;
-            }
+            if (panel.textContent?.includes(defaultMessage.slice(0, 20))) panel.textContent = message;
         });
     }
 
@@ -253,7 +215,6 @@ class DashboardPageController {
     renderError(error) {
         const page = document.querySelector(".dashboard-page");
         if (!page) return;
-
         let notice = document.querySelector("#dashboard-data-error");
         if (!notice) {
             notice = document.createElement("div");
@@ -262,23 +223,16 @@ class DashboardPageController {
             notice.setAttribute("role", "alert");
             page.prepend(notice);
         }
-
-        const message = error?.code === "AUTHENTICATION_REQUIRED"
-            ? "Your session is no longer active. Please sign in again."
-            : "Dashboard data could not be loaded. Please refresh and try again.";
+        const message = error?.code === "AUTHENTICATION_REQUIRED" ? "Your session is no longer active. Please sign in again." : "Dashboard data could not be loaded. Please refresh and try again.";
         notice.textContent = message;
     }
 
     renderLogoutState() {
-        document.querySelectorAll("[data-auth-action='logout']").forEach(button => {
-            button.disabled = false;
-        });
+        document.querySelectorAll("[data-auth-action='logout']").forEach(button => { button.disabled = false; });
     }
 
     bindEvents() {
-        document.querySelectorAll("[data-auth-action='logout']").forEach(button => {
-            button.addEventListener("click", this.handleLogout);
-        });
+        document.querySelectorAll("[data-auth-action='logout']").forEach(button => button.addEventListener("click", this.handleLogout));
     }
 
     async handleLogout(event) {
@@ -294,9 +248,7 @@ class DashboardPageController {
     }
 
     destroy() {
-        document?.querySelectorAll("[data-auth-action='logout']").forEach(button => {
-            button.removeEventListener("click", this.handleLogout);
-        });
+        document?.querySelectorAll("[data-auth-action='logout']").forEach(button => button.removeEventListener("click", this.handleLogout));
         this.initialised = false;
         this.loading = false;
         this.data = null;
