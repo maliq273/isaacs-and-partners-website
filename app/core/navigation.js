@@ -13,6 +13,7 @@ import { getUserDashboardRole } from "../dashboard/DashboardAccess.js";
 class Navigation {
     constructor() {
         this.loginRoute = ROUTES.LOGIN;
+        this.adminLoginRoute = ROUTES.ADMIN_LOGIN;
         this.dashboardRoute = ROUTES.DASHBOARD;
         this.staffDashboardRoute = ROUTES.STAFF_DASHBOARD;
         this.individualDashboardRoute = ROUTES.INDIVIDUAL_DASHBOARD;
@@ -22,6 +23,10 @@ class Navigation {
 
     getLoginRoute() {
         return this.loginRoute;
+    }
+
+    getAdminLoginRoute() {
+        return this.adminLoginRoute;
     }
 
     getDashboardRoute() {
@@ -51,6 +56,13 @@ class Navigation {
     toLogin(returnUrl = null, { replace = true } = {}) {
         return this._navigate(
             this._withReturnUrl(this.loginRoute, returnUrl),
+            { replace }
+        );
+    }
+
+    toAdminLogin(returnUrl = null, { replace = true } = {}) {
+        return this._navigate(
+            this._withReturnUrl(this.adminLoginRoute, returnUrl),
             { replace }
         );
     }
