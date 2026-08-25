@@ -3,13 +3,12 @@
  * Super Admin Dashboard Data Service
  *
  * Reads live administrative data from Supabase using the authenticated
- * user's JWT. SUPER_ADMIN access is resolved by DashboardAccess and the
- * database RLS policies remain the security boundary.
+ * user's JWT. The caller supplies the already-resolved SUPER_ADMIN role so
+ * the dashboard does not perform a second role lookup during rendering.
  */
 
 import auth from "../auth/AuthService.js";
 import authConfig from "../auth/auth.config.js";
-import { resolveUserDashboardRole } from "./DashboardAccess.js";
 
 const TABLES = Object.freeze({
     staff: "staff",
@@ -27,7 +26,6 @@ class AdminDashboardDataService {
 
     async request(table, select = "id", options = {}) {
         await auth.initialise();
-
         if (!auth.isAuthenticated()) {
             const error = new Error("An authenticated administrator session is required.");
             error.code = "AUTHENTICATION_REQUIRED";
@@ -45,9 +43,7 @@ class AdminDashboardDataService {
         const timeoutId = controller ? setTimeout(() => controller.abort(), this.timeout) : null;
 
         try {
-            const params = new URLSearchParams();
-            params.set("select", select);
-
+            const params = new URLSearchParams({ select });
             if (options.filter) {
                 Object.entries(options.filter).forEach(([key, value]) => params.set(key, value));
             }
@@ -64,19 +60,15 @@ class AdminDashboardDataService {
 
             const raw = await response.text();
             let data = [];
-            if (raw) {
-                try {
-                    data = JSON.parse(raw);
-                } catch {
-                    data = [];
-                }
+            try {
+                data = raw ? JSON.parse(raw) : [];
+            } catch {
+                data = [];
             }
 
             if (!response.ok) {
                 const error = new Error(
-                    data?.message ||
-                    data?.hint ||
-                    `Administrative request failed for ${table} (${response.status}).`
+                    data?.message || data?.hint || `Administrative request failed for ${table} (${response.status}).`
                 );
                 error.code = `ADMIN_HTTP_${response.status}`;
                 error.status = response.status;
@@ -101,13 +93,9 @@ class AdminDashboardDataService {
 
     async requestWithFallback(table, primarySelect, fallbackSelect = "id") {
         try {
-            return {
-                data: await this.request(table, primarySelect),
-                warning: null
-            };
+            return { data: await this.request(table, primarySelect), warning: null };
         } catch (error) {
             console.warn(`[AdminDashboardDataService] ${table} primary query failed.`, error);
-
             try {
                 return {
                     data: await this.request(table, fallbackSelect),
@@ -123,24 +111,21 @@ class AdminDashboardDataService {
         }
     }
 
-    async getDashboardSummary() {
+    async getDashboardSummary(verifiedRole = null) {
         await auth.initialise();
-
         if (!auth.isAuthenticated()) {
             const error = new Error("An authenticated administrator session is required.");
             error.code = "AUTHENTICATION_REQUIRED";
             throw error;
         }
 
-        const user = auth.getCurrentUser();
-        const role = await resolveUserDashboardRole(user);
-
-        if (role !== "SUPER_ADMIN") {
-            const error = new Error("SUPER_ADMIN profile could not be verified.");
+        if (verifiedRole !== "SUPER_ADMIN") {
+            const error = new Error("SUPER_ADMIN role verification is required before loading administrative data.");
             error.code = "SUPER_ADMIN_PROFILE_NOT_FOUND";
             throw error;
         }
 
+        const user = auth.getCurrentUser();
         const [staffResult, mattersResult, quotesResult, assignmentsResult] = await Promise.all([
             this.requestWithFallback("staff", "id,user_id,status", "id"),
             this.requestWithFallback("matters", "id,status", "id"),
@@ -148,41 +133,18 @@ class AdminDashboardDataService {
             this.requestWithFallback("assignments", "id,matter_id", "id")
         ]);
 
-        const warnings = [
-            staffResult.warning,
-            mattersResult.warning,
-            quotesResult.warning,
-            assignmentsResult.warning
-        ].filter(Boolean);
-
+        const warnings = [staffResult.warning, mattersResult.warning, quotesResult.warning, assignmentsResult.warning].filter(Boolean);
         const staff = staffResult.data;
         const matters = mattersResult.data;
         const quotes = quotesResult.data;
         const assignments = assignmentsResult.data;
 
         const assignedMatterIds = new Set(
-            assignments
-                .map(item => item?.matter_id)
-                .filter(Boolean)
-                .map(String)
+            assignments.map(item => item?.matter_id).filter(Boolean).map(String)
         );
 
-        const closedMatterStatuses = new Set([
-            "closed",
-            "completed",
-            "cancelled",
-            "archived"
-        ]);
-
-        const finalQuoteStatuses = new Set([
-            "approved",
-            "accepted",
-            "rejected",
-            "declined",
-            "converted",
-            "cancelled",
-            "closed"
-        ]);
+        const closedMatterStatuses = new Set(["closed", "completed", "cancelled", "archived"]);
+        const finalQuoteStatuses = new Set(["approved", "accepted", "rejected", "declined", "converted", "cancelled", "closed"]);
 
         const openMatters = matters.filter(item => {
             const status = String(item?.status || "").toLowerCase();
