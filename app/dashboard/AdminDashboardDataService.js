@@ -2,20 +2,16 @@
  * Isaacs and Partners
  * Super Admin Dashboard Data Service
  *
- * Reads the real administrative tables from Supabase.
- * The authenticated SUPER_ADMIN JWT and database RLS are the security boundary.
- * No service-role key or database password belongs in this file.
- *
- * The dashboard must remain usable while the schema is being expanded.
- * Optional administrative columns therefore have safe fallbacks instead of
- * allowing one missing column to blank the entire Super Admin dashboard.
+ * Reads live administrative data from Supabase using the authenticated
+ * user's JWT. SUPER_ADMIN access is resolved by DashboardAccess and the
+ * database RLS policies remain the security boundary.
  */
 
 import auth from "../auth/AuthService.js";
 import authConfig from "../auth/auth.config.js";
+import { resolveUserDashboardRole } from "./DashboardAccess.js";
 
 const TABLES = Object.freeze({
-    profiles: "profiles",
     staff: "staff",
     matters: "matters",
     quotes: "quotes",
@@ -45,35 +41,26 @@ class AdminDashboardDataService {
             throw error;
         }
 
-        const controller = typeof AbortController !== "undefined"
-            ? new AbortController()
-            : null;
-        const timeoutId = controller
-            ? setTimeout(() => controller.abort(), this.timeout)
-            : null;
+        const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const timeoutId = controller ? setTimeout(() => controller.abort(), this.timeout) : null;
 
         try {
             const params = new URLSearchParams();
             params.set("select", select);
 
             if (options.filter) {
-                Object.entries(options.filter).forEach(([key, value]) => {
-                    params.set(key, value);
-                });
+                Object.entries(options.filter).forEach(([key, value]) => params.set(key, value));
             }
 
-            const response = await fetch(
-                `${this.baseUrl}/${TABLES[table]}?${params.toString()}`,
-                {
-                    method: "GET",
-                    headers: {
-                        Accept: "application/json",
-                        apikey: this.publishableKey,
-                        Authorization: `Bearer ${token}`
-                    },
-                    signal: controller?.signal
-                }
-            );
+            const response = await fetch(`${this.baseUrl}/${TABLES[table]}?${params.toString()}`, {
+                method: "GET",
+                headers: {
+                    Accept: "application/json",
+                    apikey: this.publishableKey,
+                    Authorization: `Bearer ${token}`
+                },
+                signal: controller?.signal
+            });
 
             const raw = await response.text();
             let data = [];
@@ -112,28 +99,22 @@ class AdminDashboardDataService {
         }
     }
 
-    async requestWithFallback(table, primarySelect, fallbackSelect = "id", options = {}) {
+    async requestWithFallback(table, primarySelect, fallbackSelect = "id") {
         try {
             return {
-                data: await this.request(table, primarySelect, options),
+                data: await this.request(table, primarySelect),
                 warning: null
             };
         } catch (error) {
-            console.warn(
-                `[AdminDashboardDataService] ${table} query failed; retrying with ${fallbackSelect}.`,
-                error
-            );
+            console.warn(`[AdminDashboardDataService] ${table} primary query failed.`, error);
 
             try {
                 return {
-                    data: await this.request(table, fallbackSelect, options),
+                    data: await this.request(table, fallbackSelect),
                     warning: `${table}: optional columns unavailable; using basic records.`
                 };
             } catch (fallbackError) {
-                console.error(
-                    `[AdminDashboardDataService] ${table} fallback query failed.`,
-                    fallbackError
-                );
+                console.warn(`[AdminDashboardDataService] ${table} fallback query failed.`, fallbackError);
                 return {
                     data: [],
                     warning: `${table}: data could not be read under the current RLS/schema.`
@@ -143,30 +124,22 @@ class AdminDashboardDataService {
     }
 
     async getDashboardSummary() {
-        const user = auth.getCurrentUser();
-        const userId = user?.id || user?.user_id || user?.userId || null;
+        await auth.initialise();
 
-        if (!userId) {
-            const error = new Error("Authenticated user identity is unavailable.");
-            error.code = "ADMIN_USER_ID_MISSING";
+        if (!auth.isAuthenticated()) {
+            const error = new Error("An authenticated administrator session is required.");
+            error.code = "AUTHENTICATION_REQUIRED";
             throw error;
         }
 
-        // Read only the signed-in administrator's profile. This works with
-        // the existing profiles_select_own_or_admin RLS policy and avoids
-        // depending on a broad profiles query.
-        const profileResult = await this.request(
-            "profiles",
-            "id,email,role,is_active",
-            { filter: { id: `eq.${userId}` } }
-        ).then(data => ({ data, warning: null }))
-            .catch(async error => {
-                console.error("[AdminDashboardDataService] Profile query failed.", error);
-                return {
-                    data: [],
-                    warning: "profiles: administrator profile could not be read."
-                };
-            });
+        const user = auth.getCurrentUser();
+        const role = await resolveUserDashboardRole(user);
+
+        if (role !== "SUPER_ADMIN") {
+            const error = new Error("SUPER_ADMIN profile could not be verified.");
+            error.code = "SUPER_ADMIN_PROFILE_NOT_FOUND";
+            throw error;
+        }
 
         const [staffResult, mattersResult, quotesResult, assignmentsResult] = await Promise.all([
             this.requestWithFallback("staff", "id,user_id,status", "id"),
@@ -176,22 +149,11 @@ class AdminDashboardDataService {
         ]);
 
         const warnings = [
-            profileResult.warning,
             staffResult.warning,
             mattersResult.warning,
             quotesResult.warning,
             assignmentsResult.warning
         ].filter(Boolean);
-
-        const adminProfile = profileResult.data.find(
-            item => String(item?.role || "").toUpperCase() === "SUPER_ADMIN" && item?.is_active === true
-        );
-
-        if (!adminProfile) {
-            const error = new Error("SUPER_ADMIN profile could not be verified.");
-            error.code = "SUPER_ADMIN_PROFILE_NOT_FOUND";
-            throw error;
-        }
 
         const staff = staffResult.data;
         const matters = mattersResult.data;
@@ -232,12 +194,11 @@ class AdminDashboardDataService {
             return !finalQuoteStatuses.has(status);
         });
 
-        const unassignedMatters = openMatters.filter(
-            item => !assignedMatterIds.has(String(item.id))
-        );
+        const unassignedMatters = openMatters.filter(item => !assignedMatterIds.has(String(item.id)));
 
         return {
-            profile: adminProfile,
+            user,
+            role: "SUPER_ADMIN",
             counts: {
                 staff: staff.length,
                 pendingPreQuotes: pendingPreQuotes.length,
