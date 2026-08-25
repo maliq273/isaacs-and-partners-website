@@ -2,17 +2,16 @@
  * Isaacs and Partners
  * Dashboard Page Controller
  *
- * Connects the rendered role dashboard pages to DashboardDataService.
- * Authentication remains owned by AuthService/AuthGuard.
- * Data access remains owned by DashboardDataService.
+ * Connects rendered role dashboards to DashboardDataService.
+ * The authoritative dashboard role is resolved from public.profiles.
  */
 
 import auth from "../auth/AuthService.js";
 import navigation from "../core/navigation.js";
 import dashboardData from "./DashboardDataService.js";
 import {
-    getUserDashboardRole,
-    isSuperAdmin
+    resolveUserDashboardRole,
+    clearRoleCache
 } from "./DashboardAccess.js";
 
 const PAGE_ROLES = Object.freeze({
@@ -58,11 +57,11 @@ class DashboardPageController {
         }
 
         const user = auth.getCurrentUser();
-        const role = getUserDashboardRole(user);
+        const role = await resolveUserDashboardRole(user);
         const pageRole = this.getPageRole();
 
         if (!this.canUsePage(role, pageRole)) {
-            navigation.toUserDashboard(user, { replace: true });
+            navigation.toRoleDashboard(role, { replace: true });
             return this;
         }
 
@@ -198,10 +197,11 @@ class DashboardPageController {
     renderStaff() {
         const matters = this.data.matters || [];
         const tasks = this.data.tasks || [];
+        const staff = this.data.staff || {};
 
         this.setText("#staff-outstanding-tasks", tasks.length);
-        this.setText("#active-staff", this.data.staff?.status === "active" ? 1 : 0);
-        this.setText("#online-staff", this.data.staff?.online ? 1 : 0);
+        this.setText("#active-staff", staff.status === "active" ? 1 : 0);
+        this.setText("#online-staff", staff.online ? 1 : 0);
         this.setText("#total-staff", this.data.staff ? 1 : 0);
 
         this.setText("#staff-table", tasks.length ? `${tasks.length} task(s) assigned to you.` : "No tasks assigned.");
@@ -219,7 +219,7 @@ class DashboardPageController {
         this.setText("#admin-staff-count", "—");
         this.setText(
             "#admin-security-status",
-            isSuperAdmin(this.data.user)
+            this.data.role === "SUPER_ADMIN"
                 ? "Authenticated administrator session is active."
                 : "Administrator access is unavailable."
         );
@@ -321,6 +321,8 @@ class DashboardPageController {
         event?.preventDefault();
 
         try {
+            const user = auth.getCurrentUser();
+            clearRoleCache(user?.id || user?.user_id || user?.userId || null);
             await auth.logout({ remote: true, reason: "user" });
             navigation.toLogin(null, { replace: true });
         } catch (error) {
