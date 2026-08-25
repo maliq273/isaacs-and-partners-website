@@ -21,60 +21,33 @@
         </header>
 
         <section class="stats-grid">
-            <article class="stat-card">
-                <span class="stat-label">Staff</span>
-                <strong id="admin-staff-count">0</strong>
-            </article>
-            <article class="stat-card">
-                <span class="stat-label">Pending Pre-Quotes</span>
-                <strong id="admin-prequote-count">0</strong>
-            </article>
-            <article class="stat-card">
-                <span class="stat-label">Unassigned Matters</span>
-                <strong id="admin-unassigned-count">0</strong>
-            </article>
-            <article class="stat-card">
-                <span class="stat-label">Open Matters</span>
-                <strong id="admin-open-matters">0</strong>
-            </article>
+            <article class="stat-card"><span class="stat-label">Staff</span><strong id="admin-staff-count">0</strong></article>
+            <article class="stat-card"><span class="stat-label">Pending Pre-Quotes</span><strong id="admin-prequote-count">0</strong></article>
+            <article class="stat-card"><span class="stat-label">Unassigned Matters</span><strong id="admin-unassigned-count">0</strong></article>
+            <article class="stat-card"><span class="stat-label">Open Matters</span><strong id="admin-open-matters">0</strong></article>
         </section>
 
         <section class="dashboard-grid">
             <article class="panel">
                 <div class="panel-header">
-                    <div>
-                        <h2>Staff Administration</h2>
-                        <p>Create, edit, deactivate and assign staff members.</p>
-                    </div>
+                    <div><h2>Staff Administration</h2><p>Create, edit, deactivate and assign staff members.</p></div>
                     <a class="panel-link" href="./staff.html">Open Staff</a>
                 </div>
-                <div class="activity-list">
-                    <div class="empty-state">Staff administration is ready for the staff workflow/API connection.</div>
-                </div>
+                <div class="activity-list"><div class="empty-state">Staff administration is ready for the staff workflow/API connection.</div></div>
             </article>
 
             <article class="panel">
                 <div class="panel-header">
-                    <div>
-                        <h2>Pre-Quote Assignment</h2>
-                        <p>Review approved pre-quotes and assign them to the correct person or business.</p>
-                    </div>
+                    <div><h2>Pre-Quote Assignment</h2><p>Review approved pre-quotes and assign them to the correct person or business.</p></div>
                     <a class="panel-link" href="./matters.html">Open Matters</a>
                 </div>
-                <div class="activity-list">
-                    <div class="empty-state">Assignment queue will appear here when the quote workflow is connected.</div>
-                </div>
+                <div class="activity-list"><div class="empty-state">Assignment queue will appear here when the quote workflow is connected.</div></div>
             </article>
         </section>
 
         <section class="dashboard-grid">
             <article class="panel">
-                <div class="panel-header">
-                    <div>
-                        <h2>Operations</h2>
-                        <p>Manage clients, matters, reports and platform activity.</p>
-                    </div>
-                </div>
+                <div class="panel-header"><div><h2>Operations</h2><p>Manage clients, matters, reports and platform activity.</p></div></div>
                 <div class="activity-list">
                     <a class="panel-link" href="./clients.html">Clients</a>
                     <a class="panel-link" href="./matters.html">Matters</a>
@@ -85,67 +58,16 @@
             </article>
 
             <article class="panel">
-                <div class="panel-header">
-                    <div>
-                        <h2>Security</h2>
-                        <p>Administrative access is restricted to SUPER_ADMIN accounts.</p>
-                    </div>
-                </div>
+                <div class="panel-header"><div><h2>Security</h2><p>Administrative access is restricted to SUPER_ADMIN accounts.</p></div></div>
                 <div id="admin-security-status" class="activity-list"></div>
             </article>
         </section>
     </main>
 
     <script type="module">
-        import auth from "../auth/AuthService.js";
-        import navigation from "../core/navigation.js";
-        import { isSuperAdmin } from "./DashboardAccess.js";
-
-        const initialise = async () => {
-            await auth.initialise();
-
-            const user = auth.getCurrentUser();
-
-            if (!auth.isAuthenticated()) {
-                navigation.toLogin(window.location.pathname, { replace: true });
-                return;
-            }
-
-            if (!isSuperAdmin(user)) {
-                navigation.toUserDashboard(user, { replace: true });
-                return;
-            }
-
-            const greeting = document.querySelector("#admin-greeting");
-            const name =
-                user.name ||
-                user.fullName ||
-                [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-                user.email ||
-                "Super Admin";
-
-            if (greeting) {
-                greeting.textContent = `Welcome, ${name}`;
-            }
-
-            document.querySelector("#admin-security-status").innerHTML =
-                "<div>Authenticated administrator session is active.</div>";
-
-            document
-                .querySelectorAll("[data-auth-action='logout']")
-                .forEach(button => {
-                    button.addEventListener("click", async () => {
-                        await auth.logout({ remote: true, reason: "user" });
-                        navigation.toLogin(null, { replace: true });
-                    });
-                });
-        };
-
-        initialise().catch(error => {
-            console.error("[SuperAdmin] Initialisation failed:", error);
-        });
+        import dashboardPageController from "./DashboardPageController.js";
+        await dashboardPageController.initialise();
     </script>
-
     <script type="module" src="../js/app.js"></script>
 </body>
 </html>

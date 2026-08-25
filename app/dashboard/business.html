@@ -12,7 +12,7 @@
         <header class="page-header">
             <div>
                 <p class="eyebrow">Isaacs & Partners</p>
-                <h1>Business Dashboard</h1>
+                <h1 id="dashboard-greeting">Business Dashboard</h1>
                 <p class="page-description">Manage your business matters, compliance work, documents, consultations and authorised representatives.</p>
             </div>
             <div class="page-actions">
@@ -31,11 +31,11 @@
         <section class="dashboard-grid">
             <article class="panel">
                 <div class="panel-header"><div><h2>Business Matters</h2><p>Company registration, SARS, UIF, COIDA, HR, legal and compliance matters.</p></div></div>
-                <div class="empty-state">No business matters are currently linked to your account.</div>
+                <div class="empty-state">Loading matters...</div>
             </article>
             <article class="panel">
                 <div class="panel-header"><div><h2>Compliance Documents</h2><p>Track documents required for your business matters.</p></div></div>
-                <div class="empty-state">No outstanding documents.</div>
+                <div class="empty-state">Loading documents...</div>
             </article>
         </section>
 
@@ -52,9 +52,8 @@
     </main>
 
     <script type="module">
-        import authGuard from "../auth/AuthGuard.js";
-        await authGuard.initialise();
-        await authGuard.isAuthenticated();
+        import dashboardPageController from "./DashboardPageController.js";
+        await dashboardPageController.initialise();
     </script>
     <script type="module" src="../js/app.js"></script>
 </body>
