@@ -8,18 +8,16 @@
     <title>Sign In | Isaacs and Partners</title>
     <link rel="stylesheet" href="../../style.css">
     <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="../css/login-roles.css?v=20260825-1">
 </head>
 <body class="login-page">
 <main id="loginPage" class="login-shell">
     <section class="login-card" aria-labelledby="loginTitle">
         <header class="login-brand">
-            <a class="login-home-logo" href="/index.html" aria-label="Return to Isaacs and Partners homepage">
-                <img src="../../assets/logo.png" alt="Isaacs and Partners">
-            </a>
+            <a class="login-home-logo" href="/index.html" aria-label="Return to Isaacs and Partners homepage"><img src="../../assets/logo.png" alt="Isaacs and Partners"></a>
             <h1 id="loginTitle">Isaacs and Partners</h1>
             <p id="loginSubtitle">Secure Client &amp; Staff Sign In</p>
         </header>
-
         <section id="rolePicker" class="login-role-picker" aria-labelledby="loginRoleTitle">
             <h2 id="loginRoleTitle">Who is signing in?</h2>
             <p>Choose your account type to continue to the correct dashboard.</p>
@@ -29,7 +27,6 @@
                 <button type="button" class="login-role-card" data-role="staff" aria-pressed="false"><span class="role-icon" aria-hidden="true">🛡️</span><span><strong>Staff</strong><small>Authorised staff member</small></span></button>
             </div>
         </section>
-
         <form id="loginForm" class="login-form" novalidate autocomplete="on" hidden>
             <input id="loginType" name="loginType" type="hidden" value="">
             <div id="loginError" class="login-message error" role="alert" aria-live="assertive" hidden></div>
@@ -41,23 +38,17 @@
             <button id="loginButton" type="submit" class="login-submit">Sign In</button>
             <div class="login-links"><a href="/signup.html">Not a member? Create an account</a><a href="/index.html">← Return to Homepage</a></div>
         </form>
-
         <footer class="login-footer"><p>Authorised personnel only.</p><p>Isaacs and Partners</p><a class="home-link" href="/index.html">Return to Homepage</a></footer>
     </section>
 </main>
 <script type="module">
-    import loginController from "./LoginController.js?v=20260825-3";
-    const form = document.querySelector("#loginForm");
-    const picker = document.querySelector("#rolePicker");
-    const cards = [...document.querySelectorAll("[data-role]")];
-    const input = document.querySelector("#loginType");
-    const label = document.querySelector("#selectedRoleLabel");
-    const labels = { individual: "Individual", business: "Business", staff: "Staff" };
-    function selectRole(role) { if (!labels[role]) return; input.value = role; label.textContent = labels[role]; cards.forEach(c => { const active = c.dataset.role === role; c.classList.toggle("active", active); c.setAttribute("aria-pressed", String(active)); }); picker.hidden = true; form.hidden = false; loginController.setRole(role); document.querySelector("#identifier")?.focus(); }
-    function changeRole() { form.hidden = true; picker.hidden = false; input.value = ""; loginController.setRole(null); }
-    cards.forEach(card => card.addEventListener("click", () => selectRole(card.dataset.role)));
-    document.querySelector("#changeRoleButton").addEventListener("click", changeRole);
-    loginController.initialise({ formSelector: "#loginForm", submitButton: document.querySelector("#loginButton"), errorSelector: "#loginError", statusSelector: "#loginStatus" });
+import loginController from "./LoginController.js?v=20260825-4";
+const form=document.querySelector("#loginForm"),picker=document.querySelector("#rolePicker"),cards=[...document.querySelectorAll("[data-role]")],input=document.querySelector("#loginType"),label=document.querySelector("#selectedRoleLabel"),labels={individual:"Individual",business:"Business",staff:"Staff"};
+function selectRole(role){if(!labels[role])return;input.value=role;label.textContent=labels[role];cards.forEach(c=>{const active=c.dataset.role===role;c.classList.toggle("active",active);c.setAttribute("aria-pressed",String(active));});picker.hidden=true;form.hidden=false;loginController.setRole(role);document.querySelector("#identifier")?.focus();}
+function changeRole(){form.hidden=true;picker.hidden=false;input.value="";loginController.setRole(null);}
+cards.forEach(card=>card.addEventListener("click",()=>selectRole(card.dataset.role)));
+document.querySelector("#changeRoleButton").addEventListener("click",changeRole);
+loginController.initialise({formSelector:"#loginForm",submitButton:document.querySelector("#loginButton"),errorSelector:"#loginError",statusSelector:"#loginStatus"});
 </script>
 </body>
 </html>
