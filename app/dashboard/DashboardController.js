@@ -3,12 +3,15 @@
  * Dashboard Controller
  *
  * Protects dashboard entry and sends authenticated users to the
- * correct dashboard according to their account role/type.
+ * correct dashboard according to the authoritative application role.
  */
 
 import auth from "../auth/AuthService.js";
 import navigation from "../core/navigation.js";
-import { getUserDashboardRole } from "./DashboardAccess.js";
+import {
+    resolveUserDashboardRole,
+    clearRoleCache
+} from "./DashboardAccess.js";
 
 class DashboardController {
     constructor() {
@@ -30,7 +33,14 @@ class DashboardController {
         }
 
         const user = auth.getCurrentUser();
-        const role = getUserDashboardRole(user);
+
+        /*
+         * IMPORTANT: role is resolved from public.profiles before choosing
+         * a dashboard. This prevents STAFF/BUSINESS/SUPER_ADMIN users from
+         * falling through to the INDIVIDUAL dashboard merely because their
+         * Supabase Auth metadata does not contain a role.
+         */
+        const role = await resolveUserDashboardRole(user);
         const target = navigation.getDashboardRouteForRole(role);
 
         if (this.shouldRedirectToRoleDashboard(target)) {
@@ -116,6 +126,8 @@ class DashboardController {
         this.loggingOut = true;
 
         try {
+            const user = auth.getCurrentUser();
+            clearRoleCache(user?.id || user?.user_id || user?.userId || null);
             await auth.logout({ remote: true, reason: "user" });
             navigation.toLogin(null, { replace: true });
         } catch (error) {
