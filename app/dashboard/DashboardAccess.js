@@ -3,9 +3,12 @@
  * Dashboard Access
  *
  * Central role/account-type resolver for dashboard navigation.
- * Authentication remains owned by AuthService; this module only
- * determines which already-authenticated dashboard a user should see.
+ * Authentication remains owned by AuthService; this module resolves the
+ * authoritative application role from public.profiles after authentication.
  */
+
+import auth from "../auth/AuthService.js";
+import authConfig from "../auth/auth.config.js";
 
 const ROLE_ALIASES = Object.freeze({
     SUPER_ADMIN: "SUPER_ADMIN",
@@ -23,6 +26,8 @@ const ROLE_ALIASES = Object.freeze({
     CLIENT: "INDIVIDUAL",
     CUSTOMER: "INDIVIDUAL"
 });
+
+const PROFILE_ROLE_CACHE = new Map();
 
 export function normaliseAccountType(value) {
     const key = String(value || "")
@@ -62,7 +67,86 @@ export function getUserDashboardRole(user) {
         }
     }
 
-    return "INDIVIDUAL";
+    return null;
+}
+
+/**
+ * Resolve the authoritative application role from public.profiles.
+ *
+ * Supabase Auth user metadata is useful for registration context, but it is
+ * not the application's role source of truth. Staff and Super Admin roles
+ * are provisioned internally in public.profiles and protected by RLS.
+ */
+export async function resolveUserDashboardRole(user = auth.getCurrentUser()) {
+    if (!user || typeof user !== "object") {
+        return null;
+    }
+
+    const userId = user.id || user.user_id || user.userId;
+
+    if (!userId) {
+        return getUserDashboardRole(user);
+    }
+
+    const cached = PROFILE_ROLE_CACHE.get(String(userId));
+    if (cached) {
+        return cached;
+    }
+
+    const token = auth.getToken();
+    const publishableKey = authConfig.supabase.publishableKey;
+    const baseUrl = `${authConfig.supabase.url}/rest/v1/profiles`;
+
+    if (!token || !publishableKey) {
+        return getUserDashboardRole(user) || "INDIVIDUAL";
+    }
+
+    const params = new URLSearchParams({
+        select: "role,is_active",
+        id: `eq.${encodeURIComponent(String(userId))}`,
+        limit: "1"
+    });
+
+    try {
+        const response = await fetch(`${baseUrl}?${params.toString()}`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                apikey: publishableKey,
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            console.warn(
+                `[DashboardAccess] Profile role lookup failed: HTTP ${response.status}`
+            );
+            return getUserDashboardRole(user) || "INDIVIDUAL";
+        }
+
+        const rows = await response.json();
+        const profile = Array.isArray(rows) ? rows[0] : rows;
+        const profileRole = normaliseAccountType(profile?.role);
+
+        if (profileRole && profile?.is_active !== false) {
+            PROFILE_ROLE_CACHE.set(String(userId), profileRole);
+            return profileRole;
+        }
+
+        return getUserDashboardRole(user) || "INDIVIDUAL";
+    } catch (error) {
+        console.warn("[DashboardAccess] Profile role lookup failed:", error);
+        return getUserDashboardRole(user) || "INDIVIDUAL";
+    }
+}
+
+export function clearRoleCache(userId = null) {
+    if (userId) {
+        PROFILE_ROLE_CACHE.delete(String(userId));
+        return;
+    }
+
+    PROFILE_ROLE_CACHE.clear();
 }
 
 export function isSuperAdmin(user) {
@@ -99,6 +183,8 @@ export function canAccessDashboard(user, dashboardRole) {
 export default {
     normaliseAccountType,
     getUserDashboardRole,
+    resolveUserDashboardRole,
+    clearRoleCache,
     isSuperAdmin,
     isStaff,
     isBusiness,
