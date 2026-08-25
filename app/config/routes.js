@@ -13,7 +13,7 @@ export const ROUTES = Object.freeze({
     SIGNUP: "/signup.html",
 
     DASHBOARD: "/app/dashboard/",
-    STAFF_DASHBOARD: "/app/dashboard/",
+    STAFF_DASHBOARD: "/app/dashboard/staff.html",
     SUPER_ADMIN_DASHBOARD: "/app/dashboard/super-admin.html",
     INDIVIDUAL_DASHBOARD: "/app/dashboard/client.html",
     BUSINESS_DASHBOARD: "/app/dashboard/business.html",
