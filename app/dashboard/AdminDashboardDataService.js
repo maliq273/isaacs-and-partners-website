@@ -5,6 +5,10 @@
  * Reads the real administrative tables from Supabase.
  * The authenticated SUPER_ADMIN JWT and database RLS are the security boundary.
  * No service-role key or database password belongs in this file.
+ *
+ * The dashboard must remain usable while the schema is being expanded.
+ * Optional administrative columns therefore have safe fallbacks instead of
+ * allowing one missing column to blank the entire Super Admin dashboard.
  */
 
 import auth from "../auth/AuthService.js";
@@ -25,16 +29,20 @@ class AdminDashboardDataService {
         this.timeout = authConfig.request.timeout;
     }
 
-    async request(table, select = "id") {
+    async request(table, select = "id", options = {}) {
         await auth.initialise();
 
         if (!auth.isAuthenticated()) {
-            throw new Error("An authenticated administrator session is required.");
+            const error = new Error("An authenticated administrator session is required.");
+            error.code = "AUTHENTICATION_REQUIRED";
+            throw error;
         }
 
         const token = auth.getToken();
         if (!token) {
-            throw new Error("Administrator access token is missing.");
+            const error = new Error("Administrator access token is missing.");
+            error.code = "ADMIN_TOKEN_MISSING";
+            throw error;
         }
 
         const controller = typeof AbortController !== "undefined"
@@ -45,8 +53,17 @@ class AdminDashboardDataService {
             : null;
 
         try {
+            const params = new URLSearchParams();
+            params.set("select", select);
+
+            if (options.filter) {
+                Object.entries(options.filter).forEach(([key, value]) => {
+                    params.set(key, value);
+                });
+            }
+
             const response = await fetch(
-                `${this.baseUrl}/${TABLES[table]}?select=${encodeURIComponent(select)}`,
+                `${this.baseUrl}/${TABLES[table]}?${params.toString()}`,
                 {
                     method: "GET",
                     headers: {
@@ -77,6 +94,7 @@ class AdminDashboardDataService {
                 error.code = `ADMIN_HTTP_${response.status}`;
                 error.status = response.status;
                 error.table = table;
+                error.details = data;
                 throw error;
             }
 
@@ -85,6 +103,7 @@ class AdminDashboardDataService {
             if (error?.name === "AbortError") {
                 const timeoutError = new Error("Administrative data request timed out.");
                 timeoutError.code = "ADMIN_REQUEST_TIMEOUT";
+                timeoutError.table = table;
                 throw timeoutError;
             }
             throw error;
@@ -93,17 +112,69 @@ class AdminDashboardDataService {
         }
     }
 
+    async requestWithFallback(table, primarySelect, fallbackSelect = "id") {
+        try {
+            return {
+                data: await this.request(table, primarySelect),
+                warning: null
+            };
+        } catch (error) {
+            console.warn(
+                `[AdminDashboardDataService] ${table} query failed; retrying with ${fallbackSelect}.`,
+                error
+            );
+
+            try {
+                return {
+                    data: await this.request(table, fallbackSelect),
+                    warning: `${table}: optional columns unavailable; using basic records.`
+                };
+            } catch (fallbackError) {
+                console.error(
+                    `[AdminDashboardDataService] ${table} fallback query failed.`,
+                    fallbackError
+                );
+                return {
+                    data: [],
+                    warning: `${table}: data could not be read under the current RLS/schema.`
+                };
+            }
+        }
+    }
+
     async getDashboardSummary() {
-        const [profile, staff, matters, quotes, assignments] = await Promise.all([
-            this.request("profiles", "id,email,role,is_active"),
-            this.request("staff", "id,user_id,status"),
-            this.request("matters", "id,status"),
-            this.request("quotes", "id,status"),
-            this.request("assignments", "id,matter_id")
+        // The profile check is mandatory. The other collections are allowed
+        // to degrade independently so one evolving table cannot break the
+        // entire administrative dashboard.
+        const profileResult = await this.requestWithFallback(
+            "profiles",
+            "id,email,role,is_active",
+            "id,email,role,is_active"
+        );
+
+        const [staffResult, mattersResult, quotesResult, assignmentsResult] = await Promise.all([
+            this.requestWithFallback("staff", "id,user_id,status", "id"),
+            this.requestWithFallback("matters", "id,status", "id"),
+            this.requestWithFallback("quotes", "id,status", "id"),
+            this.requestWithFallback("assignments", "id,matter_id", "id")
         ]);
 
+        const warnings = [
+            profileResult.warning,
+            staffResult.warning,
+            mattersResult.warning,
+            quotesResult.warning,
+            assignmentsResult.warning
+        ].filter(Boolean);
+
+        const profile = profileResult.data;
+        const staff = staffResult.data;
+        const matters = mattersResult.data;
+        const quotes = quotesResult.data;
+        const assignments = assignmentsResult.data;
+
         const adminProfile = profile.find(
-            item => item.role === "SUPER_ADMIN" && item.is_active === true
+            item => String(item?.role || "").toUpperCase() === "SUPER_ADMIN" && item?.is_active === true
         );
 
         if (!adminProfile) {
@@ -119,7 +190,7 @@ class AdminDashboardDataService {
                 .map(String)
         );
 
-        const openStatuses = new Set([
+        const closedMatterStatuses = new Set([
             "closed",
             "completed",
             "cancelled",
@@ -137,11 +208,15 @@ class AdminDashboardDataService {
         ]);
 
         const openMatters = matters.filter(item => {
+            // If the status column was unavailable and the fallback returned
+            // only id, treat the matter as open rather than hiding it.
             const status = String(item?.status || "").toLowerCase();
-            return !status || !openStatuses.has(status);
+            return !status || !closedMatterStatuses.has(status);
         });
 
         const pendingPreQuotes = quotes.filter(item => {
+            // A quote with no readable status is treated as pending until the
+            // quote workflow supplies its final status.
             const status = String(item?.status || "").toLowerCase();
             return !finalQuoteStatuses.has(status);
         });
@@ -163,7 +238,9 @@ class AdminDashboardDataService {
             quotes,
             assignments,
             unassignedMatters,
-            pendingPreQuotes
+            pendingPreQuotes,
+            warnings,
+            connected: true
         };
     }
 }
