@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="application-name" content="Isaacs and Partners">
+    <meta name="app-version" content="1.0.0">
+    <title>Administrator Control Centre | Isaacs and Partners</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../css/login.css">
+    <style>
+        .admin-access-card {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border: 1px solid rgba(176, 141, 87, 0.35);
+            border-radius: 8px;
+            background: rgba(176, 141, 87, 0.07);
+            color: #667085;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+        .admin-access-card strong { color: #172033; }
+        .admin-return { margin-top: 18px; text-align: center; }
+        .admin-return a { color: #172033; font-weight: 600; text-decoration: none; }
+        .admin-return a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="login-page">
+    <main class="login-container">
+        <section class="login-wrapper" aria-labelledby="adminLoginTitle">
+            <div class="login-card">
+                <header class="login-brand">
+                    <div class="login-logo" aria-hidden="true">
+                        <img src="../../assets/logo.png" alt="Isaacs and Partners">
+                    </div>
+                    <h1 id="adminLoginTitle">Administrator Control Centre</h1>
+                    <p>Restricted access for authorised Super Administrators</p>
+                </header>
+
+                <div class="admin-access-card" role="note">
+                    <strong>Protected area.</strong><br>
+                    This entrance is separate from individual, business and staff sign-in. Access is granted only after authentication and an explicit <strong>SUPER_ADMIN</strong> role check.
+                </div>
+
+                <form id="adminLoginForm" class="login-form" method="post" novalidate autocomplete="on">
+                    <div id="adminLoginError" class="login-message error" role="alert" aria-live="assertive" hidden></div>
+                    <div id="adminLoginStatus" class="login-message success" role="status" aria-live="polite"></div>
+
+                    <div class="login-field">
+                        <label for="adminEmail">Administrator email</label>
+                        <input id="adminEmail" name="email" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="254" aria-required="true">
+                    </div>
+
+                    <div class="login-field">
+                        <label for="adminPassword">Administrator password</label>
+                        <input id="adminPassword" name="password" type="password" autocomplete="current-password" required maxlength="256" aria-required="true">
+                    </div>
+
+                    <div class="login-options">
+                        <label class="login-remember">
+                            <input id="adminRememberMe" name="rememberMe" type="checkbox">
+                            <span>Keep this administrator session active</span>
+                        </label>
+                    </div>
+
+                    <button id="adminLoginButton" type="submit" class="login-submit">
+                        Enter Control Centre
+                    </button>
+                </form>
+
+                <div class="login-security">
+                    <span class="login-security-icon" aria-hidden="true">&#128274;</span>
+                    <span class="login-security-text">Administrative credentials are never stored in this page or source code. Server-side authorization and database policies remain the final security boundary.</span>
+                </div>
+
+                <footer class="login-footer">
+                    <p>Authorised personnel only.</p>
+                    <p>Isaacs and Partners</p>
+                    <div class="admin-return">
+                        <a href="/index.html">Return to Homepage</a>
+                    </div>
+                </footer>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import adminLoginController from "./AdminLoginController.js";
+
+        adminLoginController.initialise({
+            formSelector: "#adminLoginForm",
+            submitButton: document.querySelector("#adminLoginButton"),
+            errorSelector: "#adminLoginError",
+            statusSelector: "#adminLoginStatus"
+        });
+    </script>
+</body>
+</html>
