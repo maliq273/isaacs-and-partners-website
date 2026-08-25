@@ -3,11 +3,14 @@
  * Login Controller
  *
  * Controls the public sign-in form and delegates authentication
- * to AuthService. Navigation remains centralised and safe.
+ * to AuthService. After authentication, the user's authoritative
+ * application role is resolved before navigation so there is no
+ * intermediate /app/dashboard/ redirect.
  */
 
 import auth from "./AuthService.js";
 import navigation from "../core/navigation.js";
+import { resolveUserDashboardRole } from "../dashboard/DashboardAccess.js";
 
 class LoginController {
     constructor() {
@@ -36,7 +39,7 @@ class LoginController {
         await auth.initialise();
 
         if (auth.isAuthenticated()) {
-            this.redirectAuthenticatedUser();
+            await this.redirectAuthenticatedUser();
             return this;
         }
 
@@ -58,7 +61,6 @@ class LoginController {
         const rememberMe = formData.get("rememberMe") === "on";
 
         const validationError = this.validateCredentials(identifier, password);
-
         if (validationError) {
             this.showError(validationError);
             return;
@@ -76,8 +78,8 @@ class LoginController {
             }
 
             this.setStatus("Login successful. Redirecting...");
-            await this.delay(250);
-            this.redirectAuthenticatedUser();
+            await this.delay(150);
+            await this.redirectAuthenticatedUser();
         } catch (error) {
             this.handleLoginError(error);
         } finally {
@@ -131,7 +133,7 @@ class LoginController {
         this.showError(message);
     }
 
-    redirectAuthenticatedUser() {
+    async redirectAuthenticatedUser() {
         if (typeof window === "undefined") return;
 
         const params = new URLSearchParams(window.location.search);
@@ -142,7 +144,9 @@ class LoginController {
             return;
         }
 
-        navigation.toDashboard({ replace: true });
+        const user = auth.getCurrentUser();
+        const role = await resolveUserDashboardRole(user);
+        navigation.toRoleDashboard(role, { replace: true });
     }
 
     isSafeReturnUrl(url) {
