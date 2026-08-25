@@ -412,7 +412,7 @@ class StaffAdminDataService {
         is_active: Boolean(active)
     });
 }
-        );
+    
     }
 
     async deactivate(id) {
