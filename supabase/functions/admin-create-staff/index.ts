@@ -66,6 +66,7 @@ Deno.serve(async (request) => {
   const password = String(payload?.password ?? "");
   const firstName = String(payload?.first_name ?? payload?.firstName ?? "").trim();
   const lastName = String(payload?.last_name ?? payload?.lastName ?? "").trim();
+  const phone = String(payload?.phone ?? "").trim();
   const department = String(payload?.department ?? "").trim();
   const jobTitle = String(payload?.job_title ?? payload?.jobTitle ?? "").trim();
   const employeeNumber = String(payload?.employee_number ?? payload?.employeeNumber ?? "").trim() || makeEmployeeNumber();
@@ -79,7 +80,14 @@ Deno.serve(async (request) => {
     email,
     password,
     email_confirm: true,
-    user_metadata: { account_type: "staff", first_name: firstName, last_name: lastName, department, job_title: jobTitle }
+    user_metadata: {
+      account_type: "staff",
+      first_name: firstName,
+      last_name: lastName,
+      phone,
+      department,
+      job_title: jobTitle
+    }
   });
 
   if (createError || !created.user) {
@@ -97,16 +105,18 @@ Deno.serve(async (request) => {
       .upsert({
         id: userId,
         email,
+        first_name: firstName || null,
+        last_name: lastName || null,
+        phone: phone || null,
         role,
-        is_active: true,
-        staff_id: null
+        is_active: true
       }, { onConflict: "id" });
 
     if (updateProfileError) throw new Error(`Profile creation failed: ${updateProfileError.message}`);
     profileInserted = true;
 
     stage = "staff";
-    const staffRecord: Record<string, unknown> = {
+    const staffRecord = {
       user_id: userId,
       employee_number: employeeNumber,
       department: department || null,
@@ -124,14 +134,6 @@ Deno.serve(async (request) => {
       throw new Error(`Staff record creation failed: ${staffError?.message ?? "No staff record was returned."}`);
     }
     staffId = staff.id;
-
-    stage = "profile-link";
-    const { error: linkError } = await admin
-      .from("profiles")
-      .update({ staff_id: staff.id })
-      .eq("id", userId);
-
-    if (linkError) throw new Error(`Profile/staff link failed: ${linkError.message}`);
 
     stage = "audit";
     const { error: auditError } = await admin.from("audit_logs").insert({
