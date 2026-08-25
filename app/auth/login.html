@@ -9,118 +9,55 @@
     <link rel="stylesheet" href="../../style.css">
     <link rel="stylesheet" href="../css/login.css">
 </head>
-<body>
-<main id="loginPage" class="login-page">
-    <section class="login-container" aria-labelledby="loginTitle">
-        <header class="login-header">
-            <div class="login-logo" aria-hidden="true">
+<body class="login-page">
+<main id="loginPage" class="login-shell">
+    <section class="login-card" aria-labelledby="loginTitle">
+        <header class="login-brand">
+            <a class="login-home-logo" href="/index.html" aria-label="Return to Isaacs and Partners homepage">
                 <img src="../../assets/logo.png" alt="Isaacs and Partners">
-            </div>
+            </a>
             <h1 id="loginTitle">Isaacs and Partners</h1>
-            <p id="loginSubtitle">Secure Client & Staff Sign In</p>
+            <p id="loginSubtitle">Secure Client &amp; Staff Sign In</p>
         </header>
 
-        <section class="login-role-picker" aria-labelledby="loginRoleTitle">
-            <h2 id="loginRoleTitle" class="login-role-title">Who is signing in?</h2>
-            <p class="login-role-subtitle">Choose your account type to continue to the correct dashboard.</p>
-
+        <section id="rolePicker" class="login-role-picker" aria-labelledby="loginRoleTitle">
+            <h2 id="loginRoleTitle">Who is signing in?</h2>
+            <p>Choose your account type to continue to the correct dashboard.</p>
             <div class="login-role-grid">
-                <button type="button" class="login-role-card" data-role="individual" aria-pressed="false">
-                    <span class="role-icon" aria-hidden="true">👤</span>
-                    <strong>Individual</strong>
-                    <small>Personal client account</small>
-                </button>
-                <button type="button" class="login-role-card" data-role="business" aria-pressed="false">
-                    <span class="role-icon" aria-hidden="true">🏢</span>
-                    <strong>Business</strong>
-                    <small>Company or organisation account</small>
-                </button>
-                <button type="button" class="login-role-card" data-role="staff" aria-pressed="false">
-                    <span class="role-icon" aria-hidden="true">🛡️</span>
-                    <strong>Staff</strong>
-                    <small>Authorised staff member</small>
-                </button>
+                <button type="button" class="login-role-card" data-role="individual" aria-pressed="false"><span class="role-icon" aria-hidden="true">👤</span><span><strong>Individual</strong><small>Personal client account</small></span></button>
+                <button type="button" class="login-role-card" data-role="business" aria-pressed="false"><span class="role-icon" aria-hidden="true">🏢</span><span><strong>Business</strong><small>Company or organisation account</small></span></button>
+                <button type="button" class="login-role-card" data-role="staff" aria-pressed="false"><span class="role-icon" aria-hidden="true">🛡️</span><span><strong>Staff</strong><small>Authorised staff member</small></span></button>
             </div>
         </section>
 
         <form id="loginForm" class="login-form" novalidate autocomplete="on" hidden>
             <input id="loginType" name="loginType" type="hidden" value="">
-            <div id="loginError" class="login-message login-error" role="alert" aria-live="assertive" hidden></div>
-            <div id="loginStatus" class="login-message login-status" role="status" aria-live="polite"></div>
-
-            <div class="login-field">
-                <label for="identifier">Email address</label>
-                <input id="identifier" name="identifier" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="254" aria-required="true">
-            </div>
-
-            <div class="login-field">
-                <label for="password">Password</label>
-                <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="256" aria-required="true">
-            </div>
-
-            <div class="login-options">
-                <label class="remember-me">
-                    <input id="rememberMe" name="rememberMe" type="checkbox">
-                    <span>Keep me signed in</span>
-                </label>
-            </div>
-
+            <div id="loginError" class="login-message error" role="alert" aria-live="assertive" hidden></div>
+            <div id="loginStatus" class="login-message success" role="status" aria-live="polite"></div>
+            <div class="login-selected-role"><span>Signing in as</span><strong id="selectedRoleLabel">—</strong><button id="changeRoleButton" type="button">Change</button></div>
+            <div class="login-field"><label for="identifier">Email address</label><input id="identifier" name="identifier" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="254"></div>
+            <div class="login-field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="256"></div>
+            <label class="login-remember"><input id="rememberMe" name="rememberMe" type="checkbox"><span>Keep me signed in</span></label>
             <button id="loginButton" type="submit" class="login-submit">Sign In</button>
-
-            <div class="login-links">
-                <a href="/signup.html">Not a member? Create an account</a>
-                <a href="/app/auth/login.html">Change account type</a>
-            </div>
+            <div class="login-links"><a href="/signup.html">Not a member? Create an account</a><a href="/index.html">← Return to Homepage</a></div>
         </form>
 
-        <footer class="login-footer">
-            <p>Authorised personnel only.</p>
-            <p>Isaacs and Partners</p>
-            <a class="home-link" href="/index.html">← Return to Homepage</a>
-        </footer>
+        <footer class="login-footer"><p>Authorised personnel only.</p><p>Isaacs and Partners</p><a class="home-link" href="/index.html">Return to Homepage</a></footer>
     </section>
 </main>
-
 <script type="module">
-    import loginController from "./LoginController.js?v=20260825-2";
-
+    import loginController from "./LoginController.js?v=20260825-3";
     const form = document.querySelector("#loginForm");
-    const roleCards = [...document.querySelectorAll("[data-role]")];
-    const roleInput = document.querySelector("#loginType");
-    const subtitle = document.querySelector("#loginSubtitle");
-    const rolePicker = document.querySelector(".login-role-picker");
-
-    function selectRole(role) {
-        roleInput.value = role;
-        roleCards.forEach(card => {
-            const active = card.dataset.role === role;
-            card.classList.toggle("active", active);
-            card.setAttribute("aria-pressed", String(active));
-        });
-
-        const labels = {
-            individual: "Individual Client Sign In",
-            business: "Business Client Sign In",
-            staff: "Staff Sign In"
-        };
-
-        subtitle.textContent = labels[role] || "Secure Client & Staff Sign In";
-        rolePicker.hidden = true;
-        form.hidden = false;
-        loginController.setRole?.(role);
-        document.querySelector("#identifier")?.focus();
-    }
-
-    roleCards.forEach(card => {
-        card.addEventListener("click", () => selectRole(card.dataset.role));
-    });
-
-    loginController.initialise({
-        formSelector: "#loginForm",
-        submitButton: document.querySelector("#loginButton"),
-        errorSelector: "#loginError",
-        statusSelector: "#loginStatus"
-    });
+    const picker = document.querySelector("#rolePicker");
+    const cards = [...document.querySelectorAll("[data-role]")];
+    const input = document.querySelector("#loginType");
+    const label = document.querySelector("#selectedRoleLabel");
+    const labels = { individual: "Individual", business: "Business", staff: "Staff" };
+    function selectRole(role) { if (!labels[role]) return; input.value = role; label.textContent = labels[role]; cards.forEach(c => { const active = c.dataset.role === role; c.classList.toggle("active", active); c.setAttribute("aria-pressed", String(active)); }); picker.hidden = true; form.hidden = false; loginController.setRole(role); document.querySelector("#identifier")?.focus(); }
+    function changeRole() { form.hidden = true; picker.hidden = false; input.value = ""; loginController.setRole(null); }
+    cards.forEach(card => card.addEventListener("click", () => selectRole(card.dataset.role)));
+    document.querySelector("#changeRoleButton").addEventListener("click", changeRole);
+    loginController.initialise({ formSelector: "#loginForm", submitButton: document.querySelector("#loginButton"), errorSelector: "#loginError", statusSelector: "#loginStatus" });
 </script>
 </body>
 </html>
