@@ -44,9 +44,7 @@ class AdminAuthGuard {
         }
 
         const user = auth.getCurrentUser();
-        const role = String(
-            user?.role || user?.user_role || user?.app_role || ""
-        ).toUpperCase();
+        const role = this._resolveRole(user);
 
         if (role !== ADMIN_AUTH_CONFIG.role) {
             return {
@@ -61,6 +59,41 @@ class AdminAuthGuard {
             role,
             user
         };
+    }
+
+    _resolveRole(user) {
+        if (!user || typeof user !== "object") {
+            return null;
+        }
+
+        const candidates = [
+            user.role,
+            user.user_role,
+            user.app_role,
+            user.accountType,
+            user.account_type,
+            user.userType,
+            user.user_type,
+            user.user_metadata?.role,
+            user.user_metadata?.user_role,
+            user.user_metadata?.app_role,
+            user.app_metadata?.role,
+            user.app_metadata?.user_role,
+            user.app_metadata?.app_role
+        ];
+
+        for (const value of candidates) {
+            const role = String(value || "")
+                .trim()
+                .toUpperCase()
+                .replace(/[ -]+/g, "_");
+
+            if (role === ADMIN_AUTH_CONFIG.role) {
+                return role;
+            }
+        }
+
+        return null;
     }
 
     getStatus() {
