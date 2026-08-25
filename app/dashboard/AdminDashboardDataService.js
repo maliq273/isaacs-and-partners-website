@@ -112,10 +112,10 @@ class AdminDashboardDataService {
         }
     }
 
-    async requestWithFallback(table, primarySelect, fallbackSelect = "id") {
+    async requestWithFallback(table, primarySelect, fallbackSelect = "id", options = {}) {
         try {
             return {
-                data: await this.request(table, primarySelect),
+                data: await this.request(table, primarySelect, options),
                 warning: null
             };
         } catch (error) {
@@ -126,7 +126,7 @@ class AdminDashboardDataService {
 
             try {
                 return {
-                    data: await this.request(table, fallbackSelect),
+                    data: await this.request(table, fallbackSelect, options),
                     warning: `${table}: optional columns unavailable; using basic records.`
                 };
             } catch (fallbackError) {
@@ -143,14 +143,30 @@ class AdminDashboardDataService {
     }
 
     async getDashboardSummary() {
-        // The profile check is mandatory. The other collections are allowed
-        // to degrade independently so one evolving table cannot break the
-        // entire administrative dashboard.
-        const profileResult = await this.requestWithFallback(
+        const user = auth.getCurrentUser();
+        const userId = user?.id || user?.user_id || user?.userId || null;
+
+        if (!userId) {
+            const error = new Error("Authenticated user identity is unavailable.");
+            error.code = "ADMIN_USER_ID_MISSING";
+            throw error;
+        }
+
+        // Read only the signed-in administrator's profile. This works with
+        // the existing profiles_select_own_or_admin RLS policy and avoids
+        // depending on a broad profiles query.
+        const profileResult = await this.request(
             "profiles",
             "id,email,role,is_active",
-            "id,email,role,is_active"
-        );
+            { filter: { id: `eq.${userId}` } }
+        ).then(data => ({ data, warning: null }))
+            .catch(async error => {
+                console.error("[AdminDashboardDataService] Profile query failed.", error);
+                return {
+                    data: [],
+                    warning: "profiles: administrator profile could not be read."
+                };
+            });
 
         const [staffResult, mattersResult, quotesResult, assignmentsResult] = await Promise.all([
             this.requestWithFallback("staff", "id,user_id,status", "id"),
@@ -167,13 +183,7 @@ class AdminDashboardDataService {
             assignmentsResult.warning
         ].filter(Boolean);
 
-        const profile = profileResult.data;
-        const staff = staffResult.data;
-        const matters = mattersResult.data;
-        const quotes = quotesResult.data;
-        const assignments = assignmentsResult.data;
-
-        const adminProfile = profile.find(
+        const adminProfile = profileResult.data.find(
             item => String(item?.role || "").toUpperCase() === "SUPER_ADMIN" && item?.is_active === true
         );
 
@@ -182,6 +192,11 @@ class AdminDashboardDataService {
             error.code = "SUPER_ADMIN_PROFILE_NOT_FOUND";
             throw error;
         }
+
+        const staff = staffResult.data;
+        const matters = mattersResult.data;
+        const quotes = quotesResult.data;
+        const assignments = assignmentsResult.data;
 
         const assignedMatterIds = new Set(
             assignments
@@ -208,15 +223,11 @@ class AdminDashboardDataService {
         ]);
 
         const openMatters = matters.filter(item => {
-            // If the status column was unavailable and the fallback returned
-            // only id, treat the matter as open rather than hiding it.
             const status = String(item?.status || "").toLowerCase();
             return !status || !closedMatterStatuses.has(status);
         });
 
         const pendingPreQuotes = quotes.filter(item => {
-            // A quote with no readable status is treated as pending until the
-            // quote workflow supplies its final status.
             const status = String(item?.status || "").toLowerCase();
             return !finalQuoteStatuses.has(status);
         });
