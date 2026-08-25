@@ -20,6 +20,12 @@ const errorMessage = (error: unknown) => {
   return String(error ?? "Unknown error.");
 };
 
+const makeEmployeeNumber = () => {
+  const stamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `IP-${stamp}-${random}`;
+};
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
@@ -61,6 +67,8 @@ Deno.serve(async (request) => {
   const firstName = String(payload?.first_name ?? payload?.firstName ?? "").trim();
   const lastName = String(payload?.last_name ?? payload?.lastName ?? "").trim();
   const department = String(payload?.department ?? "").trim();
+  const jobTitle = String(payload?.job_title ?? payload?.jobTitle ?? "").trim();
+  const employeeNumber = String(payload?.employee_number ?? payload?.employeeNumber ?? "").trim() || makeEmployeeNumber();
   const role = normaliseRole(payload?.role || "STAFF");
 
   if (!email || !email.includes("@")) return json({ error: "A valid staff email is required." }, 400);
@@ -71,7 +79,7 @@ Deno.serve(async (request) => {
     email,
     password,
     email_confirm: true,
-    user_metadata: { account_type: "staff", first_name: firstName, last_name: lastName, department }
+    user_metadata: { account_type: "staff", first_name: firstName, last_name: lastName, department, job_title: jobTitle }
   });
 
   if (createError || !created.user) {
@@ -98,18 +106,23 @@ Deno.serve(async (request) => {
     profileInserted = true;
 
     stage = "staff";
-    const staffRecord: Record<string, unknown> = { user_id: userId, status: "active" };
-    if (firstName) staffRecord.first_name = firstName;
-    if (lastName) staffRecord.last_name = lastName;
-    if (department) staffRecord.department = department;
+    const staffRecord: Record<string, unknown> = {
+      user_id: userId,
+      employee_number: employeeNumber,
+      department: department || null,
+      job_title: jobTitle || null,
+      is_active: true
+    };
 
     const { data: staff, error: staffError } = await admin
       .from("staff")
       .insert(staffRecord)
-      .select("*")
+      .select("id,user_id,employee_number,department,job_title,is_active,created_at,updated_at")
       .single();
 
-    if (staffError || !staff) throw new Error(`Staff record creation failed: ${staffError?.message ?? "No staff record was returned."}`);
+    if (staffError || !staff) {
+      throw new Error(`Staff record creation failed: ${staffError?.message ?? "No staff record was returned."}`);
+    }
     staffId = staff.id;
 
     stage = "profile-link";
@@ -120,14 +133,13 @@ Deno.serve(async (request) => {
 
     if (linkError) throw new Error(`Profile/staff link failed: ${linkError.message}`);
 
-    // Audit logging must never cause an otherwise valid staff account to be rolled back.
     stage = "audit";
     const { error: auditError } = await admin.from("audit_logs").insert({
       actor_id: callerId,
       action: "STAFF_CREATED",
       entity_type: "staff",
       entity_id: staff.id,
-      details: { email, role, department }
+      details: { email, role, department, job_title: jobTitle, employee_number: employeeNumber }
     });
 
     const auditWarning = auditError ? ` Staff account created, but audit logging failed: ${auditError.message}` : "";
