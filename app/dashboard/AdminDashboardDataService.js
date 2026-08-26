@@ -127,7 +127,11 @@ class AdminDashboardDataService {
 
         const user = auth.getCurrentUser();
         const [staffResult, mattersResult, quotesResult, assignmentsResult] = await Promise.all([
-            this.requestWithFallback("staff", "id,user_id,status", "id"),
+            this.requestWithFallback(
+                "staff",
+                "id,user_id,employee_number,department,job_title,is_active,created_at,updated_at",
+                "id,is_active"
+            ),
             this.requestWithFallback("matters", "id,status", "id"),
             this.requestWithFallback("quotes", "id,status", "id"),
             this.requestWithFallback("assignments", "id,matter_id", "id")
@@ -163,6 +167,7 @@ class AdminDashboardDataService {
             role: "SUPER_ADMIN",
             counts: {
                 staff: staff.length,
+                activeStaff: staff.filter(item => item?.is_active === true).length,
                 pendingPreQuotes: pendingPreQuotes.length,
                 unassignedMatters: unassignedMatters.length,
                 openMatters: openMatters.length
