@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Accounts | Isaacs and Partners</title>
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body data-page="super-admin-accounts">
+  <main class="dashboard-page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Isaacs and Partners · Super Admin</p>
+        <h1>Accounts</h1>
+        <p class="page-description">Central management of individual and business client accounts. Supabase is the authoritative source of account state.</p>
+      </div>
+      <div class="page-actions">
+        <button type="button" class="btn btn-secondary" data-account-action="individuals">Individuals</button>
+        <button type="button" class="btn btn-secondary" data-account-action="businesses">Businesses</button>
+        <button type="button" class="btn btn-primary" data-account-action="new-individual">+ Individual</button>
+        <button type="button" class="btn btn-primary" data-account-action="new-business">+ Business</button>
+        <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
+      </div>
+    </header>
+
+    <div id="account-message" class="login-message" role="status" hidden></div>
+
+    <section class="stats-grid">
+      <article class="stat-card"><span class="stat-label">Individuals</span><strong id="account-individual-count">0</strong></article>
+      <article class="stat-card"><span class="stat-label">Businesses</span><strong id="account-business-count">0</strong></article>
+      <article class="stat-card"><span class="stat-label">Active Accounts</span><strong id="account-active-count">0</strong></article>
+      <article class="stat-card"><span class="stat-label">Authority</span><strong>LIVE</strong></article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-toolbar">
+        <div class="search-box" style="flex:1">
+          <label class="sr-only" for="account-search">Search accounts</label>
+          <input id="account-search" class="form-control" type="search" placeholder="Search name, email, phone or registration number..." autocomplete="off">
+        </div>
+        <span class="control-plane-badge">Supabase source of truth</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Account</th><th>Contact</th><th>Reference</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
+          <tbody id="accounts-table"><tr><td colspan="6">Loading accounts...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="account-modal" class="modal-host" hidden></div>
+
+  <script type="module">
+    import controller from "./AdminAccountsController.js?v=20260827-1";
+    await controller.initialise();
+  </script>
+</body>
+</html>
