@@ -137,11 +137,24 @@ Deno.serve(async (request) => {
 
     stage = "audit";
     const { error: auditError } = await admin.from("audit_logs").insert({
-      actor_id: callerId,
+      actor_user_id: callerId,
       action: "STAFF_CREATED",
       entity_type: "staff",
       entity_id: staff.id,
-      details: { email, role, department, job_title: jobTitle, employee_number: employeeNumber }
+      previous_data: null,
+      new_data: {
+        user_id: userId,
+        email,
+        role,
+        department,
+        job_title: jobTitle,
+        employee_number: employeeNumber,
+        is_active: true
+      },
+      metadata: {
+        source: "admin-create-staff",
+        provisioning_stage: "staff_created"
+      }
     });
 
     const auditWarning = auditError ? ` Staff account created, but audit logging failed: ${auditError.message}` : "";
