@@ -58,7 +58,6 @@ class DashboardPageController {
 
         try {
             if (pageRole === "SUPER_ADMIN") {
-                /* Pass the role already verified above; do not perform another profile lookup. */
                 this.data = await adminDashboardData.getDashboardSummary(role);
                 this.data.user = user;
                 this.data.role = role;
@@ -158,13 +157,103 @@ class DashboardPageController {
 
     renderSuperAdmin() {
         const counts = this.data.counts || {};
+        const integrations = this.data.integrations || {};
         this.setText("#admin-open-matters", counts.openMatters ?? 0);
         this.setText("#admin-prequote-count", counts.pendingPreQuotes ?? 0);
         this.setText("#admin-unassigned-count", counts.unassignedMatters ?? 0);
         this.setText("#admin-staff-count", counts.staff ?? 0);
         this.setText("#admin-security-status", this.data.role === "SUPER_ADMIN" ? "Authenticated administrator session is active. Live Supabase data is connected." : "Administrator access is unavailable.");
-        this.setPanelMessage("Staff administration is ready for the staff workflow/API connection.", counts.staff ?? 0, "staff");
-        this.setPanelMessage("Assignment queue will appear here when the quote workflow is connected.", counts.unassignedMatters ?? 0, "unassigned matter");
+        this.setText("#admin-integration-summary", this.integrationSummary(integrations.summary));
+        this.renderIntegrations(integrations.providers || [], integrations.summary || {});
+        this.renderIntegrationEvents(integrations.events || []);
+    }
+
+    renderIntegrations(providers, summary) {
+        const container = document.querySelector("#admin-integrations");
+        if (!container) return;
+
+        if (!providers.length) {
+            container.innerHTML = `<div class="empty-state">Integration registry is unavailable.</div>`;
+            return;
+        }
+
+        container.innerHTML = providers.map(provider => {
+            const status = String(provider.status || "NOT_CONFIGURED").toUpperCase();
+            const statusClass = status === "CONNECTED" ? "active" : status === "ERROR" ? "inactive" : "pending";
+            const lastSync = provider.last_success_at ? this.formatDate(provider.last_success_at) : "No successful sync yet";
+            const error = provider.last_error ? `<small class="integration-error">${this.escape(provider.last_error)}</small>` : "";
+
+            return `
+                <article class="integration-card">
+                    <div class="integration-card-header">
+                        <div>
+                            <strong>${this.escape(provider.display_name || provider.provider_key)}</strong>
+                            <small>${this.escape(provider.provider_key)}</small>
+                        </div>
+                        <span class="status-badge ${statusClass}">${this.escape(this.formatIntegrationStatus(status))}</span>
+                    </div>
+                    <div class="integration-meta">
+                        <span>Last successful sync: ${this.escape(lastSync)}</span>
+                        <span>${provider.enabled ? "Enabled" : "Not configured"}</span>
+                    </div>
+                    ${error}
+                </article>
+            `;
+        }).join("");
+
+        this.setText("#admin-integration-provider-count", `${summary.connectedProviders ?? 0}/${summary.providerCount ?? providers.length} connected`);
+    }
+
+    renderIntegrationEvents(events) {
+        const container = document.querySelector("#admin-integration-events");
+        if (!container) return;
+
+        if (!events.length) {
+            container.innerHTML = `<div class="empty-state">No integration events have been recorded yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = events.slice(0, 10).map(event => {
+            const status = String(event.status || "PENDING").toUpperCase();
+            const statusClass = status === "COMPLETED" ? "active" : status === "FAILED" ? "inactive" : "pending";
+            return `
+                <div class="integration-event-row">
+                    <div>
+                        <strong>${this.escape(event.event_type || "EVENT")}</strong>
+                        <small>${this.escape(event.entity_type || "")}${event.entity_id ? ` · ${this.escape(event.entity_id)}` : ""}</small>
+                    </div>
+                    <div>
+                        <span class="status-badge ${statusClass}">${this.escape(status)}</span>
+                        <small>${this.escape(this.formatDate(event.created_at))}</small>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    integrationSummary(summary = {}) {
+        const connected = Number(summary.connectedProviders || 0);
+        const total = Number(summary.providerCount || 0);
+        const pending = Number(summary.pendingEvents || 0);
+        const failed = Number(summary.failedEvents || 0);
+        return `${connected}/${total} providers connected · ${pending} pending events · ${failed} failed events`;
+    }
+
+    formatIntegrationStatus(status) {
+        return String(status || "NOT_CONFIGURED")
+            .toLowerCase()
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, character => character.toUpperCase());
+    }
+
+    formatDate(value) {
+        if (!value) return "—";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return String(value);
+        return new Intl.DateTimeFormat("en-ZA", {
+            dateStyle: "medium",
+            timeStyle: "short"
+        }).format(date);
     }
 
     setPanelMessage(defaultMessage, count, label) {
@@ -210,6 +299,15 @@ class DashboardPageController {
     setEmptyState(index, value) {
         const elements = document.querySelectorAll(".dashboard-grid .empty-state");
         if (elements[index]) elements[index].textContent = value;
+    }
+
+    escape(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
     renderError(error) {
