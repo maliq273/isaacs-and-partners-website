@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex,nofollow">
   <title>Staff | Isaacs and Partners</title>
-  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/app.css?v=20260826-1">
 </head>
 
 <body data-page="staff-dashboard">
@@ -42,7 +42,7 @@
 
       <article class="stat-card">
         <span class="stat-label">Online</span>
-        <strong id="online-staff">0</strong>
+        <strong id="online-staff">—</strong>
       </article>
 
       <article class="stat-card">
@@ -84,7 +84,7 @@
             </tr>
           </thead>
           <tbody id="staff-table">
-            <tr><td colspan="8">Loading staff...</td></tr>
+            <tr><td colspan="8">Loading live authorised matters...</td></tr>
           </tbody>
         </table>
       </div>
@@ -93,20 +93,27 @@
     <section class="dashboard-grid">
       <article class="panel">
         <div class="panel-header"><h2>Workload Distribution</h2></div>
-        <div id="staff-workload"></div>
+        <div id="staff-workload" class="activity-list">
+          <div class="empty-state">Checking live assignment access...</div>
+        </div>
       </article>
 
       <article class="panel">
         <div class="panel-header"><h2>Recent Staff Activity</h2></div>
-        <div id="staff-activity" class="activity-list"></div>
+        <div id="staff-activity" class="activity-list">
+          <div class="empty-state">Checking live permission scope...</div>
+        </div>
       </article>
     </section>
   </main>
 
   <script type="module">
-    import dashboardPageController from "./DashboardPageController.js?v=20260825-4";
+    import dashboardPageController from "./DashboardPageController.js?v=20260826-1";
+    import staffLivePermissionController from "./StaffLivePermissionController.js?v=20260826-1";
+
     await dashboardPageController.initialise();
+    await staffLivePermissionController.initialise();
   </script>
-  <script type="module" src="../js/app.js?v=20260825-4"></script>
+  <script type="module" src="../js/app.js?v=20260826-1"></script>
 </body>
 </html>
