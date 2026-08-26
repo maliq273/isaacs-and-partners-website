@@ -97,7 +97,9 @@ Deno.serve(async (request) => {
 
     if (role === "BUSINESS") {
       stage = "business";
-      const legalName = String(payload?.legal_name ?? payload?.legalName ?? `${firstName} ${lastName}`.trim() || email).trim();
+      const suppliedLegalName = payload?.legal_name ?? payload?.legalName;
+      const fallbackLegalName = `${firstName} ${lastName}`.trim();
+      const legalName = String(suppliedLegalName ?? fallbackLegalName || email).trim();
       const tradingName = String(payload?.trading_name ?? payload?.tradingName ?? "").trim();
       const registrationNumber = String(payload?.registration_number ?? payload?.registrationNumber ?? "").trim();
       const taxNumber = String(payload?.tax_number ?? payload?.taxNumber ?? "").trim();
