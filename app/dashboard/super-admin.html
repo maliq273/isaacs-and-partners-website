@@ -11,12 +11,17 @@
     <main class="dashboard-page">
         <header class="page-header">
             <div>
-                <p class="eyebrow">Isaacs and Partners</p>
+                <p class="eyebrow">Isaacs and Partners · Control Plane</p>
                 <h1 id="admin-greeting">Super Admin</h1>
-                <p class="page-description">Central administration, staff control, assignments and platform oversight.</p>
+                <p class="page-description">Central administration, source-of-truth data, permissions and provider synchronisation.</p>
             </div>
-            <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
+            <div class="page-actions">
+                <span class="control-plane-badge" id="admin-integration-provider-count">Checking providers…</span>
+                <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
+            </div>
         </header>
+
+        <div id="dashboard-data-error" class="login-message login-error" role="alert" hidden></div>
 
         <section class="stats-grid">
             <article class="stat-card"><span class="stat-label">Staff</span><strong id="admin-staff-count">0</strong></article>
@@ -25,27 +30,69 @@
             <article class="stat-card"><span class="stat-label">Open Matters</span><strong id="admin-open-matters">0</strong></article>
         </section>
 
+        <section class="control-plane-grid">
+            <article class="panel control-plane-hero">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Authoritative system</p>
+                        <h2>Super Admin Control Plane</h2>
+                        <p>Changes made here are written to Supabase first. Durable integration events then provide the synchronisation boundary for configured external providers.</p>
+                    </div>
+                </div>
+                <div class="control-plane-summary" id="admin-integration-summary">Loading control-plane status…</div>
+                <div class="quick-action-grid">
+                    <a class="quick-action-card" href="./staff-admin.html"><strong>Staff</strong><span>Create, edit, activate and control access</span></a>
+                    <a class="quick-action-card" href="./clients.html"><strong>Clients</strong><span>Manage individual and client records</span></a>
+                    <a class="quick-action-card" href="./matters.html"><strong>Matters</strong><span>Create, assign and progress matters</span></a>
+                    <a class="quick-action-card" href="./reports.html"><strong>Reports</strong><span>Operational and financial reporting</span></a>
+                </div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Live services</p>
+                        <h2>Provider Health</h2>
+                        <p>Provider credentials remain server-side. This view exposes health and synchronisation state only.</p>
+                    </div>
+                </div>
+                <div id="admin-integrations" class="integration-grid">
+                    <div class="empty-state">Loading provider health…</div>
+                </div>
+            </article>
+        </section>
+
         <section class="dashboard-grid">
             <article class="panel">
                 <div class="panel-header">
                     <div><h2>Staff Administration</h2><p>Create, edit, deactivate and assign staff members.</p></div>
                     <a class="panel-link" href="./staff-admin.html">Open Staff Administration</a>
                 </div>
-                <div class="activity-list"><div class="empty-state">Manage staff accounts, access and records.</div></div>
+                <div class="activity-list">
+                    <div class="empty-state">Staff records are read from the live Supabase staff table.</div>
+                </div>
             </article>
             <article class="panel">
                 <div class="panel-header">
-                    <div><h2>Pre-Quote Assignment</h2><p>Review approved pre-quotes and assign them to the correct person or business.</p></div>
+                    <div><h2>Assignment Queue</h2><p>Monitor open matters and active assignment coverage.</p></div>
                     <a class="panel-link" href="./matters.html">Open Matters</a>
                 </div>
-                <div class="activity-list"><div class="empty-state">Assignment queue will appear here when the quote workflow is connected.</div></div>
+                <div class="activity-list">
+                    <div class="empty-state">Assignment data is calculated from the live assignments table.</div>
+                </div>
             </article>
         </section>
 
         <section class="dashboard-grid">
             <article class="panel">
-                <div class="panel-header"><div><h2>Operations</h2><p>Manage clients, matters, reports and platform activity.</p></div></div>
-                <div class="activity-list">
+                <div class="panel-header"><div><h2>Integration Event Stream</h2><p>Durable events generated by changes to application data.</p></div></div>
+                <div id="admin-integration-events" class="integration-event-list">
+                    <div class="empty-state">Loading integration events…</div>
+                </div>
+            </article>
+            <article class="panel">
+                <div class="panel-header"><div><h2>Operations</h2><p>Open the operational areas controlled by Super Admin.</p></div></div>
+                <div class="activity-list admin-operation-links">
                     <a class="panel-link" href="./clients.html">Clients</a>
                     <a class="panel-link" href="./matters.html">Matters</a>
                     <a class="panel-link" href="./reports.html">Reports</a>
@@ -53,15 +100,18 @@
                     <a class="panel-link" href="./ai.html">AI Suite</a>
                 </div>
             </article>
-            <article class="panel">
-                <div class="panel-header"><div><h2>Security</h2><p>Administrative access is restricted to SUPER_ADMIN accounts.</p></div></div>
-                <div id="admin-security-status" class="activity-list"></div>
-            </article>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div><h2>Security</h2><p>Administrative access is restricted to SUPER_ADMIN accounts.</p></div>
+            </div>
+            <div id="admin-security-status" class="security-status"></div>
         </section>
     </main>
 
     <script type="module">
-        import dashboardPageController from "./DashboardPageController.js?v=20260825-4";
+        import dashboardPageController from "./DashboardPageController.js?v=20260826-1";
         await dashboardPageController.initialise();
     </script>
 </body>
