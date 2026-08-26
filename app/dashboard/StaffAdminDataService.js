@@ -89,7 +89,6 @@ class StaffAdminDataService {
             }
 
             return data;
-
         } finally {
             if (timer) {
                 clearTimeout(timer);
@@ -408,11 +407,9 @@ class StaffAdminDataService {
     }
 
     async setStatus(id, active) {
-    return this.updateStaff(id, {
-        is_active: Boolean(active)
-    });
-}
-    
+        return this.updateStaff(id, {
+            is_active: Boolean(active)
+        });
     }
 
     async deactivate(id) {
