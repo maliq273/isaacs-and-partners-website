@@ -3,12 +3,13 @@
  * Super Admin Dashboard Data Service
  *
  * Reads live administrative data from Supabase using the authenticated
- * user's JWT. The caller supplies the already-resolved SUPER_ADMIN role so
- * the dashboard does not perform a second role lookup during rendering.
+ * user's JWT. Supabase remains the source of truth; integration health is
+ * read from the durable control-plane registry/outbox.
  */
 
 import auth from "../auth/AuthService.js";
 import authConfig from "../auth/auth.config.js";
+import integrationData from "../integrations/IntegrationDataService.js";
 
 const TABLES = Object.freeze({
     staff: "staff",
@@ -126,7 +127,7 @@ class AdminDashboardDataService {
         }
 
         const user = auth.getCurrentUser();
-        const [staffResult, mattersResult, quotesResult, assignmentsResult] = await Promise.all([
+        const [staffResult, mattersResult, quotesResult, assignmentsResult, controlPlaneResult] = await Promise.all([
             this.requestWithFallback(
                 "staff",
                 "id,user_id,employee_number,department,job_title,is_active,created_at,updated_at",
@@ -134,17 +135,41 @@ class AdminDashboardDataService {
             ),
             this.requestWithFallback("matters", "id,status", "id"),
             this.requestWithFallback("quotes", "id,status", "id"),
-            this.requestWithFallback("assignments", "id,matter_id", "id")
+            this.requestWithFallback("assignments", "id,matter_id,case_id,quote_id,staff_id,status,assigned_at", "id"),
+            integrationData.getControlPlaneStatus().catch(error => ({
+                providers: [],
+                events: [],
+                summary: {
+                    providerCount: 0,
+                    connectedProviders: 0,
+                    configuredProviders: 0,
+                    pendingEvents: 0,
+                    processingEvents: 0,
+                    failedEvents: 0
+                },
+                warning: `Integration control plane unavailable: ${error.message}`
+            }))
         ]);
 
-        const warnings = [staffResult.warning, mattersResult.warning, quotesResult.warning, assignmentsResult.warning].filter(Boolean);
+        const warnings = [
+            staffResult.warning,
+            mattersResult.warning,
+            quotesResult.warning,
+            assignmentsResult.warning,
+            controlPlaneResult.warning
+        ].filter(Boolean);
+
         const staff = staffResult.data;
         const matters = mattersResult.data;
         const quotes = quotesResult.data;
         const assignments = assignmentsResult.data;
 
         const assignedMatterIds = new Set(
-            assignments.map(item => item?.matter_id).filter(Boolean).map(String)
+            assignments
+                .filter(item => String(item?.status || "ACTIVE").toUpperCase() === "ACTIVE")
+                .map(item => item?.matter_id)
+                .filter(Boolean)
+                .map(String)
         );
 
         const closedMatterStatuses = new Set(["closed", "completed", "cancelled", "archived"]);
@@ -178,6 +203,7 @@ class AdminDashboardDataService {
             assignments,
             unassignedMatters,
             pendingPreQuotes,
+            integrations: controlPlaneResult,
             warnings,
             connected: true
         };
