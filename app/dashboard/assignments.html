@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Assignments | Isaacs and Partners</title>
+<link rel="stylesheet" href="../css/app.css"><link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body data-page="assignments">
+<main class="dashboard-page">
+<header class="page-header"><div><p class="eyebrow">Isaacs and Partners · Control Plane</p><h1>Assignments</h1><p class="page-description">Assign live matters to active staff and manage the operational workload.</p></div><div class="page-actions"><a class="btn btn-secondary" href="./super-admin.html">← Super Admin</a><button class="btn btn-secondary" data-assignment-action="refresh">Refresh</button><button class="btn" data-auth-action="logout">Sign Out</button></div></header>
+<div id="assignment-message" class="login-message" hidden></div>
+<section class="stats-grid"><article class="stat-card"><span class="stat-label">Active Assignments</span><strong id="assignment-active">0</strong></article><article class="stat-card"><span class="stat-label">Completed</span><strong id="assignment-completed">0</strong></article><article class="stat-card"><span class="stat-label">Assigned Staff</span><strong id="assignment-staff">0</strong></article><article class="stat-card"><span class="stat-label">Unassigned Matters</span><strong id="assignment-unassigned">0</strong></article></section>
+<section class="panel"><div class="panel-header"><div><h2>Staff → Matter Assignment</h2><p>Only active staff accounts can receive new assignments.</p></div><button class="btn btn-primary" data-assignment-action="new">+ Assign Matter</button></div><div class="table-wrapper"><table><thead><tr><th>Matter</th><th>Staff</th><th>Department</th><th>Status</th><th>Assigned</th><th>Actions</th></tr></thead><tbody id="assignments-table"><tr><td colspan="6">Loading assignments...</td></tr></tbody></table></div></section>
+</main><div id="assignment-modal" class="modal-host" hidden></div>
+<script type="module">import controller from "./AssignmentController.js?v=20260827-2"; await controller.initialise();</script>
+</body></html>
