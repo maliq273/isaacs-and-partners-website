@@ -1,123 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-ZA">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex,nofollow">
   <title>Matters | Isaacs and Partners</title>
   <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
 </head>
-
 <body data-page="matters-dashboard">
-  <div id="app-shell"></div>
-
   <main class="dashboard-page">
     <header class="page-header">
       <div>
-        <p class="eyebrow">Matter Management</p>
+        <p class="eyebrow">Isaacs and Partners · Control Plane</p>
         <h1>Matters</h1>
-        <p class="page-description">
-          Monitor every active and completed client matter.
-        </p>
+        <p class="page-description">Create, open, update and monitor client matters from the live Supabase source of truth.</p>
       </div>
-
       <div class="page-actions">
-        <button type="button" class="btn btn-secondary" id="export-matters">
-          Export
-        </button>
-
-        <button type="button" class="btn btn-primary" id="create-matter">
-          New Matter
-        </button>
+        <button type="button" class="btn btn-secondary" data-matter-action="refresh">Refresh</button>
+        <button type="button" class="btn btn-primary" data-matter-action="new">+ New Matter</button>
+        <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
       </div>
     </header>
-
+    <div id="matter-message" class="login-message" role="status" hidden></div>
     <section class="stats-grid">
-      <article class="stat-card">
-        <span class="stat-label">Total Matters</span>
-        <strong id="total-matters">0</strong>
-      </article>
-
-      <article class="stat-card">
-        <span class="stat-label">Open</span>
-        <strong id="open-matters">0</strong>
-      </article>
-
-      <article class="stat-card">
-        <span class="stat-label">High Priority</span>
-        <strong id="high-priority-matters">0</strong>
-      </article>
-
-      <article class="stat-card">
-        <span class="stat-label">Overdue Tasks</span>
-        <strong id="overdue-matter-tasks">0</strong>
-      </article>
+      <article class="stat-card"><span class="stat-label">Total Matters</span><strong id="total-matters">0</strong></article>
+      <article class="stat-card"><span class="stat-label">Open</span><strong id="open-matters">0</strong></article>
+      <article class="stat-card"><span class="stat-label">High Priority</span><strong id="high-priority-matters">0</strong></article>
+      <article class="stat-card"><span class="stat-label">Overdue Tasks</span><strong id="overdue-matter-tasks">0</strong></article>
     </section>
-
     <section class="panel">
       <div class="panel-toolbar">
-        <input
-          id="matter-search"
-          type="search"
-          class="form-control"
-          placeholder="Search matter reference, client or title..."
-          autocomplete="off"
-        >
-
-        <select id="matter-department-filter" class="form-control">
-          <option value="">All departments</option>
-          <option value="immigration">Immigration</option>
-          <option value="hr-ir">HR & Industrial Relations</option>
-          <option value="business-compliance">Business Compliance</option>
-          <option value="legal">Legal Services</option>
-        </select>
-
-        <select id="matter-status-filter" class="form-control">
-          <option value="">All statuses</option>
-          <option value="open">Open</option>
-          <option value="active">Active</option>
-          <option value="pending">Pending</option>
-          <option value="closed">Closed</option>
-          <option value="completed">Completed</option>
-        </select>
-
-        <select id="matter-priority-filter" class="form-control">
-          <option value="">All priorities</option>
-          <option value="low">Low</option>
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
-        </select>
+        <input id="matter-search" type="search" class="form-control" placeholder="Search matter reference, title or description..." autocomplete="off">
+        <select id="matter-status-filter" class="form-control"><option value="">All statuses</option><option value="new">New</option><option value="open">Open</option><option value="active">Active</option><option value="pending">Pending</option><option value="closed">Closed</option><option value="completed">Completed</option></select>
+        <select id="matter-priority-filter" class="form-control"><option value="">All priorities</option><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select>
       </div>
-
       <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Reference</th>
-              <th>Client</th>
-              <th>Title</th>
-              <th>Department</th>
-              <th>Stage</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Assigned To</th>
-              <th>Updated</th>
-            </tr>
-          </thead>
-
-          <tbody id="matters-table">
-            <tr>
-              <td colspan="9">Loading matters...</td>
-            </tr>
-          </tbody>
-        </table>
+        <table><thead><tr><th>Reference</th><th>Client</th><th>Title</th><th>Status</th><th>Priority</th><th>Created</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="matters-table"><tr><td colspan="8">Loading matters...</td></tr></tbody></table>
       </div>
-
-      <div class="pagination" id="matters-pagination"></div>
     </section>
   </main>
-
-  <script type="module" src="../js/app.js"></script>
+  <div id="matter-modal" class="modal-host" hidden></div>
+  <script type="module">import matterController from "./MatterController.js?v=20260827-1"; await matterController.initialise();</script>
 </body>
 </html>
