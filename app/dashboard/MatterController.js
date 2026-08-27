@@ -4,34 +4,309 @@ import navigation from "../core/navigation.js";
 import matterData from "./MatterDataService.js";
 import { resolveUserDashboardRole } from "./DashboardAccess.js";
 
-const esc=v=>String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#039;");
+const esc = v => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
 
-class MatterController{
- constructor(){this.matters=[];this.individuals=[];this.businesses=[];this.role=null;this.permissions={};this.bound=false;this.onClick=this.onClick.bind(this);this.onSubmit=this.onSubmit.bind(this);this.onInput=this.onInput.bind(this);}
- async initialise(){await auth.initialise();if(!auth.isAuthenticated()){navigation.toLogin(location.pathname,{replace:true});return;}this.role=await resolveUserDashboardRole(auth.getCurrentUser());if(!["SUPER_ADMIN","STAFF"].includes(this.role)){navigation.toRoleDashboard(this.role,{replace:true});return;}if(this.role==="STAFF"){const keys=["view_matters","create_matters","edit_matters"];const values=await Promise.all(keys.map(k=>this.permission(k)));this.permissions=Object.fromEntries(keys.map((k,i)=>[k,values[i]]));if(!this.permissions.view_matters){this.message("You do not have permission to view matters.","error");return;}}else this.permissions={view_matters:true,create_matters:true,edit_matters:true};this.bind();await this.load();}
- token(){const t=auth.getToken();if(!t)throw new Error("Your session has expired. Please sign in again.");return t;}
- async request(path,options={}){const r=await fetch(`${authConfig.supabase.url}/rest/v1/${path}`,{...options,headers:{Accept:"application/json",apikey:authConfig.supabase.publishableKey,Authorization:`Bearer ${this.token()}`,"Content-Type":"application/json",Prefer:"return=representation",...(options.headers||{})}});const raw=await r.text();let d=[];try{d=raw?JSON.parse(raw):[];}catch{d=raw;}if(!r.ok)throw new Error(d?.message||d?.hint||d?.details||`Matter request failed (${r.status}).`);return d;}
- async rpc(name,payload){const r=await fetch(`${authConfig.supabase.url}/rest/v1/rpc/${name}`,{method:"POST",headers:{Accept:"application/json",apikey:authConfig.supabase.publishableKey,Authorization:`Bearer ${this.token()}`,"Content-Type":"application/json"},body:JSON.stringify(payload)});const raw=await r.text();let d=null;try{d=raw?JSON.parse(raw):null;}catch{}if(!r.ok)throw new Error(d?.message||`Permission request failed (${r.status}).`);return d;}
- async permission(key){if(this.role==="SUPER_ADMIN")return true;try{return Boolean(await this.rpc("has_staff_permission",{p_permission_key:key}));}catch{return false;}}
- async load(){this.setBusy(true);try{const data=await matterData.list();this.matters=Array.isArray(data)?data:[];this.render();}catch(error){console.error("[MatterController] load failed",error);this.message(error.message||"Matter data could not be loaded.","error");}finally{this.setBusy(false);}}
- async loadClients(){const [i,b]=await Promise.all([this.request("profiles?role=eq.INDIVIDUAL&is_active=eq.true&select=id,first_name,last_name,email&order=first_name"),this.request("businesses?is_active=eq.true&select=id,legal_name,trading_name,email&order=legal_name")]);this.individuals=Array.isArray(i)?i:[];this.businesses=Array.isArray(b)?b:[];}
- bind(){if(this.bound)return;this.bound=true;document.addEventListener("click",this.onClick);document.addEventListener("submit",this.onSubmit);document.addEventListener("input",this.onInput);document.querySelector("[data-auth-action='logout']")?.addEventListener("click",async e=>{e.preventDefault();await auth.logout({remote:true,reason:"user"});navigation.toLogin(null,{replace:true});});}
- onInput(){this.renderTable();}
- onClick(e){const b=e.target.closest("[data-matter-action]");if(!b)return;const a=b.dataset.matterAction;if(a==="new")return this.openCreate();if(a==="view")return this.openView(b.dataset.id);if(a==="edit")return this.openEdit(b.dataset.id);if(a==="close")return this.closeModal();if(a==="refresh")return this.load();}
- async openCreate(){if(!this.permissions.create_matters){this.message("You do not have permission to create matters.","error");return;}try{await this.loadClients();this.openModal(this.form("create",{}));}catch(e){this.message(e.message,"error");}}
- async openEdit(id){if(!this.permissions.edit_matters){this.message("You do not have permission to edit matters.","error");return;}try{const r=await matterData.get(id);if(!r)throw new Error("Matter could not be found.");await this.loadClients();this.openModal(this.form("edit",r));}catch(e){this.message(e.message,"error");}}
- async openView(id){try{const r=await matterData.get(id);if(!r)throw new Error("Matter could not be found.");this.openModal(`<div class="modal-backdrop" data-matter-action="close"></div><section class="modal-card" role="dialog" aria-modal="true"><div class="modal-header"><div><p class="eyebrow">Live Supabase Matter</p><h2>${esc(r.reference_number||r.title||"Matter")}</h2></div><button class="icon-button" type="button" data-matter-action="close">×</button></div><div class="detail-grid"><div><span>Title</span><strong>${esc(r.title)}</strong></div><div><span>Status</span><strong>${esc(r.status)}</strong></div><div><span>Priority</span><strong>${esc(r.priority)}</strong></div><div><span>Reference</span><strong>${esc(r.reference_number||"—")}</strong></div><div class="detail-wide"><span>Description</span><p>${esc(r.description||"No description provided.")}</p></div></div><div class="modal-footer"><button class="btn btn-secondary" type="button" data-matter-action="close">Close</button>${this.permissions.edit_matters?`<button class="btn btn-primary" type="button" data-matter-action="edit" data-id="${esc(r.id)}">Edit Matter</button>`:""}</div></section>`);}catch(e){this.message(e.message,"error");}}
- form(action,r){const edit=action==="edit",io=this.individuals.map(x=>`<option value="${x.id}" ${r.individual_user_id===x.id?"selected":""}>${esc(`${x.first_name||""} ${x.last_name||""}`.trim()||x.email)} — ${esc(x.email||"")}</option>`).join(""),bo=this.businesses.map(x=>`<option value="${x.id}" ${r.business_id===x.id?"selected":""}>${esc(x.trading_name||x.legal_name)} — ${esc(x.email||"")}</option>`).join("");return `<div class="modal-backdrop" data-matter-action="close"></div><section class="modal-card" role="dialog" aria-modal="true"><div class="modal-header"><div><p class="eyebrow">${this.role} · Live Supabase</p><h2>${edit?"Edit":"Create"} Matter</h2></div><button class="icon-button" type="button" data-matter-action="close">×</button></div><form id="matter-form" data-action="${action}" data-id="${esc(r.id||"")}"><div class="form-grid"><label>Title<input name="title" required maxlength="200" value="${esc(r.title||"")}"></label><label>Reference number<input name="reference_number" maxlength="100" value="${esc(r.reference_number||"")}"></label><label>Individual client<select name="individual_user_id"><option value="">Not linked</option>${io}</select></label><label>Business client<select name="business_id"><option value="">Not linked</option>${bo}</select></label><label>Status<select name="status"><option value="">${edit?"Keep current":"Database default"}</option><option value="NEW">New</option><option value="OPEN">Open</option><option value="ACTIVE">Active</option><option value="PENDING">Pending</option><option value="CLOSED">Closed</option><option value="COMPLETED">Completed</option></select></label><label>Priority<select name="priority"><option value="LOW">Low</option><option value="NORMAL" selected>Normal</option><option value="HIGH">High</option><option value="URGENT">Urgent</option></select></label><label class="form-wide">Description<textarea name="description" rows="5" maxlength="5000">${esc(r.description||"")}</textarea></label></div><div class="modal-footer"><button class="btn btn-secondary" type="button" data-matter-action="close">Cancel</button><button class="btn btn-primary" type="submit">${edit?"Save Changes":"Create Matter"}</button></div></form></section>`;}
- async onSubmit(e){if(e.target.id!=="matter-form")return;e.preventDefault();const f=e.target,raw=Object.fromEntries(new FormData(f).entries()),p={title:String(raw.title||"").trim(),reference_number:String(raw.reference_number||"").trim()||null,individual_user_id:raw.individual_user_id||null,business_id:raw.business_id||null,description:String(raw.description||"").trim()||null,priority:raw.priority||"NORMAL"};if(raw.status)p.status=raw.status;if(!p.title){this.message("Matter title is required.","error");return;}try{this.setBusy(true);if(f.dataset.action==="create"){p.created_by=auth.getCurrentUser().id;await matterData.create(p);this.message("Matter created successfully.","success");}else{await matterData.update(f.dataset.id,p);this.message("Matter updated successfully.","success");}this.closeModal();await this.load();}catch(error){this.message(error.message||"Matter could not be saved.","error");}finally{this.setBusy(false);}}
- render(){this.set("#total-matters",this.matters.length);this.set("#open-matters",this.matters.filter(x=>!["CLOSED","COMPLETED","CANCELLED","ARCHIVED"].includes(String(x.status||"").toUpperCase())).length);this.set("#high-priority-matters",this.matters.filter(x=>["HIGH","URGENT"].includes(String(x.priority||"").toUpperCase())).length);this.set("#overdue-matter-tasks",0);this.renderTable();}
- renderTable(){const t=document.querySelector("#matters-table");if(!t)return;const q=String(document.querySelector("#matter-search")?.value||"").toLowerCase(),s=String(document.querySelector("#matter-status-filter")?.value||"").toLowerCase(),p=String(document.querySelector("#matter-priority-filter")?.value||"").toLowerCase();const rows=this.matters.filter(x=>`${x.reference_number||""} ${x.title||""} ${x.description||""}`.toLowerCase().includes(q)).filter(x=>!s||String(x.status||"").toLowerCase()===s).filter(x=>!p||String(x.priority||"").toLowerCase()===p);t.innerHTML=rows.length?rows.map(x=>`<tr><td><strong>${esc(x.reference_number||"—")}</strong></td><td>${esc(x.individual_user_id?"Individual":x.business_id?"Business":"Unlinked")}</td><td>${esc(x.title)}</td><td>${esc(x.status||"NEW")}</td><td>${esc(x.priority||"NORMAL")}</td><td>${this.date(x.created_at)}</td><td>${this.date(x.updated_at)}</td><td class="row-actions"><button class="btn btn-small" data-matter-action="view" data-id="${esc(x.id)}">Open</button>${this.permissions.edit_matters?`<button class="btn btn-small btn-secondary" data-matter-action="edit" data-id="${esc(x.id)}">Edit</button>`:""}</td></tr>`).join(""):`<tr><td colspan="8" class="empty-state">No matters found under the current filters or permission scope.</td></tr>`;}
- openModal(h){const x=document.querySelector("#matter-modal");if(x){x.innerHTML=h;x.hidden=false;x.querySelector("input,select,textarea")?.focus();}}
- closeModal(){const x=document.querySelector("#matter-modal");if(x){x.hidden=true;x.innerHTML="";}}
- deny(m){this.message(m,"error");}
- message(m,type){const x=document.querySelector("#matter-message");if(x){x.hidden=false;x.className=`login-message ${type==="error"?"login-error":"login-success"}`;x.textContent=m;}}
- set(s,v){const x=document.querySelector(s);if(x)x.textContent=String(v);}
- date(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":new Intl.DateTimeFormat("en-ZA",{dateStyle:"medium",timeStyle:"short"}).format(d);}
- setBusy(v){document.body.classList.toggle("is-busy",Boolean(v));}
+const MATTER_STATUS_OPTIONS = [
+    ["NEW", "New"],
+    ["PENDING", "Pending"],
+    ["IN_PROGRESS", "In progress"],
+    ["ON_HOLD", "On hold"],
+    ["COMPLETED", "Completed"],
+    ["APPROVED", "Approved"],
+    ["REJECTED", "Rejected"],
+    ["CANCELLED", "Cancelled"],
+    ["EXPIRED", "Expired"],
+    ["ARCHIVED", "Archived"]
+];
+
+class MatterController {
+    constructor() {
+        this.matters = [];
+        this.individuals = [];
+        this.businesses = [];
+        this.role = null;
+        this.permissions = {};
+        this.bound = false;
+        this.onClick = this.onClick.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
+        this.onInput = this.onInput.bind(this);
+    }
+
+    async initialise() {
+        await auth.initialise();
+        if (!auth.isAuthenticated()) {
+            navigation.toLogin(location.pathname, { replace: true });
+            return;
+        }
+
+        this.role = await resolveUserDashboardRole(auth.getCurrentUser());
+        if (!["SUPER_ADMIN", "STAFF"].includes(this.role)) {
+            navigation.toRoleDashboard(this.role, { replace: true });
+            return;
+        }
+
+        if (this.role === "STAFF") {
+            const keys = ["view_matters", "create_matters", "edit_matters"];
+            const values = await Promise.all(keys.map(k => this.permission(k)));
+            this.permissions = Object.fromEntries(keys.map((k, i) => [k, values[i]]));
+            if (!this.permissions.view_matters) {
+                this.message("You do not have permission to view matters.", "error");
+                return;
+            }
+        } else {
+            this.permissions = { view_matters: true, create_matters: true, edit_matters: true };
+        }
+
+        this.bind();
+        await this.load();
+    }
+
+    token() {
+        const t = auth.getToken();
+        if (!t) throw new Error("Your session has expired. Please sign in again.");
+        return t;
+    }
+
+    async request(path, options = {}) {
+        const r = await fetch(`${authConfig.supabase.url}/rest/v1/${path}`, {
+            ...options,
+            headers: {
+                Accept: "application/json",
+                apikey: authConfig.supabase.publishableKey,
+                Authorization: `Bearer ${this.token()}`,
+                "Content-Type": "application/json",
+                ...(options.headers || {})
+            }
+        });
+        const raw = await r.text();
+        let d = [];
+        try { d = raw ? JSON.parse(raw) : []; } catch { d = raw; }
+        if (!r.ok) throw new Error(d?.message || d?.hint || d?.details || `Matter request failed (${r.status}).`);
+        return d;
+    }
+
+    async rpc(name, payload) {
+        const r = await fetch(`${authConfig.supabase.url}/rest/v1/rpc/${name}`, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                apikey: authConfig.supabase.publishableKey,
+                Authorization: `Bearer ${this.token()}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+        const raw = await r.text();
+        let d = null;
+        try { d = raw ? JSON.parse(raw) : null; } catch { d = raw; }
+        if (!r.ok) throw new Error(d?.message || d?.hint || d?.details || `Permission request failed (${r.status}).`);
+        return d;
+    }
+
+    async permission(key) {
+        if (this.role === "SUPER_ADMIN") return true;
+        try {
+            return Boolean(await this.rpc("has_staff_permission", { p_permission_key: key }));
+        } catch {
+            return false;
+        }
+    }
+
+    async load() {
+        this.setBusy(true);
+        try {
+            const data = await matterData.list();
+            this.matters = Array.isArray(data) ? data : [];
+            this.render();
+        } catch (error) {
+            console.error("[MatterController] load failed", error);
+            this.message(error.message || "Matter data could not be loaded.", "error");
+        } finally {
+            this.setBusy(false);
+        }
+    }
+
+    async loadClients() {
+        const [i, b] = await Promise.all([
+            this.request("profiles?role=eq.INDIVIDUAL&is_active=eq.true&select=id,first_name,last_name,email&order=first_name"),
+            this.request("businesses?is_active=eq.true&select=id,legal_name,trading_name,email&order=legal_name")
+        ]);
+        this.individuals = Array.isArray(i) ? i : [];
+        this.businesses = Array.isArray(b) ? b : [];
+    }
+
+    bind() {
+        if (this.bound) return;
+        this.bound = true;
+        document.addEventListener("click", this.onClick);
+        document.addEventListener("submit", this.onSubmit);
+        document.addEventListener("input", this.onInput);
+        document.querySelector("[data-auth-action='logout']")?.addEventListener("click", async e => {
+            e.preventDefault();
+            await auth.logout({ remote: true, reason: "user" });
+            navigation.toLogin(null, { replace: true });
+        });
+    }
+
+    onInput() { this.renderTable(); }
+
+    onClick(e) {
+        const b = e.target.closest("[data-matter-action]");
+        if (!b) return;
+        const a = b.dataset.matterAction;
+        if (a === "new") return this.openCreate();
+        if (a === "view") return this.openView(b.dataset.id);
+        if (a === "edit") return this.openEdit(b.dataset.id);
+        if (a === "close") return this.closeModal();
+        if (a === "refresh") return this.load();
+    }
+
+    async openCreate() {
+        if (!this.permissions.create_matters) {
+            this.message("You do not have permission to create matters.", "error");
+            return;
+        }
+        try {
+            await this.loadClients();
+            this.openModal(this.form("create", {}));
+        } catch (e) {
+            this.message(e.message, "error");
+        }
+    }
+
+    async openEdit(id) {
+        if (!this.permissions.edit_matters) {
+            this.message("You do not have permission to edit matters.", "error");
+            return;
+        }
+        try {
+            const r = await matterData.get(id);
+            if (!r) throw new Error("Matter could not be found.");
+            await this.loadClients();
+            this.openModal(this.form("edit", r));
+        } catch (e) {
+            this.message(e.message, "error");
+        }
+    }
+
+    async openView(id) {
+        try {
+            const r = await matterData.get(id);
+            if (!r) throw new Error("Matter could not be found.");
+            this.openModal(`<div class="modal-backdrop" data-matter-action="close"></div><section class="modal-card" role="dialog" aria-modal="true"><div class="modal-header"><div><p class="eyebrow">Live Supabase Matter</p><h2>${esc(r.reference_number || r.title || "Matter")}</h2></div><button class="icon-button" type="button" data-matter-action="close">×</button></div><div class="detail-grid"><div><span>Title</span><strong>${esc(r.title)}</strong></div><div><span>Status</span><strong>${esc(r.status)}</strong></div><div><span>Priority</span><strong>${esc(r.priority)}</strong></div><div><span>Reference</span><strong>${esc(r.reference_number || "—")}</strong></div><div class="detail-wide"><span>Description</span><p>${esc(r.description || "No description provided.")}</p></div></div><div class="modal-footer"><button class="btn btn-secondary" type="button" data-matter-action="close">Close</button>${this.permissions.edit_matters ? `<button class="btn btn-primary" type="button" data-matter-action="edit" data-id="${esc(r.id)}">Edit Matter</button>` : ""}</div></section>`);
+        } catch (e) {
+            this.message(e.message, "error");
+        }
+    }
+
+    statusOptions(current = "") {
+        const currentValue = String(current || "").toUpperCase();
+        return `<option value="">${currentValue ? "Keep current" : "Database default"}</option>${MATTER_STATUS_OPTIONS.map(([value, label]) => `<option value="${value}" ${currentValue === value ? "selected" : ""}>${label}</option>`).join("")}`;
+    }
+
+    form(action, r) {
+        const edit = action === "edit";
+        const io = this.individuals.map(x => `<option value="${x.id}" ${r.individual_user_id === x.id ? "selected" : ""}>${esc(`${x.first_name || ""} ${x.last_name || ""}`.trim() || x.email)} — ${esc(x.email || "")}</option>`).join("");
+        const bo = this.businesses.map(x => `<option value="${x.id}" ${r.business_id === x.id ? "selected" : ""}>${esc(x.trading_name || x.legal_name)} — ${esc(x.email || "")}</option>`).join("");
+        const priority = String(r.priority || "NORMAL").toUpperCase();
+        return `<div class="modal-backdrop" data-matter-action="close"></div><section class="modal-card" role="dialog" aria-modal="true"><div class="modal-header"><div><p class="eyebrow">${this.role} · Live Supabase</p><h2>${edit ? "Edit" : "Create"} Matter</h2></div><button class="icon-button" type="button" data-matter-action="close">×</button></div><form id="matter-form" data-action="${action}" data-id="${esc(r.id || "")}"><div class="form-grid"><label>Title<input name="title" required maxlength="200" value="${esc(r.title || "")}"></label><label>Reference number<input name="reference_number" maxlength="100" value="${esc(r.reference_number || "")}"></label><label>Individual client<select name="individual_user_id"><option value="">Not linked</option>${io}</select></label><label>Business client<select name="business_id"><option value="">Not linked</option>${bo}</select></label><label>Status<select name="status">${this.statusOptions(r.status)}</select></label><label>Priority<select name="priority"><option value="LOW" ${priority === "LOW" ? "selected" : ""}>Low</option><option value="NORMAL" ${priority === "NORMAL" ? "selected" : ""}>Normal</option><option value="HIGH" ${priority === "HIGH" ? "selected" : ""}>High</option><option value="URGENT" ${priority === "URGENT" ? "selected" : ""}>Urgent</option></select></label><label class="form-wide">Description<textarea name="description" rows="5" maxlength="5000">${esc(r.description || "")}</textarea></label></div><div class="modal-footer"><button class="btn btn-secondary" type="button" data-matter-action="close">Cancel</button><button class="btn btn-primary" type="submit">${edit ? "Save Changes" : "Create Matter"}</button></div></form></section>`;
+    }
+
+    async onSubmit(e) {
+        if (e.target.id !== "matter-form") return;
+        e.preventDefault();
+        const f = e.target;
+        const raw = Object.fromEntries(new FormData(f).entries());
+        const p = {
+            title: String(raw.title || "").trim(),
+            reference_number: String(raw.reference_number || "").trim() || null,
+            individual_user_id: raw.individual_user_id || null,
+            business_id: raw.business_id || null,
+            description: String(raw.description || "").trim() || null,
+            priority: raw.priority || "NORMAL"
+        };
+        if (raw.status) p.status = raw.status;
+        if (!p.title) {
+            this.message("Matter title is required.", "error");
+            return;
+        }
+
+        try {
+            this.setBusy(true);
+            if (f.dataset.action === "create") {
+                const user = auth.getCurrentUser();
+                if (!user?.id) throw new Error("Authenticated user could not be identified.");
+                p.created_by = user.id;
+                await matterData.create(p);
+                this.message("Matter created successfully.", "success");
+            } else {
+                await matterData.update(f.dataset.id, p);
+                this.message("Matter updated successfully.", "success");
+            }
+            this.closeModal();
+            await this.load();
+        } catch (error) {
+            console.error("[MatterController] save failed", error);
+            this.message(error.message || "Matter could not be saved.", "error");
+        } finally {
+            this.setBusy(false);
+        }
+    }
+
+    render() {
+        this.set("#total-matters", this.matters.length);
+        this.set("#open-matters", this.matters.filter(x => !["COMPLETED", "CANCELLED", "ARCHIVED", "DELETED"].includes(String(x.status || "").toUpperCase())).length);
+        this.set("#high-priority-matters", this.matters.filter(x => ["HIGH", "URGENT"].includes(String(x.priority || "").toUpperCase())).length);
+        this.set("#overdue-matter-tasks", 0);
+        this.renderTable();
+    }
+
+    renderTable() {
+        const t = document.querySelector("#matters-table");
+        if (!t) return;
+        const q = String(document.querySelector("#matter-search")?.value || "").toLowerCase();
+        const s = String(document.querySelector("#matter-status-filter")?.value || "").toLowerCase();
+        const p = String(document.querySelector("#matter-priority-filter")?.value || "").toLowerCase();
+        const rows = this.matters
+            .filter(x => `${x.reference_number || ""} ${x.title || ""} ${x.description || ""}`.toLowerCase().includes(q))
+            .filter(x => !s || String(x.status || "").toLowerCase() === s)
+            .filter(x => !p || String(x.priority || "").toLowerCase() === p);
+        t.innerHTML = rows.length ? rows.map(x => `<tr><td><strong>${esc(x.reference_number || "—")}</strong></td><td>${esc(x.individual_user_id ? "Individual" : x.business_id ? "Business" : "Unlinked")}</td><td>${esc(x.title)}</td><td>${esc(x.status || "NEW")}</td><td>${esc(x.priority || "NORMAL")}</td><td>${this.date(x.created_at)}</td><td>${this.date(x.updated_at)}</td><td class="row-actions"><button class="btn btn-small" data-matter-action="view" data-id="${esc(x.id)}">Open</button>${this.permissions.edit_matters ? `<button class="btn btn-small btn-secondary" data-matter-action="edit" data-id="${esc(x.id)}">Edit</button>` : ""}</td></tr>`).join("") : `<tr><td colspan="8" class="empty-state">No matters found under the current filters or permission scope.</td></tr>`;
+    }
+
+    openModal(h) {
+        const x = document.querySelector("#matter-modal");
+        if (x) {
+            x.innerHTML = h;
+            x.hidden = false;
+            x.querySelector("input,select,textarea")?.focus();
+        }
+    }
+
+    closeModal() {
+        const x = document.querySelector("#matter-modal");
+        if (x) { x.hidden = true; x.innerHTML = ""; }
+    }
+
+    message(m, type) {
+        const x = document.querySelector("#matter-message");
+        if (x) {
+            x.hidden = false;
+            x.className = `login-message ${type === "error" ? "login-error" : "login-success"}`;
+            x.textContent = m;
+        }
+    }
+
+    set(s, v) { const x = document.querySelector(s); if (x) x.textContent = String(v); }
+
+    date(v) {
+        if (!v) return "—";
+        const d = new Date(v);
+        return Number.isNaN(d.getTime()) ? "—" : new Intl.DateTimeFormat("en-ZA", { dateStyle: "medium", timeStyle: "short" }).format(d);
+    }
+
+    setBusy(v) { document.body.classList.toggle("is-busy", Boolean(v)); }
 }
-export const matterController=new MatterController();
+
+export const matterController = new MatterController();
 export default matterController;
