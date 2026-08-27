@@ -15,7 +15,7 @@ class MatterDataService {
                 apikey: authConfig.supabase.publishableKey,
                 Authorization: `Bearer ${this.token()}`,
                 "Content-Type": "application/json",
-                Prefer: options.method === "POST" ? "return=representation" : "return=representation",
+                Prefer: "return=representation",
                 ...(options.headers || {})
             }
         });
