@@ -15,20 +15,43 @@ const MATTER_FIELDS = [
     "updated_at"
 ].join(",");
 
+// The live application uses matter_status rather than a generic status string.
+// Keep UI writes limited to values already represented by the application's
+// shared Status contract. Creation deliberately relies on the database default.
+const MATTER_STATUSES = new Set([
+    "ACTIVE",
+    "INACTIVE",
+    "NEW",
+    "PENDING",
+    "IN_PROGRESS",
+    "ON_HOLD",
+    "COMPLETED",
+    "APPROVED",
+    "REJECTED",
+    "CANCELLED",
+    "EXPIRED",
+    "ARCHIVED",
+    "DELETED",
+    "FAILED",
+    "ERROR"
+]);
+
 class MatterDataService {
-    token() {
+    async token() {
+        await auth.initialise();
         const token = auth.getToken?.();
         if (!token) throw new Error("Your session has expired. Please sign in again.");
         return token;
     }
 
     async rest(path, options = {}) {
+        const token = await this.token();
         const response = await fetch(`${authConfig.supabase.url}/rest/v1/${path}`, {
             ...options,
             headers: {
                 Accept: "application/json",
                 apikey: authConfig.supabase.publishableKey,
-                Authorization: `Bearer ${this.token()}`,
+                Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
                 ...(options.headers || {})
             }
@@ -55,7 +78,9 @@ class MatterDataService {
     }
 
     async list() {
-        return this.rest(`matters?select=${encodeURIComponent(MATTER_FIELDS)}&order=updated_at.desc`);
+        return this.rest(
+            `matters?select=${encodeURIComponent(MATTER_FIELDS)}&order=updated_at.desc`
+        );
     }
 
     async get(id) {
@@ -66,7 +91,7 @@ class MatterDataService {
         return Array.isArray(rows) ? rows[0] || null : null;
     }
 
-    normalisePayload(payload = {}) {
+    normalisePayload(payload = {}, { forCreate = false } = {}) {
         const source = payload && typeof payload === "object" ? payload : {};
         const result = {};
 
@@ -86,22 +111,36 @@ class MatterDataService {
         result.title = String(result.title ?? "").trim();
         if (!result.title) throw new Error("Matter title is required.");
 
+        for (const key of ["individual_user_id", "business_id"]) {
+            if (result[key] === "") result[key] = null;
+            if (result[key] !== null && result[key] !== undefined && typeof result[key] !== "string") {
+                throw new Error(`${key} must be a valid UUID.`);
+            }
+        }
+
         if (result.reference_number === "") result.reference_number = null;
         if (result.description === "") result.description = null;
-        if (result.individual_user_id === "") result.individual_user_id = null;
-        if (result.business_id === "") result.business_id = null;
         if (result.priority === "") delete result.priority;
-        if (result.status === "") delete result.status;
         if (!result.priority) result.priority = "NORMAL";
 
-        // Do not send mutually empty client identifiers as undefined values.
-        // PostgREST handles explicit NULLs correctly against the nullable
-        // matter ownership columns.
+        // Never send a UI status during creation. The live database owns the
+        // initial matter_status default and this prevents invalid enum values
+        // such as OPEN from reaching PostgREST.
+        if (forCreate) {
+            delete result.status;
+        } else if (result.status !== undefined) {
+            const status = String(result.status).trim().toUpperCase();
+            if (!MATTER_STATUSES.has(status)) {
+                throw new Error(`Unsupported matter status: ${status}.`);
+            }
+            result.status = status;
+        }
+
         return result;
     }
 
     async create(payload) {
-        const data = this.normalisePayload(payload);
+        const data = this.normalisePayload(payload, { forCreate: true });
         return this.rest("matters", {
             method: "POST",
             headers: { Prefer: "return=representation" },
