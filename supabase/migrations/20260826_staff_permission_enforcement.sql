@@ -1,8 +1,31 @@
 -- Isaacs & Partners
 -- Staff permission enforcement foundation.
--- Compatibility repair: remove the obsolete two-argument overload before any
--- one-argument has_staff_permission(text) call is parsed.
-drop function if exists public.has_staff_permission(text, text);
+--
+-- This migration is intentionally self-contained. Some remote databases may
+-- contain legacy overloaded has_staff_permission functions whose default
+-- arguments make one-argument calls ambiguous. Remove every legacy overload
+-- before creating the canonical one-argument API.
+
+do $$
+declare
+    fn record;
+begin
+    for fn in
+        select p.oid,
+               pg_get_function_identity_arguments(p.oid) as identity_args
+        from pg_proc p
+        join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public'
+          and p.proname = 'has_staff_permission'
+          and pg_get_function_identity_arguments(p.oid) <> 'text'
+    loop
+        execute format(
+            'drop function public.has_staff_permission(%s)',
+            fn.identity_args
+        );
+    end loop;
+end
+$$;
 
 create or replace function public.staff_permission_scope(p_permission_key text)
 returns text language sql security definer set search_path = public stable
@@ -39,31 +62,31 @@ as $$ select public.is_super_admin() or public.staff_permission_scope(p_permissi
 
 -- Replace staff-sensitive policies while preserving direct client/business ownership.
 drop policy if exists matters_select_owner_staff_admin on public.matters;
-create policy matters_select_owner_staff_admin on public.matters for select to authenticated using (public.is_super_admin() or individual_user_id=auth.uid() or business_id in (select b.id from public.businesses b where b.owner_user_id=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('view_matters') and public.staff_can_access_matter(id,'view_matters')));
+create policy matters_select_owner_staff_admin on public.matters for select to authenticated using (public.is_super_admin() or individual_user_id=auth.uid() or business_id in (select b.id from public.businesses b where b.owner_user_id=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('view_matters'::text) and public.staff_can_access_matter(id,'view_matters'::text)));
 
 drop policy if exists matters_admin_update on public.matters;
-create policy matters_admin_update on public.matters for update to authenticated using (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_matters') and public.staff_can_access_matter(id,'edit_matters'))) with check (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_matters') and public.staff_can_access_matter(id,'edit_matters')));
+create policy matters_admin_update on public.matters for update to authenticated using (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_matters'::text) and public.staff_can_access_matter(id,'edit_matters'::text))) with check (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_matters'::text) and public.staff_can_access_matter(id,'edit_matters'::text)));
 
 drop policy if exists cases_select_authorised on public.cases;
-create policy cases_select_authorised on public.cases for select to authenticated using (public.is_super_admin() or exists (select 1 from public.matters m where m.id=cases.matter_id and (m.individual_user_id=auth.uid() or m.business_id in (select b.id from public.businesses b where b.owner_user_id=auth.uid()))) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('view_cases') and public.staff_can_access_case(id,'view_cases')));
+create policy cases_select_authorised on public.cases for select to authenticated using (public.is_super_admin() or exists (select 1 from public.matters m where m.id=cases.matter_id and (m.individual_user_id=auth.uid() or m.business_id in (select b.id from public.businesses b where b.owner_user_id=auth.uid()))) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('view_cases'::text) and public.staff_can_access_case(id,'view_cases'::text)));
 
 drop policy if exists cases_admin_update on public.cases;
-create policy cases_admin_update on public.cases for update to authenticated using (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_cases') and public.staff_can_access_case(id,'edit_cases'))) with check (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_cases') and public.staff_can_access_case(id,'edit_cases')));
+create policy cases_admin_update on public.cases for update to authenticated using (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_cases'::text) and public.staff_can_access_case(id,'edit_cases'::text))) with check (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_cases'::text) and public.staff_can_access_case(id,'edit_cases'::text)));
 
 drop policy if exists quotes_select_authorised on public.quotes;
-create policy quotes_select_authorised on public.quotes for select to authenticated using (public.is_super_admin() or individual_user_id=auth.uid() or business_id in (select b.id from public.businesses b where b.owner_user_id=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('view_quotes') and public.staff_can_access_quote(id,'view_quotes')));
+create policy quotes_select_authorised on public.quotes for select to authenticated using (public.is_super_admin() or individual_user_id=auth.uid() or business_id in (select b.id from public.businesses b where b.owner_user_id=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('view_quotes'::text) and public.staff_can_access_quote(id,'view_quotes'::text)));
 
 drop policy if exists quotes_admin_update on public.quotes;
-create policy quotes_admin_update on public.quotes for update to authenticated using (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_quotes') and public.staff_can_access_quote(id,'edit_quotes'))) with check (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_quotes') and public.staff_can_access_quote(id,'edit_quotes')));
+create policy quotes_admin_update on public.quotes for update to authenticated using (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_quotes'::text) and public.staff_can_access_quote(id,'edit_quotes'::text))) with check (public.is_super_admin() or (public.current_user_role()<>'STAFF'::app_role and created_by=auth.uid()) or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('edit_quotes'::text) and public.staff_can_access_quote(id,'edit_quotes'::text)));
 
 drop policy if exists assignments_select_authorised on public.assignments;
-create policy assignments_select_authorised on public.assignments for select to authenticated using (public.is_super_admin() or assigned_by=auth.uid() or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('manage_assignments') and public.staff_can_access_assignment(id,'manage_assignments')) or staff_id in (select s.id from public.staff s where s.user_id=auth.uid() and s.is_active=true));
+create policy assignments_select_authorised on public.assignments for select to authenticated using (public.is_super_admin() or assigned_by=auth.uid() or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('manage_assignments'::text) and public.staff_can_access_assignment(id,'manage_assignments'::text)) or staff_id in (select s.id from public.staff s where s.user_id=auth.uid() and s.is_active=true));
 
 drop policy if exists assignments_admin_insert on public.assignments;
-create policy assignments_admin_insert on public.assignments for insert to authenticated with check (public.is_super_admin() or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('manage_assignments') and assigned_by=auth.uid()));
+create policy assignments_admin_insert on public.assignments for insert to authenticated with check (public.is_super_admin() or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('manage_assignments'::text) and assigned_by=auth.uid()));
 
 drop policy if exists assignments_admin_update on public.assignments;
-create policy assignments_admin_update on public.assignments for update to authenticated using (public.is_super_admin() or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('manage_assignments') and public.staff_can_access_assignment(id,'manage_assignments'))) with check (public.is_super_admin() or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('manage_assignments')));
+create policy assignments_admin_update on public.assignments for update to authenticated using (public.is_super_admin() or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('manage_assignments'::text) and public.staff_can_access_assignment(id,'manage_assignments'::text))) with check (public.is_super_admin() or (public.current_user_role()='STAFF'::app_role and public.has_staff_permission('manage_assignments'::text)));
 
 comment on function public.staff_permission_scope(text) is 'Returns the strongest enabled permission scope for the authenticated staff member.';
 comment on function public.has_staff_permission(text) is 'Returns true only for SUPER_ADMIN or an active staff account with the requested enabled permission.';
