@@ -3,12 +3,14 @@
 --
 -- This migration is intentionally self-contained. Some remote databases may
 -- contain legacy overloaded has_staff_permission functions whose default
--- arguments make one-argument calls ambiguous. Remove every legacy overload
--- before creating the canonical one-argument API.
+-- arguments make one-argument calls ambiguous. Rename every legacy overload
+-- before creating the canonical one-argument API so existing dependencies are
+-- preserved instead of destructively dropping functions.
 
 do $$
 declare
     fn record;
+    legacy_name text;
 begin
     for fn in
         select p.oid,
@@ -19,9 +21,11 @@ begin
           and p.proname = 'has_staff_permission'
           and pg_get_function_identity_arguments(p.oid) <> 'text'
     loop
+        legacy_name := 'has_staff_permission_legacy_' || substr(md5(fn.identity_args), 1, 10);
         execute format(
-            'drop function public.has_staff_permission(%s)',
-            fn.identity_args
+            'alter function public.has_staff_permission(%s) rename to %I',
+            fn.identity_args,
+            legacy_name
         );
     end loop;
 end
