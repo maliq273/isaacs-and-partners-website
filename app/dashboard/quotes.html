@@ -6,14 +6,4 @@
 <div id="quote-message" class="login-message" hidden></div>
 <section class="stats-grid"><article class="stat-card"><span class="stat-label">Total Quotes</span><strong id="quote-total">0</strong></article><article class="stat-card"><span class="stat-label">Awaiting Decision</span><strong id="quote-pending">0</strong></article><article class="stat-card"><span class="stat-label">Approved</span><strong id="quote-approved">0</strong></article><article class="stat-card"><span class="stat-label">Pipeline Value</span><strong id="quote-value">R0.00</strong></article></section>
 <section class="panel"><div class="panel-header"><div><h2>Sales Quotes</h2><p>Zoho-style lifecycle: Draft → Approved → Sent → Accepted/Declined → Invoice.</p></div></div><div class="table-wrapper"><table><thead><tr><th>Quote #</th><th>Customer</th><th>Subject</th><th>Total</th><th>Internal</th><th>Customer</th><th>Date</th><th>Actions</th></tr></thead><tbody id="quotes-table"><tr><td colspan="8">Loading quotes...</td></tr></tbody></table></div></section>
-</main><div id="quote-modal" class="modal-host" hidden></div><script type="module">
-import controller from "./QuoteController.js?v=20260829-3";
-const originalClientOptions = controller.clientOptions.bind(controller);
-controller.clientOptions = function(row = {}) {
-    const template = document.createElement("template");
-    template.innerHTML = originalClientOptions(row);
-    template.content.querySelectorAll('optgroup[label="Businesses"] option').forEach(option => { option.value = `business:${option.value}`; });
-    return template.innerHTML;
-};
-await controller.initialise();
-</script></body></html>
+</main><div id="quote-modal" class="modal-host" hidden></div><script type="module">import controller from "./QuoteController.js?v=20260829-4"; await controller.initialise();</script></body></html>
