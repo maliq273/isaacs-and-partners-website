@@ -100,10 +100,7 @@ using (
             )
             or (
                 public.current_user_role() = 'STAFF'::public.app_role
-                and public.has_staff_permission(
-                    'view_documents'::text,
-                    public.staff_permission_scope('view_documents'::text)
-                )
+                and public.has_staff_permission('view_documents'::text)
                 and public.staff_can_access_matter(documents.matter_id, 'view_documents'::text)
             )
         )
