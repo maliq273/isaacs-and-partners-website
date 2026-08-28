@@ -29,6 +29,3 @@ BEGIN
     END IF;
 END
 $$;
-
-COMMENT ON FUNCTION public.has_staff_permission_legacy_v1(text, text) IS
-    'Legacy compatibility overload retained under a distinct name. The canonical staff permission API is has_staff_permission(text).';
