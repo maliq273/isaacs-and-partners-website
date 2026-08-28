@@ -1,6 +1,8 @@
 -- Isaacs & Partners
 -- Bootstrap the integration outbox before the operational data-plane migration.
 -- Migration ordering matters: 20260826_operational_data_plane.sql installs triggers that call enqueue_integration_event().
+-- Migration ordering matters: 20260826_operational_data_plane.sql installs
+-- triggers that call enqueue_integration_event().
 
 create table if not exists public.integration_events (
     id uuid primary key default gen_random_uuid(),
