@@ -120,6 +120,24 @@ create table if not exists public.notifications (
     constraint notifications_channel_check check (channel in ('IN_APP','EMAIL','WHATSAPP','SMS'))
 );
 
+-- The integration outbox must exist before operational-table triggers reference it.
+create table if not exists public.integration_events (
+    id uuid primary key default gen_random_uuid(),
+    event_type text not null,
+    entity_type text,
+    entity_id uuid,
+    operation text,
+    source text,
+    status text not null default 'PENDING',
+    attempts integer not null default 0,
+    available_at timestamptz not null default now(),
+    processed_at timestamptz,
+    last_error text,
+    correlation_id text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
 create index if not exists documents_matter_idx on public.documents(matter_id);
 create index if not exists documents_individual_idx on public.documents(individual_user_id);
 create index if not exists documents_business_idx on public.documents(business_id);
@@ -131,6 +149,8 @@ create index if not exists invoices_business_idx on public.invoices(business_id)
 create index if not exists invoices_individual_idx on public.invoices(individual_user_id);
 create index if not exists payments_invoice_idx on public.payments(invoice_id, paid_at desc);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_user_id, created_at desc);
+create index if not exists integration_events_status_available_idx on public.integration_events(status, available_at);
+create index if not exists integration_events_created_at_idx on public.integration_events(created_at desc);
 
 create or replace function public.set_operational_updated_at()
 returns trigger
@@ -141,6 +161,40 @@ begin
     return new;
 end;
 $$;
+
+-- Durable outbox writer used by the operational triggers below.
+create or replace function public.enqueue_integration_event()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+    insert into public.integration_events (
+        event_type,
+        entity_type,
+        entity_id,
+        operation,
+        source,
+        status,
+        available_at,
+        correlation_id
+    ) values (
+        lower(TG_TABLE_NAME || '.' || TG_OP),
+        TG_TABLE_NAME,
+        coalesce(NEW.id, OLD.id),
+        TG_OP,
+        'supabase',
+        'PENDING',
+        now(),
+        gen_random_uuid()::text
+    );
+    return coalesce(NEW, OLD);
+end;
+$$;
+
+revoke all on function public.enqueue_integration_event() from public;
+grant execute on function public.enqueue_integration_event() to authenticated;
 
 do $$
 declare
@@ -168,6 +222,7 @@ alter table public.tasks enable row level security;
 alter table public.invoices enable row level security;
 alter table public.payments enable row level security;
 alter table public.notifications enable row level security;
+alter table public.integration_events enable row level security;
 
 -- Documents
  drop policy if exists documents_select_authorised on public.documents;
@@ -263,7 +318,13 @@ create policy notifications_recipient_select on public.notifications for select 
 drop policy if exists notifications_recipient_update on public.notifications;
 create policy notifications_recipient_update on public.notifications for update to authenticated using (recipient_user_id = auth.uid() or public.is_super_admin()) with check (recipient_user_id = auth.uid() or public.is_super_admin());
 
-grant select on public.documents, public.appointments, public.tasks, public.invoices, public.payments, public.notifications to authenticated;
+drop policy if exists integration_events_admin_select on public.integration_events;
+create policy integration_events_admin_select on public.integration_events for select to authenticated using (public.is_super_admin());
+
+drop policy if exists integration_events_admin_write on public.integration_events;
+create policy integration_events_admin_write on public.integration_events for all to authenticated using (public.is_super_admin()) with check (public.is_super_admin());
+
+grant select on public.documents, public.appointments, public.tasks, public.invoices, public.payments, public.notifications, public.integration_events to authenticated;
 
 comment on table public.invoices is 'Authoritative invoice ledger controlled by Super Admin and exposed to authorised clients/staff.';
 comment on table public.integration_events is 'Durable outbound event stream consumed by provider integrations.';
