@@ -30,10 +30,8 @@ create table if not exists public.integration_events (
     updated_at timestamptz not null default now()
 );
 
-create index if not exists integration_events_status_available_idx
-    on public.integration_events(status, available_at);
-create index if not exists integration_events_created_at_idx
-    on public.integration_events(created_at desc);
+create index if not exists integration_events_status_available_idx on public.integration_events(status, available_at);
+create index if not exists integration_events_created_at_idx on public.integration_events(created_at desc);
 
 create table if not exists public.documents (
     id uuid primary key default gen_random_uuid(),
@@ -54,88 +52,42 @@ alter table public.integration_providers enable row level security;
 alter table public.integration_events enable row level security;
 alter table public.documents enable row level security;
 
--- Providers/events are control-plane data. Super admins can manage/read them.
 drop policy if exists integration_providers_admin_select on public.integration_providers;
-create policy integration_providers_admin_select
-on public.integration_providers for select to authenticated
-using (public.is_super_admin());
+create policy integration_providers_admin_select on public.integration_providers for select to authenticated using (public.is_super_admin());
 
 drop policy if exists integration_providers_admin_write on public.integration_providers;
-create policy integration_providers_admin_write
-on public.integration_providers for all to authenticated
-using (public.is_super_admin())
-with check (public.is_super_admin());
+create policy integration_providers_admin_write on public.integration_providers for all to authenticated using (public.is_super_admin()) with check (public.is_super_admin());
 
 drop policy if exists integration_events_admin_select on public.integration_events;
-create policy integration_events_admin_select
-on public.integration_events for select to authenticated
-using (public.is_super_admin());
+create policy integration_events_admin_select on public.integration_events for select to authenticated using (public.is_super_admin());
 
 drop policy if exists integration_events_admin_write on public.integration_events;
-create policy integration_events_admin_write
-on public.integration_events for all to authenticated
-using (public.is_super_admin())
-with check (public.is_super_admin());
+create policy integration_events_admin_write on public.integration_events for all to authenticated using (public.is_super_admin()) with check (public.is_super_admin());
 
--- Documents follow matter visibility for staff and remain fully visible to super admins.
 drop policy if exists documents_select_authorised on public.documents;
-create policy documents_select_authorised
-on public.documents for select to authenticated
-using (
+create policy documents_select_authorised on public.documents for select to authenticated using (
     public.is_super_admin()
-    or (
-        matter_id is not null
-        and (
-            exists (
-                select 1 from public.matters m
-                where m.id = documents.matter_id
-                  and m.individual_user_id = auth.uid()
-            )
-            or exists (
-                select 1
-                from public.matters m
-                join public.businesses b on b.id = m.business_id
-                where m.id = documents.matter_id
-                  and b.owner_user_id = auth.uid()
-            )
-            or (
-                public.current_user_role() = 'STAFF'::public.app_role
-                and public.has_staff_permission('view_documents'::text)
-                and public.staff_can_access_matter(documents.matter_id, 'view_documents'::text)
-            )
-        )
-    )
+    or (matter_id is not null and (
+        exists (select 1 from public.matters m where m.id = documents.matter_id and m.individual_user_id = auth.uid())
+        or exists (select 1 from public.matters m join public.businesses b on b.id = m.business_id where m.id = documents.matter_id and b.owner_user_id = auth.uid())
+        or (public.current_user_role() = 'STAFF'::public.app_role and public.has_staff_permission('view_documents'::text) and public.staff_can_access_matter(documents.matter_id, 'view_documents'::text))
+    ))
 );
 
 drop policy if exists documents_admin_write on public.documents;
-create policy documents_admin_write
-on public.documents for all to authenticated
-using (public.is_super_admin())
-with check (public.is_super_admin());
+create policy documents_admin_write on public.documents for all to authenticated using (public.is_super_admin()) with check (public.is_super_admin());
 
--- Keep timestamps consistent with the application's existing convention.
 drop trigger if exists integration_providers_set_updated_at on public.integration_providers;
-create trigger integration_providers_set_updated_at
-before update on public.integration_providers
-for each row execute function public.set_updated_at();
+create trigger integration_providers_set_updated_at before update on public.integration_providers for each row execute function public.set_updated_at();
 
 drop trigger if exists integration_events_set_updated_at on public.integration_events;
-create trigger integration_events_set_updated_at
-before update on public.integration_events
-for each row execute function public.set_updated_at();
+create trigger integration_events_set_updated_at before update on public.integration_events for each row execute function public.set_updated_at();
 
 drop trigger if exists documents_set_updated_at on public.documents;
-create trigger documents_set_updated_at
-before update on public.documents
-for each row execute function public.set_updated_at();
+create trigger documents_set_updated_at before update on public.documents for each row execute function public.set_updated_at();
 
--- Seed only the providers the application already expects; all start disabled.
 insert into public.integration_providers(provider_key, display_name)
-values
-    ('supabase', 'Supabase'),
-    ('zoho', 'Zoho'),
-    ('whatsapp', 'WhatsApp'),
-    ('google', 'Google')
+values ('supabase', 'Supabase'), ('zoho', 'Zoho'), ('whatsapp', 'WhatsApp'), ('google', 'Google')
 on conflict (provider_key) do nothing;
 
 comment on table public.integration_providers is 'Control-plane provider registry consumed by IntegrationDataService.';

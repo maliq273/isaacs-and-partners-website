@@ -16,11 +16,7 @@ begin
     end if;
 
     if (p_individual_user_id is null) = (p_business_id is null) then
-        return jsonb_build_object(
-            'valid', false,
-            'field', 'client',
-            'message', 'A matter must be linked to exactly one individual or business client.'
-        );
+        return jsonb_build_object('valid', false, 'field', 'client', 'message', 'A matter must be linked to exactly one individual or business client.');
     end if;
 
     return jsonb_build_object('valid', true);

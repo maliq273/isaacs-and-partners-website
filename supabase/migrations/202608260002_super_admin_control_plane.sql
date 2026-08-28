@@ -116,26 +116,17 @@ begin
 end;
 $$;
 
--- Recreate these triggers idempotently. They intentionally capture only
--- application data tables; integration tables are excluded to avoid loops.
 do $$
 declare
     table_name text;
 begin
     foreach table_name in array array[
-        'profiles',
-        'staff',
-        'businesses',
-        'matters',
-        'cases',
-        'assignments',
-        'quotes'
+        'profiles', 'staff', 'businesses', 'matters', 'cases', 'assignments', 'quotes'
     ] loop
         execute format('drop trigger if exists integration_event_%I on public.%I', table_name, table_name);
         execute format(
             'create trigger integration_event_%I after insert or update or delete on public.%I for each row execute function public.enqueue_integration_event()',
-            table_name,
-            table_name
+            table_name, table_name
         );
     end loop;
 end $$;
@@ -144,36 +135,18 @@ alter table public.integration_providers enable row level security;
 alter table public.integration_events enable row level security;
 
 drop policy if exists integration_providers_admin_select on public.integration_providers;
-create policy integration_providers_admin_select
-on public.integration_providers
-for select
-to authenticated
-using (public.is_super_admin());
+create policy integration_providers_admin_select on public.integration_providers for select to authenticated using (public.is_super_admin());
 
 drop policy if exists integration_providers_admin_update on public.integration_providers;
-create policy integration_providers_admin_update
-on public.integration_providers
-for update
-to authenticated
-using (public.is_super_admin())
-with check (public.is_super_admin());
+create policy integration_providers_admin_update on public.integration_providers for update to authenticated using (public.is_super_admin()) with check (public.is_super_admin());
 
 drop policy if exists integration_events_admin_select on public.integration_events;
-create policy integration_events_admin_select
-on public.integration_events
-for select
-to authenticated
-using (public.is_super_admin());
+create policy integration_events_admin_select on public.integration_events for select to authenticated using (public.is_super_admin());
 
--- Only server-side workers should mutate integration events. No INSERT,
--- UPDATE or DELETE policy is intentionally exposed to browser sessions.
 revoke all on public.integration_events from anon;
 revoke all on public.integration_events from authenticated;
 grant select on public.integration_events to authenticated;
-
 grant select, update on public.integration_providers to authenticated;
 
-comment on table public.integration_events is
-    'Durable outbound integration outbox. Service-role Edge Functions consume events and synchronize configured providers.';
-comment on table public.integration_providers is
-    'Provider registry and health state. Secrets are stored only in Supabase Edge Function secrets.';
+comment on table public.integration_events is 'Durable outbound integration outbox. Service-role Edge Functions consume events and synchronize configured providers.';
+comment on table public.integration_providers is 'Provider registry and health state. Secrets are stored only in Supabase Edge Function secrets.';
