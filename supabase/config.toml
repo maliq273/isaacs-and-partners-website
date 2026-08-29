@@ -1,0 +1,7 @@
+project_id = "aglobzjtstbfwcsdhvmp"
+
+[functions.admin-github-config]
+verify_jwt = false
+
+[functions.admin-upload-brand-asset]
+verify_jwt = false
