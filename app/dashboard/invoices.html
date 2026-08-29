@@ -1,9 +1,61 @@
 <!doctype html>
 <html lang="en-ZA">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Invoices | Isaacs and Partners</title><link rel="stylesheet" href="../css/app.css"><link rel="stylesheet" href="../css/dashboard.css"><link rel="stylesheet" href="../css/sales-transactions.css"></head>
-<body data-page="invoices"><main class="dashboard-page">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Invoices | Isaacs and Partners</title>
+<link rel="stylesheet" href="../css/app.css"><link rel="stylesheet" href="../css/dashboard.css"><link rel="stylesheet" href="../css/sales-transactions.css">
+<style>.invoice-pdf-action{white-space:nowrap}.invoice-pdf-action.is-loading{opacity:.6;pointer-events:none}</style>
+</head>
+<body data-page="invoices">
+<main class="dashboard-page">
 <header class="page-header"><div><p class="eyebrow">Isaacs and Partners · Accounts Receivable</p><h1>Invoices</h1><p class="page-description">Create, send, track, collect and audit invoices from the same control plane as quotes.</p></div><div class="page-actions"><a class="btn btn-secondary" href="./super-admin.html">← Super Admin</a><a class="btn btn-secondary" href="./quotes.html">Quotes</a><button class="btn btn-secondary" data-invoice-action="refresh">Refresh</button><button class="btn btn-primary" data-invoice-action="new">+ New Invoice</button><button class="btn" data-auth-action="logout">Sign Out</button></div></header>
 <div id="invoice-message" class="login-message" hidden></div>
 <section class="stats-grid"><article class="stat-card"><span class="stat-label">Invoices</span><strong id="invoice-total">0</strong></article><article class="stat-card"><span class="stat-label">Outstanding</span><strong id="invoice-outstanding">R0.00</strong></article><article class="stat-card"><span class="stat-label">Paid</span><strong id="invoice-paid">R0.00</strong></article><article class="stat-card"><span class="stat-label">Overdue</span><strong id="invoice-overdue">0</strong></article></section>
-<section class="panel"><div class="panel-header"><div><h2>Accounts Receivable</h2><p>Draft → Sent → Outstanding/Overdue → Partially Paid → Paid, with audit-preserving voids.</p></div></div><div class="table-wrapper"><table><thead><tr><th>Invoice #</th><th>Customer</th><th>Subject</th><th>Total</th><th>Balance</th><th>Status</th><th>Due</th><th>Actions</th></tr></thead><tbody id="invoices-table"><tr><td colspan="8">Loading invoices...</td></tr></tbody></table></div></section>
-</main><div id="invoice-modal" class="modal-host" hidden></div><script type="module">import controller from "./InvoiceController.js?v=20260829-2"; await controller.initialise();</script></body></html>
+<section class="panel"><div class="panel-header"><div><h2>Accounts Receivable</h2><p>Draft → Sent → Outstanding/Overdue → Partially Paid → Paid, with audit-preserving voids. Every invoice can be rendered as a branded visual PDF.</p></div></div><div class="table-wrapper"><table><thead><tr><th>Invoice #</th><th>Customer</th><th>Subject</th><th>Total</th><th>Balance</th><th>Status</th><th>Due</th><th>Actions</th></tr></thead><tbody id="invoices-table"><tr><td colspan="8">Loading invoices...</td></tr></tbody></table></div></section>
+</main><div id="invoice-modal" class="modal-host" hidden></div>
+<script type="module">
+import controller from "./InvoiceController.js?v=20260829-2";
+import invoicePdfService from "./InvoicePdfService.js?v=20260829-1";
+
+const message = (text, type = "error") => {
+    const el = document.querySelector("#invoice-message");
+    if (!el) return;
+    el.hidden = false;
+    el.className = `login-message ${type === "error" ? "login-error" : "login-success"}`;
+    el.textContent = text;
+    setTimeout(() => { el.hidden = true; }, 6000);
+};
+
+const enhanceInvoiceRows = () => {
+    document.querySelectorAll("#invoices-table tr").forEach(row => {
+        if (row.querySelector("[data-invoice-pdf]")) return;
+        const edit = row.querySelector("[data-invoice-action='edit']");
+        const id = edit?.dataset.id;
+        if (!id) return;
+        const actions = row.querySelector("td:last-child");
+        if (!actions) return;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn btn-small btn-secondary invoice-pdf-action";
+        button.dataset.invoicePdf = id;
+        button.textContent = "PDF";
+        actions.appendChild(button);
+    });
+};
+
+await controller.initialise();
+enhanceInvoiceRows();
+new MutationObserver(enhanceInvoiceRows).observe(document.querySelector("#invoices-table"), { childList:true, subtree:true });
+
+document.addEventListener("click", async event => {
+    const button = event.target.closest("[data-invoice-pdf]");
+    if (!button) return;
+    button.classList.add("is-loading");
+    button.textContent = "PDF…";
+    try { await invoicePdfService.download(button.dataset.invoicePdf); }
+    catch (error) { console.error("[Invoice PDF]", error); message(error.message || "The invoice PDF could not be generated."); }
+    finally { button.classList.remove("is-loading"); button.textContent = "PDF"; }
+});
+</script>
+</body>
+</html>
