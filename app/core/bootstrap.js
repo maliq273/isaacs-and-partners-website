@@ -80,23 +80,11 @@ class ApplicationBootstrap {
             this.handleVisibilityChange.bind(this);
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Initialise application
-     * ----------------------------------------------------------------------
-     *
-     * Initialisation prepares services but does not necessarily start
-     * browser event listeners or route processing.
-     */
     async initialise() {
         if (this.initialised) {
             return this;
         }
 
-        /*
-         * Prevent duplicate initialisation when multiple callers
-         * attempt startup at approximately the same time.
-         */
         if (this.starting) {
             return this;
         }
@@ -117,14 +105,6 @@ class ApplicationBootstrap {
                 }
             );
 
-            /*
-             * ----------------------------------------------------------------
-             * 1. Storage
-             * ----------------------------------------------------------------
-             *
-             * Storage must be ready before state/authentication services
-             * attempt to restore persisted information.
-             */
             await storage.initialise();
 
             this.services.set(
@@ -132,14 +112,6 @@ class ApplicationBootstrap {
                 storage
             );
 
-            /*
-             * ----------------------------------------------------------------
-             * 2. Application state
-             * ----------------------------------------------------------------
-             *
-             * State is initialised after storage so persisted state can
-             * be restored where supported by state.js.
-             */
             if (
                 typeof state.initialise ===
                 "function"
@@ -157,13 +129,6 @@ class ApplicationBootstrap {
                 state
             );
 
-            /*
-             * ----------------------------------------------------------------
-             * 3. Authentication service
-             * ----------------------------------------------------------------
-             *
-             * AuthService may restore a remembered session here.
-             */
             if (
                 typeof auth.initialise ===
                 "function"
@@ -181,16 +146,6 @@ class ApplicationBootstrap {
                 auth
             );
 
-            /*
-             * ----------------------------------------------------------------
-             * 4. Authentication guard
-             * ----------------------------------------------------------------
-             *
-             * AuthGuard is configured with the Router through dependency
-             * injection.
-             *
-             * Router itself must not import AuthGuard.
-             */
             if (
                 typeof authGuard.setRouter ===
                 "function"
@@ -217,13 +172,6 @@ class ApplicationBootstrap {
                 authGuard
             );
 
-            /*
-             * ----------------------------------------------------------------
-             * 5. Router
-             * ----------------------------------------------------------------
-             *
-             * Inject AuthGuard after both objects exist.
-             */
             router.setAuthGuard(
                 authGuard
             );
@@ -235,18 +183,7 @@ class ApplicationBootstrap {
                 router
             );
 
-            /*
-             * ----------------------------------------------------------------
-             * 6. Route registration
-             * ----------------------------------------------------------------
-             */
             this.registerRoutes();
-
-            /*
-             * ----------------------------------------------------------------
-             * 7. Browser lifecycle listeners
-             * ----------------------------------------------------------------
-             */
             this.attachBrowserLifecycleListeners();
 
             this.initialised = true;
@@ -292,18 +229,10 @@ class ApplicationBootstrap {
         }
     }
 
-    /**
-     * Alias for initialise().
-     */
     async init() {
         return this.initialise();
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Start application
-     * ----------------------------------------------------------------------
-     */
     async start() {
         if (this.started) {
             return this;
@@ -323,9 +252,6 @@ class ApplicationBootstrap {
         }
     }
 
-    /**
-     * Internal startup sequence.
-     */
     async _start() {
         const startTime =
             Date.now();
@@ -341,17 +267,7 @@ class ApplicationBootstrap {
                 }
             );
 
-            /*
-             * Start router before resolving the current page.
-             */
             await router.start();
-
-            /*
-             * Initialise login controller only when the current
-             * document actually contains the login form.
-             *
-             * This avoids forcing LoginController onto every page.
-             */
             await this.initialisePageController();
 
             this.started = true;
@@ -401,24 +317,7 @@ class ApplicationBootstrap {
         }
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Register application routes
-     * ----------------------------------------------------------------------
-     *
-     * Route handlers intentionally remain lightweight.
-     *
-     * A route handler can:
-     * - dispatch page-level events
-     * - initialise page-specific modules
-     * - return a promise
-     *
-     * The bootstrap layer does not hard-code business logic into the router.
-     */
     registerRoutes() {
-        /*
-         * Prevent duplicate route registration.
-         */
         const existingRoutes =
             new Map(
                 router.getRoutes()
@@ -457,13 +356,6 @@ class ApplicationBootstrap {
             }
         );
 
-        /*
-         * Central not-found route handling.
-         *
-         * The browser can still handle static documents when no
-         * application route exists, but registered application
-         * routes receive a consistent not-found lifecycle.
-         */
         router.setNotFoundHandler(
             async ({
                 path,
@@ -479,14 +371,6 @@ class ApplicationBootstrap {
                     }
                 );
 
-                /*
-                 * Do not attempt to redirect to /404.html from here.
-                 * That could cause recursive routing on installations
-                 * where 404.html itself is routed.
-                 *
-                 * The page may handle the event and render its own
-                 * not-found UI.
-                 */
                 return {
                     handled:
                         true,
@@ -503,11 +387,6 @@ class ApplicationBootstrap {
         return this;
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Create route handler
-     * ----------------------------------------------------------------------
-     */
     createRouteHandler(
         definition
     ) {
@@ -543,19 +422,11 @@ class ApplicationBootstrap {
                 routeContext
             );
 
-            /*
-             * Allow page-specific modules to listen for the route
-             * rather than forcing every possible page controller
-             * into bootstrap.js.
-             */
             eventBus.emit(
                 `application:route:${definition.name}`,
                 routeContext
             );
 
-            /*
-             * Update document title when a route provides one.
-             */
             this.updateDocumentTitle(
                 definition.meta?.title
             );
@@ -564,16 +435,6 @@ class ApplicationBootstrap {
         };
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Initialise page-specific controller
-     * ----------------------------------------------------------------------
-     *
-     * At present LoginController is the authentication page controller.
-     *
-     * Other controllers should be registered here only when their
-     * actual files exist and are ready.
-     */
     async initialisePageController() {
         if (
             typeof window ===
@@ -587,9 +448,6 @@ class ApplicationBootstrap {
         const pathname =
             this.getCurrentPath();
 
-        /*
-         * Login page.
-         */
         if (
             this.isRoute(
                 pathname,
@@ -613,11 +471,6 @@ class ApplicationBootstrap {
         return this;
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Browser lifecycle
-     * ----------------------------------------------------------------------
-     */
     attachBrowserLifecycleListeners() {
         if (
             typeof window ===
@@ -641,9 +494,6 @@ class ApplicationBootstrap {
         return this;
     }
 
-    /**
-     * Remove browser lifecycle listeners.
-     */
     detachBrowserLifecycleListeners() {
         if (
             typeof window ===
@@ -667,11 +517,6 @@ class ApplicationBootstrap {
         return this;
     }
 
-    /**
-     * Browser before-unload event.
-     *
-     * Do not perform asynchronous operations here.
-     */
     handleBeforeUnload() {
         eventBus.emit(
             "application:beforeUnload",
@@ -682,12 +527,6 @@ class ApplicationBootstrap {
         );
     }
 
-    /**
-     * Browser visibility event.
-     *
-     * This provides a central place for future idle/session
-     * management without duplicating document listeners.
-     */
     handleVisibilityChange() {
         if (
             typeof document ===
@@ -711,11 +550,6 @@ class ApplicationBootstrap {
         );
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Stop application
-     * ----------------------------------------------------------------------
-     */
     async stop() {
         if (!this.started && !this.initialised) {
             return this;
@@ -735,9 +569,6 @@ class ApplicationBootstrap {
         }
     }
 
-    /**
-     * Internal shutdown sequence.
-     */
     async _stop() {
         if (this.stopping) {
             return this;
@@ -754,9 +585,6 @@ class ApplicationBootstrap {
                 }
             );
 
-            /*
-             * Destroy page controller if active.
-             */
             const login =
                 this.services.get(
                     "loginController"
@@ -774,9 +602,6 @@ class ApplicationBootstrap {
                 "loginController"
             );
 
-            /*
-             * Stop router.
-             */
             if (
                 router &&
                 typeof router.stop ===
@@ -785,9 +610,6 @@ class ApplicationBootstrap {
                 await router.stop();
             }
 
-            /*
-             * Remove application browser listeners.
-             */
             this.detachBrowserLifecycleListeners();
 
             this.started = false;
@@ -814,13 +636,6 @@ class ApplicationBootstrap {
         }
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Reset application bootstrap state
-     * ----------------------------------------------------------------------
-     *
-     * This does not delete persisted storage.
-     */
     reset() {
         this.started = false;
         this.initialised = false;
@@ -838,12 +653,6 @@ class ApplicationBootstrap {
 
         return this;
     }
-
-    /**
-     * ----------------------------------------------------------------------
-     * Route helpers
-     * ----------------------------------------------------------------------
-     */
 
     getCurrentPath() {
         if (
@@ -910,11 +719,6 @@ class ApplicationBootstrap {
         );
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Document title
-     * ----------------------------------------------------------------------
-     */
     updateDocumentTitle(
         title
     ) {
@@ -937,11 +741,6 @@ class ApplicationBootstrap {
             `${title} | Isaacs and Partners`;
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Status
-     * ----------------------------------------------------------------------
-     */
     getStatus() {
         return {
             initialised:
@@ -989,11 +788,6 @@ class ApplicationBootstrap {
         };
     }
 
-    /**
-     * ----------------------------------------------------------------------
-     * Access service
-     * ----------------------------------------------------------------------
-     */
     getService(
         name
     ) {
@@ -1005,70 +799,24 @@ class ApplicationBootstrap {
     }
 }
 
-
-/**
- * --------------------------------------------------------------------------
- * Singleton bootstrap
- * --------------------------------------------------------------------------
- */
 export const bootstrap =
     new ApplicationBootstrap();
 
-
-/**
- * --------------------------------------------------------------------------
- * Convenience startup function
- * --------------------------------------------------------------------------
- *
- * This is useful from index.html or a root application entry module:
- *
- *     import { startApplication } from "./app/core/bootstrap.js";
- *
- *     await startApplication();
- */
 export async function startApplication() {
     return bootstrap.start();
 }
 
-
-/**
- * --------------------------------------------------------------------------
- * Convenience shutdown function
- * --------------------------------------------------------------------------
- */
 export async function stopApplication() {
     return bootstrap.stop();
 }
 
+// Backward-compatible lifecycle alias used by app/js/app.js.
+export async function shutdown() {
+    return stopApplication();
+}
 
-/**
- * --------------------------------------------------------------------------
- * Browser auto-start
- * --------------------------------------------------------------------------
- *
- * The bootstrap module intentionally does NOT automatically start merely
- * because it was imported.
- *
- * The root application entry point will explicitly call startApplication().
- *
- * This is important because:
- *
- * - tests may import the module without starting the application
- * - other modules may import bootstrap during configuration
- * - index.html remains the single startup authority
- * - startup ordering remains deterministic
- */
-
-
-/**
- * Named class export.
- */
 export {
     ApplicationBootstrap,
 };
 
-
-/**
- * Default export.
- */
 export default bootstrap;
