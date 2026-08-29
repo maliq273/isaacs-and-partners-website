@@ -1,6 +1,10 @@
--- PR24: optional account branding/profile assets and invoice PDF branding.
+-- PR25: optional account branding/profile assets and invoice PDF branding.
 -- Binary assets are stored in the repository through a privileged Edge Function;
 -- only their public GitHub Pages URL is stored in Supabase.
+--
+-- Versioned as 202608290006 so the sales runtime can remain 202608290004 and
+-- GitHub integration Vault remains 202608290005. This avoids duplicate migration
+-- versions in Supabase migration history.
 
 alter table if exists public.profiles
     add column if not exists avatar_url text;
