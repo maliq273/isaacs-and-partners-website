@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 const clean = (value: unknown) => String(value ?? "").trim();
 const roleOf = (value: unknown) => clean(value).toUpperCase();
+const repositoryPattern = /^(?:[A-Za-z0-9_.]|-)+\/(?:[A-Za-z0-9_.]|-)+$/;
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: corsHeaders });
 
 Deno.serve(async request => {
@@ -33,7 +34,7 @@ Deno.serve(async request => {
 
     if (request.method === "GET") {
       const { data, error } = await admin.from("github_integration_config").select("repository,configured_at,last_tested_at,last_test_status,last_test_message").eq("id", "default").maybeSingle();
-      if (error) return json({ error: error.message }, 500);
+      if (error) return json({ error: `GitHub integration metadata is unavailable. Apply the GitHub integration migration before configuring the token. Database error: ${error.message}` }, 503);
       return json({ configured: Boolean(data?.configured_at), repository: data?.repository ?? "maliq273/isaacs-and-partners-website", configured_at: data?.configured_at ?? null, last_tested_at: data?.last_tested_at ?? null, last_test_status: data?.last_test_status ?? null, last_test_message: data?.last_test_message ?? null });
     }
 
@@ -42,19 +43,27 @@ Deno.serve(async request => {
     if (action === "save") {
       const githubToken = clean(payload.token);
       const repository = clean(payload.repository || "maliq273/isaacs-and-partners-website");
-      if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) return json({ error: "Repository must use owner/name format." }, 400);
-      if (!githubToken) return json({ error: "Enter a GitHub token before saving." }, 400);
+      if (!repositoryPattern.test(repository)) return json({ error: "Repository must use GitHub owner/name format, for example maliq273/isaacs-and-partners-website." }, 400);
+      if (!githubToken) return json({ error: "Enter the GitHub token before saving." }, 400);
       const { data, error } = await admin.rpc("set_github_integration_config", { p_actor: caller.user.id, p_token: githubToken, p_repository: repository });
-      if (error) return json({ error: error.message }, 400);
-      await admin.from("audit_logs").insert({ actor_user_id: caller.user.id, action: "GITHUB_INTEGRATION_CONFIGURED", entity_type: "github_integration", entity_id: "default", new_data: { repository, token_updated: true }, metadata: { source: "admin-github-config" } });
+      if (error) {
+        const message = clean(error.message);
+        const status = /SUPER_ADMIN|access is required/i.test(message) ? 403 : /valid GitHub token|owner\/name format/i.test(message) ? 400 : 503;
+        return json({ error: status === 503 ? `GitHub token storage is unavailable. Apply migration 202608290005 before saving. Database error: ${message}` : message }, status);
+      }
+      const { error: auditError } = await admin.from("audit_logs").insert({ actor_user_id: caller.user.id, action: "GITHUB_INTEGRATION_CONFIGURED", entity_type: "github_integration", entity_id: "default", new_data: { repository, token_updated: true }, metadata: { source: "admin-github-config" } });
+      if (auditError) return json({ error: `GitHub token was saved, but the audit event could not be recorded: ${auditError.message}` }, 500);
       return json({ success: true, ...(data ?? {}) });
     }
 
     if (action === "test") {
       const { data: secret, error: secretError } = await admin.rpc("get_github_integration_secret");
-      if (secretError) return json({ error: secretError.message }, 500);
+      if (secretError) return json({ error: `GitHub secret storage is unavailable. Apply migration 202608290005 before testing. Database error: ${secretError.message}` }, 503);
       const config = Array.isArray(secret) ? secret[0] : secret;
-      if (!config?.github_token || !config?.repository) { await admin.rpc("record_github_integration_test", { p_status: "FAIL", p_message: "GitHub integration is not configured." }); return json({ error: "GitHub integration is not configured." }, 400); }
+      if (!config?.github_token || !config?.repository) {
+        await admin.rpc("record_github_integration_test", { p_status: "FAIL", p_message: "GitHub integration is not configured." });
+        return json({ error: "GitHub integration is not configured. Save the token first." }, 400);
+      }
       const response = await fetch(`https://api.github.com/repos/${config.repository}`, { headers: { Authorization: `Bearer ${config.github_token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" } });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) { const message = body?.message || `GitHub returned HTTP ${response.status}.`; await admin.rpc("record_github_integration_test", { p_status: "FAIL", p_message: message }); return json({ error: message }, 502); }

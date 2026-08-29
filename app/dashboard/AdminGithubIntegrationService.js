@@ -2,6 +2,7 @@ import auth from "../auth/AuthService.js";
 import authConfig from "../auth/auth.config.js";
 
 const FUNCTION_URL = `${authConfig.supabase.url}/functions/v1/admin-github-config`;
+const REPOSITORY_PATTERN = /^(?:[A-Za-z0-9_.]|-)+\/(?:[A-Za-z0-9_.]|-)+$/;
 
 class AdminGithubIntegrationService {
     constructor() { this.form = null; this.status = null; this.message = null; this.saveButton = null; this.testButton = null; this.bound = false; }
@@ -25,9 +26,10 @@ class AdminGithubIntegrationService {
         const raw = await response.text(); let data = {}; try { data = raw ? JSON.parse(raw) : {}; } catch { data = {}; }
         if (!response.ok) throw new Error(data?.error || `GitHub integration request failed (${response.status}).`); return data;
     }
-    async refresh() { try { const data = await this.request("GET"); const repository = this.form.elements.repository; if (repository && data.repository) repository.value = data.repository; this.renderStatus(data); } catch (error) { this.renderMessage(error.message, true); } }
+    async refresh() { try { const data = await this.request("GET"); const repository = this.form.elements.repository; if (repository && data.repository) repository.value = data.repository; this.renderStatus(data); } catch (error) { this.renderStatus({ configured: false }); this.renderMessage(error.message, true); } }
     async save() {
         const token = this.form.elements.token?.value?.trim(); const repository = this.form.elements.repository?.value?.trim();
+        if (!repository || !REPOSITORY_PATTERN.test(repository)) { this.renderMessage("Repository must use GitHub owner/name format, for example maliq273/isaacs-and-partners-website.", true); return; }
         if (!token) { this.renderMessage("Enter the GitHub token before saving.", true); return; }
         this.setBusy(true, "Saving securely…");
         try { const data = await this.request("POST", { action: "save", token, repository }); this.form.elements.token.value = ""; this.renderStatus({ configured: true, repository: data.repository, configured_at: new Date().toISOString(), last_test_status: null, last_tested_at: null }); this.renderMessage("GitHub token saved securely in Supabase Vault. The token is not stored in browser storage or source code."); }
