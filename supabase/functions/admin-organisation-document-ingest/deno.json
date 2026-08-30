@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "supabase": "npm:@supabase/supabase-js@2.57.0",
+    "mammoth": "npm:mammoth@1.12.2",
+    "unpdf": "npm:unpdf@1.4.0"
+  }
+}
