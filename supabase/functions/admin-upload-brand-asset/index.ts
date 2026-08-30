@@ -28,14 +28,14 @@ Deno.serve(async request => {
     if (!config?.github_token || !config?.repository) return json({ error: "GitHub integration is not configured. Configure it in Super Admin first." }, 409);
     const payload = await request.json().catch(() => null) as Record<string, unknown> | null;
     const role = roleOf(payload?.role); const userId = clean(payload?.user_id); const dataUrl = clean(payload?.data_url);
-    if (!["INDIVIDUAL", "BUSINESS"].includes(role)) return json({ error: "Asset role must be INDIVIDUAL or BUSINESS." }, 400);
+    if (!["INDIVIDUAL", "BUSINESS", "ORGANISATION"].includes(role)) return json({ error: "Asset role must be INDIVIDUAL, BUSINESS or ORGANISATION." }, 400);
     if (!userId) return json({ error: "user_id is required." }, 400);
     const match = dataUrl.match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/i);
     if (!match) return json({ error: "Only JPEG, PNG or WebP images are supported." }, 400);
     const mime = match[1].toLowerCase(); const extension = extensionFor(mime); const base64 = match[2]; const estimatedBytes = Math.floor((base64.length * 3) / 4);
     if (!extension) return json({ error: "Unsupported image type." }, 400);
     if (estimatedBytes > 5 * 1024 * 1024) return json({ error: "The image must be 5 MB or smaller." }, 400);
-    const path = role === "INDIVIDUAL" ? `assets/client-avatars/${userId}.${extension}` : `assets/business-logos/${userId}.${extension}`;
+    const path = role === "INDIVIDUAL" ? `assets/client-avatars/${userId}.${extension}` : role === "BUSINESS" ? `assets/business-logos/${userId}.${extension}` : `assets/company/${userId}.${extension}`;
     const apiBase = `https://api.github.com/repos/${config.repository}/contents/${path}`;
     const headers = { Authorization: `Bearer ${config.github_token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "Content-Type": "application/json" };
     let existingSha: string | undefined; const existingResponse = await fetch(apiBase, { headers });
@@ -45,10 +45,14 @@ Deno.serve(async request => {
     const githubBody = await githubResponse.json().catch(() => ({}));
     if (!githubResponse.ok) return json({ error: `GitHub asset upload failed: ${githubBody?.message ?? "Unknown GitHub error."}` }, 502);
     const assetUrl = `https://maliq273.github.io/isaacs-and-partners-website/${path}`;
-    const table = role === "INDIVIDUAL" ? "profiles" : "businesses"; const column = role === "INDIVIDUAL" ? "avatar_url" : "logo_url";
-    const query = role === "INDIVIDUAL" ? admin.from(table).update({ [column]: assetUrl }).eq("id", userId) : admin.from(table).update({ [column]: assetUrl }).eq("owner_user_id", userId);
-    const { error: updateError } = await query; if (updateError) return json({ error: `Account branding could not be saved: ${updateError.message}` }, 400);
-    await admin.from("audit_logs").insert({ actor_user_id: caller.user.id, action: `${role}_BRAND_ASSET_UPLOADED`, entity_type: role === "INDIVIDUAL" ? "profile" : "business", entity_id: userId, new_data: { asset_url: assetUrl, github_path: path, mime_type: mime, bytes: estimatedBytes }, metadata: { source: "admin-upload-brand-asset", repository: config.repository } });
+    if (role === "INDIVIDUAL") {
+      const { error } = await admin.from("profiles").update({ avatar_url: assetUrl }).eq("id", userId); if (error) return json({ error: `Account branding could not be saved: ${error.message}` }, 400);
+    } else if (role === "BUSINESS") {
+      const { error } = await admin.from("businesses").update({ logo_url: assetUrl }).eq("id", userId); if (error) return json({ error: `Business branding could not be saved: ${error.message}` }, 400);
+    } else {
+      const { error } = await admin.from("organisation_profiles").update({ logo_url: assetUrl, updated_at: new Date().toISOString() }).eq("id", userId); if (error) return json({ error: `Organisation logo could not be saved: ${error.message}` }, 400);
+    }
+    await admin.from("audit_logs").insert({ actor_user_id: caller.user.id, action: `${role}_BRAND_ASSET_UPLOADED`, entity_type: role === "ORGANISATION" ? "organisation_profile" : role === "INDIVIDUAL" ? "profile" : "business", entity_id: userId, new_data: { asset_url: assetUrl, github_path: path, mime_type: mime, bytes: estimatedBytes }, metadata: { source: "admin-upload-brand-asset", repository: config.repository } });
     return json({ success: true, asset_url: assetUrl, github_path: path });
   } catch (error) { return json({ error: error instanceof Error ? error.message : "Unexpected asset upload error." }, 500); }
 });
