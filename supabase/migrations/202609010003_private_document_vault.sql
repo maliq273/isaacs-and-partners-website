@@ -58,6 +58,54 @@ DROP POLICY IF EXISTS client_documents_admin_delete ON public.client_documents;
 CREATE POLICY client_documents_admin_delete ON public.client_documents
 FOR DELETE TO authenticated USING (is_super_admin() OR uploaded_by = auth.uid());
 
+-- Always private. Storage object policies below are the actual file-level boundary.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('client-documents', 'client-documents', false)
+ON CONFLICT (id) DO UPDATE SET public = false;
+
+DROP POLICY IF EXISTS client_documents_storage_select ON storage.objects;
+CREATE POLICY client_documents_storage_select ON storage.objects
+FOR SELECT TO authenticated
+USING (
+    bucket_id = 'client-documents'
+    AND (
+        split_part(name, '/', 1) = auth.uid()::text
+        OR is_super_admin()
+        OR EXISTS (
+            SELECT 1 FROM public.matters m
+            WHERE m.id::text = split_part(name, '/', 2)
+              AND m.assigned_staff_id = auth.uid()
+        )
+    )
+);
+
+DROP POLICY IF EXISTS client_documents_storage_insert ON storage.objects;
+CREATE POLICY client_documents_storage_insert ON storage.objects
+FOR INSERT TO authenticated
+WITH CHECK (
+    bucket_id = 'client-documents'
+    AND (
+        split_part(name, '/', 1) = auth.uid()::text
+        OR is_super_admin()
+        OR EXISTS (
+            SELECT 1 FROM public.matters m
+            WHERE m.id::text = split_part(name, '/', 2)
+              AND m.assigned_staff_id = auth.uid()
+        )
+    )
+);
+
+DROP POLICY IF EXISTS client_documents_storage_update ON storage.objects;
+CREATE POLICY client_documents_storage_update ON storage.objects
+FOR UPDATE TO authenticated
+USING (bucket_id = 'client-documents' AND (split_part(name, '/', 1) = auth.uid()::text OR is_super_admin()))
+WITH CHECK (bucket_id = 'client-documents' AND (split_part(name, '/', 1) = auth.uid()::text OR is_super_admin()));
+
+DROP POLICY IF EXISTS client_documents_storage_delete ON storage.objects;
+CREATE POLICY client_documents_storage_delete ON storage.objects
+FOR DELETE TO authenticated
+USING (bucket_id = 'client-documents' AND (split_part(name, '/', 1) = auth.uid()::text OR is_super_admin()));
+
 CREATE OR REPLACE FUNCTION public.client_document_storage_prefix(p_client_id UUID)
 RETURNS TEXT LANGUAGE sql STABLE SET search_path = public AS $$
     SELECT p_client_id::text || '/';
