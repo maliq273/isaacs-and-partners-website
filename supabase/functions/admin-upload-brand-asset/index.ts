@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = { "Access-Control-Allow-Origin": "https://www.isaacsandpartners.online", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Max-Age": "86400", "Content-Type": "application/json" };
+const SITE_ORIGIN = "https://www.isaacsandpartners.online";
+const corsHeaders = { "Access-Control-Allow-Origin": SITE_ORIGIN, "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Max-Age": "86400", "Content-Type": "application/json" };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: corsHeaders });
 const clean = (value: unknown) => String(value ?? "").trim();
 const roleOf = (value: unknown) => clean(value).toUpperCase();
@@ -44,7 +45,7 @@ Deno.serve(async request => {
     const githubResponse = await fetch(apiBase, { method: "PUT", headers, body: JSON.stringify({ message: `chore: update ${role.toLowerCase()} brand asset ${userId}`, content: base64, ...(existingSha ? { sha: existingSha } : {}) }) });
     const githubBody = await githubResponse.json().catch(() => ({}));
     if (!githubResponse.ok) return json({ error: `GitHub asset upload failed: ${githubBody?.message ?? "Unknown GitHub error."}` }, 502);
-    const assetUrl = `https://maliq273.github.io/isaacs-and-partners-website/${path}`;
+    const assetUrl = `${SITE_ORIGIN}/${path}`;
     if (role === "INDIVIDUAL") {
       const { error } = await admin.from("profiles").update({ avatar_url: assetUrl }).eq("id", userId); if (error) return json({ error: `Account branding could not be saved: ${error.message}` }, 400);
     } else if (role === "BUSINESS") {
