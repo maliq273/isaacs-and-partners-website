@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS public.client_documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     client_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-    matter_id BIGINT REFERENCES public.matters(id) ON DELETE CASCADE,
+    matter_id UUID REFERENCES public.matters(id) ON DELETE CASCADE,
     storage_bucket TEXT NOT NULL DEFAULT 'client-documents',
     storage_path TEXT NOT NULL UNIQUE,
     original_name TEXT NOT NULL,

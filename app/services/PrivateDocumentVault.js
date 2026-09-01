@@ -2,9 +2,8 @@
  * Isaacs & Partners — Private Document Vault
  *
  * Browser-safe orchestration boundary for confidential client files.
- * Actual privileged storage operations must be performed through the
- * authenticated Supabase client / Edge Function boundary. No service-role,
- * OpenAI or GitHub secret belongs in this module.
+ * No service-role, OpenAI or GitHub secret belongs in this module.
+ * Confidential files are stored only in the private Supabase bucket.
  */
 export default class PrivateDocumentVault {
     constructor({ supabase, logger = console } = {}) {
@@ -18,8 +17,12 @@ export default class PrivateDocumentVault {
         if (!clientId) throw new Error('Client ID is required.');
         if (!(file instanceof File)) throw new Error('A valid file is required.');
 
+        const { data: userData, error: userError } = await this.supabase.auth.getUser();
+        if (userError || !userData?.user?.id) throw new Error('Authentication required.');
+
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const path = `${clientId}/${crypto.randomUUID()}-${safeName}`;
+        const scope = matterId ? `${clientId}/${matterId}` : `${clientId}/general`;
+        const path = `${scope}/${crypto.randomUUID()}-${safeName}`;
 
         const { error: uploadError } = await this.supabase.storage
             .from(this.bucket)
@@ -43,7 +46,7 @@ export default class PrivateDocumentVault {
                 size_bytes: file.size,
                 document_type: documentType,
                 metadata,
-                uploaded_by: (await this.supabase.auth.getUser()).data.user?.id
+                uploaded_by: userData.user.id
             })
             .select()
             .single();
@@ -69,9 +72,10 @@ export default class PrivateDocumentVault {
 
     async createSignedUrl(document, expiresIn = 300) {
         if (!document?.storage_path) throw new Error('Document storage path is required.');
+        const ttl = Math.min(Math.max(Number(expiresIn) || 300, 60), 900);
         const { data, error } = await this.supabase.storage
             .from(document.storage_bucket || this.bucket)
-            .createSignedUrl(document.storage_path, expiresIn);
+            .createSignedUrl(document.storage_path, ttl);
         if (error) throw error;
         return data?.signedUrl || null;
     }
