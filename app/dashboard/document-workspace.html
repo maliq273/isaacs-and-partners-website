@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Document Workspace | Isaacs and Partners</title>
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body data-page="document-workspace">
+<main class="dashboard-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Operations · Assigned Matters</p>
+      <h1>Document Workspace</h1>
+      <p class="page-description">Work with confidential documents belonging to matters assigned to you. Access is enforced by authenticated identity, matter assignment and document RLS.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn" href="./staff.html">Staff Dashboard</a>
+      <a class="btn" href="./matters.html">My Matters</a>
+      <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
+    </div>
+  </header>
+
+  <div id="document-workspace-message" class="login-message" role="status" hidden></div>
+
+  <section class="stats-grid">
+    <article class="stat-card"><span class="stat-label">Authorised Documents</span><strong id="workspace-document-count">0</strong></article>
+    <article class="stat-card"><span class="stat-label">Pending Ingestion</span><strong id="workspace-pending-count">0</strong></article>
+    <article class="stat-card"><span class="stat-label">Ready</span><strong id="workspace-ready-count">0</strong></article>
+    <article class="stat-card"><span class="stat-label">Needs Attention</span><strong id="workspace-failed-count">0</strong></article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel panel-large">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Assigned matter files</p>
+          <h2>My Authorised Documents</h2>
+          <p>Only documents permitted by the current authenticated staff scope will appear here.</p>
+        </div>
+        <span class="control-plane-badge">RLS protected</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Matter</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Ingestion</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody id="workspace-documents">
+            <tr><td colspan="6">Document service integration will be connected in PR38.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Upload boundary</p>
+          <h2>Secure Upload</h2>
+        </div>
+      </div>
+      <div class="activity-list">
+        <div><strong>Matter required</strong><span>Staff uploads must be explicitly associated with an authorised matter.</span></div>
+        <div><strong>Private storage</strong><span>Files are stored in the private client-documents bucket.</span></div>
+        <div><strong>Provenance</strong><span>Original name, MIME type, size and SHA-256 are retained.</span></div>
+        <div><strong>Queue hand-off</strong><span>Successful uploads enter the controlled ingestion queue.</span></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel">
+      <div class="panel-header"><div><p class="eyebrow">Processing</p><h2>Ingestion Progress</h2></div></div>
+      <div class="activity-list">
+        <div><strong>Pending</strong><span>Awaiting trusted worker pickup.</span></div>
+        <div><strong>OCR</strong><span>Scanned content is being converted to searchable text.</span></div>
+        <div><strong>Classifying</strong><span>Document type is being determined from extracted content.</span></div>
+        <div><strong>Extracting</strong><span>Structured information is being normalized.</span></div>
+        <div><strong>Indexing</strong><span>Approved extracted content is being prepared for retrieval.</span></div>
+        <div><strong>Complete</strong><span>Processing has completed successfully.</span></div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header"><div><p class="eyebrow">AI assistance</p><h2>Controlled Dossier Context</h2></div></div>
+      <div class="empty-state">AI processing will use only documents that the authenticated staff member is authorised to access. The workspace never grants broader document access merely because AI processing is available.</div>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Build status</p>
+        <h2>PR38 Integration Surface</h2>
+        <p>The workspace is ready for the trusted document worker and document service to be connected without changing the dashboard security boundary.</p>
+      </div>
+    </div>
+    <div class="security-status" id="workspace-build-status">Dashboard surface ready · document worker not yet connected.</div>
+  </section>
+</main>
+
+<script type="module">
+  import dashboardPageController from "./DashboardPageController.js?v=20260901-2";
+  await dashboardPageController.initialise();
+</script>
+</body>
+</html>
