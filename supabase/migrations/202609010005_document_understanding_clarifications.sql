@@ -1,6 +1,6 @@
 -- PR39: Intelligent document understanding + human clarification boundary.
--- This migration stores analysis state, page/section evidence and explicit
--- clarification requests without exposing privileged AI credentials.
+-- Stores analysis state, page/section evidence and explicit clarification
+-- requests without exposing privileged AI credentials.
 
 CREATE TABLE IF NOT EXISTS public.client_document_understandings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -73,11 +73,8 @@ USING (
     EXISTS (
         SELECT 1 FROM public.client_documents d
         WHERE d.id = client_document_understandings.document_id
-          AND (
-              d.client_id = auth.uid()
-              OR public.is_super_admin()
-              OR (d.matter_id IS NOT NULL AND public.is_active_staff_assigned_to_matter(d.matter_id))
-          )
+          AND (d.client_id = auth.uid() OR public.is_super_admin()
+               OR (d.matter_id IS NOT NULL AND public.is_active_staff_assigned_to_matter(d.matter_id)))
     )
 );
 
@@ -89,11 +86,8 @@ USING (
     EXISTS (
         SELECT 1 FROM public.client_documents d
         WHERE d.id = client_document_understanding_segments.document_id
-          AND (
-              d.client_id = auth.uid()
-              OR public.is_super_admin()
-              OR (d.matter_id IS NOT NULL AND public.is_active_staff_assigned_to_matter(d.matter_id))
-          )
+          AND (d.client_id = auth.uid() OR public.is_super_admin()
+               OR (d.matter_id IS NOT NULL AND public.is_active_staff_assigned_to_matter(d.matter_id)))
     )
 );
 
@@ -105,17 +99,10 @@ USING (
     EXISTS (
         SELECT 1 FROM public.client_documents d
         WHERE d.id = client_document_clarifications.document_id
-          AND (
-              d.client_id = auth.uid()
-              OR public.is_super_admin()
-              OR (d.matter_id IS NOT NULL AND public.is_active_staff_assigned_to_matter(d.matter_id))
-          )
+          AND (d.client_id = auth.uid() OR public.is_super_admin()
+               OR (d.matter_id IS NOT NULL AND public.is_active_staff_assigned_to_matter(d.matter_id)))
     )
 );
-
--- Clarification requests are created by the trusted worker only. Users resolve
--- them through the SECURITY DEFINER function below after access is checked.
-REVOKE ALL ON FUNCTION public.submit_document_clarification(UUID, TEXT) FROM PUBLIC;
 
 CREATE OR REPLACE FUNCTION public.submit_document_clarification(
     p_clarification_id UUID,
@@ -134,52 +121,36 @@ BEGIN
     IF auth.uid() IS NULL THEN
         RAISE EXCEPTION 'Authentication required.' USING ERRCODE = '42501';
     END IF;
-
     IF NULLIF(btrim(COALESCE(p_answer, '')), '') IS NULL THEN
         RAISE EXCEPTION 'A clarification answer is required.' USING ERRCODE = '22023';
     END IF;
 
-    SELECT * INTO c
-    FROM public.client_document_clarifications
-    WHERE id = p_clarification_id
-    FOR UPDATE;
-
+    SELECT * INTO c FROM public.client_document_clarifications
+    WHERE id = p_clarification_id FOR UPDATE;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Clarification request not found.' USING ERRCODE = 'P0002';
     END IF;
 
-    SELECT * INTO d
-    FROM public.client_documents
-    WHERE id = c.document_id;
-
+    SELECT * INTO d FROM public.client_documents WHERE id = c.document_id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Document not found.' USING ERRCODE = 'P0002';
     END IF;
 
-    IF NOT (
-        d.client_id = auth.uid()
-        OR public.is_super_admin()
-        OR (d.matter_id IS NOT NULL AND public.is_active_staff_assigned_to_matter(d.matter_id))
-    ) THEN
+    IF NOT (d.client_id = auth.uid() OR public.is_super_admin()
+        OR (d.matter_id IS NOT NULL AND public.is_active_staff_assigned_to_matter(d.matter_id))) THEN
         RAISE EXCEPTION 'Not authorised to resolve this clarification.' USING ERRCODE = '42501';
     END IF;
-
     IF c.status <> 'OPEN' THEN
         RAISE EXCEPTION 'Clarification request is no longer open.' USING ERRCODE = '55000';
     END IF;
 
     UPDATE public.client_document_clarifications
-    SET status = 'ANSWERED',
-        answer = btrim(p_answer),
-        answered_by = auth.uid(),
-        answered_at = now(),
-        updated_at = now()
-    WHERE id = c.id
-    RETURNING * INTO result_row;
+    SET status = 'ANSWERED', answer = btrim(p_answer), answered_by = auth.uid(),
+        answered_at = now(), updated_at = now()
+    WHERE id = c.id RETURNING * INTO result_row;
 
     UPDATE public.client_document_understandings
-    SET state = 'READING',
-        updated_at = now()
+    SET state = 'READING', updated_at = now()
     WHERE id = c.understanding_id;
 
     UPDATE public.client_documents
@@ -192,26 +163,20 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.submit_document_clarification(UUID, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.submit_document_clarification(UUID, TEXT) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.set_document_understanding_updated_at()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    NEW.updated_at = now();
-    RETURN NEW;
-END;
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN NEW.updated_at = now(); RETURN NEW; END;
 $$;
 
-DROP TRIGGER IF EXISTS client_document_understandings_updated_at
-    ON public.client_document_understandings;
+DROP TRIGGER IF EXISTS client_document_understandings_updated_at ON public.client_document_understandings;
 CREATE TRIGGER client_document_understandings_updated_at
 BEFORE UPDATE ON public.client_document_understandings
 FOR EACH ROW EXECUTE FUNCTION public.set_document_understanding_updated_at();
 
-DROP TRIGGER IF EXISTS client_document_clarifications_updated_at
-    ON public.client_document_clarifications;
+DROP TRIGGER IF EXISTS client_document_clarifications_updated_at ON public.client_document_clarifications;
 CREATE TRIGGER client_document_clarifications_updated_at
 BEFORE UPDATE ON public.client_document_clarifications
 FOR EACH ROW EXECUTE FUNCTION public.set_document_understanding_updated_at();
@@ -222,5 +187,3 @@ COMMENT ON TABLE public.client_document_understanding_segments IS
     'Page/section evidence used to preserve document context and locate uncertain text.';
 COMMENT ON TABLE public.client_document_clarifications IS
     'Explicit human clarification requests for document text the AI/OCR cannot confidently resolve.';
-COMMENT ON FUNCTION public.submit_document_clarification(UUID, TEXT) IS
-    'Authorised human answer boundary; answered values are retained as provenance and trigger document reprocessing.';
