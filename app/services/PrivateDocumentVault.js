@@ -9,7 +9,7 @@
  * - browser-side validation before upload
  * - SHA-256 provenance hash
  * - role-aware path handling
- * - atomic cleanup when metadata/queue registration fails
+ * - cleanup when metadata/queue registration fails
  * - explicit hand-off to the trusted ingestion queue
  */
 export default class PrivateDocumentVault {
@@ -57,7 +57,6 @@ export default class PrivateDocumentVault {
         const isStaff = profile.role === 'staff';
 
         // Existing Storage RLS requires staff uploads to be scoped to a matter.
-        // This prevents a staff member from creating an unscoped client object.
         if (isStaff && !matterId) {
             throw new Error('Staff document uploads must be associated with a matter.');
         }
@@ -87,6 +86,8 @@ export default class PrivateDocumentVault {
 
         if (uploadError) throw uploadError;
 
+        let document = null;
+
         try {
             const { data, error } = await this.supabase
                 .from('client_documents')
@@ -109,15 +110,28 @@ export default class PrivateDocumentVault {
                 .single();
 
             if (error) throw error;
+            document = data;
 
             const { data: job, error: queueError } = await this.supabase
-                .rpc('queue_client_document_ingestion', { p_document_id: data.id });
+                .rpc('queue_client_document_ingestion', { p_document_id: document.id });
 
             if (queueError) throw queueError;
 
-            return { document: data, ingestionJob: job };
+            return { document, ingestionJob: job };
         } catch (error) {
-            await this.supabase.storage.from(this.bucket).remove([path]);
+            if (document?.id) {
+                const { error: deleteError } = await this.supabase
+                    .from('client_documents')
+                    .delete()
+                    .eq('id', document.id);
+                if (deleteError) this.logger.error('Failed to clean up document metadata:', deleteError);
+            }
+
+            const { error: storageError } = await this.supabase.storage
+                .from(this.bucket)
+                .remove([path]);
+            if (storageError) this.logger.error('Failed to clean up uploaded object:', storageError);
+
             throw error;
         }
     }
