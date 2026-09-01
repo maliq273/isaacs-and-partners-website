@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Document Vault | Isaacs and Partners</title>
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body data-page="document-vault">
+<main class="dashboard-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Isaacs and Partners · Private Control Plane</p>
+      <h1>Document Vault</h1>
+      <p class="page-description">Super Admin view of confidential client documents, provenance, processing state and ingestion health. File contents remain in private Supabase Storage.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn" href="./super-admin.html">Control Centre</a>
+      <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
+    </div>
+  </header>
+
+  <div id="document-vault-message" class="login-message" role="status" hidden></div>
+
+  <section class="stats-grid">
+    <article class="stat-card"><span class="stat-label">Private Documents</span><strong id="vault-document-count">0</strong></article>
+    <article class="stat-card"><span class="stat-label">Queued</span><strong id="vault-queued-count">0</strong></article>
+    <article class="stat-card"><span class="stat-label">Processing</span><strong id="vault-processing-count">0</strong></article>
+    <article class="stat-card"><span class="stat-label">Failed</span><strong id="vault-failed-count">0</strong></article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel panel-large">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Ingestion boundary</p>
+          <h2>Document Processing Queue</h2>
+          <p>Queue state only. The trusted worker will perform retrieval, verification, OCR/extraction and classification.</p>
+        </div>
+        <span class="control-plane-badge" id="vault-worker-status">Not connected</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Matter</th>
+              <th>Status</th>
+              <th>Ingestion</th>
+              <th>Attempts</th>
+              <th>Available</th>
+            </tr>
+          </thead>
+          <tbody id="vault-queue">
+            <tr><td colspan="6">Queue integration will be connected in PR38.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Provenance</p>
+          <h2>Integrity Controls</h2>
+        </div>
+      </div>
+      <div class="activity-list">
+        <div><strong>Original file</strong><span>Immutable source retained in private storage.</span></div>
+        <div><strong>SHA-256</strong><span>Hash verification occurs before trusted processing.</span></div>
+        <div><strong>Storage</strong><span>Private <code>client-documents</code> bucket only.</span></div>
+        <div><strong>GitHub</strong><span>Confidential client files are never committed to the repository.</span></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel">
+      <div class="panel-header"><div><p class="eyebrow">Operational controls</p><h2>Queue Health</h2></div></div>
+      <div class="activity-list">
+        <div><strong>Pending</strong><span id="vault-pending-summary">Waiting for ingestion worker.</span></div>
+        <div><strong>Retries</strong><span id="vault-retry-summary">Retry policy will be exposed by the worker.</span></div>
+        <div><strong>Failures</strong><span id="vault-failure-summary">Failed jobs remain auditable and do not overwrite originals.</span></div>
+      </div>
+    </article>
+    <article class="panel">
+      <div class="panel-header"><div><p class="eyebrow">AI boundary</p><h2>Processing Rules</h2></div></div>
+      <div class="empty-state">AI services receive only approved extracted content through the trusted processing boundary. Browser code never receives service-role credentials and cannot bypass document or matter permissions.</div>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Build status</p>
+        <h2>PR38 Integration Surface</h2>
+        <p>This dashboard is intentionally presentation-first. Database queries, worker execution and privileged processing are wired after the dashboard surface is approved.</p>
+      </div>
+    </div>
+    <div class="security-status" id="vault-build-status">Dashboard surface ready · trusted ingestion worker not yet connected.</div>
+  </section>
+</main>
+
+<script type="module">
+  import dashboardPageController from "./DashboardPageController.js?v=20260901-2";
+  await dashboardPageController.initialise();
+</script>
+</body>
+</html>
