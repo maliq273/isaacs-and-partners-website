@@ -1,4 +1,4 @@
--- PR40: Private client dossier storage boundary.
+-- PR40: private client dossier storage boundary.
 -- Canonical path: owner/matter/{staging|verified}/filename.
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit)
@@ -7,26 +7,17 @@ ON CONFLICT (id) DO UPDATE SET public = false, file_size_limit = 52428800;
 
 ALTER TABLE public.client_documents ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ;
 ALTER TABLE public.client_documents ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES public.profiles(id);
-
 CREATE INDEX IF NOT EXISTS client_documents_verified_idx ON public.client_documents(verified_at, verified_by);
 
 CREATE OR REPLACE FUNCTION public.client_dossier_path_allowed(p_name TEXT, p_require_staging BOOLEAN DEFAULT FALSE)
 RETURNS BOOLEAN LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-    parts TEXT[];
-    owner_id UUID;
-    matter_id UUID;
+DECLARE parts TEXT[]; owner_id UUID; matter_id UUID;
 BEGIN
     IF p_name IS NULL THEN RETURN FALSE; END IF;
-    parts := storage.foldername(p_name);
+    parts := string_to_array(p_name, '/');
     IF array_length(parts, 1) <> 4 THEN RETURN FALSE; END IF;
     IF parts[1] = '' OR parts[2] = '' OR parts[3] NOT IN ('staging','verified') OR parts[4] = '' THEN RETURN FALSE; END IF;
-    BEGIN
-        owner_id := parts[1]::uuid;
-        matter_id := parts[2]::uuid;
-    EXCEPTION WHEN invalid_text_representation THEN
-        RETURN FALSE;
-    END;
+    BEGIN owner_id := parts[1]::uuid; matter_id := parts[2]::uuid; EXCEPTION WHEN invalid_text_representation THEN RETURN FALSE; END;
     IF p_require_staging AND parts[3] <> 'staging' THEN RETURN FALSE; END IF;
     IF is_super_admin() THEN RETURN TRUE; END IF;
     IF EXISTS (SELECT 1 FROM public.matters m WHERE m.id = matter_id AND m.individual_user_id = auth.uid() AND owner_id = m.individual_user_id) THEN RETURN TRUE; END IF;
