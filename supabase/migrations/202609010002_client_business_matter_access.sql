@@ -1,6 +1,9 @@
 -- Isaacs & Partners
 -- PR35: Client / Business / Matter access foundation.
+--
 -- Existing client, business and matter tables remain authoritative.
+-- This migration adds narrowly-scoped access helpers and RPCs so frontend
+-- controllers do not need to duplicate authorization rules.
 
 create or replace function public.client_can_access_matter(p_matter_id uuid)
 returns boolean
@@ -16,7 +19,8 @@ as $$
           and (
               m.individual_user_id = auth.uid()
               or exists (
-                  select 1 from public.businesses b
+                  select 1
+                  from public.businesses b
                   where b.id = m.business_id
                     and b.owner_user_id = auth.uid()
               )
@@ -38,7 +42,8 @@ as $$
     from public.matters m
     where m.individual_user_id = auth.uid()
        or exists (
-            select 1 from public.businesses b
+            select 1
+            from public.businesses b
             where b.id = m.business_id
               and b.owner_user_id = auth.uid()
        )
@@ -105,7 +110,9 @@ grant execute on function public.get_matter_access_context(uuid) to authenticate
 
 comment on function public.client_can_access_matter(uuid) is
 'Authoritative client-side authorization helper: true only when the current authenticated user owns the individual or business side of the matter.';
+
 comment on function public.get_my_matters() is
 'Returns matters visible to the authenticated caller under existing RLS and staff/super-admin access rules.';
+
 comment on function public.get_matter_access_context(uuid) is
 'Returns a permission-checked matter context for authorised users without exposing unrelated client records.';
