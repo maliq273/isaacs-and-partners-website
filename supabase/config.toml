@@ -5,3 +5,8 @@ verify_jwt = false
 
 [functions.admin-upload-brand-asset]
 verify_jwt = false
+
+# PR40 — invoked only by the trusted worker boundary. The function itself
+# validates the service-role bearer token before processing any queue job.
+[functions.trusted-document-worker]
+verify_jwt = false
