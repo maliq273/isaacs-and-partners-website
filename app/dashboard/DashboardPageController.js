@@ -1,358 +1,41 @@
-/**
- * Isaacs and Partners
- * Dashboard Page Controller
- *
- * Connects rendered role dashboards to dashboard data services.
- * The authoritative dashboard role is resolved once from public.profiles.
- */
-
+// Dashboard Page Controller — role-aware rendering over the existing Supabase data services.
 import auth from "../auth/AuthService.js";
 import navigation from "../core/navigation.js";
 import dashboardData from "./DashboardDataService.js";
 import adminDashboardData from "./AdminDashboardDataService.js";
 import { resolveUserDashboardRole, clearRoleCache } from "./DashboardAccess.js";
 
-const PAGE_ROLES = Object.freeze({
-    "client-dashboard": "INDIVIDUAL",
-    "business-dashboard": "BUSINESS",
-    "staff-dashboard": "STAFF",
-    "super-admin": "SUPER_ADMIN"
-});
-
+const PAGE_ROLES = Object.freeze({"client-dashboard":"INDIVIDUAL","business-dashboard":"BUSINESS","staff-dashboard":"STAFF","super-admin":"SUPER_ADMIN"});
 class DashboardPageController {
-    constructor() {
-        this.initialised = false;
-        this.loading = false;
-        this.data = null;
-        this.handleLogout = this.handleLogout.bind(this);
-    }
-
-    async initialise() {
-        if (this.initialised) return this;
-        if (this.loading) return this.loading;
-        this.loading = this._initialise();
-        try {
-            await this.loading;
-            return this;
-        } finally {
-            this.loading = false;
-        }
-    }
-
-    async _initialise() {
-        await auth.initialise();
-
-        if (!auth.isAuthenticated()) {
-            navigation.toLogin(this.getCurrentReturnUrl(), { replace: true });
-            return this;
-        }
-
-        const user = auth.getCurrentUser();
-        const role = await resolveUserDashboardRole(user);
-        const pageRole = this.getPageRole();
-
-        if (!this.canUsePage(role, pageRole)) {
-            navigation.toRoleDashboard(role, { replace: true });
-            return this;
-        }
-
-        try {
-            if (pageRole === "SUPER_ADMIN") {
-                this.data = await adminDashboardData.getDashboardSummary(role);
-                this.data.user = user;
-                this.data.role = role;
-                this.data.dashboard = "SUPER_ADMIN";
-            } else {
-                this.data = await dashboardData.getCurrentDashboard({ limit: 10 });
-            }
-
-            this.render();
-        } catch (error) {
-            console.error("[DashboardPageController] Dashboard data load failed:", error);
-            this.renderError(error);
-        }
-
-        this.bindEvents();
-        this.initialised = true;
-        return this;
-    }
-
-    getPageRole() {
-        if (typeof document === "undefined") return null;
-        return PAGE_ROLES[document.body?.dataset?.page] || null;
-    }
-
-    canUsePage(actualRole, pageRole) {
-        if (!pageRole) return true;
-        if (actualRole === "SUPER_ADMIN") return pageRole === "SUPER_ADMIN" || pageRole === "STAFF";
-        return actualRole === pageRole;
-    }
-
-    getCurrentReturnUrl() {
-        if (typeof window === "undefined") return "/index.html";
-        return window.location.pathname + window.location.search + window.location.hash;
-    }
-
-    render() {
-        if (typeof document === "undefined" || !this.data) return;
-        this.renderUser();
-        this.renderRoleDashboard();
-        this.renderLogoutState();
-    }
-
-    renderUser() {
-        const user = this.data.user || auth.getCurrentUser();
-        const displayName = user?.name || user?.fullName || user?.full_name || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email || user?.username || "User";
-        document.querySelectorAll("#dashboard-greeting, #admin-greeting").forEach(element => {
-            element.textContent = `Welcome, ${displayName}`;
-        });
-    }
-
-    renderRoleDashboard() {
-        const page = this.getPageRole();
-        if (page === "INDIVIDUAL") return this.renderIndividual();
-        if (page === "BUSINESS") return this.renderBusiness();
-        if (page === "STAFF") return this.renderStaff();
-        if (page === "SUPER_ADMIN") return this.renderSuperAdmin();
-    }
-
-    renderIndividual() {
-        const matters = this.data.matters || [];
-        const documents = this.data.documents || [];
-        const appointments = this.data.appointments || [];
-        const invoices = this.data.invoices || [];
-        this.setStatByIndex(0, matters.length);
-        this.setStatByIndex(1, documents.length);
-        this.setStatByIndex(2, appointments.length);
-        this.setStatByIndex(3, this.calculateOutstandingBalance(invoices));
-        this.setEmptyState(0, this.collectionMessage(matters, "matter"));
-        this.setEmptyState(1, this.collectionMessage(documents, "outstanding document"));
-        this.setEmptyState(2, this.collectionMessage(appointments, "upcoming appointment"));
-    }
-
-    renderBusiness() {
-        const matters = this.data.matters || [];
-        const documents = this.data.documents || [];
-        const invoices = this.data.invoices || [];
-        this.setStatByIndex(0, matters.length);
-        this.setStatByIndex(1, documents.length);
-        this.setStatByIndex(2, this.countComplianceItems(documents));
-        this.setStatByIndex(3, this.calculateOutstandingBalance(invoices));
-        this.setEmptyState(0, this.collectionMessage(matters, "business matter"));
-        this.setEmptyState(1, this.collectionMessage(documents, "outstanding document"));
-    }
-
-    renderStaff() {
-        const matters = this.data.matters || [];
-        const tasks = this.data.tasks || [];
-        const staff = this.data.staff || {};
-        this.setText("#staff-outstanding-tasks", tasks.length);
-        this.setText("#active-staff", staff.status === "active" ? 1 : 0);
-        this.setText("#online-staff", staff.online ? 1 : 0);
-        this.setText("#total-staff", this.data.staff ? 1 : 0);
-        this.setText("#staff-table", tasks.length ? `${tasks.length} task(s) assigned to you.` : "No tasks assigned.");
-        this.setText("#staff-workload", matters.length ? `${matters.length} matter(s) currently linked to your workload.` : "No matters currently assigned.");
-        this.setText("#staff-activity", tasks.length ? `${tasks.length} outstanding task(s) require attention.` : "No outstanding tasks.");
-    }
-
-    renderSuperAdmin() {
-        const counts = this.data.counts || {};
-        const integrations = this.data.integrations || {};
-        this.setText("#admin-open-matters", counts.openMatters ?? 0);
-        this.setText("#admin-prequote-count", counts.pendingPreQuotes ?? 0);
-        this.setText("#admin-unassigned-count", counts.unassignedMatters ?? 0);
-        this.setText("#admin-staff-count", counts.staff ?? 0);
-        this.setText("#admin-security-status", this.data.role === "SUPER_ADMIN" ? "Authenticated administrator session is active. Live Supabase data is connected." : "Administrator access is unavailable.");
-        this.setText("#admin-integration-summary", this.integrationSummary(integrations.summary));
-        this.renderIntegrations(integrations.providers || [], integrations.summary || {});
-        this.renderIntegrationEvents(integrations.events || []);
-    }
-
-    renderIntegrations(providers, summary) {
-        const container = document.querySelector("#admin-integrations");
-        if (!container) return;
-
-        if (!providers.length) {
-            container.innerHTML = `<div class="empty-state">Integration registry is unavailable.</div>`;
-            return;
-        }
-
-        container.innerHTML = providers.map(provider => {
-            const status = String(provider.status || "NOT_CONFIGURED").toUpperCase();
-            const statusClass = status === "CONNECTED" ? "active" : status === "ERROR" ? "inactive" : "pending";
-            const lastSync = provider.last_success_at ? this.formatDate(provider.last_success_at) : "No successful sync yet";
-            const error = provider.last_error ? `<small class="integration-error">${this.escape(provider.last_error)}</small>` : "";
-
-            return `
-                <article class="integration-card">
-                    <div class="integration-card-header">
-                        <div>
-                            <strong>${this.escape(provider.display_name || provider.provider_key)}</strong>
-                            <small>${this.escape(provider.provider_key)}</small>
-                        </div>
-                        <span class="status-badge ${statusClass}">${this.escape(this.formatIntegrationStatus(status))}</span>
-                    </div>
-                    <div class="integration-meta">
-                        <span>Last successful sync: ${this.escape(lastSync)}</span>
-                        <span>${provider.enabled ? "Enabled" : "Not configured"}</span>
-                    </div>
-                    ${error}
-                </article>
-            `;
-        }).join("");
-
-        this.setText("#admin-integration-provider-count", `${summary.connectedProviders ?? 0}/${summary.providerCount ?? providers.length} connected`);
-    }
-
-    renderIntegrationEvents(events) {
-        const container = document.querySelector("#admin-integration-events");
-        if (!container) return;
-
-        if (!events.length) {
-            container.innerHTML = `<div class="empty-state">No integration events have been recorded yet.</div>`;
-            return;
-        }
-
-        container.innerHTML = events.slice(0, 10).map(event => {
-            const status = String(event.status || "PENDING").toUpperCase();
-            const statusClass = status === "COMPLETED" ? "active" : status === "FAILED" ? "inactive" : "pending";
-            return `
-                <div class="integration-event-row">
-                    <div>
-                        <strong>${this.escape(event.event_type || "EVENT")}</strong>
-                        <small>${this.escape(event.entity_type || "")}${event.entity_id ? ` · ${this.escape(event.entity_id)}` : ""}</small>
-                    </div>
-                    <div>
-                        <span class="status-badge ${statusClass}">${this.escape(status)}</span>
-                        <small>${this.escape(this.formatDate(event.created_at))}</small>
-                    </div>
-                </div>
-            `;
-        }).join("");
-    }
-
-    integrationSummary(summary = {}) {
-        const connected = Number(summary.connectedProviders || 0);
-        const total = Number(summary.providerCount || 0);
-        const pending = Number(summary.pendingEvents || 0);
-        const failed = Number(summary.failedEvents || 0);
-        return `${connected}/${total} providers connected · ${pending} pending events · ${failed} failed events`;
-    }
-
-    formatIntegrationStatus(status) {
-        return String(status || "NOT_CONFIGURED")
-            .toLowerCase()
-            .replace(/_/g, " ")
-            .replace(/\b\w/g, character => character.toUpperCase());
-    }
-
-    formatDate(value) {
-        if (!value) return "—";
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return String(value);
-        return new Intl.DateTimeFormat("en-ZA", {
-            dateStyle: "medium",
-            timeStyle: "short"
-        }).format(date);
-    }
-
-    setPanelMessage(defaultMessage, count, label) {
-        const panels = document.querySelectorAll(".dashboard-grid .activity-list .empty-state");
-        const message = count > 0 ? `${count} ${label}${count === 1 ? "" : "s"} currently require attention.` : defaultMessage;
-        panels.forEach(panel => {
-            if (panel.textContent?.includes(defaultMessage.slice(0, 20))) panel.textContent = message;
-        });
-    }
-
-    calculateOutstandingBalance(invoices) {
-        const total = invoices.reduce((sum, invoice) => {
-            const value = invoice?.balance_due ?? invoice?.balanceDue ?? invoice?.amount_due ?? invoice?.amountDue ?? 0;
-            const numeric = Number(value);
-            return sum + (Number.isFinite(numeric) ? numeric : 0);
-        }, 0);
-        return `R${total.toFixed(2)}`;
-    }
-
-    countComplianceItems(documents) {
-        return documents.filter(document => {
-            const type = String(document?.type || document?.category || document?.document_type || "").toLowerCase();
-            return type.includes("compliance") || type.includes("sars") || type.includes("uif") || type.includes("coida");
-        }).length;
-    }
-
-    collectionMessage(items, label) {
-        const count = items.length;
-        if (!count) return `No ${label}s are currently linked to your account.`;
-        return `${count} ${label}${count === 1 ? "" : "s"} currently linked to your account.`;
-    }
-
-    setStatByIndex(index, value) {
-        const cards = document.querySelectorAll(".stats-grid .stat-card strong");
-        if (cards[index]) cards[index].textContent = String(value);
-    }
-
-    setText(selector, value) {
-        const element = document.querySelector(selector);
-        if (element) element.textContent = String(value);
-    }
-
-    setEmptyState(index, value) {
-        const elements = document.querySelectorAll(".dashboard-grid .empty-state");
-        if (elements[index]) elements[index].textContent = value;
-    }
-
-    escape(value) {
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    renderError(error) {
-        const page = document.querySelector(".dashboard-page");
-        if (!page) return;
-        let notice = document.querySelector("#dashboard-data-error");
-        if (!notice) {
-            notice = document.createElement("div");
-            notice.id = "dashboard-data-error";
-            notice.className = "login-message login-error";
-            notice.setAttribute("role", "alert");
-            page.prepend(notice);
-        }
-        const message = error?.code === "AUTHENTICATION_REQUIRED" ? "Your session is no longer active. Please sign in again." : "Dashboard data could not be loaded. Please refresh and try again.";
-        notice.textContent = message;
-    }
-
-    renderLogoutState() {
-        document.querySelectorAll("[data-auth-action='logout']").forEach(button => { button.disabled = false; });
-    }
-
-    bindEvents() {
-        document.querySelectorAll("[data-auth-action='logout']").forEach(button => button.addEventListener("click", this.handleLogout));
-    }
-
-    async handleLogout(event) {
-        event?.preventDefault();
-        try {
-            const user = auth.getCurrentUser();
-            clearRoleCache(user?.id || user?.user_id || user?.userId || null);
-            await auth.logout({ remote: true, reason: "user" });
-            navigation.toLogin(null, { replace: true });
-        } catch (error) {
-            console.error("[DashboardPageController] Logout failed:", error);
-        }
-    }
-
-    destroy() {
-        document?.querySelectorAll("[data-auth-action='logout']").forEach(button => button.removeEventListener("click", this.handleLogout));
-        this.initialised = false;
-        this.loading = false;
-        this.data = null;
-    }
+ constructor(){this.initialised=false;this.loading=false;this.data=null;this.handleLogout=this.handleLogout.bind(this)}
+ async initialise(){if(this.initialised)return this;if(this.loading)return this.loading;this.loading=this._initialise();try{return await this.loading}finally{this.loading=false}}
+ async _initialise(){await auth.initialise();if(!auth.isAuthenticated()){navigation.toLogin(this.getCurrentReturnUrl(),{replace:true});return this}const user=auth.getCurrentUser(),role=await resolveUserDashboardRole(user),pageRole=this.getPageRole();if(!this.canUsePage(role,pageRole)){navigation.toRoleDashboard(role,{replace:true});return this}try{this.data=pageRole==="SUPER_ADMIN"?await adminDashboardData.getDashboardSummary(role):await dashboardData.getCurrentDashboard({limit:10});this.data.user=user;this.data.role=role;this.data.dashboard=pageRole;this.render()}catch(error){console.error("[DashboardPageController] Dashboard data load failed:",error);this.renderError(error)}this.bindEvents();this.initialised=true;return this}
+ getPageRole(){return typeof document==="undefined"?null:PAGE_ROLES[document.body?.dataset?.page]||null}
+ canUsePage(actualRole,pageRole){if(!pageRole)return true;if(actualRole==="SUPER_ADMIN")return pageRole==="SUPER_ADMIN"||pageRole==="STAFF";return actualRole===pageRole}
+ getCurrentReturnUrl(){return typeof window==="undefined"?"/index.html":window.location.pathname+window.location.search+window.location.hash}
+ render(){if(typeof document==="undefined"||!this.data)return;this.renderUser();this.renderRoleDashboard();this.renderLogoutState()}
+ renderUser(){const user=this.data.user||auth.getCurrentUser(),name=user?.name||user?.fullName||user?.full_name||[user?.firstName,user?.lastName].filter(Boolean).join(" ")||user?.email||user?.username||"User";document.querySelectorAll("#dashboard-greeting,#admin-greeting").forEach(e=>e.textContent=`Welcome, ${name}`)}
+ renderRoleDashboard(){const p=this.getPageRole();if(p==="INDIVIDUAL")return this.renderIndividual();if(p==="BUSINESS")return this.renderBusiness();if(p==="STAFF")return this.renderStaff();if(p==="SUPER_ADMIN")return this.renderSuperAdmin()}
+ renderIndividual(){const m=this.data.matters||[],d=this.data.documents||[],a=this.data.appointments||[],i=this.data.invoices||[];this.setStatByIndex(0,m.length);this.setStatByIndex(1,d.length);this.setStatByIndex(2,a.length);this.setStatByIndex(3,this.calculateOutstandingBalance(i));this.setEmptyState(0,this.collectionMessage(m,"matter"));this.setEmptyState(1,this.collectionMessage(d,"outstanding document"));this.setEmptyState(2,this.collectionMessage(a,"upcoming appointment"))}
+ renderBusiness(){const m=this.data.matters||[],d=this.data.documents||[],i=this.data.invoices||[];this.setStatByIndex(0,m.length);this.setStatByIndex(1,d.length);this.setStatByIndex(2,this.countComplianceItems(d));this.setStatByIndex(3,this.calculateOutstandingBalance(i));this.setEmptyState(0,this.collectionMessage(m,"business matter"));this.setEmptyState(1,this.collectionMessage(d,"outstanding document"))}
+ renderStaff(){const m=this.data.matters||[],t=this.data.tasks||[],d=this.data.documents||[];this.setText("#staff-my-matters",m.length);this.setText("#staff-outstanding-tasks",t.length);this.setText("#staff-document-count",d.length);this.setText("#staff-ai-queue",t.length);this.setText("#staff-workload",m.length?`${m.length} matter(s) currently linked to your workload.`:"No matters currently assigned.");this.setText("#staff-documents",d.length?`${d.length} authorised document record(s) available.`:"No authorised documents currently available.");this.setText("#staff-activity",t.length?`${t.length} outstanding task(s) require attention.`:"No outstanding tasks.")}
+ renderSuperAdmin(){const c=this.data.counts||{},i=this.data.integrations||{};this.setText("#admin-open-matters",c.openMatters??0);this.setText("#admin-unassigned-count",c.unassignedMatters??0);this.setText("#admin-staff-count",c.staff??0);this.setText("#admin-ai-events",(i.events||[]).length);this.setText("#admin-security-status",this.data.role==="SUPER_ADMIN"?"Authenticated administrator session is active. Live Supabase data is connected.":"Administrator access is unavailable.");this.setText("#admin-integration-summary",this.integrationSummary(i.summary));this.renderIntegrations(i.providers||[],i.summary||{});this.renderIntegrationEvents(i.events||[])}
+ renderIntegrations(providers,summary){const c=document.querySelector("#admin-integrations");if(!c)return;if(!providers.length){c.innerHTML='<div class="empty-state">Integration registry is unavailable.</div>';return}c.innerHTML=providers.map(p=>{const s=String(p.status||"NOT_CONFIGURED").toUpperCase(),sc=s==="CONNECTED"?"active":s==="ERROR"?"inactive":"pending",last=p.last_success_at?this.formatDate(p.last_success_at):"No successful sync yet",err=p.last_error?`<small class="integration-error">${this.escape(p.last_error)}</small>`:"";return `<article class="integration-card"><div class="integration-card-header"><div><strong>${this.escape(p.display_name||p.provider_key)}</strong><small>${this.escape(p.provider_key)}</small></div><span class="status-badge ${sc}">${this.escape(this.formatIntegrationStatus(s))}</span></div><div class="integration-meta"><span>Last successful sync: ${this.escape(last)}</span><span>${p.enabled?"Enabled":"Not configured"}</span></div>${err}</article>`}).join("");this.setText("#admin-integration-provider-count",`${summary.connectedProviders??0}/${summary.providerCount??providers.length} connected`)}
+ renderIntegrationEvents(events){const c=document.querySelector("#admin-integration-events");if(!c)return;if(!events.length){c.innerHTML='<div class="empty-state">No integration events have been recorded yet.</div>';return}c.innerHTML=events.slice(0,10).map(e=>{const s=String(e.status||"PENDING").toUpperCase(),sc=s==="COMPLETED"?"active":s==="FAILED"?"inactive":"pending";return `<div class="integration-event-row"><div><strong>${this.escape(e.event_type||"EVENT")}</strong><small>${this.escape(e.entity_type||"")}${e.entity_id?` · ${this.escape(e.entity_id)}`:""}</small></div><div><span class="status-badge ${sc}">${this.escape(s)}</span><small>${this.escape(this.formatDate(e.created_at))}</small></div></div>`}).join("")}
+ integrationSummary(s={}){return `${Number(s.connectedProviders||0)}/${Number(s.providerCount||0)} providers connected · ${Number(s.pendingEvents||0)} pending events · ${Number(s.failedEvents||0)} failed events`}
+ formatIntegrationStatus(s){return String(s||"NOT_CONFIGURED").toLowerCase().replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}
+ formatDate(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):new Intl.DateTimeFormat("en-ZA",{dateStyle:"medium",timeStyle:"short"}).format(d)}
+ calculateOutstandingBalance(invoices){const total=invoices.reduce((sum,x)=>{const n=Number(x?.balance_due??x?.balanceDue??x?.amount_due??x?.amountDue??0);return sum+(Number.isFinite(n)?n:0)},0);return`R${total.toFixed(2)}`}
+ countComplianceItems(d){return d.filter(x=>{const t=String(x?.type||x?.category||x?.document_type||"").toLowerCase();return t.includes("compliance")||t.includes("sars")||t.includes("uif")||t.includes("coida")}).length}
+ collectionMessage(items,label){return items.length?`${items.length} ${label}${items.length===1?"":"s"} currently linked to your account.`:`No ${label}s are currently linked to your account.`}
+ setStatByIndex(i,v){const c=document.querySelectorAll(".stats-grid .stat-card strong");if(c[i])c[i].textContent=String(v)}
+ setText(s,v){const e=document.querySelector(s);if(e)e.textContent=String(v)}
+ setEmptyState(i,v){const e=document.querySelectorAll(".dashboard-grid .empty-state");if(e[i])e[i].textContent=v}
+ escape(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#039;")}
+ renderError(error){const p=document.querySelector(".dashboard-page");if(!p)return;let n=document.querySelector("#dashboard-data-error");if(!n){n=document.createElement("div");n.id="dashboard-data-error";n.className="login-message login-error";n.setAttribute("role","alert");p.prepend(n)}n.textContent=error?.code==="AUTHENTICATION_REQUIRED"?"Your session is no longer active. Please sign in again.":"Dashboard data could not be loaded. Please refresh and try again."}
+ renderLogoutState(){document.querySelectorAll("[data-auth-action='logout']").forEach(b=>b.disabled=false)}
+ bindEvents(){document.querySelectorAll("[data-auth-action='logout']").forEach(b=>b.addEventListener("click",this.handleLogout))}
+ async handleLogout(e){e?.preventDefault();try{const u=auth.getCurrentUser();clearRoleCache(u?.id||u?.user_id||u?.userId||null);await auth.logout({remote:true,reason:"user"});navigation.toLogin(null,{replace:true})}catch(error){console.error("[DashboardPageController] Logout failed:",error)}}
+ destroy(){document?.querySelectorAll("[data-auth-action='logout']").forEach(b=>b.removeEventListener("click",this.handleLogout));this.initialised=false;this.loading=false;this.data=null}
 }
-
-export const dashboardPageController = new DashboardPageController();
-export { DashboardPageController };
-export default dashboardPageController;
+export const dashboardPageController=new DashboardPageController();export{DashboardPageController};export default dashboardPageController;
