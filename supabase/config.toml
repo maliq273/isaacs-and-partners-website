@@ -10,3 +10,9 @@ verify_jwt = false
 # validates the service-role bearer token before processing any queue job.
 [functions.trusted-document-worker]
 verify_jwt = false
+
+# PR43 — OpenWA webhook and outbound worker. Authentication is performed
+# inside the function using HMAC for webhooks and a dedicated worker token
+# for outbound queue processing.
+[functions.openwa-communication-worker]
+verify_jwt = false
