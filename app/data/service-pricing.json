@@ -1,0 +1,59 @@
+{
+  "version": "2.0.0",
+  "currency": "ZAR",
+  "vat": "EXCLUDED",
+  "principles": {
+    "customerSignup": "Create a blank client dashboard. Full AI workspace is activated by Super Admin or authorised staff after onboarding review.",
+    "freeConsultationMinutes": 30,
+    "paidConsultation": { "amount": 1250, "vat": "EXCLUDED" },
+    "immigrationQuote": "AI produces a preliminary estimate only; staff sends the binding quote to the customer inbox.",
+    "immigrationPayment": { "depositPercent": 50, "finalPercent": 50, "finalTrigger": "FILES_READY_FOR_VFS_OR_DHA" },
+    "immigrationAuthorityFeesExcluded": true,
+    "humanApprovalRequiredForLegalAdvice": true,
+    "humanAssistanceRequiredForHRIR": true,
+    "businessComplianceMarkupPercent": 39
+  },
+  "domains": {
+    "immigration": {
+      "mode": "AI_INTAKE_HUMAN_QUOTE",
+      "estimateSource": "LIVE_REGULATORY_AND_MARKET_RESEARCH",
+      "authorityFeesExcluded": true,
+      "specialBilling": {
+        "section-22-applications": "HOURLY_PLUS_PER_PAGE_PLUS_SERVICE_FLAT_RATE",
+        "section-24-applications": "HOURLY_PLUS_PER_PAGE_PLUS_SERVICE_FLAT_RATE",
+        "visa-appeals": "HOURLY_PLUS_PER_PAGE_PLUS_SERVICE_FLAT_RATE"
+      },
+      "workflow": ["QUALIFICATION", "REGULATORY_RESEARCH", "DOCUMENT_COLLECTION", "AI_PRECHECK", "STAFF_QUOTE", "DEPOSIT", "PREPARATION", "QC", "SUBMISSION_READY", "FINAL_BALANCE", "VFS_OR_DHA_SUBMISSION", "TRACKING"]
+    },
+    "hr-industrial-relations": {
+      "mode": "HUMAN_ASSISTANCE",
+      "rates": {
+        "payrollOutsourcing": "12.5_PERCENT_OF_MONTHLY_EMPLOYEE_SALARY",
+        "temporaryStaffing": "23.5_PERCENT_OF_EMPLOYEE_HOURLY_RATE",
+        "hearingRepresentationHourly": 400,
+        "documentSupplied": 150
+      },
+      "workflow": ["INTAKE", "AI_TRIAGE", "HUMAN_ASSIGNMENT", "DOCUMENT_COLLECTION", "HUMAN_SERVICE_DELIVERY", "QC", "CLIENT_UPDATE", "CLOSURE"]
+    },
+    "business-compliance": {
+      "mode": "AI_ESTIMATE_HUMAN_APPROVAL",
+      "marketResearchMarkupPercent": 39,
+      "retainer": {
+        "monthlyAmount": 1250,
+        "baseIncludedItems": 3,
+        "pricingAfterBase": "AI_RECOMMEND_STAFF_PRICE"
+      },
+      "workflow": ["INTAKE", "AI_TRIAGE", "SERVICE_SELECTION", "MARKET_RESEARCH", "MARKUP_CALCULATION", "PACKAGE_ANALYSIS", "STAFF_PRICE_REVIEW", "QUOTE", "DELIVERY", "COMPLIANCE_TRACKING"]
+    },
+    "legal": {
+      "mode": "AI_INTAKE_HUMAN_LEGAL_REVIEW",
+      "rates": {
+        "paidConsultation": 1250,
+        "consultationVat": "EXCLUDED",
+        "hourly": "CONFIGURED_IN_SERVICE_INVENTORY",
+        "perDocument": "CONFIGURED_IN_SERVICE_INVENTORY"
+      },
+      "workflow": ["AI_INTAKE", "FREE_30_MIN_AI_CONSULTATION", "SCOPE_CONFIRMATION", "PRICING_SELECTION", "PAYMENT", "HUMAN_LEGAL_REVIEW", "DRAFT_OR_ADVICE", "QC", "DELIVERY"]
+    }
+  }
+}
