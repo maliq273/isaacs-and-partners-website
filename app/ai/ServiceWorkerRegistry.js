@@ -21,7 +21,8 @@ const WORKERS = Object.freeze({
     QUOTE: { id: "QUOTE", domains: ["IMMIGRATION", "LEGAL", "BUSINESS_COMPLIANCE", "HR_IR"], mode: "HUMAN_APPROVAL", responsibilities: ["prepare_quote_draft", "send_to_staff_review", "send_approved_quote_to_customer_inbox", "record_terms"] },
     PAYMENT_GATE: { id: "PAYMENT_GATE", domains: ["ALL"], mode: "DETERMINISTIC", responsibilities: ["enforce_payment_state", "block_paid_work_before_required_deposit", "enforce_final_balance_before_submission"] },
     APPLICATION_PREPARATION: { id: "APPLICATION_PREPARATION", domains: ["IMMIGRATION"], mode: "AI_HUMAN_QC", responsibilities: ["populate_forms", "assemble_bundle", "generate_index", "generate_cover_sheet", "flag_outstanding_items", "require_quality_control"] },
-    CLIENT_COMMUNICATION: { id: "CLIENT_COMMUNICATION", domains: ["ALL"], mode: "AI_ASSISTED", responsibilities: ["status_updates", "missing_document_requests", "clarification_requests", "quote_notifications", "submission_readiness_notifications"] },
+    OPENWA_COMMUNICATION: { id: "OPENWA_COMMUNICATION", domains: ["ALL"], mode: "SERVER_TRANSPORT", responsibilities: ["queue_outbound_whatsapp", "send_text_through_openwa", "receive_signed_webhooks", "persist_inbound_messages", "track_sent_delivery_read_failed_states", "deduplicate_events", "never_expose_openwa_api_key"] },
+    CLIENT_COMMUNICATION: { id: "CLIENT_COMMUNICATION", domains: ["ALL"], mode: "AI_ASSISTED", responsibilities: ["status_updates", "missing_document_requests", "clarification_requests", "quote_notifications", "submission_readiness_notifications", "route_whatsapp_through_openwa"] },
     AUDIT: { id: "AUDIT", domains: ["ALL"], mode: "SYSTEM", responsibilities: ["record_worker_execution", "record_sources", "record_pricing_inputs", "record_human_decisions", "preserve_provenance"] }
 });
 
