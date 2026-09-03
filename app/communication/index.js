@@ -6,3 +6,5 @@ export { default as LeadService } from "./services/LeadService.js";
 export { default as SalesService } from "./services/SalesService.js";
 export { default as StaffMessageHandler } from "./handlers/StaffMessageHandler.js";
 export { default as EscalationHandler } from "./handlers/EscalationHandler.js";
+export { default as StaffAuthorityService, STAFF_AI_CAPABILITIES } from "./services/StaffAuthorityService.js";
+export { default as CommercialPolicyService, COMMERCIAL_RULES } from "./services/CommercialPolicyService.js";
