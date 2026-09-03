@@ -3,8 +3,8 @@
  * Registration Controller
  *
  * Handles public Individual and Business registration.
- * Staff accounts are provisioned internally and cannot be created
- * through this controller.
+ * WhatsApp is a first-class client communication identity and is required
+ * for public client registration. The OpenWA chatId is never collected here.
  */
 
 import auth from "./AuthService.js";
@@ -53,8 +53,17 @@ class RegistrationController {
         const password = String(data.get("password") || "");
         const confirmPassword = String(data.get("confirmPassword") || data.get("passwordConfirmation") || "");
         const accountType = String(data.get("accountType") || "individual").trim().toLowerCase();
+        const whatsappNumber = this.normaliseWhatsAppNumber(data.get("whatsappNumber"));
+        const whatsappConsent = data.get("whatsappConsent") === "on";
 
-        const validationError = this.validate({ email, password, confirmPassword, accountType });
+        const validationError = this.validate({
+            email,
+            password,
+            confirmPassword,
+            accountType,
+            whatsappNumber,
+            whatsappConsent
+        });
         if (validationError) {
             this.showError(validationError);
             return;
@@ -62,9 +71,16 @@ class RegistrationController {
 
         const profile = {};
         for (const [key, value] of data.entries()) {
-            if (["email", "password", "confirmPassword", "passwordConfirmation", "accountType"].includes(key)) continue;
+            if (["email", "password", "confirmPassword", "passwordConfirmation", "accountType", "whatsappConsent"].includes(key)) continue;
+            if (key === "whatsappNumber") {
+                profile[key] = whatsappNumber;
+                continue;
+            }
             if (typeof value === "string" && value.trim()) profile[key] = value.trim();
         }
+
+        profile.whatsappConsent = true;
+        profile.communicationIdentity = "WHATSAPP";
 
         this.submitting = true;
         this.setLoading(true);
@@ -98,14 +114,25 @@ class RegistrationController {
         }
     }
 
-    validate({ email, password, confirmPassword, accountType }) {
+    validate({ email, password, confirmPassword, accountType, whatsappNumber, whatsappConsent }) {
         if (!email) return "Please enter your email address.";
         if (!this._isValidEmail(email)) return "Please enter a valid email address.";
         if (password.length < 8) return "Password must contain at least 8 characters.";
         if (password.length > 256) return "The password is too long.";
         if (password !== confirmPassword) return "The passwords do not match.";
         if (!["individual", "business"].includes(accountType)) return "Please select Individual or Business registration.";
+        if (!whatsappNumber) return "Please enter your WhatsApp number in international format, for example +27718831097.";
+        if (!/^\+[1-9]\d{7,14}$/.test(whatsappNumber)) return "Please enter a valid WhatsApp number with the country code.";
+        if (!whatsappConsent) return "Please confirm that this number is registered on WhatsApp and that Isaacs & Partners may use it for client communication.";
         return null;
+    }
+
+    normaliseWhatsAppNumber(value) {
+        const raw = String(value || "").trim().replace(/[\s().-]/g, "");
+        if (!raw) return "";
+        if (raw.startsWith("00")) return `+${raw.slice(2)}`;
+        if (raw.startsWith("+")) return raw;
+        return raw;
     }
 
     handleRegistrationError(error) {
