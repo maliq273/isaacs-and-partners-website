@@ -80,7 +80,7 @@ declare
     v_allowed boolean := false;
     v_amount numeric;
 begin
-    if p_required_percent not in (50,100) then raise exception 'Only 50% or 100% payment gates are supported.' using errcode='22023'; end if;
+    if p_required_percent not in (50,100) then raise exception 'Only 50%% or 100%% payment gates are supported.' using errcode='22023'; end if;
 
     select i.amount,
            (
