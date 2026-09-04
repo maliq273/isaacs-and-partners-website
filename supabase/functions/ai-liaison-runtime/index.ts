@@ -1,17 +1,23 @@
 /**
  * Isaacs & Partners — AI Liaison Runtime Connector
  *
- * PR51 — first Supabase-backed runtime boundary for the AI liaison.
+ * Supabase-backed runtime boundary for the AI liaison.
  *
- * Responsibilities in this first slice:
+ * Responsibilities:
  *   1. Authenticate the signed-in client using the caller JWT.
  *   2. Resolve or create the client's AI conversation.
  *   3. Persist the inbound client message through the protected RPC.
- *   4. Return the authoritative conversation/message state to the caller.
+ *   4. Execute the existing conversational AI liaison (WhatsAppAgent).
+ *   5. Persist trusted AI output through the same protected RPC using the
+ *      server-side service-role boundary.
+ *   6. Return the authoritative conversation and AI response to the caller.
  *
- * AI-generated messages are deliberately NOT accepted from the browser.
- * Trusted AI output will be added in the next runtime slice using the
- * service-role boundary. This prevents a client from forging AI messages.
+ * IMPORTANT:
+ * - The runtime does not create a second conversational AI implementation.
+ * - WhatsAppAgent is the existing operational liaison/orchestration layer.
+ * - AIEngine/AIService remain the application's general analysis interfaces;
+ *   they are not currently configured as a conversational response provider.
+ * - Browser clients can never submit AI/SYSTEM messages themselves.
  *
  * Required Edge Function secrets/configuration:
  *   SUPABASE_URL
@@ -19,6 +25,7 @@
  *   SUPABASE_ANON_KEY (or SUPABASE_PUBLISHABLE_KEY)
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import WhatsAppAgent from "../../../app/communication/agents/WhatsAppAgent.js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -63,7 +70,12 @@ function normaliseChannel(value: unknown) {
 
 async function authenticate(request: Request) {
   const token = clean(request.headers.get("Authorization")).replace(/^Bearer\s+/i, "");
-  if (!token) throw new Response(JSON.stringify({ error: "Authentication is required." }), { status: 401, headers: corsHeaders });
+  if (!token) {
+    throw new Response(JSON.stringify({ error: "Authentication is required." }), {
+      status: 401,
+      headers: corsHeaders,
+    });
+  }
 
   const caller = createClient(SUPABASE_URL!, ANON_KEY!, {
     global: { headers: { Authorization: `Bearer ${token}` } },
@@ -72,25 +84,34 @@ async function authenticate(request: Request) {
 
   const { data, error } = await caller.auth.getUser(token);
   if (error || !data?.user?.id) {
-    throw new Response(JSON.stringify({ error: "Authenticated user could not be verified." }), { status: 401, headers: corsHeaders });
+    throw new Response(JSON.stringify({ error: "Authenticated user could not be verified." }), {
+      status: 401,
+      headers: corsHeaders,
+    });
   }
 
   return { caller, user: data.user };
 }
 
-async function verifyMatterOwnership(userId: string, matterId: string | null) {
-  if (!matterId) return;
+async function getMatter(matterId: string | null) {
+  if (!matterId) return null;
 
-  const { data: matter, error } = await admin
+  const { data, error } = await admin
     .from("matters")
-    .select("id, individual_user_id, business_id")
+    .select("*")
     .eq("id", matterId)
     .maybeSingle();
 
   if (error) throw error;
-  if (!matter) throw new Error("Matter not found.");
+  if (!data) throw new Error("Matter not found.");
+  return data;
+}
 
-  if (matter.individual_user_id === userId) return;
+async function verifyMatterOwnership(userId: string, matterId: string | null) {
+  const matter = await getMatter(matterId);
+  if (!matter) return null;
+
+  if (matter.individual_user_id === userId) return matter;
 
   if (matter.business_id) {
     const { data: business, error: businessError } = await admin
@@ -101,13 +122,19 @@ async function verifyMatterOwnership(userId: string, matterId: string | null) {
       .maybeSingle();
 
     if (businessError) throw businessError;
-    if (business) return;
+    if (business) return matter;
   }
 
   throw new Error("You are not authorised to use this matter in the AI conversation.");
 }
 
-async function resolveConversation({ userId, chatId, phoneNumber, channel, matterId }: {
+async function resolveConversation({
+  userId,
+  chatId,
+  phoneNumber,
+  channel,
+  matterId,
+}: {
   userId: string;
   chatId: string | null;
   phoneNumber: string | null;
@@ -143,7 +170,6 @@ async function resolveConversation({ userId, chatId, phoneNumber, channel, matte
     .single();
 
   if (createError) {
-    // A concurrent request may have created the unique chat conversation.
     if (createError.code === "23505" && chatId) {
       const retry = await admin
         .from("ai_conversations")
@@ -151,7 +177,9 @@ async function resolveConversation({ userId, chatId, phoneNumber, channel, matte
         .eq("chat_id", chatId)
         .maybeSingle();
       if (retry.error) throw retry.error;
-      if (retry.data?.client_user_id !== userId) throw new Error("WhatsApp conversation belongs to another client.");
+      if (retry.data?.client_user_id !== userId) {
+        throw new Error("WhatsApp conversation belongs to another client.");
+      }
       return retry.data;
     }
     throw createError;
@@ -160,9 +188,49 @@ async function resolveConversation({ userId, chatId, phoneNumber, channel, matte
   return created;
 }
 
+async function persistAiMessage({
+  conversationId,
+  body,
+  intent,
+  serviceDomain,
+  metadata = {},
+}: {
+  conversationId: string;
+  body: string;
+  intent?: string | null;
+  serviceDomain?: string | null;
+  metadata?: Record<string, unknown>;
+}) {
+  const { data, error } = await admin.rpc("ai_append_conversation_message", {
+    p_conversation_id: conversationId,
+    p_sender_type: "AI",
+    p_direction: "OUTBOUND",
+    p_body: body,
+    p_intent: intent ?? null,
+    p_service_domain: serviceDomain ?? null,
+    p_metadata: {
+      source: "ai-liaison-runtime",
+      runtime: "WhatsAppAgent",
+      ...metadata,
+    },
+  });
+
+  if (error) throw error;
+  return data;
+}
+
+function createLiaisonAgent() {
+  return new WhatsAppAgent();
+}
+
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS") return new Response("ok", { status: 200, headers: corsHeaders });
-  if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
+  if (request.method === "OPTIONS") {
+    return new Response("ok", { status: 200, headers: corsHeaders });
+  }
+
+  if (request.method !== "POST") {
+    return json({ error: "Method not allowed." }, 405);
+  }
 
   try {
     const { caller, user } = await authenticate(request);
@@ -181,7 +249,7 @@ Deno.serve(async (request) => {
       return json({ error: "WhatsApp conversations require chatId." }, 400);
     }
 
-    await verifyMatterOwnership(user.id, matterId);
+    const matter = await verifyMatterOwnership(user.id, matterId);
 
     const conversation = await resolveConversation({
       userId: user.id,
@@ -222,6 +290,49 @@ Deno.serve(async (request) => {
 
     if (messageError) throw messageError;
 
+    const agent = createLiaisonAgent();
+    const result = await agent.handleInbound({
+      chatId: chatId || `portal:${user.id}`,
+      phoneNumber,
+      body,
+      messageId,
+      user,
+      matter,
+      conversation: null,
+    });
+
+    const aiReply = clean(result?.reply, 8192);
+    let aiMessage = null;
+
+    if (aiReply) {
+      aiMessage = await persistAiMessage({
+        conversationId: conversation.id,
+        body: aiReply,
+        intent: result?.intent?.intent ?? null,
+        serviceDomain: result?.servicePlan?.domain ?? null,
+        metadata: {
+          action: result?.action ?? "RESPOND",
+          handled: result?.handled === true,
+          ...(result?.escalation
+            ? {
+                escalation: {
+                  superAdminRequired: result.escalation.superAdminRequired === true,
+                  requiredCapabilities: result.escalation.requiredCapabilities ?? [],
+                },
+              }
+            : {}),
+        },
+      });
+    }
+
+    if (result?.action === "ESCALATE") {
+      const { error: stateError } = await admin
+        .from("ai_conversations")
+        .update({ state: "AI_ESCALATED", updated_at: new Date().toISOString() })
+        .eq("id", conversation.id);
+      if (stateError) throw stateError;
+    }
+
     const { data: refreshed, error: refreshError } = await admin
       .from("ai_conversations")
       .select("*")
@@ -234,9 +345,18 @@ Deno.serve(async (request) => {
       ok: true,
       conversation: refreshed,
       message,
+      aiMessage,
+      result: {
+        action: result?.action ?? null,
+        intent: result?.intent ?? null,
+        servicePlan: result?.servicePlan ?? null,
+        sales: result?.sales ?? null,
+        escalated: result?.action === "ESCALATE",
+      },
       next: {
-        aiResponse: "PENDING_RUNTIME_STEP",
+        aiResponse: aiMessage ? "PERSISTED" : "NONE",
         aiOutputIsServerControlled: true,
+        engine: "WhatsAppAgent",
       },
     });
   } catch (error) {
