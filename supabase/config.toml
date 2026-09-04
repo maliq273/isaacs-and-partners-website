@@ -7,7 +7,7 @@ verify_jwt = false
 verify_jwt = false
 
 # PR40 — invoked only by the trusted worker boundary. The function itself
-# validates the service-role bearer token before processing any queue job.
+# validates the service-role bearer token before processing each queue job.
 [functions.trusted-document-worker]
 verify_jwt = false
 
@@ -15,4 +15,9 @@ verify_jwt = false
 # inside the function using HMAC for webhooks and a dedicated worker token
 # for outbound queue processing.
 [functions.openwa-communication-worker]
+verify_jwt = false
+
+# PR51 — AI liaison runtime. Authentication is performed inside the function
+# with the caller JWT; the browser never receives a service-role credential.
+[functions.ai-liaison-runtime]
 verify_jwt = false
