@@ -1,13 +1,8 @@
-/* Public AI Liaison layout safeguard.
-   Keeps the launcher anchored at the bottom and the panel above it,
-   while never allowing the AI window to cover the site's navigation. */
 .public-ai-liaison {
-  left: auto !important;
-  right: 12px !important;
-  bottom: max(12px, env(safe-area-inset-bottom)) !important;
-  width: auto !important;
-  height: auto !important;
-  z-index: 4900 !important;
+  position: fixed !important;
+  right: 24px !important;
+  bottom: 112px !important;
+  z-index: 2147483000 !important;
   pointer-events: none !important;
 }
 
@@ -15,52 +10,64 @@
   position: relative !important;
   right: auto !important;
   bottom: auto !important;
+  z-index: 2 !important;
   pointer-events: auto !important;
+}
+
+.public-ai-liaison__launcher-icon {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  flex: 0 0 auto !important;
+}
+
+.public-ai-liaison__launcher-lawyer {
+  display: none !important;
 }
 
 .public-ai-liaison__panel {
   position: absolute !important;
   right: 0 !important;
   bottom: calc(100% + 12px) !important;
-  width: min(460px, calc(100vw - 24px)) !important;
-  height: min(680px, calc(100dvh - 110px)) !important;
-  max-height: calc(100dvh - 110px) !important;
+  z-index: 3 !important;
   pointer-events: auto !important;
 }
 
-@media (max-width: 900px) {
+.public-ai-liaison.is-minimised .public-ai-liaison__launcher-lawyer {
+  display: grid !important;
+}
+
+.public-ai-liaison.is-minimised .public-ai-liaison__launcher-icon,
+.public-ai-liaison.is-minimised .public-ai-liaison__launcher-copy,
+.public-ai-liaison.is-minimised .public-ai-liaison__pulse,
+.public-ai-liaison.is-minimised .public-ai-liaison__hint {
+  display: none !important;
+}
+
+.public-ai-liaison.is-minimised .public-ai-liaison__launcher {
+  width: 68px !important;
+  min-width: 68px !important;
+  height: 68px !important;
+  padding: 9px !important;
+  justify-content: center !important;
+}
+
+.public-ai-liaison.is-open .public-ai-liaison__launcher {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 640px) {
   .public-ai-liaison {
     right: 12px !important;
-    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    bottom: 82px !important;
   }
 
   .public-ai-liaison__panel {
     right: 0 !important;
     bottom: calc(100% + 10px) !important;
     width: min(430px, calc(100vw - 24px)) !important;
-    height: min(660px, calc(100dvh - 100px)) !important;
-    max-height: calc(100dvh - 100px) !important;
-  }
-}
-
-@media (max-width: 600px) {
-  .public-ai-liaison {
-    left: 8px !important;
-    right: 8px !important;
-    bottom: max(8px, env(safe-area-inset-bottom)) !important;
-  }
-
-  .public-ai-liaison__launcher {
-    margin-left: auto !important;
-  }
-
-  .public-ai-liaison__panel {
-    left: auto !important;
-    right: 0 !important;
-    bottom: calc(100% + 8px) !important;
-    width: min(430px, calc(100vw - 16px)) !important;
-    height: min(640px, calc(100dvh - 92px)) !important;
-    max-height: calc(100dvh - 92px) !important;
-    border-radius: 16px !important;
+    max-height: calc(100vh - 96px) !important;
   }
 }
