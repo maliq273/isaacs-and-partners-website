@@ -120,7 +120,8 @@ export default class WhatsAppAgent {
 
     async generateReply({ body, intent, servicePlan, sales, context = null, lead = null, user = null, matter = null } = {}) {
         if (this.responseGenerator) {
-            return this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter });
+            const generated = await this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter });
+            if (generated) return generated;
         }
         if (intent.intent === "GREETING") return "Hello and welcome to Isaacs & Partners. How may we assist you today?";
         if (intent.intent === "STATUS") return "Please provide your matter number so I can route your status request to the correct client record.";
