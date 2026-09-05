@@ -12,6 +12,7 @@ on:
       - 'app/auth/login.html'
       - 'app/auth/register.html'
       - 'app/consultation/index.html'
+      - '404.html'
       - '.github/workflows/ensure-public-ai-liaison.yml'
   workflow_dispatch:
 
@@ -32,16 +33,7 @@ jobs:
         run: |
           from pathlib import Path
 
-          # Canonical public brand asset.
-          # The repository now contains assets/logo.png.
           canonical = "assets/logo.png"
-          replacements = {
-              "assets/logo%20.png": canonical,
-              "assets/logo .png": canonical,
-              "images/logo.png": canonical,
-              "../assets/logo.png": "../assets/logo.png",
-              "../../assets/logo.png": "../../assets/logo.png",
-          }
 
           for path in Path(".").rglob("*"):
               if not path.is_file() or ".git" in path.parts:
@@ -54,16 +46,14 @@ jobs:
                   continue
 
               updated = text
-              for old, new in replacements.items():
-                  if old.startswith("../"):
-                      continue
-                  updated = updated.replace(old, new)
+              updated = updated.replace("assets/logo%20.png", canonical)
+              updated = updated.replace("assets/logo .png", canonical)
+              updated = updated.replace("images/logo.png", canonical)
 
-              # Fix relative application pages separately so their path remains valid.
-              if path.as_posix().startswith("app/auth/") or path.as_posix().startswith("app/consultation/"):
+              if path.as_posix().startswith("app/auth/"):
                   updated = updated.replace("../../assets/logo%20.png", "../../assets/logo.png")
                   updated = updated.replace("../../assets/logo .png", "../../assets/logo.png")
-                  updated = updated.replace("../../assets/logo.png", "../../assets/logo.png")
+              elif path.as_posix().startswith("app/consultation/"):
                   updated = updated.replace("../assets/logo%20.png", "../assets/logo.png")
                   updated = updated.replace("../assets/logo .png", "../assets/logo.png")
 
@@ -78,7 +68,6 @@ jobs:
           index = Path("index.html")
           text = index.read_text(encoding="utf-8")
 
-          # Remove old/duplicate preloads and insert one canonical logo preload.
           lines = text.splitlines(True)
           lines = [
               line for line in lines
@@ -104,8 +93,8 @@ jobs:
         shell: bash
         run: |
           test -f assets/logo.png
-          ! grep -R --exclude-dir=.git -n 'assets/logo%20.png\|assets/logo \.png' . || (echo 'Old spaced/encoded logo reference remains' && exit 1)
-          ! grep -R --exclude-dir=.git -n 'images/logo.png' . || (echo 'Deleted images/logo.png reference remains' && exit 1)
+          ! grep -R --exclude-dir=.git --exclude-dir=.github -n 'assets/logo%20.png\|assets/logo \.png' . || (echo 'Old spaced/encoded logo reference remains' && exit 1)
+          ! grep -R --exclude-dir=.git --exclude-dir=.github -n 'images/logo.png' . || (echo 'Deleted images/logo.png reference remains' && exit 1)
           grep -n 'assets/logo.png' index.html
           grep -n 'app/communication/public/PublicLeadLiaison.js' index.html
 
@@ -113,7 +102,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html app/auth/login.html app/auth/register.html app/consultation/index.html
+          git add -A
           if git diff --cached --quiet; then
             echo "No generated wiring changes required."
             exit 0
