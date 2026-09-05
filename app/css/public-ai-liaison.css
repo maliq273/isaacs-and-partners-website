@@ -6,6 +6,26 @@
     font-family: "Poppins", sans-serif;
 }
 
+/* Homepage performance: do not let the preloader wait for every remote
+   font, image or third-party resource. The existing runtime still handles
+   its normal fade when resources finish loading. */
+#preloader {
+    animation: ipFastPreloader .65s ease forwards;
+    animation-delay: .35s;
+}
+
+@keyframes ipFastPreloader {
+    from {
+        opacity: 1;
+        visibility: visible;
+    }
+    to {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+}
+
 .public-ai-liaison__launcher {
     display: flex;
     align-items: center;
