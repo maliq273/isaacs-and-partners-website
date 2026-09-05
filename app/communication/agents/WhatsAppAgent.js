@@ -76,8 +76,30 @@ export default class WhatsAppAgent {
         }
 
         const sales = this.sales.buildState({ servicePlan, lead });
-        const reply = await this.generateReply({ context, body, intent, servicePlan, lead, sales });
-        return { handled: true, action: "RESPOND", context, intent, lead, servicePlan, sales, reply };
+        const replyResult = await this.generateReply({
+            context,
+            body,
+            intent,
+            servicePlan,
+            lead,
+            sales,
+            user,
+            matter
+        });
+        const reply = typeof replyResult === "object" ? replyResult?.text : replyResult;
+        return {
+            handled: true,
+            action: "RESPOND",
+            context,
+            intent,
+            lead,
+            servicePlan,
+            sales,
+            reply,
+            aiProvider: typeof replyResult === "object" ? replyResult?.provider || null : null,
+            aiModel: typeof replyResult === "object" ? replyResult?.model || null : null,
+            companySources: typeof replyResult === "object" ? replyResult?.companySources || [] : []
+        };
     }
 
     canStaffAnswer(staff, servicePlan = {}) {
@@ -96,8 +118,10 @@ export default class WhatsAppAgent {
         return this.commercial.getRule(servicePlan?.domain, options);
     }
 
-    async generateReply({ body, intent, servicePlan, sales } = {}) {
-        if (this.responseGenerator) return this.responseGenerator({ body, intent, servicePlan, sales });
+    async generateReply({ body, intent, servicePlan, sales, context = null, lead = null, user = null, matter = null } = {}) {
+        if (this.responseGenerator) {
+            return this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter });
+        }
         if (intent.intent === "GREETING") return "Hello and welcome to Isaacs & Partners. How may we assist you today?";
         if (intent.intent === "STATUS") return "Please provide your matter number so I can route your status request to the correct client record.";
         if (intent.intent === "DOCUMENTS") return "Please tell me which service or application you are dealing with so I can guide you on the document process.";
