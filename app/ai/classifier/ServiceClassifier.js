@@ -8,12 +8,12 @@ export default class ServiceClassifier {
             ]
                 .filter(Boolean)
                 .join(" ")
-                .toLowerCase();
+                .toLowerCase()
+                .replace(/[’']/g, "'");
 
         const rules = [
             {
-                service:
-                    "IMMIGRATION",
+                service: "IMMIGRATION",
                 keywords: [
                     "visa",
                     "immigration",
@@ -26,26 +26,52 @@ export default class ServiceClassifier {
                 ]
             },
             {
-                service: "HR",
+                service: "HR_IR",
                 keywords: [
+                    "ccma",
+                    "ccma hearing",
+                    "ccma case",
+                    "ccma matter",
+                    "commission for conciliation mediation and arbitration",
+                    "conciliation",
+                    "mediation",
+                    "arbitration",
+                    "labour dispute",
+                    "labor dispute",
+                    "labour law",
+                    "labor law",
                     "employee",
                     "employment",
                     "disciplinary",
+                    "disciplinary hearing",
                     "grievance",
                     "performance",
-                    "retrenchment"
+                    "poor performance",
+                    "misconduct",
+                    "dismissal",
+                    "unfair dismissal",
+                    "unfair labour practice",
+                    "unfair labor practice",
+                    "retrenchment",
+                    "retrenchments",
+                    "workplace dispute",
+                    "employment dispute",
+                    "hr",
+                    "human resources",
+                    "industrial relations"
                 ]
             },
             {
-                service:
-                    "BUSINESS_COMPLIANCE",
+                service: "BUSINESS_COMPLIANCE",
                 keywords: [
                     "cipc",
                     "sars",
                     "uif",
                     "coida",
                     "tax",
-                    "company registration"
+                    "company registration",
+                    "business registration",
+                    "compliance"
                 ]
             },
             {
@@ -56,31 +82,20 @@ export default class ServiceClassifier {
                     "affidavit",
                     "power of attorney",
                     "settlement",
-                    "legal opinion"
+                    "legal opinion",
+                    "notary",
+                    "notarial"
                 ]
             }
         ];
 
         for (const rule of rules) {
-            if (
-                rule.keywords.some(
-                    keyword =>
-                        text.includes(
-                            keyword
-                        )
-                )
-            ) {
+            const matched = rule.keywords.filter(keyword => text.includes(keyword));
+            if (matched.length) {
                 return {
-                    value:
-                        rule.service,
-                    confidence: 0.85,
-                    matched:
-                        rule.keywords.filter(
-                            keyword =>
-                                text.includes(
-                                    keyword
-                                )
-                        )
+                    value: rule.service,
+                    confidence: matched.includes("ccma") || matched.includes("ccma hearing") ? 0.98 : 0.9,
+                    matched
                 };
             }
         }
