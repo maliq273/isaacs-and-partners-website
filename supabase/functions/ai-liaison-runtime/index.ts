@@ -1,31 +1,31 @@
 /**
  * Isaacs & Partners — AI Liaison Runtime Connector
  *
- * Supabase-backed runtime boundary for the AI liaison.
+ * Supabase-backed server runtime for the AI liaison.
  *
  * Responsibilities:
  *   1. Authenticate the signed-in client using the caller JWT.
  *   2. Resolve or create the client's AI conversation.
  *   3. Persist the inbound client message through the protected RPC.
- *   4. Execute the existing conversational AI liaison (WhatsAppAgent).
- *   5. Persist trusted AI output through the same protected RPC using the
- *      server-side service-role boundary.
- *   6. Return the authoritative conversation and AI response to the caller.
- *
- * IMPORTANT:
- * - The runtime does not create a second conversational AI implementation.
- * - WhatsAppAgent is the existing operational liaison/orchestration layer.
- * - AIEngine/AIService remain the application's general analysis interfaces;
- *   they are not currently configured as a conversational response provider.
- * - Browser clients can never submit AI/SYSTEM messages themselves.
+ *   4. Run the existing WhatsAppAgent orchestration and policy layer.
+ *   5. Generate a ChatGPT/Gemini-quality response through TruthFusionEngine,
+ *      merging general model reasoning with authoritative company truth.
+ *   6. Persist trusted AI output through the service-role boundary.
+ *   7. Return the authoritative conversation and AI response to the caller.
  *
  * Required Edge Function secrets/configuration:
  *   SUPABASE_URL
  *   SUPABASE_SERVICE_ROLE_KEY
  *   SUPABASE_ANON_KEY (or SUPABASE_PUBLISHABLE_KEY)
+ *   AI_PROVIDER=openai|gemini
+ *   OPENAI_API_KEY and optionally OPENAI_MODEL
+ *   GEMINI_API_KEY and optionally GEMINI_MODEL
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import WhatsAppAgent from "../../../app/communication/agents/WhatsAppAgent.js";
+import AIProviderService from "../../../app/ai/providers/AIProviderService.js";
+import CompanyTruthService from "../../../app/ai/CompanyTruthService.js";
+import TruthFusionEngine from "../../../app/ai/TruthFusionEngine.js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -220,7 +220,13 @@ async function persistAiMessage({
 }
 
 function createLiaisonAgent() {
-  return new WhatsAppAgent();
+  const provider = new AIProviderService();
+  const companyTruth = new CompanyTruthService();
+  const fusion = new TruthFusionEngine({ provider, companyTruth });
+
+  return new WhatsAppAgent({
+    responseGenerator: (input) => fusion.generate(input)
+  });
 }
 
 Deno.serve(async (request) => {
@@ -313,6 +319,9 @@ Deno.serve(async (request) => {
         metadata: {
           action: result?.action ?? "RESPOND",
           handled: result?.handled === true,
+          ai_provider: result?.aiProvider ?? null,
+          ai_model: result?.aiModel ?? null,
+          company_truth_sources: result?.companySources ?? [],
           ...(result?.escalation
             ? {
                 escalation: {
@@ -352,11 +361,14 @@ Deno.serve(async (request) => {
         servicePlan: result?.servicePlan ?? null,
         sales: result?.sales ?? null,
         escalated: result?.action === "ESCALATE",
+        aiProvider: result?.aiProvider ?? null,
+        aiModel: result?.aiModel ?? null,
+        companySources: result?.companySources ?? [],
       },
       next: {
         aiResponse: aiMessage ? "PERSISTED" : "NONE",
         aiOutputIsServerControlled: true,
-        engine: "WhatsAppAgent",
+        engine: "WhatsAppAgent + TruthFusionEngine",
       },
     });
   } catch (error) {
