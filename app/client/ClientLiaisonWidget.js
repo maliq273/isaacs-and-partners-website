@@ -34,18 +34,17 @@ class ClientLiaisonWidget {
 
         const user = auth.getCurrentUser();
         if (!user?.id) return this;
-
         this.chatId = `portal:${user.id}`;
 
         try {
-            const status = await clientPortalAccess.getStatus();
-            this.approved = status === "APPROVED";
+            this.approved = (await clientPortalAccess.getStatus()) === "APPROVED";
         } catch (error) {
             console.error("[ClientLiaisonWidget] Access check failed:", error);
             this.approved = false;
         }
 
         this.renderGate();
+        this.updateMessagesNavigation();
         if (!this.approved) return this;
 
         this.bind();
@@ -56,19 +55,36 @@ class ClientLiaisonWidget {
     renderGate() {
         const status = this.approved ? "APPROVED" : "PENDING";
         this.root.dataset.access = status.toLowerCase();
+        const statusElement = this.root.querySelector("[data-ai-status]");
+        const locked = this.root.querySelector("[data-ai-locked]");
+        const chat = this.root.querySelector("[data-ai-chat]");
 
         if (!this.approved) {
-            this.root.querySelector("[data-ai-status]").textContent =
-                "Your secure AI Liaison will become available after Isaacs & Partners approves your portal access.";
-            this.root.querySelector("[data-ai-locked]").hidden = false;
-            this.root.querySelector("[data-ai-chat]").hidden = true;
+            if (statusElement) statusElement.textContent = "Your secure AI Liaison will become available after Isaacs & Partners approves your portal access.";
+            if (locked) locked.hidden = false;
+            if (chat) chat.hidden = true;
             return;
         }
 
-        this.root.querySelector("[data-ai-status]").textContent =
-            "I connect you directly with Isaacs & Partners staff and Super Admin.";
-        this.root.querySelector("[data-ai-locked]").hidden = true;
-        this.root.querySelector("[data-ai-chat]").hidden = false;
+        if (statusElement) statusElement.textContent = "I connect you directly with Isaacs & Partners staff and Super Admin.";
+        if (locked) locked.hidden = true;
+        if (chat) chat.hidden = false;
+    }
+
+    updateMessagesNavigation() {
+        document.querySelectorAll("[data-client-messages-link]").forEach(link => {
+            if (this.approved) {
+                link.classList.remove("client-nav-link--locked");
+                link.removeAttribute("aria-disabled");
+                link.removeAttribute("tabindex");
+                return;
+            }
+
+            link.classList.add("client-nav-link--locked");
+            link.setAttribute("aria-disabled", "true");
+            link.setAttribute("tabindex", "-1");
+            link.addEventListener("click", event => event.preventDefault());
+        });
     }
 
     bind() {
@@ -82,12 +98,9 @@ class ClientLiaisonWidget {
 
     async loadConversation() {
         try {
-            this.conversation = await this.runtime.getClientConversation({
-                chatId: this.chatId,
-                channel: "PORTAL"
-            });
+            this.conversation = await this.runtime.getClientConversation({ chatId: this.chatId, channel: "PORTAL" });
             if (!this.conversation) {
-                this.setListMessage("No conversation yet. I am ready when you are.");
+                this.setListMessage("Hi! I am your AI Liaison. How can I assist you today?");
                 return;
             }
             this.renderMessages(await this.runtime.listMessages(this.conversation.id));
@@ -100,22 +113,15 @@ class ClientLiaisonWidget {
     async send(event) {
         event.preventDefault();
         if (this.loading || !this.approved) return;
-
         const body = String(this.input?.value || "").trim();
         if (!body) return;
 
         this.setLoading(true);
         try {
-            const result = await this.runtime.sendClientMessage({
-                body,
-                chatId: this.chatId,
-                channel: "PORTAL"
-            });
+            const result = await this.runtime.sendClientMessage({ body, chatId: this.chatId, channel: "PORTAL" });
             this.conversation = result.conversation || this.conversation;
             this.input.value = "";
-            if (this.conversation?.id) {
-                this.renderMessages(await this.runtime.listMessages(this.conversation.id));
-            }
+            if (this.conversation?.id) this.renderMessages(await this.runtime.listMessages(this.conversation.id));
         } catch (error) {
             console.error("[ClientLiaisonWidget] Send failed:", error);
             this.setListMessage(error?.message || "Unable to send your message. Please try again.");
@@ -128,7 +134,7 @@ class ClientLiaisonWidget {
         if (!this.list) return;
         this.list.replaceChildren();
         if (!messages.length) {
-            this.setListMessage("No conversation yet. I am ready when you are.");
+            this.setListMessage("Hi! I am your AI Liaison. How can I assist you today?");
             return;
         }
 
@@ -138,10 +144,8 @@ class ClientLiaisonWidget {
 
             const header = document.createElement("div");
             header.className = "ai-widget-message__header";
-
             const sender = document.createElement("strong");
             sender.textContent = this.senderLabel(message.sender_type);
-
             const time = document.createElement("time");
             time.textContent = this.formatTimestamp(message.created_at);
             header.append(sender, time);
@@ -156,13 +160,7 @@ class ClientLiaisonWidget {
     }
 
     senderLabel(type) {
-        return ({
-            CLIENT: "You",
-            AI: "AI Liaison",
-            STAFF: "Isaacs & Partners",
-            SUPER_ADMIN: "Super Admin",
-            SYSTEM: "Isaacs & Partners"
-        })[String(type || "").toUpperCase()] || "Isaacs & Partners";
+        return ({ CLIENT: "You", AI: "AI Liaison", STAFF: "Isaacs & Partners", SUPER_ADMIN: "Super Admin", SYSTEM: "Isaacs & Partners" })[String(type || "").toUpperCase()] || "Isaacs & Partners";
     }
 
     formatTimestamp(value) {
@@ -193,9 +191,7 @@ const clientLiaisonWidget = new ClientLiaisonWidget();
 
 if (typeof document !== "undefined") {
     document.addEventListener("DOMContentLoaded", () => {
-        clientLiaisonWidget.initialise().catch(error => {
-            console.error("[ClientLiaisonWidget] Initialisation failed:", error);
-        });
+        clientLiaisonWidget.initialise().catch(error => console.error("[ClientLiaisonWidget] Initialisation failed:", error));
     });
 }
 
