@@ -12,6 +12,13 @@ function correctCommonWords(text) {
     return corrected;
 }
 
+const CATEGORY_ICONS = {
+    immigration: "fa-passport",
+    "hr-industrial-relations": "fa-people-group",
+    "business-compliance": "fa-building-shield",
+    legal: "fa-scale-balanced"
+};
+
 class PublicLeadLiaison {
     constructor() {
         this.agent = new WhatsAppAgent({ mode: "PUBLIC_LEAD", responseGenerator: publicLeadResponseGenerator });
@@ -38,8 +45,8 @@ class PublicLeadLiaison {
         root.innerHTML = `
             <button class="public-ai-liaison__launcher" type="button" data-ai-launcher aria-label="Open AI Liaison" aria-expanded="false">
                 <span class="public-ai-liaison__launcher-lawyer" aria-hidden="true"><i class="fa-solid fa-user-tie"></i><b>👋</b></span>
-                <span class="public-ai-liaison__launcher-icon"><i class="fa-solid fa-comments"></i><b>👋</b></span>
-                <span class="public-ai-liaison__launcher-copy"><strong>AI Liaison</strong><small>Free 15-minute consultation</small></span>
+                <span class="public-ai-liaison__launcher-icon" aria-hidden="true"><i class="fa-solid fa-comments"></i><b>👋</b></span>
+                <span class="public-ai-liaison__launcher-copy"><strong>AI Liaison</strong><small>Free 15-minute preliminary consultation</small></span>
                 <span class="public-ai-liaison__pulse" aria-hidden="true"></span>
                 <span class="public-ai-liaison__hint" aria-hidden="true">Need help? I’m here.</span>
             </button>
@@ -48,10 +55,18 @@ class PublicLeadLiaison {
                     <div class="public-ai-liaison__identity"><span class="public-ai-liaison__avatar"><i class="fa-solid fa-scale-balanced"></i></span><div><strong>Isaacs &amp; Partners</strong><span>AI Liaison · Free 15 min</span></div></div>
                     <div class="public-ai-liaison__controls"><button type="button" class="public-ai-liaison__minimise" data-ai-minimise aria-label="Minimise">−</button><button type="button" class="public-ai-liaison__close" data-ai-close aria-label="Close">&times;</button></div>
                 </header>
-                <div class="public-ai-liaison__service-selector">
-                    <label for="public-ai-category">Choose one of our 4 main categories</label>
-                    <select id="public-ai-category" data-ai-category><option value="">Select category</option>${PUBLIC_SERVICE_DIRECTORY.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select>
-                    <select data-ai-service disabled aria-label="Choose a specific service"><option value="">Choose sub-category / service</option></select>
+                <div class="public-ai-liaison__welcome" data-ai-welcome>
+                    <div class="public-ai-liaison__welcome-avatar"><i class="fa-solid fa-scale-balanced"></i><b>👋</b></div>
+                    <div class="public-ai-liaison__welcome-copy"><span>Welcome</span><h2>How can we help you today?</h2><p>I’m your AI Liaison. Start with one of our four main service areas and I’ll guide you through a free 15-minute preliminary consultation.</p></div>
+                    <div class="public-ai-liaison__category-grid" data-ai-categories>
+                        ${PUBLIC_SERVICE_DIRECTORY.map(category => `<button type="button" class="public-ai-liaison__category" data-category-id="${category.id}"><span><i class="fa-solid ${CATEGORY_ICONS[category.id] || "fa-circle-question"}"></i></span><strong>${category.name}</strong><small>${category.services.length} services</small></button>`).join("")}
+                    </div>
+                </div>
+                <div class="public-ai-liaison__service-selector" data-ai-service-selector hidden>
+                    <div class="public-ai-liaison__selector-heading"><div><label for="public-ai-category">Service area</label><strong data-ai-selected-category>Choose a category</strong></div><button type="button" data-ai-change-category>Change</button></div>
+                    <select id="public-ai-category" data-ai-category aria-label="Choose service category"><option value="">Select category</option>${PUBLIC_SERVICE_DIRECTORY.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select>
+                    <label class="sr-only" for="public-ai-service">Specific service</label>
+                    <select id="public-ai-service" data-ai-service disabled><option value="">Choose a specific service</option></select>
                 </div>
                 <div class="public-ai-liaison__body" data-ai-list aria-live="polite"></div>
                 <div class="public-ai-liaison__cta" data-ai-cta hidden><strong>Your free AI consultation is complete.</strong><span>Your enquiry is prepared. Create an account so Isaacs &amp; Partners can securely capture your details and move it toward the appropriate professional consultation or quotation.</span><div class="public-ai-liaison__cta-actions"><a href="/signup.html?type=individual&source=website-ai" data-ai-signup class="gold-btn">Create Client Account</a><a href="/signup.html?type=business&source=website-ai" data-ai-business class="outline-btn">Business Account</a></div></div>
@@ -66,14 +81,23 @@ class PublicLeadLiaison {
         this.input = root.querySelector("textarea");
         this.sendButton = root.querySelector("[data-ai-send]");
         this.cta = root.querySelector("[data-ai-cta]");
+        this.welcome = root.querySelector("[data-ai-welcome]");
+        this.serviceSelector = root.querySelector("[data-ai-service-selector]");
+        this.categoryGrid = root.querySelector("[data-ai-categories]");
         this.categorySelect = root.querySelector("[data-ai-category]");
         this.serviceSelect = root.querySelector("[data-ai-service]");
+        this.selectedCategoryLabel = root.querySelector("[data-ai-selected-category]");
     }
 
     bind() {
         this.root.querySelector("[data-ai-launcher]")?.addEventListener("click", () => this.toggle());
         this.root.querySelector("[data-ai-minimise]")?.addEventListener("click", () => this.minimise());
         this.root.querySelector("[data-ai-close]")?.addEventListener("click", () => this.close());
+        this.root.querySelector("[data-ai-change-category]")?.addEventListener("click", () => this.showCategoryPicker());
+        this.categoryGrid?.addEventListener("click", event => {
+            const button = event.target.closest("[data-category-id]");
+            if (button) this.selectCategory(button.dataset.categoryId);
+        });
         this.form?.addEventListener("submit", event => this.send(event));
         this.categorySelect?.addEventListener("change", () => this.populateServices());
         this.serviceSelect?.addEventListener("change", () => this.selectServiceFromMenu());
@@ -86,8 +110,8 @@ class PublicLeadLiaison {
         this.root.classList.remove("is-minimised");
         this.root.classList.add("is-open");
         this.root.querySelector("[data-ai-launcher]")?.setAttribute("aria-expanded", "true");
-        if (reason === "greeting" && !this.list.children.length) {
-            this.appendMessage("AI", "Hi! Welcome to Isaacs & Partners. I’m your AI Liaison. I can give you a free 15-minute preliminary consultation, identify the right service, ask a few qualification questions and prepare you for signup.");
+        if (reason === "greeting" && !this.list.children.length && !this.serviceId) {
+            this.appendMessage("AI", "Hi! Welcome to Isaacs & Partners. I’m your AI Liaison. I can help you identify the right service and guide you through a free 15-minute preliminary consultation.");
         }
         this.input?.focus();
     }
@@ -109,9 +133,27 @@ class PublicLeadLiaison {
 
     toggle() { this.opened ? this.close() : this.open(); }
 
+    showCategoryPicker() {
+        this.serviceSelector.hidden = true;
+        this.welcome.hidden = false;
+        this.categoryGrid?.querySelectorAll(".public-ai-liaison__category").forEach(button => button.classList.toggle("is-selected", button.dataset.categoryId === this.categorySelect.value));
+    }
+
+    selectCategory(categoryId) {
+        const category = PUBLIC_SERVICE_DIRECTORY.find(item => item.id === categoryId);
+        if (!category) return;
+        this.categorySelect.value = category.id;
+        this.populateServices();
+        this.welcome.hidden = true;
+        this.serviceSelector.hidden = false;
+        this.selectedCategoryLabel.textContent = category.name;
+        this.categoryGrid?.querySelectorAll(".public-ai-liaison__category").forEach(button => button.classList.toggle("is-selected", button.dataset.categoryId === category.id));
+        this.serviceSelect.focus();
+    }
+
     populateServices() {
         const category = PUBLIC_SERVICE_DIRECTORY.find(item => item.id === this.categorySelect.value);
-        this.serviceSelect.innerHTML = `<option value="">Choose sub-category / service</option>`;
+        this.serviceSelect.innerHTML = `<option value="">Choose a specific service</option>`;
         this.serviceSelect.disabled = !category;
         category?.services.forEach(service => {
             const option = document.createElement("option");
@@ -119,6 +161,7 @@ class PublicLeadLiaison {
             option.textContent = service.name;
             this.serviceSelect.appendChild(option);
         });
+        if (category) this.selectedCategoryLabel.textContent = category.name;
     }
 
     selectServiceFromMenu() {
@@ -138,8 +181,7 @@ class PublicLeadLiaison {
         for (const category of PUBLIC_SERVICE_DIRECTORY) {
             const service = category.services.find(item => item.id === this.serviceId);
             if (!service) continue;
-            this.categorySelect.value = category.id;
-            this.populateServices();
+            this.selectCategory(category.id);
             this.serviceSelect.value = service.id;
             return;
         }
