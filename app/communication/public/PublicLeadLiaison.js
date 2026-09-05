@@ -34,7 +34,7 @@ class PublicLeadLiaison {
         this.render();
         this.restoreSession();
         this.bind();
-        window.setTimeout(() => this.open("greeting"), 700);
+        window.setTimeout(() => this.open(), 700);
     }
 
     render() {
@@ -99,20 +99,17 @@ class PublicLeadLiaison {
             if (button) this.selectCategory(button.dataset.categoryId);
         });
         this.form?.addEventListener("submit", event => this.send(event));
-        this.categorySelect?.addEventListener("change", () => this.populateServices());
+        this.categorySelect?.addEventListener("change", () => this.selectCategory(this.categorySelect.value));
         this.serviceSelect?.addEventListener("change", () => this.selectServiceFromMenu());
     }
 
-    open(reason = "manual") {
+    open() {
         if (!this.panel) return;
         this.opened = true;
         this.panel.hidden = false;
         this.root.classList.remove("is-minimised");
         this.root.classList.add("is-open");
         this.root.querySelector("[data-ai-launcher]")?.setAttribute("aria-expanded", "true");
-        if (reason === "greeting" && !this.list.children.length && !this.serviceId) {
-            this.appendMessage("AI", "Hi! Welcome to Isaacs & Partners. I’m your AI Liaison. I can help you identify the right service and guide you through a free 15-minute preliminary consultation.");
-        }
         this.input?.focus();
     }
 
@@ -142,12 +139,25 @@ class PublicLeadLiaison {
     selectCategory(categoryId) {
         const category = PUBLIC_SERVICE_DIRECTORY.find(item => item.id === categoryId);
         if (!category) return;
+
+        const previousCategory = PUBLIC_SERVICE_DIRECTORY.find(item => item.services.some(service => service.id === this.serviceId));
+        const changingCategory = Boolean(this.serviceId && previousCategory && previousCategory.id !== category.id);
+
+        if (changingCategory) {
+            this.serviceId = null;
+            this.serviceName = null;
+            this.context = null;
+            this.list?.replaceChildren();
+            if (this.cta) this.cta.hidden = true;
+        }
+
         this.categorySelect.value = category.id;
         this.populateServices();
         this.welcome.hidden = true;
         this.serviceSelector.hidden = false;
         this.selectedCategoryLabel.textContent = category.name;
         this.categoryGrid?.querySelectorAll(".public-ai-liaison__category").forEach(button => button.classList.toggle("is-selected", button.dataset.categoryId === category.id));
+        this.persistState();
         this.serviceSelect.focus();
     }
 
@@ -168,12 +178,18 @@ class PublicLeadLiaison {
         const category = PUBLIC_SERVICE_DIRECTORY.find(item => item.id === this.categorySelect.value);
         const service = category?.services.find(item => item.id === this.serviceSelect.value);
         if (!service) return;
+
+        const serviceChanged = this.serviceId !== service.id;
         this.serviceId = service.id;
         this.serviceName = service.name;
         this.context = this.context || {};
-        this.context.publicLead = { stage: 0, qualified: false, answers: [] };
+        if (serviceChanged) {
+            this.context.publicLead = { stage: 0, qualified: false, answers: [] };
+            this.list?.replaceChildren();
+            if (this.cta) this.cta.hidden = true;
+            this.appendMessage("AI", `I have selected ${service.name} under ${category.name}. Tell me what has happened and I’ll take you through the free 15-minute preliminary consultation.`);
+        }
         this.persistState();
-        this.appendMessage("AI", `I have selected ${service.name} under ${category.name}. Tell me what has happened and I’ll take you through the free 15-minute preliminary consultation.`);
         this.input?.focus();
     }
 
@@ -181,7 +197,12 @@ class PublicLeadLiaison {
         for (const category of PUBLIC_SERVICE_DIRECTORY) {
             const service = category.services.find(item => item.id === this.serviceId);
             if (!service) continue;
-            this.selectCategory(category.id);
+            this.categorySelect.value = category.id;
+            this.populateServices();
+            this.welcome.hidden = true;
+            this.serviceSelector.hidden = false;
+            this.selectedCategoryLabel.textContent = category.name;
+            this.categoryGrid?.querySelectorAll(".public-ai-liaison__category").forEach(button => button.classList.toggle("is-selected", button.dataset.categoryId === category.id));
             this.serviceSelect.value = service.id;
             return;
         }
