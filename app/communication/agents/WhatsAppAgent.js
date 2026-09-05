@@ -10,7 +10,7 @@ import StaffAuthorityService from "../services/StaffAuthorityService.js";
 import CommercialPolicyService from "../services/CommercialPolicyService.js";
 
 export default class WhatsAppAgent {
-    constructor({ serviceCatalog = null, pricingPolicy = null, responseGenerator = null } = {}) {
+    constructor({ serviceCatalog = null, pricingPolicy = null, responseGenerator = null, mode = "OPERATIONS" } = {}) {
         this.intentClassifier = new WhatsAppIntentClassifier();
         this.serviceClassifier = new ServiceClassifier();
         this.serviceIntelligence = new ServiceIntelligenceEngine({ serviceCatalog, pricingPolicy });
@@ -22,6 +22,7 @@ export default class WhatsAppAgent {
         this.authority = new StaffAuthorityService();
         this.commercial = new CommercialPolicyService();
         this.responseGenerator = responseGenerator;
+        this.mode = String(mode || "OPERATIONS").toUpperCase();
     }
 
     async handleInbound({ chatId, phoneNumber = null, body, messageId = null, user = null, matter = null, conversation = null } = {}) {
@@ -54,7 +55,12 @@ export default class WhatsAppAgent {
             return { handled: true, action: "ROUTE_TO_HUMAN", context, intent, lead, servicePlan };
         }
 
-        if (assessment.humanRequired) {
+        // Public website mode is a lead-generation layer. It uses the same
+        // classification, service intelligence, lead and sales pipeline, but
+        // does not create a staff intervention from an anonymous website chat.
+        // Sensitive/decision-critical matters are still clearly directed to
+        // the firm rather than represented as completed by AI.
+        if (this.mode !== "PUBLIC_LEAD" && assessment.humanRequired) {
             this.handover.escalate(context, assessment);
             const escalation = this.escalations.create({ context, assessment, lead, servicePlan });
             escalation.requiredCapabilities = this.authority.getRequiredCapabilities({
