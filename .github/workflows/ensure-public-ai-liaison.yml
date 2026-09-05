@@ -8,6 +8,7 @@ on:
       - 'app/communication/agents/PublicLeadResponseGenerator.js'
       - 'app/communication/public/PublicServiceDirectory.js'
       - 'app/css/public-ai-liaison.css'
+      - 'app/css/public-ai-liaison-layout-fix.css'
       - 'index.html'
       - 'app/auth/login.html'
       - 'app/auth/register.html'
@@ -93,6 +94,7 @@ jobs:
         shell: bash
         run: |
           test -f assets/logo.png
+          test -f app/css/public-ai-liaison-layout-fix.css
           ! grep -R --exclude-dir=.git --exclude-dir=.github -n 'assets/logo%20.png\|assets/logo \.png' . || (echo 'Old spaced/encoded logo reference remains' && exit 1)
           ! grep -R --exclude-dir=.git --exclude-dir=.github -n 'images/logo.png' . || (echo 'Deleted images/logo.png reference remains' && exit 1)
           grep -n 'assets/logo.png' index.html
