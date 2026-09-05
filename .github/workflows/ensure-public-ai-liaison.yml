@@ -7,6 +7,9 @@ on:
       - 'app/communication/public/PublicLeadLiaison.js'
       - 'app/css/public-ai-liaison.css'
       - 'index.html'
+      - 'app/auth/login.html'
+      - 'app/auth/register.html'
+      - 'app/consultation/index.html'
       - '.github/workflows/ensure-public-ai-liaison.yml'
   workflow_dispatch:
 
@@ -20,13 +23,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Wire public AI Liaison into index.html
+      - name: Normalize logo asset paths and wire public AI Liaison
         shell: python
         run: |
           from pathlib import Path
 
-          path = Path("index.html")
-          text = path.read_text(encoding="utf-8")
+          root = Path(".")
+          logo_path = "assets/logo%20.png"
+
+          # The current repository asset has a literal space in its filename:
+          # assets/logo .png. Browsers must request that path encoded as %20.
+          # Normalize existing website references so they no longer request
+          # the missing assets/logo.png file.
+          for path in root.rglob("*"):
+              if not path.is_file() or ".git" in path.parts:
+                  continue
+              if path.suffix.lower() not in {".html", ".js", ".css", ".json", ".xml", ".txt"}:
+                  continue
+              try:
+                  text = path.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  continue
+              updated = text.replace("assets/logo.png", logo_path)
+              if updated != text:
+                  path.write_text(updated, encoding="utf-8")
+
+          index = Path("index.html")
+          text = index.read_text(encoding="utf-8")
+
+          preload = '    <link rel="preload" as="image" href="assets/logo%20.png" fetchpriority="high">\n'
+          if 'rel="preload" as="image" href="assets/logo%20.png"' not in text:
+              marker = '</head>'
+              if marker not in text:
+                  raise SystemExit('index.html is missing </head>')
+              text = text.replace(marker, preload + marker, 1)
 
           css = '    <link rel="stylesheet" href="app/css/public-ai-liaison.css">\n'
           js = '    <script type="module" src="app/communication/public/PublicLeadLiaison.js"></script>\n'
@@ -43,16 +73,16 @@ jobs:
                   raise SystemExit('index.html is missing </body>')
               text = text.replace(marker, js + marker, 1)
 
-          path.write_text(text, encoding="utf-8")
+          index.write_text(text, encoding="utf-8")
 
-      - name: Commit generated index wiring
+      - name: Commit generated wiring
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
+          git add index.html app/auth/login.html app/auth/register.html app/consultation/index.html
           if git diff --cached --quiet; then
-            echo "Public AI Liaison already wired."
+            echo "Public AI Liaison and logo paths already wired."
             exit 0
           fi
-          git commit -m "Wire public AI Liaison into index"
+          git commit -m "Fix logo asset path and optimize public AI loading"
           git push
