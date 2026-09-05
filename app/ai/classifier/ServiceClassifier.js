@@ -91,19 +91,25 @@ export default class ServiceClassifier {
 
         for (const rule of rules) {
             const matched = rule.keywords.filter(keyword => text.includes(keyword));
-            if (matched.length) {
-                return {
-                    value: rule.service,
-                    confidence: matched.includes("ccma") || matched.includes("ccma hearing") ? 0.98 : 0.9,
-                    matched
-                };
-            }
+            if (!matched.length) continue;
+
+            const isCcma = matched.some(keyword => keyword.startsWith("ccma")) || text.includes("commission for conciliation mediation and arbitration");
+
+            return {
+                value: rule.service,
+                confidence: isCcma ? 0.98 : 0.9,
+                matched,
+                serviceId: isCcma ? "ccma-representation" : null,
+                serviceName: isCcma ? "CCMA Representation" : null
+            };
         }
 
         return {
             value: "UNKNOWN",
             confidence: 0,
-            matched: []
+            matched: [],
+            serviceId: null,
+            serviceName: null
         };
     }
 }
