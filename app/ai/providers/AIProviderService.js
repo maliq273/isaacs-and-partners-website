@@ -12,15 +12,14 @@
  *   GEMINI_MODEL=gemini-2.5-flash
  */
 
+const env = (name) => globalThis.Deno?.env?.get(name) ?? undefined;
+
 function clean(value, max = 12000) {
     return String(value ?? "").trim().slice(0, max);
 }
 
 function extractOpenAIText(data) {
-    if (typeof data?.output_text === "string" && data.output_text.trim()) {
-        return data.output_text.trim();
-    }
-
+    if (typeof data?.output_text === "string" && data.output_text.trim()) return data.output_text.trim();
     const output = Array.isArray(data?.output) ? data.output : [];
     const parts = [];
     for (const item of output) {
@@ -39,14 +38,15 @@ function extractGeminiText(data) {
 
 export default class AIProviderService {
     constructor({
-        provider = Deno.env.get("AI_PROVIDER") || "openai",
-        openAIKey = Deno.env.get("OPENAI_API_KEY"),
-        openAIModel = Deno.env.get("OPENAI_MODEL") || "gpt-4.1-mini",
-        geminiKey = Deno.env.get("GEMINI_API_KEY"),
-        geminiModel = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash",
+        provider = env("AI_PROVIDER") || "openai",
+        openAIKey = env("OPENAI_API_KEY"),
+        openAIModel = env("OPENAI_MODEL") || "gpt-4.1-mini",
+        geminiKey = env("GEMINI_API_KEY"),
+        geminiModel = env("GEMINI_MODEL") || "gemini-2.5-flash",
         fetchImpl = globalThis.fetch
     } = {}) {
         this.provider = String(provider || "openai").trim().toLowerCase();
+        if (!["openai", "gemini"].includes(this.provider)) throw new Error("AI_PROVIDER must be openai or gemini.");
         this.openAIKey = clean(openAIKey, 512);
         this.openAIModel = clean(openAIModel, 128);
         this.geminiKey = clean(geminiKey, 512);
@@ -67,35 +67,20 @@ export default class AIProviderService {
         const userText = clean(user, 16000);
         if (!systemText || !userText) throw new Error("AI provider requires system and user prompts.");
         if (!this.isConfigured()) return null;
-
-        if (this.provider === "gemini") {
-            return this.generateGemini({ system: systemText, user: userText, temperature, maxOutputTokens });
-        }
-
-        return this.generateOpenAI({ system: systemText, user: userText, temperature, maxOutputTokens });
+        if (typeof this.fetch !== "function") throw new Error("AI provider fetch implementation is unavailable.");
+        return this.provider === "gemini"
+            ? this.generateGemini({ system: systemText, user: userText, temperature, maxOutputTokens })
+            : this.generateOpenAI({ system: systemText, user: userText, temperature, maxOutputTokens });
     }
 
     async generateOpenAI({ system, user, temperature, maxOutputTokens }) {
         const response = await this.fetch("https://api.openai.com/v1/responses", {
             method: "POST",
-            headers: {
-                Authorization: `Bearer ${this.openAIKey}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: this.openAIModel,
-                instructions: system,
-                input: user,
-                temperature,
-                max_output_tokens: maxOutputTokens
-            })
+            headers: { Authorization: `Bearer ${this.openAIKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: this.openAIModel, instructions: system, input: user, temperature, max_output_tokens: maxOutputTokens })
         });
-
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            throw new Error(`OpenAI provider error (${response.status}): ${clean(data?.error?.message || "request failed", 500)}`);
-        }
-
+        if (!response.ok) throw new Error(`OpenAI provider error (${response.status}): ${clean(data?.error?.message || "request failed", 500)}`);
         const text = extractOpenAIText(data);
         if (!text) throw new Error("OpenAI provider returned no text.");
         return { text, provider: "OPENAI", model: this.openAIModel };
@@ -109,18 +94,11 @@ export default class AIProviderService {
             body: JSON.stringify({
                 systemInstruction: { parts: [{ text: system }] },
                 contents: [{ role: "user", parts: [{ text: user }] }],
-                generationConfig: {
-                    temperature,
-                    maxOutputTokens
-                }
+                generationConfig: { temperature, maxOutputTokens }
             })
         });
-
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            throw new Error(`Gemini provider error (${response.status}): ${clean(data?.error?.message || "request failed", 500)}`);
-        }
-
+        if (!response.ok) throw new Error(`Gemini provider error (${response.status}): ${clean(data?.error?.message || "request failed", 500)}`);
         const text = extractGeminiText(data);
         if (!text) throw new Error("Gemini provider returned no text.");
         return { text, provider: "GEMINI", model: this.geminiModel };
