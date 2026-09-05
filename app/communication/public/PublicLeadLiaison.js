@@ -5,6 +5,7 @@ import { PUBLIC_SERVICE_DIRECTORY } from "./PublicServiceDirectory.js";
 const STORAGE_KEY = "ip_public_ai_liaison_session_v2";
 const STORAGE_VERSION = 2;
 const MAX_REMEMBERED_MESSAGES = 12;
+const LAYOUT_FIX_HREF = "app/css/public-ai-liaison-layout-fix.css?v=20260905-1";
 
 function correctCommonWords(text) {
     const corrections = [["ccm", "ccma"], ["cma", "ccma"], ["ccmaa", "ccma"], ["retrenchmant", "retrenchment"], ["disciplnary", "disciplinary"], ["disciplinery", "disciplinary"], ["grievnce", "grievance"], ["employement", "employment"], ["immigartion", "immigration"], ["citizanship", "citizenship"], ["complaince", "compliance"], ["compilance", "compliance"], ["notery", "notary"], ["affidavid", "affidavit"]];
@@ -33,10 +34,20 @@ class PublicLeadLiaison {
 
     initialise() {
         if (!document.body || document.querySelector("[data-public-ai-liaison]")) return;
+        this.installLayoutFix();
         this.render();
         this.restoreSession();
         this.bind();
-        window.setTimeout(() => this.open(), 700);
+        this.close();
+    }
+
+    installLayoutFix() {
+        if (document.querySelector('link[data-public-ai-layout-fix="true"]')) return;
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = LAYOUT_FIX_HREF;
+        link.dataset.publicAiLayoutFix = "true";
+        document.head?.appendChild(link);
     }
 
     render() {
@@ -121,17 +132,18 @@ class PublicLeadLiaison {
     }
 
     open() {
-        if (!this.panel) return;
+        if (!this.panel || !this.root) return;
         this.opened = true;
         this.panel.hidden = false;
         this.root.classList.remove("is-minimised");
         this.root.classList.add("is-open");
         this.root.querySelector("[data-ai-launcher]")?.setAttribute("aria-expanded", "true");
         if (!this.serviceId) this.showCategoryPicker();
-        this.input?.focus();
+        window.requestAnimationFrame(() => this.input?.focus());
     }
 
     close() {
+        if (!this.panel || !this.root) return;
         this.opened = false;
         this.panel.hidden = true;
         this.root.classList.remove("is-open", "is-minimised");
@@ -139,6 +151,7 @@ class PublicLeadLiaison {
     }
 
     minimise() {
+        if (!this.panel || !this.root) return;
         this.opened = false;
         this.panel.hidden = true;
         this.root.classList.remove("is-open");
@@ -354,4 +367,12 @@ class PublicLeadLiaison {
     }
 }
 
-if (typeof document !== "undefined") document.addEventListener("DOMContentLoaded", () => new PublicLeadLiaison().initialise());
+if (typeof document !== "undefined") {
+    document.addEventListener("DOMContentLoaded", () => {
+        const instanceKey = "__IP_PUBLIC_AI_LIAISON__";
+        if (window[instanceKey]) return;
+        const instance = new PublicLeadLiaison();
+        window[instanceKey] = instance;
+        instance.initialise();
+    });
+}
