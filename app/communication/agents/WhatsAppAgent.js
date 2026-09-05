@@ -36,6 +36,8 @@ export default class WhatsAppAgent {
         const serviceMatch = this.serviceClassifier.classify({ message: body });
         const servicePlan = this.serviceIntelligence.buildPlan({
             domain: serviceMatch.value,
+            serviceId: serviceMatch.serviceId || null,
+            serviceName: serviceMatch.serviceName || null,
             facts: context.facts,
             clientType: user?.user_metadata?.account_type || "INDIVIDUAL"
         });
