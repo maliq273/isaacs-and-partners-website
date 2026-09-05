@@ -28,14 +28,12 @@ jobs:
         run: |
           from pathlib import Path
 
-          root = Path(".")
-          logo_path = "assets/logo%20.png"
+          # assets/favicon.png and the current assets/logo .png point to the
+          # same optimized image blob. Use the clean filename everywhere so
+          # browsers no longer request the missing assets/logo.png path.
+          logo_path = "assets/favicon.png"
 
-          # The current repository asset has a literal space in its filename:
-          # assets/logo .png. Browsers must request that path encoded as %20.
-          # Normalize existing website references so they no longer request
-          # the missing assets/logo.png file.
-          for path in root.rglob("*"):
+          for path in Path(".").rglob("*"):
               if not path.is_file() or ".git" in path.parts:
                   continue
               if path.suffix.lower() not in {".html", ".js", ".css", ".json", ".xml", ".txt"}:
@@ -51,8 +49,8 @@ jobs:
           index = Path("index.html")
           text = index.read_text(encoding="utf-8")
 
-          preload = '    <link rel="preload" as="image" href="assets/logo%20.png" fetchpriority="high">\n'
-          if 'rel="preload" as="image" href="assets/logo%20.png"' not in text:
+          preload = '    <link rel="preload" as="image" href="assets/favicon.png" fetchpriority="high">\n'
+          if 'rel="preload" as="image" href="assets/favicon.png"' not in text:
               marker = '</head>'
               if marker not in text:
                   raise SystemExit('index.html is missing </head>')
