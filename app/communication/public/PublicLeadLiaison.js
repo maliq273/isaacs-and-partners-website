@@ -2,8 +2,9 @@ import WhatsAppAgent from "../agents/WhatsAppAgent.js";
 import publicLeadResponseGenerator from "../agents/PublicLeadResponseGenerator.js";
 import { PUBLIC_SERVICE_DIRECTORY } from "./PublicServiceDirectory.js";
 
-const STORAGE_KEY = "ip_public_ai_lead_session";
-const MAX_REMEMBERED_MESSAGES = 30;
+const STORAGE_KEY = "ip_public_ai_liaison_session_v2";
+const STORAGE_VERSION = 2;
+const MAX_REMEMBERED_MESSAGES = 12;
 
 function correctCommonWords(text) {
     const corrections = [["ccm", "ccma"], ["cma", "ccma"], ["ccmaa", "ccma"], ["retrenchmant", "retrenchment"], ["disciplnary", "disciplinary"], ["disciplinery", "disciplinary"], ["grievnce", "grievance"], ["employement", "employment"], ["immigartion", "immigration"], ["citizanship", "citizenship"], ["complaince", "compliance"], ["compilance", "compliance"], ["notery", "notary"], ["affidavid", "affidavit"]];
@@ -54,25 +55,25 @@ class PublicLeadLiaison {
             <div class="public-ai-liaison__panel" data-ai-panel hidden>
                 <header class="public-ai-liaison__header">
                     <div class="public-ai-liaison__identity"><span class="public-ai-liaison__avatar"><i class="fa-solid fa-scale-balanced"></i></span><div><strong>Isaacs &amp; Partners</strong><span>AI Liaison · Free 15 min</span></div></div>
-                    <div class="public-ai-liaison__controls"><button type="button" class="public-ai-liaison__minimise" data-ai-minimise aria-label="Minimise">−</button><button type="button" class="public-ai-liaison__close" data-ai-close aria-label="Close">&times;</button></div>
+                    <div class="public-ai-liaison__controls"><button type="button" class="public-ai-liaison__minimise" data-ai-minimise aria-label="Minimise AI Liaison">−</button><button type="button" class="public-ai-liaison__close" data-ai-close aria-label="Close AI Liaison">&times;</button></div>
                 </header>
                 <div class="public-ai-liaison__welcome" data-ai-welcome>
                     <div class="public-ai-liaison__welcome-avatar"><i class="fa-solid fa-scale-balanced"></i><b>👋</b></div>
-                    <div class="public-ai-liaison__welcome-copy"><span>Welcome</span><h2>How can we help you today?</h2><p>I’m your AI Liaison. Start with one of our four main service areas and I’ll guide you through a free 15-minute preliminary consultation.</p></div>
+                    <div class="public-ai-liaison__welcome-copy"><span>Welcome</span><h2>How can we help you today?</h2><p>Choose a service area, then select the service you need. I’ll guide you through a free 15-minute preliminary consultation.</p></div>
                     <div class="public-ai-liaison__category-grid" data-ai-categories>
                         ${PUBLIC_SERVICE_DIRECTORY.map(category => `<button type="button" class="public-ai-liaison__category" data-category-id="${category.id}" aria-expanded="false"><span><i class="fa-solid ${CATEGORY_ICONS[category.id] || "fa-circle-question"}"></i></span><strong>${category.name}</strong><small>${category.services.length} services</small><i class="public-ai-liaison__category-chevron fa-solid fa-chevron-right" aria-hidden="true"></i></button>`).join("")}
                     </div>
                 </div>
                 <div class="public-ai-liaison__service-selector" data-ai-service-selector hidden>
                     <div class="public-ai-liaison__selector-heading"><div><label>Service area</label><strong data-ai-selected-category>Choose a category</strong></div><button type="button" data-ai-change-category><i class="fa-solid fa-arrow-left"></i> Back</button></div>
-                    <p class="public-ai-liaison__selector-help">Choose the specific service you need help with to start your free 15-minute preliminary consultation.</p>
+                    <p class="public-ai-liaison__selector-help">Select one service to begin.</p>
                     <div class="public-ai-liaison__subcategory-list" data-ai-subcategories></div>
                 </div>
                 <div class="public-ai-liaison__selected-service" data-ai-selected-service hidden></div>
                 <div class="public-ai-liaison__body" data-ai-list aria-live="polite"></div>
-                <div class="public-ai-liaison__cta" data-ai-cta hidden><strong>Your free AI consultation is complete.</strong><span>Your enquiry is prepared. Create an account so Isaacs &amp; Partners can securely capture your details and move it toward the appropriate professional consultation or quotation.</span><div class="public-ai-liaison__cta-actions"><a href="/signup.html?type=individual&source=website-ai" data-ai-signup class="gold-btn">Create Client Account</a><a href="/signup.html?type=business&source=website-ai" data-ai-business class="outline-btn">Business Account</a></div></div>
-                <form class="public-ai-liaison__composer" data-ai-form><label class="sr-only" for="public-ai-message">Ask the AI Liaison</label><textarea id="public-ai-message" rows="2" maxlength="3000" placeholder="Tell me what happened or what you need help with..." required></textarea><button type="submit" class="gold-btn" data-ai-send><i class="fa-solid fa-arrow-up"></i><span>Ask</span></button></form>
-                <footer class="public-ai-liaison__footer"><span><i class="fa-solid fa-shield-halved"></i> General information only</span><span>AI uses the Isaacs &amp; Partners service structure.</span></footer>
+                <div class="public-ai-liaison__cta" data-ai-cta hidden><strong>Your preliminary consultation is complete.</strong><span>Your enquiry is ready for secure client onboarding and professional follow-up.</span><div class="public-ai-liaison__cta-actions"><a href="/signup.html?type=individual&source=website-ai" data-ai-signup class="gold-btn">Create Client Account</a><a href="/signup.html?type=business&source=website-ai" data-ai-business class="outline-btn">Business Account</a></div></div>
+                <form class="public-ai-liaison__composer" data-ai-form><label class="sr-only" for="public-ai-message">Ask the AI Liaison</label><textarea id="public-ai-message" rows="1" maxlength="3000" placeholder="Tell me what you need help with..." required></textarea><button type="submit" class="gold-btn" data-ai-send><i class="fa-solid fa-arrow-up"></i><span>Ask</span></button></form>
+                <footer class="public-ai-liaison__footer"><span><i class="fa-solid fa-shield-halved"></i> General information only</span><span>Isaacs &amp; Partners service structure</span></footer>
             </div>`;
         document.body.appendChild(root);
         this.root = root;
@@ -104,6 +105,19 @@ class PublicLeadLiaison {
             if (button) this.selectService(button.dataset.serviceId);
         });
         this.form?.addEventListener("submit", event => this.send(event));
+        this.input?.addEventListener("input", () => this.autoSizeInput());
+        this.input?.addEventListener("keydown", event => {
+            if (event.key === "Enter" && !event.shiftKey && window.innerWidth > 600) {
+                event.preventDefault();
+                this.form?.requestSubmit();
+            }
+        });
+    }
+
+    autoSizeInput() {
+        if (!this.input) return;
+        this.input.style.height = "auto";
+        this.input.style.height = `${Math.min(this.input.scrollHeight, 96)}px`;
     }
 
     open() {
@@ -113,7 +127,7 @@ class PublicLeadLiaison {
         this.root.classList.remove("is-minimised");
         this.root.classList.add("is-open");
         this.root.querySelector("[data-ai-launcher]")?.setAttribute("aria-expanded", "true");
-        if (!this.serviceId && !this.selectedCategoryId) this.showCategoryPicker();
+        if (!this.serviceId) this.showCategoryPicker();
         this.input?.focus();
     }
 
@@ -134,33 +148,42 @@ class PublicLeadLiaison {
 
     toggle() { this.opened ? this.close() : this.open(); }
 
-    showCategoryPicker() {
+    resetConversation() {
+        this.serviceId = null;
+        this.serviceName = null;
         this.selectedCategoryId = null;
+        this.context = null;
+        this.list?.replaceChildren();
+        if (this.cta) this.cta.hidden = true;
+        if (this.selectedService) {
+            this.selectedService.hidden = true;
+            this.selectedService.replaceChildren();
+        }
+        try { localStorage.removeItem(STORAGE_KEY); } catch { /* optional local memory */ }
+    }
+
+    showCategoryPicker() {
+        this.resetConversation();
         this.serviceSelector.hidden = true;
         this.welcome.hidden = false;
         this.categoryGrid?.querySelectorAll("[data-category-id]").forEach(button => {
             button.classList.remove("is-selected");
             button.setAttribute("aria-expanded", "false");
         });
+        this.persistState();
     }
 
     selectCategory(categoryId) {
         const category = PUBLIC_SERVICE_DIRECTORY.find(item => item.id === categoryId);
         if (!category) return;
 
-        if (this.serviceId) {
-            const previousCategory = PUBLIC_SERVICE_DIRECTORY.find(item => item.services.some(service => service.id === this.serviceId));
-            if (previousCategory?.id !== category.id) {
-                this.serviceId = null;
-                this.serviceName = null;
-                this.context = null;
-                this.list?.replaceChildren();
-                if (this.cta) this.cta.hidden = true;
-                if (this.selectedService) this.selectedService.hidden = true;
-            }
-        }
-
         this.selectedCategoryId = category.id;
+        this.serviceId = null;
+        this.serviceName = null;
+        this.context = null;
+        this.list?.replaceChildren();
+        if (this.cta) this.cta.hidden = true;
+        if (this.selectedService) this.selectedService.hidden = true;
         this.welcome.hidden = true;
         this.serviceSelector.hidden = false;
         this.selectedCategoryLabel.textContent = category.name;
@@ -171,7 +194,14 @@ class PublicLeadLiaison {
             button.type = "button";
             button.className = "public-ai-liaison__subcategory";
             button.dataset.serviceId = service.id;
-            button.innerHTML = `<span><strong>${service.name}</strong><small>Start consultation for this service</small></span><i class="fa-solid fa-chevron-right" aria-hidden="true"></i>`;
+            const label = document.createElement("span");
+            const name = document.createElement("strong");
+            name.textContent = service.name;
+            label.appendChild(name);
+            const arrow = document.createElement("i");
+            arrow.className = "fa-solid fa-chevron-right";
+            arrow.setAttribute("aria-hidden", "true");
+            button.append(label, arrow);
             this.subcategoryList.appendChild(button);
         });
 
@@ -181,7 +211,7 @@ class PublicLeadLiaison {
             button.setAttribute("aria-expanded", selected ? "true" : "false");
         });
         this.persistState();
-        this.serviceSelector.querySelector(".public-ai-liaison__subcategory")?.focus();
+        this.subcategoryList.querySelector("[data-service-id]")?.focus();
     }
 
     selectService(serviceId) {
@@ -191,65 +221,69 @@ class PublicLeadLiaison {
 
         this.serviceId = service.id;
         this.serviceName = service.name;
-        this.context = this.context || {};
-        this.context.publicLead = { stage: 0, qualified: false, answers: [] };
+        this.context = { publicLead: { stage: 0, qualified: false, answers: [] } };
         this.list?.replaceChildren();
         if (this.cta) this.cta.hidden = true;
-
         this.serviceSelector.hidden = true;
-        this.selectedCategoryId = category.id;
+
         if (this.selectedService) {
             this.selectedService.hidden = false;
             this.selectedService.innerHTML = `<span><i class="fa-solid ${CATEGORY_ICONS[category.id] || "fa-circle-question"}"></i></span><div><small>${category.name}</small><strong>${service.name}</strong></div><button type="button" data-ai-change-category aria-label="Change service"><i class="fa-solid fa-pen"></i></button>`;
             this.selectedService.querySelector("[data-ai-change-category]")?.addEventListener("click", () => this.showCategoryPicker());
         }
 
-        this.appendMessage("AI", `Excellent. You’ve selected ${service.name} under ${category.name}. Your free 15-minute preliminary consultation starts now. Tell me what has happened, what you need assistance with, and any important dates or deadlines.`);
+        this.appendMessage("AI", `You selected ${service.name}. Let’s start your free 15-minute preliminary consultation. What do you need help with?`);
         this.persistState();
         this.input?.focus();
     }
 
     restoreSelectedService() {
-        for (const category of PUBLIC_SERVICE_DIRECTORY) {
-            const service = category.services.find(item => item.id === this.serviceId);
-            if (!service) continue;
-            this.selectedCategoryId = category.id;
-            this.welcome.hidden = true;
-            this.serviceSelector.hidden = true;
-            this.selectedCategoryLabel.textContent = category.name;
-            if (this.selectedService) {
-                this.selectedService.hidden = false;
-                this.selectedService.innerHTML = `<span><i class="fa-solid ${CATEGORY_ICONS[category.id] || "fa-circle-question"}"></i></span><div><small>${category.name}</small><strong>${service.name}</strong></div><button type="button" data-ai-change-category aria-label="Change service"><i class="fa-solid fa-pen"></i></button>`;
-                this.selectedService.querySelector("[data-ai-change-category]")?.addEventListener("click", () => this.showCategoryPicker());
-            }
-            return;
+        const category = PUBLIC_SERVICE_DIRECTORY.find(item => item.services.some(service => service.id === this.serviceId));
+        const service = category?.services.find(item => item.id === this.serviceId);
+        if (!category || !service) return false;
+        this.selectedCategoryId = category.id;
+        this.welcome.hidden = true;
+        this.serviceSelector.hidden = true;
+        if (this.selectedService) {
+            this.selectedService.hidden = false;
+            this.selectedService.innerHTML = `<span><i class="fa-solid ${CATEGORY_ICONS[category.id] || "fa-circle-question"}"></i></span><div><small>${category.name}</small><strong>${service.name}</strong></div><button type="button" data-ai-change-category aria-label="Change service"><i class="fa-solid fa-pen"></i></button>`;
+            this.selectedService.querySelector("[data-ai-change-category]")?.addEventListener("click", () => this.showCategoryPicker());
         }
+        return true;
     }
 
     restoreSession() {
         try {
             const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-            if (!saved) return;
+            if (!saved || saved.version !== STORAGE_VERSION) {
+                localStorage.removeItem(STORAGE_KEY);
+                return;
+            }
             this.serviceId = saved.serviceId || null;
             this.serviceName = saved.serviceName || null;
             this.context = saved.context || null;
+            if (!this.serviceId || !this.restoreSelectedService()) {
+                this.resetConversation();
+                return;
+            }
             (saved.messages || []).slice(-MAX_REMEMBERED_MESSAGES).forEach(message => this.appendMessage(message.sender, message.body, false));
-            if (this.serviceId) this.restoreSelectedService();
             if (this.context?.publicLead?.qualified) this.showCta();
-        } catch { /* optional local memory */ }
+        } catch {
+            this.resetConversation();
+        }
     }
 
     persistState() {
         try {
             const messages = Array.from(this.list?.children || []).map(item => ({ sender: item.classList.contains("public-ai-liaison__message--client") ? "CLIENT" : "AI", body: item.querySelector("p")?.textContent || "" })).filter(item => item.body).slice(-MAX_REMEMBERED_MESSAGES);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ serviceId: this.serviceId, serviceName: this.serviceName, context: this.context, messages, updatedAt: new Date().toISOString() }));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, serviceId: this.serviceId, serviceName: this.serviceName, context: this.context, messages, updatedAt: new Date().toISOString() }));
         } catch { /* optional local memory */ }
     }
 
     appendMessage(sender, body, persist = true) {
         if (!this.list || !body) return;
         const item = document.createElement("article");
-        const visualSender = sender === "CLIENT" ? "client" : String(sender).toLowerCase();
+        const visualSender = sender === "CLIENT" ? "client" : "ai";
         item.className = `public-ai-liaison__message public-ai-liaison__message--${visualSender}`;
         const label = document.createElement("strong");
         label.textContent = sender === "AI" ? "AI Liaison" : "You";
@@ -267,7 +301,6 @@ class PublicLeadLiaison {
         const originalBody = String(this.input?.value || "").trim();
         if (!originalBody) return;
         if (!this.serviceId) {
-            this.appendMessage("AI", "Please choose a service area and a specific service first. I’ll then start your free 15-minute preliminary consultation.");
             this.showCategoryPicker();
             return;
         }
@@ -275,10 +308,11 @@ class PublicLeadLiaison {
         const body = correctCommonWords(originalBody);
         this.busy = true;
         this.sendButton.disabled = true;
-        this.sendButton.querySelector("span").textContent = "...";
+        this.sendButton.querySelector("span").textContent = "…";
         this.appendMessage("CLIENT", originalBody);
-        if (body !== originalBody) this.appendMessage("AI", `I understood the wording as: “${body}”. I’ll use the closest service reference.`);
         this.input.value = "";
+        this.autoSizeInput();
+
         try {
             const result = await this.agent.handleInbound({ chatId: `public-web:${this.getSessionId()}`, body, conversation: this.context });
             this.context = result.context || this.context;
@@ -289,11 +323,12 @@ class PublicLeadLiaison {
             this.persistState();
         } catch (error) {
             console.error("[PublicLeadLiaison]", error);
-            this.appendMessage("AI", "I’m unable to complete that enquiry right now. Please create an account or use the consultation/contact options on this website so our team can assist you.");
+            this.appendMessage("AI", "I’m unable to process that right now. Please use the consultation or contact options on the website.");
         } finally {
             this.busy = false;
             this.sendButton.disabled = false;
             this.sendButton.querySelector("span").textContent = "Ask";
+            this.input?.focus();
         }
     }
 
