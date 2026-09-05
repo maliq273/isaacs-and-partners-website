@@ -1,16 +1,14 @@
 /**
  * Isaacs & Partners — Client AI Liaison Messages Controller
  *
- * Connects the existing authenticated client portal Messages page to the
- * browser-safe AILiaisonRuntimeService.
- *
- * Authentication remains owned by AuthService/AuthGuard.
- * AI runtime calls remain server-side through the Supabase Edge Function.
+ * Client communication is available only after Super Admin approval.
+ * All AI responses still travel through the server-side AI Liaison runtime.
  */
 
 import auth from "../auth/AuthService.js";
 import authGuard from "../auth/AuthGuard.js";
 import AILiaisonRuntimeService from "../services/AILiaisonRuntimeService.js";
+import clientPortalAccess from "../services/ClientPortalAccessService.js";
 
 const runtime = new AILiaisonRuntimeService();
 
@@ -25,6 +23,7 @@ class ClientMessagesController {
         this.chatId = null;
         this.matterId = null;
         this.loading = false;
+        this.approved = false;
     }
 
     async initialise() {
@@ -39,34 +38,52 @@ class ClientMessagesController {
 
         this.chatId = `portal:${user.id}`;
         this.matterId = new URLSearchParams(window.location.search).get("matterId") || null;
-
         this.list = this.root.querySelector("[data-message-list]");
         this.form = this.root.querySelector("[data-message-form]");
-        this.textarea = this.root.querySelector("textarea[name='message']");
+        this.textarea = this.form?.querySelector("textarea[name='message']");
         this.submitButton = this.form?.querySelector("button[type='submit']") || null;
 
-        this.form?.addEventListener("submit", event => this.handleSubmit(event));
+        try {
+            this.approved = (await clientPortalAccess.getStatus()) === "APPROVED";
+        } catch (error) {
+            console.error("[ClientMessagesController] Access check failed:", error);
+            this.approved = false;
+        }
 
+        this.applyAccessGate();
+        if (!this.approved) return this;
+
+        this.form?.addEventListener("submit", event => this.handleSubmit(event));
         await this.loadConversation();
         return this;
+    }
+
+    applyAccessGate() {
+        if (this.approved) return;
+
+        const banner = document.querySelector("[data-client-message-gate]");
+        if (banner) banner.hidden = false;
+
+        this.setListMessage("Client communication is locked until Isaacs & Partners approves your portal access.");
+        if (this.textarea) {
+            this.textarea.disabled = true;
+            this.textarea.placeholder = "Messaging will be enabled after approval.";
+        }
+        if (this.submitButton) this.submitButton.disabled = true;
+        if (this.form) this.form.setAttribute("aria-disabled", "true");
     }
 
     async loadConversation() {
         this.setListMessage("Loading messages...");
 
         try {
-            this.conversation = await runtime.getClientConversation({
-                chatId: this.chatId,
-                channel: "PORTAL"
-            });
-
+            this.conversation = await runtime.getClientConversation({ chatId: this.chatId, channel: "PORTAL" });
             if (!this.conversation) {
-                this.setListMessage("No messages yet. Send a message to begin your conversation with Isaacs & Partners.");
+                this.setListMessage("No messages yet. Your AI Liaison is ready when you are.");
                 return;
             }
 
-            const messages = await runtime.listMessages(this.conversation.id);
-            this.renderMessages(messages);
+            this.renderMessages(await runtime.listMessages(this.conversation.id));
         } catch (error) {
             console.error("[ClientMessagesController] Unable to load conversation:", error);
             this.setListMessage(error?.message || "Unable to load your messages.");
@@ -75,21 +92,14 @@ class ClientMessagesController {
 
     async handleSubmit(event) {
         event.preventDefault();
-        if (this.loading) return;
+        if (this.loading || !this.approved) return;
 
         const body = String(this.textarea?.value || "").trim();
         if (!body) return;
 
         this.setLoading(true);
-
         try {
-            const result = await runtime.sendClientMessage({
-                body,
-                chatId: this.chatId,
-                channel: "PORTAL",
-                matterId: this.matterId
-            });
-
+            const result = await runtime.sendClientMessage({ body, chatId: this.chatId, channel: "PORTAL", matterId: this.matterId });
             this.conversation = result.conversation || this.conversation;
             this.textarea.value = "";
 
@@ -105,11 +115,10 @@ class ClientMessagesController {
 
     renderMessages(messages = []) {
         if (!this.list) return;
-
         this.list.replaceChildren();
 
         if (!messages.length) {
-            this.setListMessage("No messages yet. Send a message to begin your conversation with Isaacs & Partners.");
+            this.setListMessage("No messages yet. Your AI Liaison is ready when you are.");
             return;
         }
 
@@ -126,7 +135,6 @@ class ClientMessagesController {
             const timestamp = document.createElement("time");
             timestamp.dateTime = message.created_at || "";
             timestamp.textContent = this.formatTimestamp(message.created_at);
-
             header.append(sender, timestamp);
 
             const body = document.createElement("p");
@@ -141,30 +149,20 @@ class ClientMessagesController {
     }
 
     senderLabel(senderType) {
-        return ({
-            CLIENT: "You",
-            AI: "AI Liaison",
-            STAFF: "Isaacs & Partners",
-            SUPER_ADMIN: "Isaacs & Partners — Super Admin",
-            SYSTEM: "System"
-        })[String(senderType || "").toUpperCase()] || "Message";
+        return ({ CLIENT: "You", AI: "AI Liaison", STAFF: "Isaacs & Partners", SUPER_ADMIN: "Isaacs & Partners — Super Admin", SYSTEM: "System" })[
+            String(senderType || "").toUpperCase()
+        ] || "Message";
     }
 
     formatTimestamp(value) {
         if (!value) return "";
-
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return "";
-
-        return new Intl.DateTimeFormat("en-ZA", {
-            dateStyle: "medium",
-            timeStyle: "short"
-        }).format(date);
+        return new Intl.DateTimeFormat("en-ZA", { dateStyle: "medium", timeStyle: "short" }).format(date);
     }
 
     setListMessage(message) {
         if (!this.list) return;
-
         this.list.replaceChildren();
         const element = document.createElement("p");
         element.className = "ip-empty-state";
@@ -174,22 +172,19 @@ class ClientMessagesController {
 
     showFormError(message) {
         let element = this.root?.querySelector("[data-message-error]");
-
         if (!element) {
             element = document.createElement("p");
             element.dataset.messageError = "true";
             element.className = "ip-form-message ip-form-message--error";
             this.form?.prepend(element);
         }
-
         element.textContent = message;
     }
 
     setLoading(loading) {
         this.loading = Boolean(loading);
         if (!this.submitButton) return;
-
-        this.submitButton.disabled = this.loading;
+        this.submitButton.disabled = this.loading || !this.approved;
         this.submitButton.setAttribute("aria-busy", String(this.loading));
         this.submitButton.textContent = this.loading ? "Sending..." : "Send Message";
     }
@@ -199,9 +194,7 @@ const clientMessagesController = new ClientMessagesController();
 
 if (typeof document !== "undefined") {
     document.addEventListener("DOMContentLoaded", () => {
-        clientMessagesController.initialise().catch(error => {
-            console.error("[ClientMessagesController] Initialisation failed:", error);
-        });
+        clientMessagesController.initialise().catch(error => console.error("[ClientMessagesController] Initialisation failed:", error));
     });
 }
 
