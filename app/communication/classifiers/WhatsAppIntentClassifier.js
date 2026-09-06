@@ -7,6 +7,7 @@ const RULES = Object.freeze([
     { intent: "DOCUMENTS", keywords: ["document", "documents", "passport", "upload", "outstanding", "required documents"] },
     { intent: "APPOINTMENT", keywords: ["appointment", "book", "booking", "meeting", "consultation", "schedule"] },
     { intent: "PRICING", keywords: ["price", "pricing", "cost", "fee", "fees", "how much", "quote", "quotation"] },
+    { intent: "COMPANY_INFORMATION", keywords: ["what services", "what service", "services do you offer", "what do you offer", "what can you help", "who are you", "what does isaacs", "tell me about isaacs", "tell me about your services"] },
     { intent: "GREETING", keywords: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"] },
     { intent: "SERVICE_ENQUIRY", keywords: ["visa", "immigration", "dha", "vfs", "refugee", "asylum", "employee", "employment", "cipc", "sars", "uif", "coida", "contract", "legal", "affidavit", "mediation"] }
 ]);
