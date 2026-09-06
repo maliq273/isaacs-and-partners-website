@@ -511,5 +511,24 @@ function initialiseLazyImages() {
     images.forEach(image => observer.observe(image));
 }
 
+/* =====================================================
+   PUBLIC AI LIAISON BOOTSTRAP
+   ===================================================== */
+
+(function initialisePublicAILiaisonRuntime() {
+    const boot = () => {
+        if (window.__IP_PUBLIC_AI_LIAISON_BOOT_REQUESTED__) return;
+        window.__IP_PUBLIC_AI_LIAISON_BOOT_REQUESTED__ = true;
+        import("./app/communication/public/PublicLeadLiaisonBootstrap.js?v=20260906-ai")
+            .catch(error => console.error("[Public AI Liaison] bootstrap import failed", error));
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot, { once: true });
+    } else {
+        boot();
+    }
+})();
+
 console.log("%c ISAACS & PARTNERS ", "background:#C9A227;color:#111;padding:10px;font-size:18px;font-weight:bold;");
 console.log("%cWebsite Ready", "color:#4ade80;font-size:14px;");
