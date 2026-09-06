@@ -7,15 +7,15 @@
  * by the trusted server runtime.
  */
 
-import immigration from "./../../knowledgebase/immigration.json" with { type: "json" };
-import hr from "./../../knowledgebase/hr.json" with { type: "json" };
-import labour from "./../../knowledgebase/labour.json" with { type: "json" };
-import business from "./../../knowledgebase/business.json" with { type: "json" };
-import contracts from "./../../knowledgebase/contracts.json" with { type: "json" };
-import ccma from "./../../knowledgebase/ccma.json" with { type: "json" };
-import mediation from "./../../knowledgebase/mediation.json" with { type: "json" };
-import notary from "./../../knowledgebase/notary.json" with { type: "json" };
-import servicePricing from "../../data/service-pricing.json" with { type: "json" };
+import immigration from "../knowledgebase/immigration.json" with { type: "json" };
+import hr from "../knowledgebase/hr.json" with { type: "json" };
+import labour from "../knowledgebase/labour.json" with { type: "json" };
+import business from "../knowledgebase/business.json" with { type: "json" };
+import contracts from "../knowledgebase/contracts.json" with { type: "json" };
+import ccma from "../knowledgebase/ccma.json" with { type: "json" };
+import mediation from "../knowledgebase/mediation.json" with { type: "json" };
+import notary from "../knowledgebase/notary.json" with { type: "json" };
+import servicePricing from "../data/service-pricing.json" with { type: "json" };
 
 const SOURCES = Object.freeze([
     { id: "company-service-pricing", name: "Isaacs & Partners Service Pricing", authority: "COMPANY_POLICY", data: servicePricing },
