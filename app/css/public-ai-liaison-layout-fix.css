@@ -1,15 +1,17 @@
 .public-ai-liaison {
   position: fixed !important;
   right: 24px !important;
-  bottom: 112px !important;
+  bottom: 178px !important;
   z-index: 2147483000 !important;
+  width: 0 !important;
+  height: 0 !important;
   pointer-events: none !important;
 }
 
 .public-ai-liaison__launcher {
-  position: relative !important;
-  right: auto !important;
-  bottom: auto !important;
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
   z-index: 2 !important;
   pointer-events: auto !important;
 }
@@ -29,7 +31,7 @@
 .public-ai-liaison__panel {
   position: absolute !important;
   right: 0 !important;
-  bottom: calc(100% + 12px) !important;
+  bottom: 76px !important;
   z-index: 3 !important;
   pointer-events: auto !important;
 }
@@ -61,13 +63,13 @@
 @media (max-width: 640px) {
   .public-ai-liaison {
     right: 12px !important;
-    bottom: 82px !important;
+    bottom: 150px !important;
   }
 
   .public-ai-liaison__panel {
     right: 0 !important;
-    bottom: calc(100% + 10px) !important;
+    bottom: 70px !important;
     width: min(430px, calc(100vw - 24px)) !important;
-    max-height: calc(100vh - 96px) !important;
+    max-height: calc(100vh - 150px) !important;
   }
 }
