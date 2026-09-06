@@ -12,7 +12,6 @@ This repository is the integrated Isaacs & Partners public website and client-pl
 ### Completed / working foundation
 
 - Public Isaacs & Partners website structure is in place.
-- Canonical company logo is `assets/logo.png` and the old `logo%20.png` / `images/logo.png` references have been removed from live application pages.
 - Public AI Liaison is wired to the existing `WhatsAppAgent` architecture. It is **not** a second AI engine.
 - Public AI Liaison has a governed four-category service directory:
   1. Immigration Services
