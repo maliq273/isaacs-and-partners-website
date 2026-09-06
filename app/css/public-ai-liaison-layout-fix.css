@@ -1,19 +1,21 @@
 .public-ai-liaison {
   position: fixed !important;
-  right: 24px !important;
-  bottom: 178px !important;
+  inset: auto 0 0 0 !important;
   z-index: 2147483000 !important;
-  width: 0 !important;
+  width: 100% !important;
   height: 0 !important;
   pointer-events: none !important;
+  --public-ai-safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .public-ai-liaison__launcher {
   position: absolute !important;
-  right: 0 !important;
-  bottom: 0 !important;
+  right: 24px !important;
+  bottom: calc(178px + var(--public-ai-safe-bottom)) !important;
   z-index: 2 !important;
   pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 .public-ai-liaison__launcher-icon {
@@ -29,11 +31,13 @@
 }
 
 .public-ai-liaison__panel {
-  position: absolute !important;
-  right: 0 !important;
-  bottom: 76px !important;
+  position: fixed !important;
+  right: 24px !important;
+  bottom: calc(178px + var(--public-ai-safe-bottom)) !important;
   z-index: 3 !important;
   pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 .public-ai-liaison.is-minimised .public-ai-liaison__launcher-lawyer {
@@ -51,6 +55,7 @@
   width: 68px !important;
   min-width: 68px !important;
   height: 68px !important;
+  min-height: 68px !important;
   padding: 9px !important;
   justify-content: center !important;
 }
@@ -60,16 +65,48 @@
   pointer-events: none !important;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .public-ai-liaison {
+    inset: auto 0 0 0 !important;
+  }
+
+  .public-ai-liaison__launcher {
     right: 12px !important;
-    bottom: 150px !important;
+    bottom: calc(118px + var(--public-ai-safe-bottom)) !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+    min-height: 58px !important;
   }
 
   .public-ai-liaison__panel {
-    right: 0 !important;
-    bottom: 70px !important;
-    width: min(430px, calc(100vw - 24px)) !important;
-    max-height: calc(100vh - 150px) !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: calc(118px + var(--public-ai-safe-bottom)) !important;
+    width: auto !important;
+    height: min(680px, calc(100dvh - 142px - var(--public-ai-safe-bottom))) !important;
+    max-height: calc(100dvh - 142px - var(--public-ai-safe-bottom)) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .public-ai-liaison__launcher {
+    right: 10px !important;
+    bottom: calc(104px + var(--public-ai-safe-bottom)) !important;
+    width: min(290px, calc(100vw - 20px)) !important;
+  }
+
+  .public-ai-liaison__panel {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(96px + var(--public-ai-safe-bottom)) !important;
+    height: min(620px, calc(100dvh - 112px - var(--public-ai-safe-bottom))) !important;
+    max-height: calc(100dvh - 112px - var(--public-ai-safe-bottom)) !important;
+    border-radius: 16px !important;
+  }
+}
+
+@media (max-height: 620px) and (max-width: 900px) {
+  .public-ai-liaison__panel {
+    height: calc(100dvh - 108px - var(--public-ai-safe-bottom)) !important;
+    max-height: calc(100dvh - 108px - var(--public-ai-safe-bottom)) !important;
   }
 }
