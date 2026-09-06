@@ -100,8 +100,13 @@ jobs:
               text = text.replace("</body>", bootstrap + "</body>", 1)
 
           text = text.replace('script.js?v=20260822', 'script.js?v=20260906')
-
           index.write_text(text, encoding="utf-8")
+
+          runtime = Path("script.js")
+          runtime_text = runtime.read_text(encoding="utf-8")
+          bootstrap_runtime = '''\n/* =====================================================\n   PUBLIC AI LIAISON BOOTSTRAP\n   ===================================================== */\n\n(function initialisePublicAILiaisonRuntime() {\n    const boot = () => {\n        if (window.__IP_PUBLIC_AI_LIAISON_BOOT_REQUESTED__) return;\n        window.__IP_PUBLIC_AI_LIAISON_BOOT_REQUESTED__ = true;\n        import("./app/communication/public/PublicLeadLiaisonBootstrap.js?v=20260906-ai")\n            .catch(error => console.error("[Public AI Liaison] bootstrap import failed", error));\n    };\n\n    if (document.readyState === "loading") {\n        document.addEventListener("DOMContentLoaded", boot, { once: true });\n    } else {\n        boot();\n    }\n})();\n'''
+          if 'PublicLeadLiaisonBootstrap.js?v=20260906-ai' not in runtime_text:
+              runtime.write_text(runtime_text.rstrip() + bootstrap_runtime, encoding="utf-8")
 
       - name: Verify canonical logo and AI wiring
         shell: bash
@@ -119,6 +124,7 @@ jobs:
           grep -n 'app/communication/public/PublicLeadLiaison.js' index.html
           grep -n 'app/communication/public/PublicLeadLiaisonBootstrap.js' index.html
           grep -n 'script.js?v=20260906' index.html
+          grep -n 'PublicLeadLiaisonBootstrap.js?v=20260906-ai' script.js
 
       - name: Commit canonical wiring
         run: |
