@@ -74,6 +74,10 @@ jobs:
           lines = text.splitlines(True)
           lines = [
               line for line in lines
+              if not ('rel="preload"' in line and 'as="image"' in line and 'assets/favicon.png' in line)
+          ]
+          lines = [
+              line for line in lines
               if 'rel="preload"' not in line or 'as="image"' not in line or 'assets/logo' not in line
           ]
           text = "".join(lines)
