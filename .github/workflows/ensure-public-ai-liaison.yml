@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'app/communication/public/PublicLeadLiaison.js'
+      - 'app/communication/public/PublicLeadLiaisonBootstrap.js'
       - 'app/communication/agents/PublicLeadResponseGenerator.js'
       - 'app/communication/public/PublicServiceDirectory.js'
       - 'app/css/public-ai-liaison.css'
@@ -80,25 +81,39 @@ jobs:
           if 'rel="preload" as="image" href="assets/logo.png"' not in text:
               text = text.replace("</head>", preload + "</head>", 1)
 
-          css = '    <link rel="stylesheet" href="app/css/public-ai-liaison.css">\n'
-          js = '    <script type="module" src="app/communication/public/PublicLeadLiaison.js"></script>\n'
+          css = '    <link rel="stylesheet" href="app/css/public-ai-liaison.css?v=20260906-ai">\n'
+          js = '    <script type="module" src="app/communication/public/PublicLeadLiaison.js?v=20260906-ai"></script>\n'
+          bootstrap = '    <script type="module" src="app/communication/public/PublicLeadLiaisonBootstrap.js?v=20260906-ai"></script>\n'
 
           if 'app/css/public-ai-liaison.css' not in text:
               text = text.replace("</head>", css + "</head>", 1)
+          else:
+              text = text.replace('href="app/css/public-ai-liaison.css"', 'href="app/css/public-ai-liaison.css?v=20260906-ai"')
+
           if 'app/communication/public/PublicLeadLiaison.js' not in text:
               text = text.replace("</body>", js + "</body>", 1)
+          else:
+              text = text.replace('src="app/communication/public/PublicLeadLiaison.js"', 'src="app/communication/public/PublicLeadLiaison.js?v=20260906-ai"')
+
+          if 'app/communication/public/PublicLeadLiaisonBootstrap.js' not in text:
+              text = text.replace("</body>", bootstrap + "</body>", 1)
 
           index.write_text(text, encoding="utf-8")
 
-      - name: Verify canonical logo references
+      - name: Verify canonical logo and AI wiring
         shell: bash
         run: |
           test -f assets/logo.png
+          test -f app/css/public-ai-liaison.css
           test -f app/css/public-ai-liaison-layout-fix.css
+          test -f app/communication/public/PublicLeadLiaison.js
+          test -f app/communication/public/PublicLeadLiaisonBootstrap.js
           ! grep -R --exclude-dir=.git --exclude-dir=.github -n 'assets/logo%20.png\|assets/logo \.png' . || (echo 'Old spaced/encoded logo reference remains' && exit 1)
           ! grep -R --exclude-dir=.git --exclude-dir=.github -n 'images/logo.png' . || (echo 'Deleted images/logo.png reference remains' && exit 1)
           grep -n 'assets/logo.png' index.html
+          grep -n 'app/css/public-ai-liaison.css' index.html
           grep -n 'app/communication/public/PublicLeadLiaison.js' index.html
+          grep -n 'app/communication/public/PublicLeadLiaisonBootstrap.js' index.html
 
       - name: Commit canonical wiring
         run: |
@@ -109,5 +124,5 @@ jobs:
             echo "No generated wiring changes required."
             exit 0
           fi
-          git commit -m "Fix canonical logo paths and wire public AI"
+          git commit -m "Harden public AI Liaison wiring and cache bust"
           git push origin main
