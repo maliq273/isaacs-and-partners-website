@@ -166,6 +166,7 @@ SCHEMA.ORG - LEGAL & PROFESSIONAL SERVICES
 </script>
     
     <link rel="stylesheet" href="app/css/public-ai-liaison.css?v=20260906-ai">
+    <link rel="stylesheet" href="app/css/public-ai-liaison-layout-fix.css?v=20260906-ai">
     <link rel="preload" as="image" href="assets/logo.png" fetchpriority="high">
 </head>
 
@@ -2666,6 +2667,45 @@ id="backToTop">
 <i class="fa-solid fa-chevron-up"></i>
 
 </button>
+
+<!-- ================================================= -->
+<!-- PUBLIC AI LIAISON FLOATING CONSULTANT -->
+<!-- ================================================= -->
+<section class="public-ai-liaison" data-public-ai-liaison="true" aria-label="Isaacs &amp; Partners AI Liaison">
+    <button class="public-ai-liaison__launcher" type="button" data-ai-launcher aria-label="Open AI Liaison" aria-expanded="false">
+        <span class="public-ai-liaison__launcher-lawyer" aria-hidden="true"><i class="fa-solid fa-user-tie"></i><b>👋</b></span>
+        <span class="public-ai-liaison__launcher-icon" aria-hidden="true"><i class="fa-solid fa-comments"></i><b>👋</b></span>
+        <span class="public-ai-liaison__launcher-copy"><strong>AI Liaison</strong><small>Free 15-minute preliminary consultation</small></span>
+        <span class="public-ai-liaison__pulse" aria-hidden="true"></span>
+        <span class="public-ai-liaison__hint" aria-hidden="true">Need help? I’m here.</span>
+    </button>
+    <div class="public-ai-liaison__panel" data-ai-panel hidden>
+        <header class="public-ai-liaison__header">
+            <div class="public-ai-liaison__identity"><span class="public-ai-liaison__avatar"><i class="fa-solid fa-scale-balanced"></i></span><div><strong>Isaacs &amp; Partners</strong><span>AI Liaison · Free 15 min</span></div></div>
+            <div class="public-ai-liaison__controls"><button type="button" class="public-ai-liaison__minimise" data-ai-minimise aria-label="Minimise AI Liaison">−</button><button type="button" class="public-ai-liaison__close" data-ai-close aria-label="Close AI Liaison">&times;</button></div>
+        </header>
+        <div class="public-ai-liaison__welcome" data-ai-welcome>
+            <div class="public-ai-liaison__welcome-avatar"><i class="fa-solid fa-scale-balanced"></i><b>👋</b></div>
+            <div class="public-ai-liaison__welcome-copy"><span>Welcome</span><h2>How can we help you today?</h2><p>Choose a service area, then select the service you need. I’ll guide you through a free 15-minute preliminary consultation.</p></div>
+            <div class="public-ai-liaison__category-grid" data-ai-categories>
+                <button type="button" class="public-ai-liaison__category" data-category-id="immigration" aria-expanded="false"><span><i class="fa-solid fa-passport"></i></span><strong>Immigration Services</strong><small>18 services</small><i class="public-ai-liaison__category-chevron fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                <button type="button" class="public-ai-liaison__category" data-category-id="hr-industrial-relations" aria-expanded="false"><span><i class="fa-solid fa-user-group"></i></span><strong>HR &amp; Industrial Relations</strong><small>14 services</small><i class="public-ai-liaison__category-chevron fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                <button type="button" class="public-ai-liaison__category" data-category-id="business-compliance" aria-expanded="false"><span><i class="fa-solid fa-building-shield"></i></span><strong>Business Compliance</strong><small>16 services</small><i class="public-ai-liaison__category-chevron fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                <button type="button" class="public-ai-liaison__category" data-category-id="general-advisory" aria-expanded="false"><span><i class="fa-solid fa-comments"></i></span><strong>General Advisory</strong><small>3 services</small><i class="public-ai-liaison__category-chevron fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <div class="public-ai-liaison__service-selector" data-ai-service-selector hidden>
+            <div class="public-ai-liaison__selector-heading"><div><label>Service area</label><strong data-ai-selected-category>Choose a category</strong></div><button type="button" data-ai-change-category><i class="fa-solid fa-arrow-left"></i> Back</button></div>
+            <p class="public-ai-liaison__selector-help">Select one service to begin.</p>
+            <div class="public-ai-liaison__subcategory-list" data-ai-subcategories></div>
+        </div>
+        <div class="public-ai-liaison__selected-service" data-ai-selected-service hidden></div>
+        <div class="public-ai-liaison__body" data-ai-list aria-live="polite"></div>
+        <div class="public-ai-liaison__cta" data-ai-cta hidden><strong>Your preliminary consultation is complete.</strong><span>Your enquiry is ready for secure client onboarding and professional follow-up.</span><div class="public-ai-liaison__cta-actions"><a href="/signup.html?type=individual&amp;source=website-ai" data-ai-signup class="gold-btn">Create Client Account</a><a href="/signup.html?type=business&amp;source=website-ai" data-ai-business class="outline-btn">Business Account</a></div></div>
+        <form class="public-ai-liaison__composer" data-ai-form><label class="sr-only" for="public-ai-message">Ask the AI Liaison</label><textarea id="public-ai-message" rows="1" maxlength="3000" placeholder="Tell me what you need help with..." required></textarea><button type="submit" class="gold-btn" data-ai-send><i class="fa-solid fa-arrow-up"></i><span>Ask</span></button></form>
+        <footer class="public-ai-liaison__footer"><span><i class="fa-solid fa-shield-halved"></i> General information only</span><span>Isaacs &amp; Partners service structure</span></footer>
+    </div>
+</section>
 
 <!-- ================================================= -->
 <!-- JAVASCRIPT -->

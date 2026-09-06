@@ -1,0 +1,6 @@
+{
+  "name": "Isaacs & Partners Consultancy",
+  "description": "Isaacs & Partners Consultancy - Immigration, HR & Industrial Relations, Business Compliance and Legal Services.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

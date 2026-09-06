@@ -33,12 +33,33 @@ class PublicLeadLiaison {
     }
 
     initialise() {
-        if (!document.body || document.querySelector("[data-public-ai-liaison]")) return;
+        if (!document.body) return;
         this.installLayoutFix();
-        this.render();
-        this.restoreSession();
-        this.bind();
-        this.close();
+
+        let root = document.querySelector("[data-public-ai-liaison]");
+        if (!root) {
+            this.render();
+        } else {
+            this.root = root;
+            this.list = root.querySelector("[data-ai-list]");
+            this.panel = root.querySelector("[data-ai-panel]");
+            this.form = root.querySelector("[data-ai-form]");
+            this.input = root.querySelector("textarea");
+            this.sendButton = root.querySelector("[data-ai-send]");
+            this.cta = root.querySelector("[data-ai-cta]");
+            this.welcome = root.querySelector("[data-ai-welcome]");
+            this.serviceSelector = root.querySelector("[data-ai-service-selector]");
+            this.categoryGrid = root.querySelector("[data-ai-categories]");
+            this.subcategoryList = root.querySelector("[data-ai-subcategories]");
+            this.selectedCategoryLabel = root.querySelector("[data-ai-selected-category]");
+            this.selectedService = root.querySelector("[data-ai-selected-service]");
+        }
+
+        if (this.root) {
+            this.restoreSession();
+            this.bind();
+            this.close();
+        }
     }
 
     installLayoutFix() {
@@ -367,12 +388,21 @@ class PublicLeadLiaison {
     }
 }
 
+export { PublicLeadLiaison };
+export default PublicLeadLiaison;
+
 if (typeof document !== "undefined") {
-    document.addEventListener("DOMContentLoaded", () => {
+    const initPublicAiLiaison = () => {
         const instanceKey = "__IP_PUBLIC_AI_LIAISON__";
         if (window[instanceKey]) return;
         const instance = new PublicLeadLiaison();
         window[instanceKey] = instance;
         instance.initialise();
-    });
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initPublicAiLiaison);
+    } else {
+        initPublicAiLiaison();
+    }
 }

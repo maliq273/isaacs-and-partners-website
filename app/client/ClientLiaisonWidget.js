@@ -190,9 +190,15 @@ class ClientLiaisonWidget {
 const clientLiaisonWidget = new ClientLiaisonWidget();
 
 if (typeof document !== "undefined") {
-    document.addEventListener("DOMContentLoaded", () => {
+    const initWidget = () => {
         clientLiaisonWidget.initialise().catch(error => console.error("[ClientLiaisonWidget] Initialisation failed:", error));
-    });
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initWidget);
+    } else {
+        initWidget();
+    }
 }
 
 export { ClientLiaisonWidget };
