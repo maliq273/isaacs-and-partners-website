@@ -233,6 +233,8 @@ Work unlocked
 Final 50%
       ↓
 Submission/application release
+
+
 8. Finish immigration automation
 
 Then connect:
@@ -246,6 +248,8 @@ Immigration service
 → QC
 → bundle
 → VFS/DHA readiness
+
+
 9. Production security audit
 
 Specifically:
