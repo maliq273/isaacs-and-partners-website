@@ -1,19 +1,30 @@
 # Isaacs & Partners — Cloudflare Zero Trust Tunnel Configuration
+#
+# The OpenWA API runs privately on the communications host and is exposed
+# only through this Cloudflare Tunnel. Supabase Edge Functions use the
+# public OpenWA hostname as OPENWA_BASE_URL; OpenWA credentials remain in
+# Supabase secrets and are never exposed to the browser.
+
 tunnel: isaacs-partners-production-tunnel
 credentials-file: /etc/cloudflared/creds.json
 
 ingress:
-  # Route OpenWA communication worker webhooks securely
+  # OpenWA WhatsApp API — local OpenWA listens on port 2785 by default.
+  - hostname: openwa.isaacsandpartners.online
+    service: http://localhost:2785
+
+  # Existing local Supabase development routes.
   - hostname: www.isaacsandpartners.online
     path: /functions/v1/openwa-communication-worker
     service: http://localhost:54321
-  # Route AI Liaison runtime securely
   - hostname: www.isaacsandpartners.online
     path: /functions/v1/ai-liaison-runtime
     service: http://localhost:54321
-  # Main web application
+
+  # Existing local web application routes.
   - hostname: www.isaacsandpartners.online
     service: http://localhost:3000
   - hostname: isaacsandpartners.online
     service: http://localhost:3000
+
   - service: http_status:404
