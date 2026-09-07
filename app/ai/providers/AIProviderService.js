@@ -38,7 +38,7 @@ function extractGeminiText(data) {
 
 export default class AIProviderService {
     constructor({
-        provider = env("AI_PROVIDER") || "openai",
+        provider = env("AI_PROVIDER") || "gemini",
         openAIKey = env("OPENAI_API_KEY"),
         openAIModel = env("OPENAI_MODEL") || "gpt-4.1-mini",
         geminiKey = env("GEMINI_API_KEY"),

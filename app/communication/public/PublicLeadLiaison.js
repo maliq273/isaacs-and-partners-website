@@ -1,6 +1,7 @@
 import WhatsAppAgent from "../agents/WhatsAppAgent.js";
 import publicLeadResponseGenerator from "../agents/PublicLeadResponseGenerator.js";
 import { PUBLIC_SERVICE_DIRECTORY } from "./PublicServiceDirectory.js";
+import publicEnquiryService from "../../services/PublicEnquiryService.js";
 
 const STORAGE_KEY = "ip_public_ai_liaison_session_v2";
 const STORAGE_VERSION = 2;
@@ -311,6 +312,20 @@ class PublicLeadLiaison {
         try {
             const messages = Array.from(this.list?.children || []).map(item => ({ sender: item.classList.contains("public-ai-liaison__message--client") ? "CLIENT" : "AI", body: item.querySelector("p")?.textContent || "" })).filter(item => item.body).slice(-MAX_REMEMBERED_MESSAGES);
             localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, serviceId: this.serviceId, serviceName: this.serviceName, context: this.context, messages, updatedAt: new Date().toISOString() }));
+            
+            if (this.serviceId) {
+                const category = PUBLIC_SERVICE_DIRECTORY.find(item => item.services.some(s => s.id === this.serviceId));
+                publicEnquiryService.submitEnquiry({
+                    sessionId: this.getSessionId(),
+                    categoryId: category?.id || this.selectedCategoryId,
+                    serviceId: this.serviceId,
+                    serviceName: this.serviceName,
+                    serviceDomain: category?.id,
+                    answers: this.context?.publicLead?.answers || [],
+                    qualified: Boolean(this.context?.publicLead?.qualified),
+                    metadata: { messagesCount: messages.length, lastUpdated: new Date().toISOString() }
+                }).catch(err => console.warn("[PublicLeadLiaison] Server enquiry persistence warning:", err));
+            }
         } catch { /* optional local memory */ }
     }
 
@@ -370,8 +385,9 @@ class PublicLeadLiaison {
         if (!this.cta) return;
         this.cta.hidden = false;
         const service = encodeURIComponent(this.serviceName || "");
-        this.root.querySelector("[data-ai-signup]")?.setAttribute("href", `/signup.html?type=individual&source=website-ai${service ? `&service=${service}` : ""}`);
-        this.root.querySelector("[data-ai-business]")?.setAttribute("href", `/signup.html?type=business&source=website-ai${service ? `&service=${service}` : ""}`);
+        const leadSessionId = encodeURIComponent(this.getSessionId());
+        this.root.querySelector("[data-ai-signup]")?.setAttribute("href", `/signup.html?type=individual&source=website-ai${service ? `&service=${service}` : ""}&leadSessionId=${leadSessionId}`);
+        this.root.querySelector("[data-ai-business]")?.setAttribute("href", `/signup.html?type=business&source=website-ai${service ? `&service=${service}` : ""}&leadSessionId=${leadSessionId}`);
     }
 
     getSessionId() {

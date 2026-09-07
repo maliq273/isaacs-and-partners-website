@@ -25,7 +25,7 @@ export default class WhatsAppAgent {
         this.mode = String(mode || "OPERATIONS").toUpperCase();
     }
 
-    async handleInbound({ chatId, phoneNumber = null, body, messageId = null, user = null, matter = null, conversation = null } = {}) {
+    async handleInbound({ chatId, phoneNumber = null, body, messageId = null, user = null, matter = null, operationalContext = null, conversation = null } = {}) {
         if (!chatId) throw new Error("WhatsApp chatId is required.");
         if (!String(body || "").trim()) return { handled: false, reason: "EMPTY_MESSAGE" };
 
@@ -92,7 +92,8 @@ export default class WhatsAppAgent {
             lead,
             sales,
             user,
-            matter
+            matter,
+            operationalContext
         });
         const reply = typeof replyResult === "object" ? replyResult?.text : replyResult;
         return {
@@ -126,13 +127,19 @@ export default class WhatsAppAgent {
         return this.commercial.getRule(servicePlan?.domain, options);
     }
 
-    async generateReply({ body, intent, servicePlan, sales, context = null, lead = null, user = null, matter = null } = {}) {
+    async generateReply({ body, intent, servicePlan, sales, context = null, lead = null, user = null, matter = null, operationalContext = null } = {}) {
         if (this.responseGenerator) {
-            const generated = await this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter });
+            const generated = await this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter, operationalContext });
             if (generated) return generated;
         }
         if (intent.intent === "GREETING") return "Hello and welcome to Isaacs & Partners. How may we assist you today?";
-        if (intent.intent === "STATUS") return "Please provide your matter number so I can route your status request to the correct client record.";
+        if (intent.intent === "STATUS") {
+            const hasMatters = matter || (Array.isArray(operationalContext?.userMatters) && operationalContext.userMatters.length > 0);
+            if (!hasMatters) {
+                return "I don't currently see an active matter linked to your account. If you would like to open a file or make an enquiry, please let us know.";
+            }
+            return "Please provide your matter number so I can route your status request to the correct client record.";
+        }
         if (intent.intent === "DOCUMENTS") return "Please tell me which service or application you are dealing with so I can guide you on the document process.";
         if (intent.intent === "APPOINTMENT") return "Please confirm the service you require and a suitable date or time so our team can arrange the appointment.";
         if (intent.intent === "PAYMENT" || intent.intent === "PAYMENT_PROOF") return this.sales.buildPaymentResponse(null);

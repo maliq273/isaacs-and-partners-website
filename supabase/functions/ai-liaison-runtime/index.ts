@@ -61,9 +61,33 @@ async function verifyMatterOwnership(userId: string, matterId: string | null) {
   throw new Error("You are not authorised to use this matter in the AI conversation.");
 }
 
+async function getUserMatters(userId: string) {
+  const { data: businesses } = await admin.from("businesses").select("id").eq("owner_user_id", userId);
+  const businessIds = (businesses || []).map((b: any) => b.id);
+
+  let query = admin.from("matters")
+    .select("id, matter_number, reference, status, service_type, service_domain, department, title, description, priority, workflow_status, created_at, updated_at, due_date")
+    .order("updated_at", { ascending: false });
+
+  if (businessIds.length > 0) {
+    query = query.or(`individual_user_id.eq.${userId},business_id.in.(${businessIds.join(",")})`);
+  } else {
+    query = query.eq("individual_user_id", userId);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("Error fetching user matters:", error);
+    return [];
+  }
+  return data || [];
+}
+
 async function getOperationalContext(userId: string, matterId: string | null) {
-  const context: any = { matter: null, documents: [], appointments: [], invoices: [] };
+  const context: any = { matter: null, userMatters: [], documents: [], appointments: [], invoices: [] };
   if (matterId) context.matter = await verifyMatterOwnership(userId, matterId);
+  context.userMatters = await getUserMatters(userId);
+
   const run = async (table: string, select: string, orderColumn: string, ownerColumn: string, limit = 50) => {
     let query: any = admin.from(table).select(select).order(orderColumn, { ascending: false }).limit(limit);
     if (matterId) query = query.eq("matter_id", matterId);
@@ -174,7 +198,7 @@ Deno.serve(async request => {
 
     const agentConversation = { chatId, phoneNumber: conversation.phone_number || phoneNumber, state: conversation.state || "AI_ACTIVE", facts: conversation.facts || {}, lastIntent: conversation.last_intent || null, lastService: conversation.last_service || null, messages: [] };
     const agent = createLiaisonAgent();
-    const result = await agent.handleInbound({ chatId, phoneNumber: agentConversation.phoneNumber, body, messageId, user, matter, conversation: agentConversation });
+    const result = await agent.handleInbound({ chatId, phoneNumber: agentConversation.phoneNumber, body, messageId, user, matter, operationalContext, conversation: agentConversation });
     const aiReply = clean(result?.reply, 8192);
     let aiMessage = null; let transportMessageId = null; let intervention = null;
     if (aiReply) aiMessage = await persistAiMessage(conversation.id, aiReply, result);

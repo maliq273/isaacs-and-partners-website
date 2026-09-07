@@ -8,6 +8,7 @@
  */
 
 import auth from "./AuthService.js";
+import publicEnquiryService from "../services/PublicEnquiryService.js";
 
 class RegistrationController {
     constructor() {
@@ -96,6 +97,21 @@ class RegistrationController {
                     rememberMe: data.get("rememberMe") === "on"
                 }
             });
+
+            if (result?.user?.id) {
+                const urlParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+                const leadSessionId = urlParams?.get("leadSessionId") || (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("ip_public_ai_session") : null);
+                if (leadSessionId) {
+                    const token = auth.getToken();
+                    if (token) {
+                        try {
+                            await publicEnquiryService.linkToClient(leadSessionId, result.user.id, token);
+                        } catch (linkError) {
+                            console.warn("[RegistrationController] Unable to link public lead enquiry:", linkError);
+                        }
+                    }
+                }
+            }
 
             if (result.requiresEmailConfirmation) {
                 this.setStatus("Account created. Please check your email and confirm your address before signing in.");

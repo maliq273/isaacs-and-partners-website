@@ -1,0 +1,19 @@
+# Isaacs & Partners — Cloudflare Zero Trust Tunnel Configuration
+tunnel: isaacs-partners-production-tunnel
+credentials-file: /etc/cloudflared/creds.json
+
+ingress:
+  # Route OpenWA communication worker webhooks securely
+  - hostname: www.isaacsandpartners.online
+    path: /functions/v1/openwa-communication-worker
+    service: http://localhost:54321
+  # Route AI Liaison runtime securely
+  - hostname: www.isaacsandpartners.online
+    path: /functions/v1/ai-liaison-runtime
+    service: http://localhost:54321
+  # Main web application
+  - hostname: www.isaacsandpartners.online
+    service: http://localhost:3000
+  - hostname: isaacsandpartners.online
+    service: http://localhost:3000
+  - service: http_status:404
