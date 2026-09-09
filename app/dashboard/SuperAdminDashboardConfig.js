@@ -20,7 +20,8 @@ export const SUPER_ADMIN_DASHBOARD_CATEGORIES = Object.freeze([
             { title: "Matters", href: "./matters.html", description: "Open, monitor and progress firm matters." },
             { title: "Assignments", href: "./assignments.html", description: "Allocate matters and operational work to active staff." },
             { title: "Cases", href: "./cases.html", description: "Manage case records linked to matters." },
-            { title: "Document Vault", href: "./document-vault.html", description: "Review controlled client documents and ingestion state." }
+            { title: "Document Vault", href: "./document-vault.html", description: "Review controlled client documents and ingestion state." },
+            { title: "WhatsApp Communications", href: "./communications.html", description: "Read and send controlled WhatsApp messages to mapped clients and staff." }
         ]
     },
     {
@@ -47,7 +48,8 @@ export const SUPER_ADMIN_DASHBOARD_CATEGORIES = Object.freeze([
         title: "Customers",
         description: "Authoritative individual and business client relationships.",
         modules: [
-            { title: "Individuals & Businesses", href: "./accounts.html", description: "Manage authoritative client account records." }
+            { title: "Individuals & Businesses", href: "./accounts.html", description: "Manage authoritative client account records." },
+            { title: "WhatsApp Communications", href: "./communications.html", description: "Communicate with mapped client WhatsApp accounts." }
         ]
     },
     {
