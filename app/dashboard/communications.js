@@ -1,9 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import auth from "../auth/AuthService.js";
+import authConfig from "../auth/auth.config.js";
 import OpenWACommunicationService from "../services/OpenWACommunicationService.js";
-import { supabase as configuredSupabase } from "../core/supabase.js";
-
-const serviceClient = configuredSupabase;
 
 class WhatsAppCommunicationsController {
     constructor() {
@@ -11,6 +9,7 @@ class WhatsAppCommunicationsController {
         this.messages = [];
         this.selectedChatId = null;
         this.loading = false;
+        this.supabase = null;
     }
 
     async initialise() {
@@ -19,6 +18,14 @@ class WhatsAppCommunicationsController {
             window.location.assign("../auth/login.html?returnUrl=" + encodeURIComponent(window.location.pathname));
             return;
         }
+
+        const token = auth.getToken();
+        if (!token) throw new Error("Authenticated session token is unavailable.");
+
+        this.supabase = createClient(authConfig.supabase.url, authConfig.supabase.publishableKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+            global: { headers: { Authorization: `Bearer ${token}` } }
+        });
 
         const user = auth.getCurrentUser();
         const role = String(user?.role || user?.app_role || user?.user_role || "").toUpperCase();
@@ -45,7 +52,8 @@ class WhatsAppCommunicationsController {
     async refreshContacts() {
         const list = document.getElementById("contact-list");
         try {
-            const { data, error } = await serviceClient.from("communication_contacts").select("*").eq("is_active", true).order("created_at", { ascending: false });
+            const { data, error } = await this.supabase.from("communication_contacts")
+                .select("*").eq("is_active", true).order("created_at", { ascending: false });
             if (error) throw error;
             this.contacts = data || [];
             document.getElementById("contact-status").textContent = `Contacts: ${this.contacts.length}`;
@@ -80,7 +88,8 @@ class WhatsAppCommunicationsController {
 
     async refreshMessages() {
         try {
-            const { data, error } = await serviceClient.from("communication_messages").select("*").eq("channel", "WHATSAPP").order("created_at", { ascending: true }).limit(500);
+            const { data, error } = await this.supabase.from("communication_messages")
+                .select("*").eq("channel", "WHATSAPP").order("created_at", { ascending: true }).limit(500);
             if (error) throw error;
             this.messages = data || [];
             document.getElementById("message-status").textContent = `Messages: ${this.messages.length}`;
@@ -123,7 +132,7 @@ class WhatsAppCommunicationsController {
         const button = document.getElementById("send-button");
         button.disabled = true;
         try {
-            const transport = new OpenWACommunicationService(serviceClient);
+            const transport = new OpenWACommunicationService(this.supabase);
             await transport.queueWhatsAppMessage({ chatId, body, phoneNumber });
             form.body.value = "";
             this.selectedChatId = chatId;
@@ -146,7 +155,10 @@ class WhatsAppCommunicationsController {
             const phoneNumber = String(form.phoneNumber.value || "").trim();
             const chatId = String(form.chatId.value || "").trim();
             if (!userId || !phoneNumber || !chatId) throw new Error("User ID, phone number and OpenWA chat ID are required.");
-            const { error } = await serviceClient.from("communication_contacts").upsert({ user_id: userId, phone_number: phoneNumber, chat_id: chatId, is_active: true }, { onConflict: "chat_id" });
+            const { error } = await this.supabase.from("communication_contacts").upsert(
+                { user_id: userId, phone_number: phoneNumber, chat_id: chatId, is_active: true },
+                { onConflict: "chat_id" }
+            );
             if (error) throw error;
             form.reset();
             await this.refreshContacts();
@@ -157,11 +169,12 @@ class WhatsAppCommunicationsController {
 
     async refreshQueueStatus() {
         try {
-            const { count, error } = await serviceClient.from("communication_outbox").select("id", { count: "exact", head: true }).eq("status", "QUEUED");
+            const { count, error } = await this.supabase.from("communication_outbox")
+                .select("id", { count: "exact", head: true }).eq("status", "QUEUED");
             if (error) throw error;
             document.getElementById("queue-status").textContent = `Queue: ${count || 0} queued`;
             document.getElementById("communication-status").textContent = "WhatsApp workspace active";
-        } catch (error) {
+        } catch {
             document.getElementById("queue-status").textContent = "Queue: unavailable";
             document.getElementById("communication-status").textContent = "Transport status unavailable";
         }
