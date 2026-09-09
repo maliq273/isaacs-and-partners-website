@@ -18,21 +18,21 @@ class WhatsAppCommunicationsController {
             window.location.assign("../auth/login.html?returnUrl=" + encodeURIComponent(window.location.pathname));
             return;
         }
-
         const token = auth.getToken();
         if (!token) throw new Error("Authenticated session token is unavailable.");
-
         this.supabase = createClient(authConfig.supabase.url, authConfig.supabase.publishableKey, {
             auth: { persistSession: false, autoRefreshToken: false },
             global: { headers: { Authorization: `Bearer ${token}` } }
         });
-
-        const user = auth.getCurrentUser();
-        const role = String(user?.role || user?.app_role || user?.user_role || "").toUpperCase();
-        if (role && role !== "SUPER_ADMIN" && role !== "STAFF") {
-            throw new Error("WhatsApp Communications is restricted to Super Admin and authorised staff.");
+        const { data: role, error: roleError } = await this.supabase.rpc("current_user_role");
+        if (roleError) throw roleError;
+        const actualRole = String(Array.isArray(role) ? role[0] : role || "").toUpperCase();
+        if (!["SUPER_ADMIN", "STAFF"].includes(actualRole)) throw new Error("WhatsApp Communications is restricted to Super Admin and authorised staff.");
+        if (actualRole === "STAFF") {
+            const { data: allowed, error } = await this.supabase.rpc("has_staff_permission", { p_permission: "view_communications" });
+            if (error) throw error;
+            if (!allowed) throw new Error("You are not authorised to view WhatsApp Communications.");
         }
-
         this.bindEvents();
         await this.refreshContacts();
         await this.refreshMessages();
@@ -55,18 +55,31 @@ class WhatsAppCommunicationsController {
             const { data, error } = await this.supabase.from("communication_contacts")
                 .select("*").eq("is_active", true).order("created_at", { ascending: false });
             if (error) throw error;
-            this.contacts = data || [];
+            const rows = data || [];
+            const ids = [...new Set(rows.map(row => row.user_id).filter(Boolean))];
+            let profiles = [];
+            if (ids.length) {
+                const result = await this.supabase.from("profiles")
+                    .select("id,first_name,last_name,email,phone,role,is_active").in("id", ids);
+                if (result.error) throw result.error;
+                profiles = result.data || [];
+            }
+            const profileMap = new Map(profiles.map(profile => [profile.id, profile]));
+            this.contacts = rows.map(contact => ({ ...contact, profile: profileMap.get(contact.user_id) || null }));
             document.getElementById("contact-status").textContent = `Contacts: ${this.contacts.length}`;
             list.replaceChildren();
             if (!this.contacts.length) {
-                list.innerHTML = '<div class="empty-state">No WhatsApp contacts are mapped yet. Use the contact mapping form below.</div>';
+                list.innerHTML = '<div class="empty-state">No WhatsApp contacts are mapped yet. Approved clients are provisioned automatically; Super Admin can map a staff contact below.</div>';
                 return;
             }
             for (const contact of this.contacts) {
                 const button = document.createElement("button");
                 button.type = "button";
                 button.className = "contact-item" + (contact.chat_id === this.selectedChatId ? " active" : "");
-                button.innerHTML = `<strong>${this.escape(contact.phone_number || contact.chat_id || "WhatsApp contact")}</strong><small>${this.escape(contact.chat_id || "No chat ID")}</small><small>${this.escape(contact.user_id || "")}</small>`;
+                const profile = contact.profile || {};
+                const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || profile.email || "Mapped account";
+                const role = this.roleLabel(profile.role);
+                button.innerHTML = `<strong>${this.escape(name)}</strong><small>${this.escape(role)} · ${this.escape(contact.phone_number || "No phone")}</small><small>${this.escape(contact.chat_id || "No chat ID")}</small>`;
                 button.addEventListener("click", () => this.selectContact(contact));
                 list.appendChild(button);
             }
@@ -78,11 +91,14 @@ class WhatsAppCommunicationsController {
 
     selectContact(contact) {
         this.selectedChatId = contact.chat_id;
-        document.getElementById("chat-id").value = contact.chat_id || "";
+        const profile = contact.profile || {};
+        const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || profile.email || "WhatsApp contact";
+        const role = this.roleLabel(profile.role);
         document.getElementById("phone-number").value = contact.phone_number || "";
-        document.getElementById("conversation-title").textContent = contact.phone_number || contact.chat_id || "WhatsApp contact";
-        document.getElementById("conversation-subtitle").textContent = `User: ${contact.user_id || "unassigned"} · OpenWA chat: ${contact.chat_id || "—"}`;
-        document.querySelectorAll(".contact-item").forEach(button => button.classList.toggle("active", button.querySelector("small")?.textContent === contact.chat_id));
+        document.getElementById("conversation-title").textContent = name;
+        document.getElementById("conversation-subtitle").textContent = `${role} · ${contact.phone_number || "No phone"} · OpenWA mapped`;
+        document.querySelectorAll(".contact-item").forEach(button => button.classList.toggle("active", button === [...document.querySelectorAll(".contact-item")].find(item => item.textContent.includes(contact.chat_id))));
+        document.getElementById("send-button").disabled = false;
         this.renderMessages();
     }
 
@@ -114,7 +130,7 @@ class WhatsAppCommunicationsController {
         for (const row of rows) {
             const article = document.createElement("article");
             article.className = `message ${String(row.direction || "").toUpperCase() === "OUTBOUND" ? "outbound" : "inbound"}`;
-            article.innerHTML = `<strong>${String(row.direction || "").toUpperCase() === "OUTBOUND" ? "Isaacs & Partners" : "Client / Staff"}</strong><p>${this.escape(row.body || "")}</p><time>${this.formatDate(row.created_at)} · ${this.escape(row.status || "")}</time>`;
+            article.innerHTML = `<strong>${String(row.direction || "").toUpperCase() === "OUTBOUND" ? "Isaacs & Partners" : "WhatsApp contact"}</strong><p>${this.escape(row.body || "")}</p><time>${this.formatDate(row.created_at)} · ${this.escape(row.status || "")}</time>`;
             list.appendChild(article);
         }
         list.scrollTop = list.scrollHeight;
@@ -122,21 +138,18 @@ class WhatsAppCommunicationsController {
 
     async sendMessage(event) {
         event.preventDefault();
-        if (this.loading) return;
+        if (this.loading || !this.selectedChatId) return;
         const form = event.currentTarget;
-        const chatId = String(form.chatId.value || "").trim();
-        const phoneNumber = String(form.phoneNumber.value || "").trim() || null;
         const body = String(form.body.value || "").trim();
-        if (!chatId || !body) return;
+        const phoneNumber = String(form.phoneNumber.value || "").trim() || null;
+        if (!body) return;
         this.loading = true;
         const button = document.getElementById("send-button");
         button.disabled = true;
         try {
             const transport = new OpenWACommunicationService(this.supabase);
-            await transport.queueWhatsAppMessage({ chatId, body, phoneNumber });
+            await transport.queueWhatsAppMessage({ chatId: this.selectedChatId, body, phoneNumber });
             form.body.value = "";
-            this.selectedChatId = chatId;
-            document.getElementById("conversation-title").textContent = phoneNumber || chatId;
             await this.refreshMessages();
             await this.refreshQueueStatus();
         } catch (error) {
@@ -153,15 +166,16 @@ class WhatsAppCommunicationsController {
         try {
             const userId = String(form.userId.value || "").trim();
             const phoneNumber = String(form.phoneNumber.value || "").trim();
-            const chatId = String(form.chatId.value || "").trim();
-            if (!userId || !phoneNumber || !chatId) throw new Error("User ID, phone number and OpenWA chat ID are required.");
-            const { error } = await this.supabase.from("communication_contacts").upsert(
-                { user_id: userId, phone_number: phoneNumber, chat_id: chatId, is_active: true },
-                { onConflict: "chat_id" }
-            );
+            if (!userId || !phoneNumber) throw new Error("User ID and phone number are required.");
+            const { data, error } = await this.supabase.rpc("map_whatsapp_contact", {
+                p_user_id: userId,
+                p_phone_number: phoneNumber
+            });
             if (error) throw error;
+            if (!data) throw new Error("WhatsApp contact could not be mapped.");
             form.reset();
             await this.refreshContacts();
+            this.showSuccess("WhatsApp contact mapped successfully.");
         } catch (error) {
             this.showError(error);
         }
@@ -185,6 +199,19 @@ class WhatsAppCommunicationsController {
         if (!element) return;
         element.hidden = false;
         element.textContent = error?.message || String(error || "Communication operation failed.");
+    }
+
+    showSuccess(message) {
+        const element = document.getElementById("communication-error");
+        if (!element) return;
+        element.hidden = false;
+        element.classList.remove("error");
+        element.textContent = message;
+        setTimeout(() => { element.hidden = true; element.classList.add("error"); }, 3500);
+    }
+
+    roleLabel(role) {
+        return ({ SUPER_ADMIN: "SUPER ADMIN", STAFF: "STAFF", BUSINESS: "CLIENT · BUSINESS", INDIVIDUAL: "CLIENT · INDIVIDUAL" })[String(role || "").toUpperCase()] || String(role || "ACCOUNT");
     }
 
     escape(value) {
