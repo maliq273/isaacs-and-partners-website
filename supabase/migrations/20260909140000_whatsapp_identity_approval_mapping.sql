@@ -31,7 +31,7 @@ returns public.communication_contacts language plpgsql security definer set sear
 declare p public.profiles; status text; phone text; chat text; r public.communication_contacts;
 begin
     if p_user_id is null then raise exception 'User id is required.' using errcode='22023'; end if;
-    if not (auth.role()='service_role' or public.is_super_admin() or p_user_id=auth.uid()) then raise exception 'WhatsApp mapping access denied.' using errcode='42501'; end if;
+    if not (auth.role()='service_role' or public.is_super_admin()) then raise exception 'WhatsApp mapping access denied.' using errcode='42501'; end if;
     select * into p from public.profiles where id=p_user_id;
     if p.id is null then raise exception 'Profile not found.' using errcode='P0002'; end if;
     if not coalesce(p.is_active,true) then update public.communication_contacts set is_active=false,updated_at=now() where user_id=p_user_id; return null; end if;
@@ -42,8 +42,6 @@ begin
     phone:=public.normalise_whatsapp_phone(coalesce(nullif(trim(p_phone_number),''),p.phone));
     if phone is null then update public.communication_contacts set is_active=false,updated_at=now() where user_id=p_user_id; return null; end if;
     chat:=phone||'@c.us';
-    -- communication_contacts has an existing unique(chat_id) constraint, so stale
-    -- ownership must be removed rather than merely deactivated before reassignment.
     delete from public.communication_contacts where chat_id=chat and user_id<>p_user_id;
     insert into public.communication_contacts(user_id,phone_number,chat_id,is_active,updated_at)
     values(p_user_id,phone,chat,true,now())
@@ -52,7 +50,7 @@ begin
     return r;
 end; $$;
 revoke all on function public.sync_whatsapp_contact_for_user(uuid,text) from public;
-grant execute on function public.sync_whatsapp_contact_for_user(uuid,text) to authenticated,service_role;
+grant execute on function public.sync_whatsapp_contact_for_user(uuid,text) to service_role;
 
 create or replace function public.map_whatsapp_contact(p_user_id uuid,p_phone_number text)
 returns public.communication_contacts language plpgsql security definer set search_path=public as $$
