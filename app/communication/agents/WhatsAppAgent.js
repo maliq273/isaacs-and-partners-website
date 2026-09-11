@@ -54,29 +54,37 @@ export default class WhatsAppAgent {
         return null;
     }
 
-    async handleInbound({ chatId, phoneNumber = null, body, messageId = null, user = null, matter = null, operationalContext = null, conversation = null, contact = null } = {}) {
+    async handleInbound({ chatId, phoneNumber = null, body, messageId = null, user = null, matter = null, operationalContext = null, conversation = null, contact = null, historicalMemory = null } = {}) {
         if (!chatId) throw new Error("WhatsApp chatId is required."); if (!String(body || "").trim()) return { handled: false, reason: "EMPTY_MESSAGE" };
         const context = conversation || this.conversations.createContext({ chatId, phoneNumber, user, matter }); this.conversations.ensureContext(context);
         this.conversations.addMessage(context, { direction: "INBOUND", body, sender: "CLIENT", messageId });
         const onboardingStates = new Set([WHATSAPP_IDENTITY_STATES.NEW, WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT, WHATSAPP_IDENTITY_STATES.ASK_MATTER, WHATSAPP_IDENTITY_STATES.ASK_EMAIL, WHATSAPP_IDENTITY_STATES.ASK_NAME, WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE, WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING]);
         if ((this.isUnauthenticatedContact(contact) || (!user && contact)) && onboardingStates.has(String(contact?.onboarding_state || context?.onboardingState || "NEW").toUpperCase())) { const onboardingResult = await this.handleOnboarding({ contact, body, conversation: context }); if (onboardingResult) { this.conversations.mergeFacts(context, onboardingResult.facts); context.onboardingState = onboardingResult.nextState; return { ...onboardingResult, context }; } }
 
+        this.memory.observe(context, { body, user, contact, onboardingFacts: contact?.onboarding_facts || context?.facts || {}, conversationId: context?.id || null, sourceMessageId: messageId });
         const intent = this.intentClassifier.classify({ message: body }); const serviceMatch = this.serviceClassifier.classify({ message: body });
         const servicePlan = this.serviceIntelligence.buildPlan({ domain: serviceMatch.value, serviceId: serviceMatch.serviceId || null, serviceName: serviceMatch.serviceName || null, facts: context.facts, clientType: user?.user_metadata?.account_type || "INDIVIDUAL" });
         const assessment = this.handover.assess({ intent: intent.intent, message: body, servicePlan, confidence: intent.confidence });
         const lead = this.leads.qualify({ message: body, user, service: servicePlan.service, facts: context.facts });
-        context.lastIntent = intent.intent; context.lastService = servicePlan.service; this.conversations.mergeFacts(context, lead.facts); this.memory.observe(context, { body, intent, servicePlan, lead, user });
+        context.lastIntent = intent.intent; context.lastService = servicePlan.service; this.conversations.mergeFacts(context, lead.facts);
         if (context.state === "HUMAN_ACTIVE") return { handled: true, action: "ROUTE_TO_HUMAN", context, intent, lead, servicePlan };
         if (this.mode !== "PUBLIC_LEAD" && assessment.humanRequired) { this.handover.escalate(context, assessment); const escalation = this.escalations.create({ context, assessment, lead, servicePlan }); escalation.requiredCapabilities = this.authority.getRequiredCapabilities({ domain: servicePlan.domain, needsPricing: servicePlan.commercial?.quoteRequired === true, needsAppointment: intent.intent === "APPOINTMENT" }); escalation.superAdminRequired = true; return { handled: true, action: "ESCALATE", context, intent, lead, servicePlan, escalation, reply: this.handoverReply() }; }
-        const sales = this.sales.buildState({ servicePlan, lead }); const replyResult = await this.generateReply({ context, body, intent, servicePlan, lead, sales, user, matter, operationalContext }); const reply = typeof replyResult === "object" ? replyResult?.text : replyResult;
+        const sales = this.sales.buildState({ servicePlan, lead }); const replyResult = await this.generateReply({ context, body, intent, servicePlan, lead, sales, user, matter, operationalContext, historicalMemory }); const reply = typeof replyResult === "object" ? replyResult?.text : replyResult;
         return { handled: true, action: "RESPOND", context, intent, lead, servicePlan, sales, reply, aiProvider: typeof replyResult === "object" ? replyResult?.provider || null : null, aiModel: typeof replyResult === "object" ? replyResult?.model || null : null, companySources: typeof replyResult === "object" ? replyResult?.companySources || [] : [] };
     }
     canStaffAnswer(staff, servicePlan = {}) { return this.authority.canAnswer(staff) && this.authority.canHandleDomain(staff, servicePlan.domain); }
     canStaffProvidePricing(staff) { return this.authority.canPrice(staff); }
     canStaffApproveQuote(staff) { return this.authority.canApproveQuote(staff); }
     getCommercialRule(servicePlan, options = {}) { return this.commercial.getRule(servicePlan?.domain, options); }
-    async generateReply({ body, intent, servicePlan, sales, context = null, lead = null, user = null, matter = null, operationalContext = null } = {}) {
-        if (this.responseGenerator) { const generated = await this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter, operationalContext }); if (generated) return generated; }
+    async generateReply({ body, intent, servicePlan, sales, context = null, lead = null, user = null, matter = null, operationalContext = null, historicalMemory = null } = {}) {
+        const strongest = historicalMemory?.strongestExplicitMemory;
+        if (historicalMemory?.isCorrection && strongest?.value_text) {
+            return `You’re right — I got that wrong. You previously told me you were interested in ${strongest.value_text}. I’ll treat that as the correct information going forward.`;
+        }
+        if (historicalMemory?.isHistoricalRecall && strongest?.value_text) {
+            return `You previously told me you were interested in ${strongest.value_text}.`;
+        }
+        if (this.responseGenerator) { const generated = await this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter, operationalContext, historicalMemory }); if (generated) return generated; }
         if (intent.intent === "GREETING") return "Hello, it’s good to hear from you. How can I help today?";
         if (intent.intent === "STATUS") { const hasMatters = matter || (Array.isArray(operationalContext?.userMatters) && operationalContext.userMatters.length > 0); if (!hasMatters) return "I don’t currently see an active matter linked to this contact. If you’re making a new enquiry, tell me what you need help with and I’ll guide you from there."; return "I can help with that. Please send me your matter number or reference so I can check the correct record."; }
         if (intent.intent === "DOCUMENTS") return "Absolutely. Tell me which service or application you’re dealing with, and I’ll help you work out what documents are needed.";
