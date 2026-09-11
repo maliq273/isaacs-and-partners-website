@@ -8,25 +8,19 @@ import SalesService from "../services/SalesService.js";
 import EscalationHandler from "../handlers/EscalationHandler.js";
 import StaffAuthorityService from "../services/StaffAuthorityService.js";
 import CommercialPolicyService from "../services/CommercialPolicyService.js";
+import CustomerMemoryService from "../../ai/CustomerMemoryService.js";
 
 export const WHATSAPP_IDENTITY_STATES = Object.freeze({
-    NEW: "NEW",
-    ASK_WHATSAPP_CONSENT: "ASK_WHATSAPP_CONSENT",
-    ASK_MATTER: "ASK_MATTER",
-    ASK_EMAIL: "ASK_EMAIL",
-    ASK_NAME: "ASK_NAME",
-    ASK_ACCOUNT_TYPE: "ASK_ACCOUNT_TYPE",
-    IDENTITY_MATCHING: "IDENTITY_MATCHING",
-    STAFF_PENDING_APPROVAL: "STAFF_PENDING_APPROVAL",
-    CLIENT_PENDING_APPROVAL: "CLIENT_PENDING_APPROVAL",
-    AUTHENTICATED_CLIENT: "AUTHENTICATED_CLIENT",
-    AUTHENTICATED_STAFF: "AUTHENTICATED_STAFF"
+    NEW: "NEW", ASK_WHATSAPP_CONSENT: "ASK_WHATSAPP_CONSENT", ASK_MATTER: "ASK_MATTER", ASK_EMAIL: "ASK_EMAIL",
+    ASK_NAME: "ASK_NAME", ASK_ACCOUNT_TYPE: "ASK_ACCOUNT_TYPE", IDENTITY_MATCHING: "IDENTITY_MATCHING",
+    STAFF_PENDING_APPROVAL: "STAFF_PENDING_APPROVAL", CLIENT_PENDING_APPROVAL: "CLIENT_PENDING_APPROVAL",
+    AUTHENTICATED_CLIENT: "AUTHENTICATED_CLIENT", AUTHENTICATED_STAFF: "AUTHENTICATED_STAFF"
 });
 
 const YES = new Set(["yes", "y", "yeah", "yep", "sure", "correct", "ok", "okay", "please do", "i do"]);
 const NO = new Set(["no", "n", "nope", "not really", "not now"]);
 const STAFF_WORDS = ["staff", "employee", "team member", "employee of isaacs", "isaacs staff", "i work here"];
-const CLIENT_WORDS = ["client", "customer", "potential client", "new client", "customer"];
+const CLIENT_WORDS = ["client", "customer", "potential client", "new client"];
 
 function clean(value, max = 4096) { return String(value ?? "").trim().slice(0, max); }
 function normalise(value) { return clean(value, 512).toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, " ").trim(); }
@@ -52,6 +46,7 @@ export default class WhatsAppAgent {
         this.serviceClassifier = new ServiceClassifier();
         this.serviceIntelligence = new ServiceIntelligenceEngine({ serviceCatalog, pricingPolicy });
         this.conversations = new ConversationService();
+        this.memory = new CustomerMemoryService();
         this.handover = new HandoverService();
         this.leads = new LeadService();
         this.sales = new SalesService();
@@ -75,61 +70,53 @@ export default class WhatsAppAgent {
 
         if (current === WHATSAPP_IDENTITY_STATES.NEW) {
             next.nextState = WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT;
-            next.reply = "Hello and welcome to Isaacs & Partners. I can assist with your enquiry and connect you with the appropriate member of our team. Before we continue, may I confirm whether WhatsApp is your preferred method of communication with Isaacs & Partners?";
+            next.reply = "Hello and welcome to Isaacs & Partners. I’m here to help with your enquiry and, when needed, connect you with the right member of our team. Before we get started, is WhatsApp your preferred way to communicate with us?";
             return next;
         }
-
         if (current === WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT) {
             if (YES.has(lower)) {
-                facts.whatsappConsent = true;
-                facts.preferredChannel = "WHATSAPP";
+                facts.whatsappConsent = true; facts.preferredChannel = "WHATSAPP";
                 next.nextState = WHATSAPP_IDENTITY_STATES.ASK_MATTER;
-                next.reply = "Thank you. I have recorded WhatsApp as your preferred method of communication. May I ask what matter or service I can assist you with today?";
+                next.reply = "Perfect, thank you. I’ll keep WhatsApp as your preferred communication channel. What can I help you with today?";
             } else if (NO.has(lower)) {
-                facts.whatsappConsent = false;
-                facts.preferredChannel = null;
+                facts.whatsappConsent = false; facts.preferredChannel = null;
                 next.nextState = WHATSAPP_IDENTITY_STATES.ASK_MATTER;
-                next.reply = "Thank you. May I ask what matter or service I can assist you with today?";
+                next.reply = "No problem. What can I help you with today?";
             } else {
                 next.nextState = WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT;
-                next.reply = "Please confirm yes or no: is WhatsApp your preferred method of communication with Isaacs & Partners?";
+                next.reply = "Just so I record this correctly, is WhatsApp your preferred way to communicate with Isaacs & Partners — yes or no?";
             }
             return next;
         }
-
         if (current === WHATSAPP_IDENTITY_STATES.ASK_MATTER) {
             facts.enquiry = text;
             next.nextState = WHATSAPP_IDENTITY_STATES.ASK_EMAIL;
-            next.reply = "Thank you. What email address should we associate with your WhatsApp contact?";
+            next.reply = "Thanks. What email address would you like us to associate with this WhatsApp contact?";
             return next;
         }
-
         if (current === WHATSAPP_IDENTITY_STATES.ASK_EMAIL) {
             if (!looksLikeEmail(text)) {
                 next.nextState = WHATSAPP_IDENTITY_STATES.ASK_EMAIL;
-                next.reply = "Please provide a valid email address, for example name@example.com.";
+                next.reply = "Could you send me your email address? For example: name@example.com.";
                 return next;
             }
             facts.email = clean(text, 320).toLowerCase();
             next.nextState = WHATSAPP_IDENTITY_STATES.ASK_NAME;
-            next.reply = "Thank you. May I have your name and surname?";
+            next.reply = "Thank you. What is your name and surname?";
             return next;
         }
-
         if (current === WHATSAPP_IDENTITY_STATES.ASK_NAME) {
             const name = splitName(text);
             if (!name.firstName || !name.lastName) {
                 next.nextState = WHATSAPP_IDENTITY_STATES.ASK_NAME;
-                next.reply = "Please provide both your first name and surname.";
+                next.reply = "Please send me both your first name and surname so I can record you correctly.";
                 return next;
             }
-            facts.firstName = name.firstName;
-            facts.lastName = name.lastName;
+            facts.firstName = name.firstName; facts.lastName = name.lastName;
             next.nextState = WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE;
-            next.reply = "Thank you. Are you contacting us as: 1. an Isaacs & Partners staff member, or 2. a potential client?";
+            next.reply = "Thanks, ${name.firstName}. Are you contacting us as 1) an Isaacs & Partners staff member, or 2) a potential client?";
             return next;
         }
-
         if (current === WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE) {
             const accountType = classifyAccountType(text);
             if (!accountType) {
@@ -140,16 +127,14 @@ export default class WhatsAppAgent {
             facts.claimedAccountType = accountType;
             next.nextState = WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING;
             next.identityMatchRequired = true;
-            next.reply = "Thank you. I am checking the information you provided against the Isaacs & Partners system. No dashboard access or staff permissions will be activated until the required approval has been completed.";
+            next.reply = "Thank you. I’m checking the information you provided against our system. Nothing is activated automatically — any dashboard or staff access still requires the appropriate approval.";
             return next;
         }
-
-        if ([WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING, WHATSAPP_IDENTITY_STATES.STAFF_PENDING_APPROVAL, WHATSAPP_IDENTITY_STATES.CLIENT_PENDING_APPROVAL].includes(current)) {
+        if (current === WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING) {
             next.nextState = current;
-            next.reply = "Thank you. Your information has been saved to the Isaacs & Partners database. Your WhatsApp contact is linked to your registration request. Your dashboard is not active yet because an authorised staff member must review and approve your account. We will continue assisting you here on WhatsApp while your account is awaiting activation.";
+            next.reply = "I’m still processing your registration. You can continue your enquiry here while the account check is completed.";
             return next;
         }
-
         return null;
     }
 
@@ -158,9 +143,21 @@ export default class WhatsAppAgent {
         if (!String(body || "").trim()) return { handled: false, reason: "EMPTY_MESSAGE" };
 
         const context = conversation || this.conversations.createContext({ chatId, phoneNumber, user, matter });
+        this.conversations.ensureContext(context);
         this.conversations.addMessage(context, { direction: "INBOUND", body, sender: "CLIENT", messageId });
 
-        if (this.isUnauthenticatedContact(contact) || (!user && contact)) {
+        // Only the actual onboarding states are handled by the registration wizard.
+        // Once a person is pending approval, the AI must still be useful and conversational.
+        const onboardingStates = new Set([
+            WHATSAPP_IDENTITY_STATES.NEW,
+            WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT,
+            WHATSAPP_IDENTITY_STATES.ASK_MATTER,
+            WHATSAPP_IDENTITY_STATES.ASK_EMAIL,
+            WHATSAPP_IDENTITY_STATES.ASK_NAME,
+            WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE,
+            WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING
+        ]);
+        if ((this.isUnauthenticatedContact(contact) || (!user && contact)) && onboardingStates.has(String(contact?.onboarding_state || context?.onboardingState || "NEW").toUpperCase())) {
             const onboardingResult = await this.handleOnboarding({ contact, body, conversation: context });
             if (onboardingResult) {
                 this.conversations.mergeFacts(context, onboardingResult.facts);
@@ -172,21 +169,17 @@ export default class WhatsAppAgent {
         const intent = this.intentClassifier.classify({ message: body });
         const serviceMatch = this.serviceClassifier.classify({ message: body });
         const servicePlan = this.serviceIntelligence.buildPlan({
-            domain: serviceMatch.value,
-            serviceId: serviceMatch.serviceId || null,
-            serviceName: serviceMatch.serviceName || null,
-            facts: context.facts,
-            clientType: user?.user_metadata?.account_type || "INDIVIDUAL"
+            domain: serviceMatch.value, serviceId: serviceMatch.serviceId || null, serviceName: serviceMatch.serviceName || null,
+            facts: context.facts, clientType: user?.user_metadata?.account_type || "INDIVIDUAL"
         });
         const assessment = this.handover.assess({ intent: intent.intent, message: body, servicePlan, confidence: intent.confidence });
         const lead = this.leads.qualify({ message: body, user, service: servicePlan.service, facts: context.facts });
-
         context.lastIntent = intent.intent;
         context.lastService = servicePlan.service;
         this.conversations.mergeFacts(context, lead.facts);
+        this.memory.observe(context, { body, intent, servicePlan, lead, user });
 
         if (context.state === "HUMAN_ACTIVE") return { handled: true, action: "ROUTE_TO_HUMAN", context, intent, lead, servicePlan };
-
         if (this.mode !== "PUBLIC_LEAD" && assessment.humanRequired) {
             this.handover.escalate(context, assessment);
             const escalation = this.escalations.create({ context, assessment, lead, servicePlan });
@@ -211,20 +204,20 @@ export default class WhatsAppAgent {
             const generated = await this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter, operationalContext });
             if (generated) return generated;
         }
-        if (intent.intent === "GREETING") return "Hello and welcome to Isaacs & Partners. How may we assist you today?";
+        if (intent.intent === "GREETING") return "Hello, it’s good to hear from you. How can I help today?";
         if (intent.intent === "STATUS") {
             const hasMatters = matter || (Array.isArray(operationalContext?.userMatters) && operationalContext.userMatters.length > 0);
-            if (!hasMatters) return "I don't currently see an active matter linked to your account. If you would like to open a file or make an enquiry, please let us know.";
-            return "Please provide your matter number so I can route your status request to the correct client record.";
+            if (!hasMatters) return "I don’t currently see an active matter linked to this contact. If you’re making a new enquiry, tell me what you need help with and I’ll guide you from there.";
+            return "I can help with that. Please send me your matter number or reference so I can check the correct record.";
         }
-        if (intent.intent === "DOCUMENTS") return "Please tell me which service or application you are dealing with so I can guide you on the document process.";
-        if (intent.intent === "APPOINTMENT") return "Please confirm the service you require and a suitable date or time so our team can arrange the appointment.";
+        if (intent.intent === "DOCUMENTS") return "Absolutely. Tell me which service or application you’re dealing with, and I’ll help you work out what documents are needed.";
+        if (intent.intent === "APPOINTMENT") return "Of course. Tell me which service you need and, if you already have a preferred day or time, include that as well.";
         if (intent.intent === "PAYMENT" || intent.intent === "PAYMENT_PROOF") return this.sales.buildPaymentResponse(null);
         if (servicePlan?.commercial?.quoteRequired) return this.commercial.getClientPaymentInstruction(servicePlan.domain);
-        if (intent.intent === "PRICING") return servicePlan.service ? `I have identified ${servicePlan.service.name}. I will capture your enquiry for the team to prepare the applicable quotation.` : "Please tell me which service you require so I can route the enquiry correctly.";
-        if (servicePlan.service) return `Thank you. I have identified your enquiry as ${servicePlan.service.name}. Please tell me briefly what you need assistance with.`;
-        return "Thank you for contacting Isaacs & Partners. Please tell me what service you need.";
+        if (intent.intent === "PRICING") return servicePlan.service ? `I can see you’re asking about ${servicePlan.service.name}. I’ll capture the enquiry so the team can provide the applicable quotation rather than guessing at a price.` : "Tell me which service you’re interested in and I’ll point you in the right direction.";
+        if (servicePlan.service) return `I understand you’re asking about ${servicePlan.service.name}. Tell me a little more about what you’re trying to achieve, and I’ll take it from there.`;
+        return "Thanks for reaching out to Isaacs & Partners. Tell me what you need help with, and I’ll guide you from there.";
     }
 
-    handoverReply() { return "Thank you. I have referred this matter to an authorised Isaacs & Partners team member for human review. Our team will follow up with you here. Super Admin oversight has been retained for this intervention."; }
+    handoverReply() { return "I understand. This needs an authorised team member to review, so I’ve referred it to the appropriate person. I’ll keep the conversation connected here so you don’t have to start again."; }
 }
