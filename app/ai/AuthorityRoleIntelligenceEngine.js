@@ -14,6 +14,7 @@ export default class AuthorityRoleIntelligenceEngine {
  async resolveWhatsAppIdentity({phoneNumber,chatId=null,whatsappName=null}={}){
   const sourcePhone=normalisePhone(phoneNumber);const base={sourcePhone,chatId:text(chatId,255)||null,whatsappName:text(whatsappName,255)||null};
   if(!sourcePhone)return{...base,authenticated:false,identityStatus:"UNVERIFIED_WHATSAPP_NUMBER",reason:"WhatsApp sender did not provide a verifiable phone number."};
+  if(/@lid$/i.test(base.chatId||""))return{...base,authenticated:false,identityStatus:"LID_AUTHORITY_BLOCKED",reason:"WhatsApp LID chat identity cannot elevate organisational authority."};
   const {data:authorityRows,error:authorityError}=await this.db.rpc("authority_directory_match_whatsapp",{p_phone:sourcePhone});
   if(authorityError)throw authorityError;const matches=Array.isArray(authorityRows)?authorityRows:authorityRows?[authorityRows]:[];
   if(matches.length===0)return{...base,authenticated:false,identityStatus:"UNKNOWN_WHATSAPP_NUMBER",reason:"WhatsApp number is not present in the active authority directory."};
