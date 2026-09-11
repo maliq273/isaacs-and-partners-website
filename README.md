@@ -2,226 +2,490 @@
 
 **Repository:** `maliq273/isaacs-and-partners-website`  
 **Branch:** `main`  
-**Current audited commit:** `105a30d37de804284f04a4952c8ec5b71a34b81e`  
-**Last audit date:** 2026-09-05
+**Current audited commit:** `92f88ed32d6a0049b00e63c99f62ec0d0411025d`  
+**Last audit:** 2026-09-11
 
-Where we are relative to the original build
+## Current position
 
-I would divide the entire project into these stages:
+The project has moved beyond the original website build into the integrated **client + AI + staff + Super Admin communication control plane**.
 
-Phase 1 — Foundation
+The core architecture is now aligned around one principle:
 
-🟢 Complete
+```text
+Customer
+   ↓
+Anthony
+   ↓
+AI Liaison Runtime
+   ↓
+Truth + Relationship + Operational Intelligence
+   ↓
+Authority / Permissions
+   ↓
+AI response OR authorised human intervention
+   ↓
+Anthony
+   ↓
+Customer
+```
 
-Website, architecture, authentication foundation, core application structure.
+Anthony is the client-facing AI identity. He is not a human employee and cannot grant himself authority.
 
-Phase 2 — Supabase control plane
+## Phase status
 
-🟢 ~90%
+### Phase 1 — Website / application foundation
 
-Database, RLS, roles, staff permissions, company master, sales foundation.
+🟢 **Complete**
 
-Phase 3 — Client/business/matter system
+Public website, repository structure, application architecture, authentication foundation, core routes and public contact/consultation foundation are in place.
 
-🟢 ~85%
+### Phase 2 — Supabase control plane
 
-Core records, dashboard architecture, business/individual separation.
+🟢 **~95%**
 
-Phase 4 — Company Truth
+Database foundation, RLS, roles, staff permissions, company data, communication records, AI conversations, interventions and supporting RPCs are substantially implemented.
 
-🟢 ~85%
+Remaining work is production reconciliation, regression testing and final security review rather than a new architecture.
 
-Company profile, policies, documents, authoritative business data.
+### Phase 3 — Client / business / matter platform
 
-Phase 5 — AI architecture
+🟢 **~90%**
 
-🟢 ~85%
+Client, business, matter and dashboard architecture exists with authenticated client context and ownership checks.
 
-AI provider → TruthFusion → Company Truth → operational context.
+Remaining work is mainly production validation and completion of individual operational modules.
 
-Phase 6 — Public AI
+### Phase 4 — Company Truth
 
-🟢 ~90%
+🟢 **~90%**
 
-Public consultation and lead architecture.
+Approved company knowledge, service information, pricing/catalogue data and company-policy hierarchy are integrated into TruthFusion.
 
-Phase 7 — Authenticated AI
+Truth hierarchy now prioritises:
 
-🟢 ~80%
+1. Super Admin instruction
+2. Live authenticated client/staff/matter records
+3. Company policy/pricing
+4. Company knowledgebase
+5. Customer-originated historical memory
+6. General model knowledge
 
-Portal approval, live matter context, AI messages, human intervention.
+### Phase 5 — AI architecture
 
-Phase 8 — Private documents
+🟢 **~95%**
 
-🟡 ~65%
+The AI stack now includes:
 
-Secure vault is done; actual production AI/OCR processor remains.
-
-Phase 9 — Quotes/invoices
-
-🟡 ~75%
-
-Core Zoho-style financial control plane exists; external payment layer remains.
-
-Phase 10 — WhatsApp/OpenWA
-
-🟡 ~65%
-
-Architecture exists; real infrastructure and UI wiring still need verification.
-
-Phase 11 — Immigration automation
-
-🟡 ~55%
-
-Architecture exists; full DHA/VFS production workflow still needs implementation and validation.
-
-Phase 12 — Production hardening
-
-🔴 ~45%
-
-This is where we are now.
-
-The correct next build order
-
-I would not start adding new features.
-
-We should now close the production gaps in this exact order:
-
-1. Supabase production reconciliation
-
-Highest priority
-
-Verify:
-
-all migrations
-all RPCs
-all tables
-all RLS policies
-all storage buckets
-all storage policies
-all Edge Functions
-all secrets
-all triggers
-all indexes
-
-against the actual Supabase project.
-
-2. Run the entire automated test suite
-
-Turn the existing tests into a real:
-
-npm test
-
-pipeline.
-
-Then add:
-
-npm run production-check
-
-covering:
-
-imports
-syntax
-missing modules
-route integrity
-API/RPC references
-environment requirements
-duplicate AI engines
-leaked secrets
-broken asset paths
-3. Finish the document processor
-
-This is the biggest unfinished subsystem.
-
-Build:
-
-Private Storage
-      ↓
-Trusted Document Worker
-      ↓
-PDF/DOCX/OCR
-      ↓
-Classification
-      ↓
-Quality
-      ↓
-Extraction
-      ↓
-Chunking
-      ↓
-Embeddings
-      ↓
-pgvector
-      ↓
-Knowledge retrieval
-      ↓
+```text
+AI Provider
+   ↓
 TruthFusion
-4. Finish OpenWA deployment
+   ↓
+Company Truth
+   ↓
+Customer Memory
+   ↓
+Historical Retrieval
+   ↓
+Relationship State
+   ↓
+Operational Intelligence
+   ↓
+Anthony
+```
 
-Then perform the actual:
+General model reasoning is combined with Isaacs & Partners authoritative information rather than replacing it.
 
+### Phase 6 — Public AI / consultation
+
+🟢 **~90%**
+
+Public consultation and lead architecture exists and uses the shared AI/company-truth foundation.
+
+Remaining work is production browser validation and final public enquiry persistence verification.
+
+### Phase 7 — Authenticated AI / client relationship
+
+🟢 **~90%**
+
+Persistent conversations, client context, customer memory, historical recall, operational context and human intervention architecture are implemented.
+
+The client-facing AI identity is now **Anthony**.
+
+### Phase 8 — Authority & Role Intelligence
+
+🟢 **~90% — newly integrated**
+
+Implemented:
+
+- `AuthorityRoleIntelligenceEngine`
+- authoritative `authority_directory`
+- exact WhatsApp-number identity matching
+- active-number verification
+- ambiguous-number denial
+- profile-phone conflict detection
+- staff-record verification
+- staff AI permission verification
+- Super Admin authority
+- Director / Shareholder / Partner / Staff / Stakeholder organisational roles
+- Super Admin **Authority & People** dashboard
+- authority administration Edge Function
+- authority audit foundation
+
+Current seeded authority records:
+
+- **Adul Maaliek Isaacs** — `27718831097` — Super Admin / Director
+- **Stephanie Byleveldt** — `27793185281` — Super Admin
+
+Important rule:
+
+> WhatsApp display names and claims made inside a conversation do not grant authority. The verified transport number must match the active authority directory.
+
+### Phase 9 — AI ↔ Staff intervention control plane
+
+🟢 **~85% — newly integrated**
+
+The intended traffic flow is now represented in the system:
+
+```text
+CUSTOMER
+   ↓
+ANTHONY
+   ↓
+Needs authorised human?
+   ↓
+AI_ESCALATED / HUMAN_ACTIVE
+   ↓
+Authorised Staff
+   ↓
+Staff response
+   ↓
+Anthony review / safety filtering
+   ↓
+Client-safe response
+   ↓
+CUSTOMER
+```
+
+Anthony can hold the conversation while an authorised team member is brought into the flow.
+
+The existing intervention control plane supports staff and Super Admin responses. Staff authority is still governed by explicit permissions.
+
+A dedicated `ai-review-staff-response` Edge Function now reviews staff drafts before client relay. It is JWT protected.
+
+### Phase 10 — WhatsApp / OpenWA
+
+🟡 **~80%**
+
+The architecture is now substantially wired:
+
+```text
 WhatsApp
-→ OpenWA
-→ Supabase
-→ AI
-→ Outbox
-→ OpenWA
-→ WhatsApp
+   ↓
+OpenWA
+   ↓
+openwa-communication-worker
+   ↓
+ai-liaison-runtime
+   ↓
+Anthony
+   ↓
+communication_outbox
+   ↓
+OpenWA
+   ↓
+WhatsApp
+```
 
-test.
+Implemented:
 
-Not a mock.
+- OpenWA webhook worker
+- direct-chat restrictions
+- HMAC verification
+- WhatsApp chat-ID handling
+- LID handling safeguards
+- inbound message persistence
+- AI runtime invocation
+- outbound communication queue
+- Anthony identity
+- authority resolution from WhatsApp number
+- human intervention routing
 
-A real message.
+The OpenWA session has previously been verified as `ready` in the local deployment.
 
-5. Wire the communication UI
+Remaining work:
 
-Client/staff/Super Admin communication screens should all use the one communication service.
+- final real-world end-to-end message test
+- verify staff intervention over the live WhatsApp path
+- verify Anthony-reviewed staff response returns to the correct customer
+- production infrastructure hardening
 
-No duplicate WhatsApp implementation.
+### Phase 11 — Client dashboard communication
 
-6. Complete production AI testing
+🟢 **~90%**
 
-Test the AI against scenarios such as:
+The client dashboard Messages / Anthony entry now opens the WhatsApp conversation with Anthony.
 
-"What is my matter status?"
+The public website WhatsApp action also points to the Isaacs & Partners WhatsApp endpoint used for Anthony.
 
-with:
+The remaining work is to complete browser-level validation and ensure all dashboard communication surfaces use the same communication service without duplicate implementations.
 
-no matter
-one matter
-multiple matters
-invalid matter number
-another client's matter number
+### Phase 12 — Relationship & Operational Intelligence
 
-Then:
+🟢 **~85%**
 
-"How much do I owe?"
+Implemented:
 
-with:
+- customer relationship state
+- customer-originated memory
+- historical memory retrieval
+- relationship commitments
+- operational state model
+- operational intelligence engine
+- matter context
+- appointment context
+- outstanding documents
+- staff ownership context
+- portfolio attention level
+- next action / next action due
 
-no invoice
-unpaid invoice
-partially paid invoice
-paid invoice
-business invoice
+The operational intelligence layer is read-only and never grants authority.
 
-Then:
+### Phase 13 — Private documents / AI document processing
 
-"What documents are outstanding?"
+🟡 **~65%**
 
-with:
+Secure document storage and trusted document-worker architecture exist.
 
-no matter
-active matter
-multiple matters
+Still required:
 
-This is essential because the new TruthFusion rules specifically address these distinctions.
+```text
+Private Storage
+   ↓
+Trusted Document Worker
+   ↓
+PDF/DOCX/OCR
+   ↓
+Classification
+   ↓
+Quality
+   ↓
+Extraction
+   ↓
+Chunking
+   ↓
+Embeddings
+   ↓
+pgvector
+   ↓
+Knowledge retrieval
+   ↓
+TruthFusion
+```
 
-7. Finish payment gate
+### Phase 14 — Quotes / invoices / financial controls
 
-Implement:
+🟡 **~75%**
 
+The financial control foundation exists, including Zoho-style invoice direction and payment-state architecture.
+
+Remaining work includes full production payment integration and final financial workflow validation.
+
+### Phase 15 — Immigration automation
+
+🟡 **~55%**
+
+Architecture exists for immigration qualification, document requirements and application workflow.
+
+Full DHA/VFS production automation and validation remain outstanding.
+
+### Phase 16 — Production hardening
+
+🟡 **~60%**
+
+The project is no longer at the earlier ~45% production-hardening state. Major control-plane work has now been implemented.
+
+Still required:
+
+- full automated test execution
+- browser regression testing
+- Supabase production reconciliation
+- Edge Function dependency alignment
+- RLS/security audit
+- storage security audit
+- secrets verification
+- CORS/CSP review
+- rate limiting
+- brute-force protection
+- upload abuse protection
+- prompt-injection testing
+- cross-client data leakage testing
+- real WhatsApp end-to-end testing
+- production monitoring/error handling
+
+## Current implementation alignment audit
+
+### 🟢 Architecturally aligned
+
+The following major pieces now agree on the same architecture:
+
+- Authority & People
+- Authority directory
+- WhatsApp identity verification
+- AI Liaison Runtime
+- Anthony identity
+- Customer memory
+- Historical memory retrieval
+- Relationship state
+- Operational intelligence
+- Human intervention
+- Staff permissions
+- Super Admin override
+- Client dashboard → Anthony WhatsApp
+- Staff response → Anthony review → client relay
+
+### 🟡 Repository source alignment still required
+
+One important technical cleanup remains before declaring the repository and deployed runtime fully aligned.
+
+`ai-liaison-runtime/index.ts` currently imports several AI modules using older immutable Git commit pins while the corresponding files on `main` have newer SHAs. The runtime itself is deployed and functional, but the repository should be normalised so its import pins explicitly reference the current approved versions.
+
+Known drift includes the runtime pins for:
+
+- `WhatsAppAgent.js`
+- `AIProviderService.js`
+- `CompanyTruthService.js`
+- `TruthFusionEngine.js`
+- `HistoricalMemoryRetrievalService.js`
+- `CustomerRelationshipMemoryEngine.js`
+- `RelationshipOperationalIntelligenceEngine.js`
+- `AuthorityRoleIntelligenceEngine.js`
+
+This is a **source/deployment reproducibility issue**, not a reason to redesign the architecture. It should be corrected before the next production deployment.
+
+## Current Edge Functions
+
+The current Supabase project includes the following relevant functions:
+
+- `ai-liaison-runtime`
+- `openwa-communication-worker`
+- `admin-authority-directory`
+- `ai-review-staff-response`
+- `admin-create-staff`
+- `admin-manage-account`
+- `admin-github-config`
+- `admin-upload-brand-asset`
+- `admin-organisation-document-ingest`
+- `trusted-document-worker`
+
+The AI liaison runtime has been deployed through the current authority/Anthony work and the latest known deployed version is **v35**.
+
+## Current build order
+
+Do **not** start another unrelated feature yet.
+
+The next work should be performed in this order:
+
+### 1. Repository dependency-pin reconciliation
+
+Make `ai-liaison-runtime` import the exact current approved AI/relationship/authority modules from `main`.
+
+Then redeploy the runtime and verify the deployed version matches the repository.
+
+### 2. Authority test matrix
+
+Test at minimum:
+
+- Adul's verified WhatsApp number → Super Admin / Director
+- Stephanie's verified WhatsApp number → Super Admin
+- unknown WhatsApp number → unauthenticated contact
+- LID-only identity → no authority elevation
+- conflicting profile phone → deny
+- duplicate active authority number → deny
+- staff without permission → deny
+- staff with permission → allow only permitted capability
+
+### 3. Real WhatsApp end-to-end test
+
+Test:
+
+```text
+Customer → WhatsApp → OpenWA → Anthony
+```
+
+Then test:
+
+```text
+Customer → Anthony → Human escalation
+                    ↓
+                  Staff
+                    ↓
+              Anthony review
+                    ↓
+                Customer
+```
+
+### 4. Browser regression test
+
+Validate:
+
+- public WhatsApp icon
+- public AI/consultation
+- client dashboard
+- Messages / Anthony
+- WhatsApp handoff
+- Super Admin dashboard
+- Authority & People
+- Staff & Permissions
+- AI intervention console
+
+### 5. Full production reconciliation
+
+Verify actual Supabase state against the repository:
+
+- migrations
+- tables
+- RPCs
+- RLS policies
+- storage buckets
+- storage policies
+- Edge Functions
+- secrets
+- triggers
+- indexes
+
+### 6. Automated production check
+
+Create/complete:
+
+```text
+npm test
+npm run production-check
+```
+
+The production check should detect:
+
+- syntax errors
+- missing imports
+- stale Git pins
+- missing modules
+- broken routes
+- API/RPC references
+- environment requirements
+- duplicate AI engines
+- secret leakage
+- broken assets
+- unsafe client-side authority assumptions
+
+### 7. Finish document AI
+
+Complete the trusted document processing pipeline.
+
+### 8. Finish financial/payment gate
+
+Implement and test:
+
+```text
 Quote approved
       ↓
 50% deposit required
@@ -233,47 +497,46 @@ Work unlocked
 Final 50%
       ↓
 Submission/application release
+```
 
+### 9. Finish immigration automation
 
-8. Finish immigration automation
+Then complete the DHA/VFS workflow.
 
-Then connect:
+### 10. Final security and production audit
 
-Immigration service
-→ current regulatory research
-→ qualification
-→ document requirements
-→ document AI
-→ form population
-→ QC
-→ bundle
-→ VFS/DHA readiness
+Only after the above should the system be treated as production-ready.
 
+## Current status summary
 
-9. Production security audit
+| Area | Status |
+|---|---|
+| Public website | 🟢 Complete |
+| Application foundation | 🟢 Complete |
+| Supabase control plane | 🟢 ~95% |
+| Client / matter platform | 🟢 ~90% |
+| Company Truth | 🟢 ~90% |
+| AI architecture | 🟢 ~95% |
+| Persistent AI memory | 🟢 ~90% |
+| Relationship intelligence | 🟢 ~85% |
+| Operational intelligence | 🟢 ~85% |
+| Authority & People | 🟢 ~90% |
+| Human intervention | 🟢 ~85% |
+| Anthony identity | 🟢 Integrated |
+| Client → Anthony WhatsApp | 🟢 Integrated |
+| Staff → Anthony → Client relay | 🟢 Architecture integrated / testing required |
+| OpenWA | 🟡 ~80% |
+| Private document AI | 🟡 ~65% |
+| Quotes / invoices | 🟡 ~75% |
+| Immigration automation | 🟡 ~55% |
+| Production hardening | 🟡 ~60% |
 
-Specifically:
+## Bottom line
 
-authentication tokens
-RLS
-Storage RLS
-Edge Function auth
-worker tokens
-OpenWA secrets
-GitHub Vault
-CORS
-CSP
-XSS
-CSRF where applicable
-open redirects
-rate limiting
-brute-force protection
-file upload abuse
-prompt injection
-cross-client data leakage
-4. Make the smallest integrated change.
-5. Test the affected browser flow.
-6. Update this README if architecture/status changes.
-7. Commit only the files required for the completed change.
+The project is now in the **integration and production-validation stage**, not the feature-discovery stage.
 
-**Current next action:** browser validation of the repaired Public AI Liaison, followed by server-side persistence of qualified public enquiries. 
+The most important architecture is now in place:
+
+> **Anthony is the controlled communication layer between customers and Isaacs & Partners, while Authority & People determines who inside the organisation is actually authorised to act.**
+
+The next technical action is **repository dependency-pin reconciliation**, followed by the real WhatsApp customer → Anthony → staff → Anthony → customer test.
