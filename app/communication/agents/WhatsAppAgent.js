@@ -62,6 +62,7 @@ export default class WhatsAppAgent {
         const onboardingStates = new Set([WHATSAPP_IDENTITY_STATES.NEW, WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT, WHATSAPP_IDENTITY_STATES.ASK_MATTER, WHATSAPP_IDENTITY_STATES.ASK_EMAIL, WHATSAPP_IDENTITY_STATES.ASK_NAME, WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE, WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING]);
         if ((this.isUnauthenticatedContact(contact) || (!user && contact)) && onboardingStates.has(String(contact?.onboarding_state || context?.onboardingState || "NEW").toUpperCase()) && !this.isAuthenticatedAuthority(operationalContext)) { const onboardingResult = await this.handleOnboarding({ contact, body, conversation: context }); if (onboardingResult) { this.conversations.mergeFacts(context, onboardingResult.facts); context.onboardingState = onboardingResult.nextState; return { ...onboardingResult, context }; } }
 
+        // Authenticated authority action requests are evaluated before ordinary AI intent, memory, or escalation.
         if (this.actionService && this.isAuthenticatedAuthority(operationalContext)) {
             const actionResult = await this.actionService.execute({ identity: operationalContext.authorityContext, message: body, conversationId: context?.id || null });
             if (actionResult?.handled) return { ...actionResult, context, intent: { intent: actionResult.action || "AUTHORITY_ACTION", confidence: 1 } };
