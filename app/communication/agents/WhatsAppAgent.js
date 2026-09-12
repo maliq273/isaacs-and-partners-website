@@ -9,6 +9,7 @@ import EscalationHandler from "../handlers/EscalationHandler.js";
 import StaffAuthorityService from "../services/StaffAuthorityService.js";
 import CommercialPolicyService from "../services/CommercialPolicyService.js";
 import CustomerMemoryService from "../../ai/CustomerMemoryService.js";
+import AuthorityActionService from "../../ai/AuthorityActionService.js";
 
 export const WHATSAPP_IDENTITY_STATES = Object.freeze({
     NEW: "NEW", ASK_WHATSAPP_CONSENT: "ASK_WHATSAPP_CONSENT", ASK_MATTER: "ASK_MATTER", ASK_EMAIL: "ASK_EMAIL",
@@ -27,11 +28,12 @@ function splitName(value) { const text = clean(value, 255).replace(/^(my name is
 function classifyAccountType(value) { const text = normalise(value); if (STAFF_WORDS.some(item => text.includes(item))) return "STAFF"; if (CLIENT_WORDS.some(item => text.includes(item))) return "CLIENT"; if (/\b(2|two)\b/.test(text) || text.includes("potential")) return "CLIENT"; if (/\b(1|one)\b/.test(text) || text.includes("employee")) return "STAFF"; return null; }
 
 export default class WhatsAppAgent {
-    constructor({ serviceCatalog = null, pricingPolicy = null, responseGenerator = null, mode = "OPERATIONS" } = {}) {
+    constructor({ serviceCatalog = null, pricingPolicy = null, responseGenerator = null, mode = "OPERATIONS", db = null } = {}) {
         this.intentClassifier = new WhatsAppIntentClassifier(); this.serviceClassifier = new ServiceClassifier();
         this.serviceIntelligence = new ServiceIntelligenceEngine({ serviceCatalog, pricingPolicy }); this.conversations = new ConversationService();
         this.memory = new CustomerMemoryService(); this.handover = new HandoverService(); this.leads = new LeadService(); this.sales = new SalesService();
         this.escalations = new EscalationHandler(); this.authority = new StaffAuthorityService(); this.commercial = new CommercialPolicyService();
+        this.actionService = db ? new AuthorityActionService({ db }) : null;
         this.responseGenerator = responseGenerator; this.mode = String(mode || "OPERATIONS").toUpperCase();
     }
     isUnauthenticatedContact(contact) { return String(contact?.identity_status || "").toUpperCase() === "UNAUTHENTICATED_WHATSAPP_CONTACT"; }
@@ -44,12 +46,7 @@ export default class WhatsAppAgent {
         const current = String(contact?.onboarding_state || conversation?.onboardingState || "NEW").toUpperCase(); const facts = { ...(conversation?.facts || {}) };
         const text = clean(body); const lower = normalise(text); const next = { handled: true, action: "RESPOND", onboarding: true, facts, nextState: current, reply: "" };
         if (current === WHATSAPP_IDENTITY_STATES.NEW) { next.nextState = WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT; next.reply = "Hello and welcome to Isaacs & Partners. I’m here to help with your enquiry and, when needed, connect you with the right member of our team. Before we get started, is WhatsApp your preferred way to communicate with us?"; return next; }
-        if (current === WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT) {
-            if (YES.has(lower)) { facts.whatsappConsent = true; facts.preferredChannel = "WHATSAPP"; next.nextState = WHATSAPP_IDENTITY_STATES.ASK_MATTER; next.reply = "Perfect, thank you. I’ll keep WhatsApp as your preferred communication channel. What can I help you with today?"; }
-            else if (NO.has(lower)) { facts.whatsappConsent = false; facts.preferredChannel = null; next.nextState = WHATSAPP_IDENTITY_STATES.ASK_MATTER; next.reply = "No problem. What can I help you with today?"; }
-            else { next.nextState = WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT; next.reply = "Just so I record this correctly, is WhatsApp your preferred way to communicate with Isaacs & Partners — yes or no?"; }
-            return next;
-        }
+        if (current === WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT) { if (YES.has(lower)) { facts.whatsappConsent = true; facts.preferredChannel = "WHATSAPP"; next.nextState = WHATSAPP_IDENTITY_STATES.ASK_MATTER; next.reply = "Perfect, thank you. I’ll keep WhatsApp as your preferred communication channel. What can I help you with today?"; } else if (NO.has(lower)) { facts.whatsappConsent = false; facts.preferredChannel = null; next.nextState = WHATSAPP_IDENTITY_STATES.ASK_MATTER; next.reply = "No problem. What can I help you with today?"; } else { next.nextState = WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT; next.reply = "Just so I record this correctly, is WhatsApp your preferred way to communicate with Isaacs & Partners — yes or no?"; } return next; }
         if (current === WHATSAPP_IDENTITY_STATES.ASK_MATTER) { facts.enquiry = text; next.nextState = WHATSAPP_IDENTITY_STATES.ASK_EMAIL; next.reply = "Thanks. What email address would you like us to associate with this WhatsApp contact?"; return next; }
         if (current === WHATSAPP_IDENTITY_STATES.ASK_EMAIL) { if (!looksLikeEmail(text)) { next.nextState = WHATSAPP_IDENTITY_STATES.ASK_EMAIL; next.reply = "Could you send me your email address? For example: name@example.com."; return next; } facts.email = clean(text, 320).toLowerCase(); next.nextState = WHATSAPP_IDENTITY_STATES.ASK_NAME; next.reply = "Thank you. What is your name and surname?"; return next; }
         if (current === WHATSAPP_IDENTITY_STATES.ASK_NAME) { const name = splitName(text); if (!name.firstName || !name.lastName) { next.nextState = WHATSAPP_IDENTITY_STATES.ASK_NAME; next.reply = "Please send me both your first name and surname so I can record you correctly."; return next; } facts.firstName = name.firstName; facts.lastName = name.lastName; next.nextState = WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE; next.reply = `Thanks, ${name.firstName}. Are you contacting us as 1) an Isaacs & Partners staff member, or 2) a potential client?`; return next; }
@@ -64,6 +61,11 @@ export default class WhatsAppAgent {
         this.conversations.addMessage(context, { direction: "INBOUND", body, sender: "CLIENT", messageId });
         const onboardingStates = new Set([WHATSAPP_IDENTITY_STATES.NEW, WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT, WHATSAPP_IDENTITY_STATES.ASK_MATTER, WHATSAPP_IDENTITY_STATES.ASK_EMAIL, WHATSAPP_IDENTITY_STATES.ASK_NAME, WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE, WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING]);
         if ((this.isUnauthenticatedContact(contact) || (!user && contact)) && onboardingStates.has(String(contact?.onboarding_state || context?.onboardingState || "NEW").toUpperCase()) && !this.isAuthenticatedAuthority(operationalContext)) { const onboardingResult = await this.handleOnboarding({ contact, body, conversation: context }); if (onboardingResult) { this.conversations.mergeFacts(context, onboardingResult.facts); context.onboardingState = onboardingResult.nextState; return { ...onboardingResult, context }; } }
+
+        if (this.actionService && this.isAuthenticatedAuthority(operationalContext)) {
+            const actionResult = await this.actionService.execute({ identity: operationalContext.authorityContext, message: body, conversationId: context?.id || null });
+            if (actionResult?.handled) return { ...actionResult, context, intent: { intent: actionResult.action || "AUTHORITY_ACTION", confidence: 1 } };
+        }
 
         this.memory.observe(context, { body, user, contact, onboardingFacts: contact?.onboarding_facts || context?.facts || {}, conversationId: context?.id || null, sourceMessageId: messageId });
         const intent = this.intentClassifier.classify({ message: body }); const serviceMatch = this.serviceClassifier.classify({ message: body });
@@ -81,15 +83,9 @@ export default class WhatsAppAgent {
     canStaffApproveQuote(staff) { return this.authority.canApproveQuote(staff); }
     getCommercialRule(servicePlan, options = {}) { return this.commercial.getRule(servicePlan?.domain, options); }
     async generateReply({ body, intent, servicePlan, sales, context = null, lead = null, user = null, matter = null, operationalContext = null, historicalMemory = null } = {}) {
-        const authorityFirst = this.isAuthenticatedAuthority(operationalContext);
-        const usableHistoricalMemory = authorityFirst ? null : historicalMemory;
-        const strongest = usableHistoricalMemory?.strongestExplicitMemory;
-        if (usableHistoricalMemory?.isCorrection && strongest?.value_text) {
-            return `You’re right — I got that wrong. You previously told me you were interested in ${strongest.value_text}. I’ll treat that as the correct information going forward.`;
-        }
-        if (usableHistoricalMemory?.isHistoricalRecall && strongest?.value_text) {
-            return `You previously told me you were interested in ${strongest.value_text}.`;
-        }
+        const authorityFirst = this.isAuthenticatedAuthority(operationalContext); const usableHistoricalMemory = authorityFirst ? null : historicalMemory; const strongest = usableHistoricalMemory?.strongestExplicitMemory;
+        if (usableHistoricalMemory?.isCorrection && strongest?.value_text) return `You’re right — I got that wrong. You previously told me you were interested in ${strongest.value_text}. I’ll treat that as the correct information going forward.`;
+        if (usableHistoricalMemory?.isHistoricalRecall && strongest?.value_text) return `You previously told me you were interested in ${strongest.value_text}.`;
         if (this.responseGenerator) { const generated = await this.responseGenerator({ body, intent, servicePlan, sales, context, lead, user, matter, operationalContext, historicalMemory: usableHistoricalMemory }); if (generated) return generated; }
         if (intent.intent === "GREETING") return "Hello, it’s good to hear from you. How can I help today?";
         if (intent.intent === "STATUS") { const hasMatters = matter || (Array.isArray(operationalContext?.userMatters) && operationalContext.userMatters.length > 0); if (!hasMatters) return "I don’t currently see an active matter linked to this contact. If you’re making a new enquiry, tell me what you need help with and I’ll guide you from there."; return "I can help with that. Please send me your matter number or reference so I can check the correct record."; }
