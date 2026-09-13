@@ -7,8 +7,8 @@
     "dev": "node server.js",
     "start": "node server.js",
     "build": "echo 'No build step required'",
-    "production-check": "node scripts/production-check-v2.mjs --write",
-    "production-check:ci": "node scripts/production-check-v2.mjs --ci --write"
+    "production-check": "node scripts/production-check.mjs --write",
+    "production-check:ci": "node scripts/production-check.mjs --ci --write"
   },
   "dependencies": {
     "express": "^4.19.2"
