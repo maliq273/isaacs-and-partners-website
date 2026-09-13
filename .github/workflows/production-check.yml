@@ -1,0 +1,48 @@
+name: Production Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  production-check:
+    name: Repository-wide production audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Run production-check
+        run: npm run production-check:ci
+
+      - name: Upload production audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-check-${{ github.sha }}
+          path: |
+            reports/production-check.md
+            reports/production-check.json
+          if-no-files-found: warn
+          retention-days: 14
