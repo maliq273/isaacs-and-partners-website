@@ -6,9 +6,44 @@ function clean(value, max = 12000) { return String(value ?? "").trim().slice(0, 
 function json(value, max = 20000) { try { return JSON.stringify(value, null, 2).slice(0, max); } catch { return "{}"; } }
 function safeUser(user) { if (!user) return null; const metadata = user.user_metadata || {}; return { id: user.id || null, email: user.email || null, name: metadata.name || metadata.full_name || null, accountType: metadata.account_type || null }; }
 function safeMatter(matter) { if (!matter) return null; const allowed = ["id", "matter_number", "reference", "status", "service_type", "service_domain", "department", "title", "description", "priority", "workflow_status", "created_at", "updated_at", "due_date"]; return Object.fromEntries(allowed.filter(key => matter[key] !== undefined).map(key => [key, matter[key]])); }
-function safeOperationalContext(matter, operationalContext) { const activeMatter = safeMatter(matter); const docs = Array.isArray(operationalContext?.documents) ? operationalContext.documents : []; const appts = Array.isArray(operationalContext?.appointments) ? operationalContext.appointments : []; const invs = Array.isArray(operationalContext?.invoices) ? operationalContext.invoices : []; const userMatters = Array.isArray(operationalContext?.userMatters) ? operationalContext.userMatters.map(m => safeMatter(m)).filter(Boolean) : []; const effectiveActive = activeMatter || (userMatters.length === 1 ? userMatters[0] : null); return { activeMatter: effectiveActive, allClientMatters: userMatters, hasActiveMatters: Boolean(effectiveActive || userMatters.length > 0), documents: docs, appointments: appts, invoices: invs }; }
+function safeOperationalContext(matter, operationalContext) {
+    const activeMatter = safeMatter(matter);
+    const docs = Array.isArray(operationalContext?.documents) ? operationalContext.documents : Array.isArray(operationalContext?.allDocuments) ? operationalContext.allDocuments : [];
+    const appts = Array.isArray(operationalContext?.appointments) ? operationalContext.appointments : Array.isArray(operationalContext?.allAppointments) ? operationalContext.allAppointments : [];
+    const invs = Array.isArray(operationalContext?.invoices) ? operationalContext.invoices : Array.isArray(operationalContext?.allInvoices) ? operationalContext.allInvoices : [];
+    
+    const rawMatters = Array.isArray(operationalContext?.matters)
+        ? operationalContext.matters
+        : Array.isArray(operationalContext?.userMatters)
+        ? operationalContext.userMatters
+        : [];
+    const userMatters = rawMatters.map(m => safeMatter(m)).filter(Boolean);
+    const effectiveActive = activeMatter || (userMatters.length === 1 ? userMatters[0] : null);
 
-const SYSTEM_PROMPT = `You are Anthony, the AI client-relationship assistant for Isaacs & Partners.
+    const matterSummaries = userMatters.map(m => ({
+        matterNumber: m.matter_number || m.reference || m.id,
+        title: m.title || "Untitled Matter",
+        status: m.status || "UNKNOWN",
+        workflowStatus: m.workflow_status || m.status || "IN_PROGRESS",
+        serviceDomain: m.service_domain || m.service_type || null,
+        priority: m.priority || "NORMAL",
+        dueDate: m.due_date || null,
+        updatedAt: m.updated_at || null
+    }));
+
+    return {
+        activeMatter: effectiveActive,
+        allClientMatters: userMatters,
+        matterSummaries,
+        hasActiveMatters: Boolean(effectiveActive || userMatters.length > 0),
+        documents: docs,
+        appointments: appts,
+        invoices: invs,
+        portfolio: operationalContext?.portfolio || null
+    };
+}
+
+const SYSTEM_PROMPT = `You are Anthony, the Isaacs & Partners AI Liaison and client-relationship assistant.
 
 IDENTITY:
 - Your name is Anthony.
