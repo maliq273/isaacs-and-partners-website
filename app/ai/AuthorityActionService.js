@@ -11,7 +11,7 @@ const CAPABILITY_PHRASES = Object.freeze({
   can_answer_ai_queries: /answer\s+anthony|answer\s+ai\s+(?:queries|questions)/i,
   can_relay_to_clients: /relay\s+(?:approved\s+)?(?:responses?|messages?)\s+to\s+clients?/i,
   can_handle_appointments: /handle\s+appointments?/i,
-  can_provide_pricing: /provide\s+pricing|give\s+pricing/i,
+  can_provide_pricing: /provide\s+pricing|give\s+pricing|pricing\s+permission/i,
   can_approve_quotes: /approve\s+quotes?/i,
   can_handle_immigration: /handle\s+immigration/i,
   can_handle_hr: /handle\s+(?:hr|ir|hr\s*\/\s*ir)/i,
@@ -55,6 +55,13 @@ function extractTarget(text) {
   const role = text.match(/\b(?:as|role)\s+(SUPER_ADMIN|DIRECTOR|SHAREHOLDER|PARTNER|STAFF|STAKEHOLDER)\b/i);
 
   let fullName = quoted?.[1]?.trim() || null;
+
+  if (!fullName) {
+    const permissionTarget = text.match(
+      /\b(?:grant|enable|allow|give|deny|remove|revoke|disable)\s+([A-Z][A-Za-zÀ-ÿ.'-]+(?:\s+[A-Z][A-Za-zÀ-ÿ.'-]+){1,4})\s+permissions?\s+(?=to\b|for\b|on\b)/
+    );
+    fullName = permissionTarget?.[1]?.trim() || null;
+  }
 
   if (!fullName) {
     const beforeRole = text.match(
