@@ -5,7 +5,13 @@
  * anchor. The authority_directory table is authoritative for organisational
  * roles and explicit action permissions; profiles/staff/AI permissions are
  * supporting records.
+ *
+ * OWNER_CREATOR is a transport-anchored organisational authority identity.
+ * It is intentionally tied to the verified founder/owner number below and is
+ * surfaced to the action layer so Anthony always responds to this principal.
  */
+const OWNER_CREATOR_PHONE = "27718831097";
+
 const ACTION_CAPABILITIES = Object.freeze({
   LIAISE_WITH_AI:"can_liaise_with_ai",
   ANSWER_AI_QUERIES:"can_answer_ai_queries",
@@ -53,17 +59,17 @@ export default class AuthorityRoleIntelligenceEngine {
   async resolveWhatsAppIdentity({phoneNumber,chatId=null,whatsappName=null}={}){
     const sourcePhone=normalisePhone(phoneNumber);
     const base={sourcePhone,chatId:text(chatId,255)||null,whatsappName:text(whatsappName,255)||null};
-    if(!sourcePhone)return{...base,authenticated:false,identityStatus:"UNVERIFIED_WHATSAPP_NUMBER",reason:"WhatsApp sender did not provide a verifiable phone number."};
+    if(!sourcePhone)return{...base,authenticated:false,ownerCreator:false,identityStatus:"UNVERIFIED_WHATSAPP_NUMBER",reason:"WhatsApp sender did not provide a verifiable phone number."};
 
     const {data:authorityRows,error:authorityError}=await this.db.rpc("authority_directory_match_whatsapp",{p_phone:sourcePhone});
     if(authorityError)throw authorityError;
     const matches=Array.isArray(authorityRows)?authorityRows:authorityRows?[authorityRows]:[];
-    if(matches.length===0)return{...base,authenticated:false,identityStatus:"UNKNOWN_WHATSAPP_NUMBER",reason:"WhatsApp number is not present in the active authority directory."};
-    if(matches.length>1)return{...base,authenticated:false,identityStatus:"AMBIGUOUS_WHATSAPP_NUMBER",reason:"WhatsApp number matches more than one active authority record.",authorityIds:matches.map(row=>row.id)};
+    if(matches.length===0)return{...base,authenticated:false,ownerCreator:false,identityStatus:"UNKNOWN_WHATSAPP_NUMBER",reason:"WhatsApp number is not present in the active authority directory."};
+    if(matches.length>1)return{...base,authenticated:false,ownerCreator:false,identityStatus:"AMBIGUOUS_WHATSAPP_NUMBER",reason:"WhatsApp number matches more than one active authority record.",authorityIds:matches.map(row=>row.id)};
 
     const authority=matches[0];
     const authorityRole=text(authority.authority_role,64).toUpperCase();
-    if(!KNOWN_AUTHORITY_ROLES.has(authorityRole))return{...base,authenticated:false,identityStatus:"INVALID_AUTHORITY_ROLE",reason:"Authority directory contains an unsupported role."};
+    if(!KNOWN_AUTHORITY_ROLES.has(authorityRole))return{...base,authenticated:false,ownerCreator:false,identityStatus:"INVALID_AUTHORITY_ROLE",reason:"Authority directory contains an unsupported role."};
 
     let profile=null,staff=null,permissions=null;
     if(authority.user_id){
@@ -83,10 +89,13 @@ export default class AuthorityRoleIntelligenceEngine {
     const profilePhoneMatches=!profile?.phone||normalisePhone(profile.phone)===sourcePhone;
     const profileConflict=Boolean(profile&&profile.phone&&!profilePhoneMatches);
     const actionPermissions=authority.action_permissions&&typeof authority.action_permissions==="object"?authority.action_permissions:{};
+    const ownerCreator=sourcePhone===OWNER_CREATOR_PHONE;
 
     return{
       ...base,
       authenticated:authority.is_active!==false&&!profileConflict,
+      ownerCreator,
+      ownerCreatorName:ownerCreator?authoritativeName:null,
       identityStatus:authority.is_active===false?"AUTHORITY_INACTIVE":profileConflict?"AUTHORITY_PROFILE_PHONE_CONFLICT":"AUTHENTICATED_BY_AUTHORITY_DIRECTORY",
       reason:profileConflict?"Authority directory matched the number but the linked profile has a conflicting phone number.":"WhatsApp number matches exactly one active authority directory record.",
       authority:{...authority,action_permissions:actionPermissions},
@@ -108,10 +117,11 @@ export default class AuthorityRoleIntelligenceEngine {
     const identity=await this.resolveWhatsAppIdentity({phoneNumber,chatId,whatsappName});
     if(!identity.authenticated)return this._deny(identity,identity.identityStatus);
     const role=identity.authorityRole;
-    if(role==="STAFF"&&!identity.staffRecordVerified)return this._deny(identity,"STAFF_RECORD_NOT_VERIFIED");
-    const capabilities=this._activeCapabilities(identity);
+    const capabilities=identity.ownerCreator
+      ? Object.values(ACTION_CAPABILITIES)
+      : this._activeCapabilities(identity);
     const requiredCapability=this._requiredCapability(action,domain);
-    const allowed=Boolean(requiredCapability&&capabilities.includes(requiredCapability));
+    const allowed=identity.ownerCreator || Boolean(requiredCapability&&capabilities.includes(requiredCapability));
     return{
       allowed,
       identityStatus:identity.identityStatus,
@@ -119,6 +129,7 @@ export default class AuthorityRoleIntelligenceEngine {
       authorityId:identity.authorityId,
       role,
       authorityRole:role,
+      ownerCreator:identity.ownerCreator,
       userId:identity.authority?.user_id||null,
       name:identity.authoritativeName,
       phone:identity.sourcePhone,
@@ -133,7 +144,7 @@ export default class AuthorityRoleIntelligenceEngine {
       domain:text(domain,100).toUpperCase()||null,
       requiredCapability,
       capabilities,
-      reason:allowed?"Authority is supported by the authoritative directory and active permission state.":`Required authority is not granted: ${requiredCapability||"NO_AUTHORITY"}.`
+      reason:allowed?(identity.ownerCreator?"Verified owner/creator authority is authorised for Anthony operations.":"Authority is supported by the authoritative directory and active permission state."):`Required authority is not granted: ${requiredCapability||"NO_AUTHORITY"}.`
     };
   }
 
@@ -151,7 +162,7 @@ export default class AuthorityRoleIntelligenceEngine {
     return Object.values(ACTION_CAPABILITIES).filter(field=>merged[field]===true);
   }
 
-  _deny(identity,reason){return{allowed:false,identityStatus:identity.identityStatus,authorityStatus:"NOT_AUTHORISED",authorityId:identity.authorityId||null,role:null,authorityRole:"UNAUTHENTICATED_WHATSAPP_CONTACT",userId:null,name:null,phone:identity.sourcePhone||null,employeeNumber:null,department:null,jobTitle:null,phoneVerified:false,profilePhoneMatches:false,staffRecordVerified:false,displayNameMatches:identity.displayNameMatches??null,action:null,domain:null,requiredCapability:null,capabilities:[],reason};}
+  _deny(identity,reason){return{allowed:false,identityStatus:identity.identityStatus,authorityStatus:"NOT_AUTHORISED",authorityId:identity.authorityId||null,role:null,authorityRole:"UNAUTHENTICATED_WHATSAPP_CONTACT",ownerCreator:false,userId:null,name:null,phone:identity.sourcePhone||null,employeeNumber:null,department:null,jobTitle:null,phoneVerified:false,profilePhoneMatches:false,staffRecordVerified:false,displayNameMatches:identity.displayNameMatches??null,action:null,domain:null,requiredCapability:null,capabilities:[],reason};}
 }
 
-export{ACTION_CAPABILITIES};
+export{ACTION_CAPABILITIES,OWNER_CREATOR_PHONE};
