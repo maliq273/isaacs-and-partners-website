@@ -45,7 +45,7 @@ export default class AIProviderService {
         geminiModel = env("GEMINI_MODEL") || "gemini-2.5-flash",
         fetchImpl = globalThis.fetch
     } = {}) {
-        this.provider = String(provider || "openai").trim().toLowerCase();
+        this.provider = String(provider || "gemini").trim().toLowerCase();
         if (!["openai", "gemini"].includes(this.provider)) throw new Error("AI_PROVIDER must be openai or gemini.");
         this.openAIKey = clean(openAIKey, 512);
         this.openAIModel = clean(openAIModel, 128);
