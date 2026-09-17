@@ -72,7 +72,40 @@ export default class AuthorityActionService {
   async execute({ identity, message, conversationId = null } = {}) {
     const classification = this.classify(message); if (!classification.action) return { handled: false };
     const authorityId = identity?.authorityId || identity?.authority?.id || null; const actorId = identity?.authority?.user_id || null;
-    if (classification.action === "AUTHORITY_SUMMARY") return { handled: true, executed: false, action: classification.action, permission: null, reply: this.authoritySummary(identity) };
+    if (classification.action === "AUTHORITY_SUMMARY") return {
+      handled: false,
+      executed: false,
+      action: "AUTHORITY_SUMMARY_CONTEXT",
+      permission: null,
+      context: {
+        authoritySummary: {
+          scope: String(identity?.authorityRole || "").toUpperCase() === "SUPER_ADMIN"
+            ? "full organisational data within Anthony's live database scope"
+            : "only the organisational records and relationships explicitly permitted by the resolved authority and assignments",
+          capabilities: String(identity?.authorityRole || "").toUpperCase() === "SUPER_ADMIN"
+            ? [
+                "manage_authority",
+                "manage_staff",
+                "manage_system",
+                "can_liaise_with_ai",
+                "can_answer_ai_queries",
+                "can_relay_to_clients",
+                "can_handle_appointments",
+                "can_provide_pricing",
+                "can_approve_quotes",
+                "can_handle_immigration",
+                "can_handle_hr",
+                "can_handle_business_compliance",
+                "can_handle_legal"
+              ]
+            : Object.entries(permissions(identity?.authority || {}))
+                .filter(([, value]) => value === true)
+                .map(([key]) => key),
+          superAdminPrecedence: String(identity?.authorityRole || "").toUpperCase() === "SUPER_ADMIN",
+          source: "verified_database_authority"
+        }
+      }
+    };
     if (!this.canExecute(identity, classification.permission)) { await this.audit({ authorityId, actorId, actorPhone: identity?.sourcePhone, action: classification.action, targetType: "AUTHORITY", requestText: message, decision: "DENIED", reason: `Required permission is not granted: ${classification.permission}.`, metadata: { conversation_id: conversationId } }); return { handled: true, executed: false, action: classification.action, permission: classification.permission, reply: `I recognise you as ${String(identity.authorityRole || "AUTHORITY").replace(/_/g, " ")}, but I cannot execute that action because ${classification.permission} is not enabled for your authority record.` }; }
     if (classification.action === "MANAGE_SYSTEM") { await this.audit({ authorityId, actorId, actorPhone: identity?.sourcePhone, action: classification.action, targetType: "SYSTEM", requestText: message, decision: "DENIED", reason: "A broad request is not treated as permission to bypass security. It must resolve to a specific executable operation.", metadata: { conversation_id: conversationId } }); return { handled: true, executed: false, action: classification.action, permission: classification.permission, reply: "I can execute specific authorised system changes, but I will not interpret 'do anything' or 'rewrite everything' as permission to bypass security. Give me the exact change and I will check the required permission." }; }
     if (classification.action === "MANAGE_STAFF_PERMISSIONS") return this.executePermissionMutation({ identity, classification, message, conversationId });
