@@ -19,6 +19,7 @@ const CAPABILITY_PHRASES = Object.freeze({
   manage_staff: /manage\s+staff\s+permissions?/i,
   manage_system: /full\s+system\s+administration|manage\s+system|system\s+administration/i
 });
+const SUMMARY_WORDS = /\b(what|which|tell|show|list)\b.*\b(organisational|organizational|data|information|records|access|permissions?|capabilities|actions?|authority)\b/i;
 function clean(v, max = 4096) { return String(v ?? "").trim().slice(0, max); }
 function normalise(v) { return clean(v).toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, " ").trim(); }
 function phone(v) { const raw = clean(v, 64); if (!raw || /@lid/i.test(raw)) return null; return raw.replace(/\D/g, "") || null; }
@@ -29,16 +30,19 @@ function extractTarget(text) {
   const role = text.match(/\b(?:as|role)\s+(SUPER_ADMIN|DIRECTOR|SHAREHOLDER|PARTNER|STAFF|STAKEHOLDER)\b/i);
   let fullName = quoted?.[1]?.trim() || null;
   if (!fullName) { const permissionTarget = text.match(/\b(?:grant|enable|allow|give|deny|remove|revoke|disable)\s+([A-Z][A-Za-zÀ-ÿ.'-]+(?:\s+[A-Z][A-Za-zÀ-ÿ.'-]+){1,4})\s+permissions?\s+(?=to\b|for\b|on\b)/); fullName = permissionTarget?.[1]?.trim() || null; }
-  if (!fullName) { const beforeRole = text.match(/\b(?:add|create|register|update|edit|change|modify|deactivate|disable|activate|remove|revoke|grant|enable|allow|give)\s+([A-Z][A-Za-zÀ-ÿ.'-]+(?:\s+[A-Z][A-Za-zÀ-ÿ.'-]+){1,4})\s+(?=as\b|with\b|who\b|whose\b|to\b)/); fullName = beforeRole?.[1]?.trim() || null; }
-  if (!fullName) { const named = text.match(/(?:for|of|to)\s+([A-Z][A-Za-zÀ-ÿ.'-]+(?:\s+[A-Z][A-Za-zÀ-ÿ.'-]+){1,4})(?=\s+(?:as|with|and|who|whose|on|in|$))/); fullName = named?.[1]?.trim() || null; }
+  if (!fullName) { const beforeRole = text.match(/\b(?:add|create|register|update|edit|change|modify|deactivate|disable|activate|remove|revoke|grant|enable|allow|give)\s+([A-Z][A-Za-zÀ-ÿ.'-]+(?:\s+[A-Za-zÀ-ÿ.'-]+){1,4})\s+(?=as\b|with\b|who\b|whose\b|to\b)/); fullName = beforeRole?.[1]?.trim() || null; }
+  if (!fullName) { const named = text.match(/(?:for|of|to)\s+([A-Z][A-Za-zÀ-ÿ.'-]+(?:\s+[A-Za-zÀ-ÿ.'-]+){1,4})(?=\s+(?:as|with|and|who|whose|on|in|$))/); fullName = named?.[1]?.trim() || null; }
   return { phone: byPhone ? phone(byPhone[1]) : null, fullName, authorityRole: role?.[1]?.toUpperCase() || null };
 }
 function capabilityFromText(text) { for (const [key, pattern] of Object.entries(CAPABILITY_PHRASES)) if (pattern.test(text)) return key; return null; }
 function looksLikeAuthorityCreation(text) { return /\b(add|create|register)\b/i.test(text) && /\b(staff|employee|team\s+member|authority|administrator|admin)\b/i.test(text); }
+function label(v) { return String(v || "").replace(/^can_/i, "").replace(/^manage_/i, "manage ").replace(/_/g, " "); }
 export default class AuthorityActionService {
   constructor({ db } = {}) { if (!db) throw new Error("AuthorityActionService requires a Supabase admin client."); this.db = db; }
   classify(message) {
-    const text = normalise(message); if (!ACTION_WORDS.test(text)) return { action: null, permission: null, target: null };
+    const text = normalise(message);
+    if (SUMMARY_WORDS.test(text) && /\b(allowed|permitted|authori[sz]ed|can|access|authority)\b/i.test(text)) return { action: "AUTHORITY_SUMMARY", permission: null, target: null };
+    if (!ACTION_WORDS.test(text)) return { action: null, permission: null, target: null };
     const capability = capabilityFromText(message);
     if (capability && /\b(grant|enable|allow|give|deny|remove|revoke|disable|set|change|update)\b/i.test(text)) return { action: "MANAGE_STAFF_PERMISSIONS", permission: PERMISSIONS.MANAGE_STAFF, target: extractTarget(message), capability, grant: /\b(grant|enable|allow|give)\b/i.test(text) };
     if (/\b(authority record|authority directory|authority)\b/i.test(text) || looksLikeAuthorityCreation(text)) { const action = /\b(deactivate|disable|remove|revoke)\b/i.test(text) ? "DEACTIVATE_AUTHORITY" : /\b(add|create|register)\b/i.test(text) ? "CREATE_AUTHORITY" : "UPDATE_AUTHORITY"; return { action, permission: PERMISSIONS.MANAGE_AUTHORITY, target: extractTarget(text) }; }
@@ -48,13 +52,27 @@ export default class AuthorityActionService {
   }
   canExecute(identity, permission) {
     const role = String(identity?.authorityRole || "").toUpperCase();
-    if (!identity?.authenticated || !["STAFF", "SUPER_ADMIN", "DIRECTOR", "PARTNER", "SHAREHOLDER", "STAKEHOLDER"].includes(role)) return false;
+    if (!identity?.verified || !["STAFF", "SUPER_ADMIN", "DIRECTOR", "PARTNER", "SHAREHOLDER", "STAKEHOLDER"].includes(role)) return false;
     if (role === "SUPER_ADMIN") return true;
     return permissions(identity.authority)[permission] === true;
+  }
+  authoritySummary(identity) {
+    const role = String(identity?.authorityRole || "UNKNOWN").toUpperCase();
+    const isSuperAdmin = role === "SUPER_ADMIN" && Boolean(identity?.verified);
+    const granted = Object.entries(permissions(identity?.authority || {})).filter(([, value]) => value === true).map(([key]) => key);
+    const capabilities = isSuperAdmin ? [
+      "manage_authority", "manage_staff", "manage_system", "can_liaise_with_ai", "can_answer_ai_queries",
+      "can_relay_to_clients", "can_handle_appointments", "can_provide_pricing", "can_approve_quotes",
+      "can_handle_immigration", "can_handle_hr", "can_handle_business_compliance", "can_handle_legal"
+    ] : granted;
+    const scope = isSuperAdmin ? "full organisational data within Anthony's live database scope" : "only the organisational records and relationships explicitly permitted by the resolved authority and assignments";
+    const actions = capabilities.length ? capabilities.map(label).join(", ") : "no additional administrative or specialist actions";
+    return `I recognise this WhatsApp number as ${identity?.authoritativeName || "the resolved identity"} with authority role ${role.replace(/_/g, " ")}. Based only on the verified database identity, the permitted disclosure scope is ${scope}. Recognised authorised capabilities/actions: ${actions}. Super Admin authority supersedes ordinary capability flags; other roles remain limited to their database-granted permissions and relationship/assignment scope. Your WhatsApp display name or conversational claims do not increase this authority.`;
   }
   async execute({ identity, message, conversationId = null } = {}) {
     const classification = this.classify(message); if (!classification.action) return { handled: false };
     const authorityId = identity?.authorityId || identity?.authority?.id || null; const actorId = identity?.authority?.user_id || null;
+    if (classification.action === "AUTHORITY_SUMMARY") return { handled: true, executed: false, action: classification.action, permission: null, reply: this.authoritySummary(identity) };
     if (!this.canExecute(identity, classification.permission)) { await this.audit({ authorityId, actorId, actorPhone: identity?.sourcePhone, action: classification.action, targetType: "AUTHORITY", requestText: message, decision: "DENIED", reason: `Required permission is not granted: ${classification.permission}.`, metadata: { conversation_id: conversationId } }); return { handled: true, executed: false, action: classification.action, permission: classification.permission, reply: `I recognise you as ${String(identity.authorityRole || "AUTHORITY").replace(/_/g, " ")}, but I cannot execute that action because ${classification.permission} is not enabled for your authority record.` }; }
     if (classification.action === "MANAGE_SYSTEM") { await this.audit({ authorityId, actorId, actorPhone: identity?.sourcePhone, action: classification.action, targetType: "SYSTEM", requestText: message, decision: "DENIED", reason: "A broad request is not treated as permission to bypass security. It must resolve to a specific executable operation.", metadata: { conversation_id: conversationId } }); return { handled: true, executed: false, action: classification.action, permission: classification.permission, reply: "I can execute specific authorised system changes, but I will not interpret 'do anything' or 'rewrite everything' as permission to bypass security. Give me the exact change and I will check the required permission." }; }
     if (classification.action === "MANAGE_STAFF_PERMISSIONS") return this.executePermissionMutation({ identity, classification, message, conversationId });
