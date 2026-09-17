@@ -1,75 +1,53 @@
 # Isaacs & Partners — OpenWA + Cloudflare + Supabase Communication Wiring
 
-## Architecture
+## Production architecture
 
 ```text
 WhatsApp
-   ↓
-OpenWA (private host :2785)
-   ↕ Cloudflare Tunnel
+   ↕
+OpenWA on Azure VM :2785
+   ↕
+Cloudflare Tunnel: isaacs-openwa
+   ↕
 https://openwa.isaacsandpartners.online
    ↕
 Supabase Edge Function: openwa-communication-worker
    ↕
-Supabase communication_messages / communication_outbox
+communication_messages / communication_outbox
    ↕
-AI Liaison runtime
+AI Liaison runtime / Anthony Isaacs
 ```
 
-OpenWA API credentials remain server-side. The browser only queues messages through the `queue_openwa_message` RPC.
+Azure is the WhatsApp transport node. Supabase remains the communication control plane and AI brain. OpenWA API credentials remain server-side; browser code only queues messages through the existing communication RPC.
 
-## 1. Cloudflare
+## 1. Azure + Cloudflare
 
-The repository tunnel configuration exposes the OpenWA API at:
+Production OpenWA is exposed only through:
 
 `https://openwa.isaacsandpartners.online`
 
-The local OpenWA API is expected on port `2785`, which is the default port for the current OpenWA API implementation.
+The Azure OpenWA API listens privately on `127.0.0.1:2785`. The existing Cloudflare tunnel is `isaacs-openwa`; do not create a second tunnel.
 
-On the machine running OpenWA and cloudflared:
+Cloudflare ingress routes:
 
-```powershell
-cloudflared tunnel route dns isaacs-partners-production-tunnel openwa.isaacsandpartners.online
-cloudflared tunnel --config C:\path\to\tunnel-config.yml run isaacs-partners-production-tunnel
+```yaml
+ingress:
+  - hostname: openwa.isaacsandpartners.online
+    service: http://127.0.0.1:2785
+  - service: http_status:404
 ```
 
-Use the actual location of `tunnel-config.yml` and the Cloudflare credentials file on the production host.
+Cloudflare WAF has a narrow server-to-server exception for this hostname's `/api/*` path which skips Super Bot Fight Mode rules only. Other WAF protections remain active.
 
-Do not commit the Cloudflare tunnel credentials file.
+The Supabase OpenWA client uses the integration User-Agent:
 
-## 2. Verify OpenWA locally
+`IsaacsPartners-OpenWA/1.0`
 
-OpenWA should be listening on port `2785`.
+This avoids Cloudflare bot challenges for legitimate server-to-server OpenWA API traffic without disabling Cloudflare security globally.
 
-```powershell
-curl http://127.0.0.1:2785/api/health
-```
+## 2. Supabase Edge Function secrets
 
-Then verify the session:
-
-```powershell
-curl -H "X-API-Key: YOUR_OPENWA_API_KEY" http://127.0.0.1:2785/api/sessions
-```
-
-The target session must exist and be connected before sending messages.
-
-## 3. Verify OpenWA through Cloudflare
-
-```powershell
-curl https://openwa.isaacsandpartners.online/api/health
-```
-
-Then:
-
-```powershell
-curl -H "X-API-Key: YOUR_OPENWA_API_KEY" https://openwa.isaacsandpartners.online/api/sessions
-```
-
-Do not put the API key in GitHub, browser JavaScript, Cloudflare public configuration, or this document.
-
-## 4. Supabase Edge Function secrets
-
-Set these production secrets on the Supabase project:
+The production worker requires these server-side values:
 
 ```text
 OPENWA_BASE_URL=https://openwa.isaacsandpartners.online
@@ -79,102 +57,129 @@ OPENWA_WEBHOOK_SECRET=<long random HMAC secret>
 OPENWA_WORKER_TOKEN=<long random worker token>
 ```
 
-The existing Supabase defaults provide the Supabase connection credentials required by the worker.
+Never commit real values to GitHub, browser JavaScript, or this document.
 
-Set secrets with the Supabase CLI, for example:
-
-```powershell
-supabase secrets set OPENWA_BASE_URL=https://openwa.isaacsandpartners.online
-supabase secrets set OPENWA_API_KEY=REPLACE_ME
-supabase secrets set OPENWA_SESSION_ID=REPLACE_ME
-supabase secrets set OPENWA_WEBHOOK_SECRET=REPLACE_ME
-supabase secrets set OPENWA_WORKER_TOKEN=REPLACE_ME
-```
-
-Never commit real values.
-
-## 5. Supabase Vault scheduler secret
-
-The migration `202609070001_openwa_outbox_scheduler.sql` schedules the outbound worker every 15 seconds.
-
-Create a Vault secret named exactly:
+The existing worker token is also stored in Supabase Vault as:
 
 `openwa_worker_token`
 
-Its value must be identical to `OPENWA_WORKER_TOKEN`.
+The webhook HMAC secret is stored in Vault as:
 
-Example SQL in the Supabase SQL Editor:
+`OPENWA_WEBHOOK_SECRET`
 
-```sql
-select vault.create_secret('REPLACE_WITH_THE_SAME_OPENWA_WORKER_TOKEN', 'openwa_worker_token');
+## 3. Outbound worker
+
+`openwa-communication-worker` is deployed with JWT verification disabled because it accepts two controlled server-to-server authentication modes:
+
+- `X-OpenWA-Worker-Token` for the Supabase scheduler/outbound worker path.
+- `X-OpenWA-Signature` HMAC for OpenWA inbound webhook delivery.
+
+The worker sends:
+
+```text
+POST /api/sessions/{OPENWA_SESSION_ID}/messages/send-text
 ```
 
-If the secret already exists, update it rather than creating a duplicate.
+with the OpenWA API key held only in the Edge Function environment.
 
-## 6. Deploy the communication worker
+It also sends the integration User-Agent so the Cloudflare WAF exception applies only to this legitimate integration traffic.
 
-Deploy the current function:
+## 4. Automatic webhook registration
 
-```powershell
-supabase functions deploy openwa-communication-worker
+The worker now self-registers the OpenWA webhook when processing the outbound queue. This removes a fragile manual registration dependency.
+
+The registered events are:
+
+```text
+message.received
+message.sent
+message.ack
+message.failed
 ```
 
-The function intentionally has JWT verification disabled because it accepts two server-to-server authentication modes:
+The target is:
 
-- HMAC signature for OpenWA inbound webhooks
-- `X-OpenWA-Worker-Token` for outbound queue processing
+`https://aglobzjtstbfwcsdhvmp.supabase.co/functions/v1/openwa-communication-worker`
 
-The function itself performs the authentication checks.
+The same `OPENWA_WEBHOOK_SECRET` is used for HMAC verification.
 
-## 7. Register the OpenWA webhook
+Webhook registration is cached per Edge Function instance for five minutes and treats an existing webhook response as non-fatal.
 
-Register the webhook against the OpenWA session using the same HMAC secret configured as `OPENWA_WEBHOOK_SECRET`.
+## 5. Outbound scheduler
 
-```powershell
-curl -X POST "https://openwa.isaacsandpartners.online/api/sessions/OPENWA_SESSION_ID/webhooks" `
-  -H "Content-Type: application/json" `
-  -H "X-API-Key: OPENWA_API_KEY" `
-  -d '{
-    "url": "https://aglobzjtstbfwcsdhvmp.supabase.co/functions/v1/openwa-communication-worker",
-    "events": ["message.received", "message.sent", "message.ack", "message.failed"],
-    "secret": "OPENWA_WEBHOOK_SECRET"
-  }'
+The existing Supabase cron job `openwa-communication-worker` is active every 15 seconds.
+
+It calls the worker with the Vault value `openwa_worker_token` using `X-OpenWA-Worker-Token`.
+
+Flow:
+
+```text
+communication_outbox QUEUED
+        ↓
+Supabase cron every 15 seconds
+        ↓
+openwa-communication-worker
+        ↓
+Cloudflare
+        ↓
+Azure OpenWA
+        ↓
+WhatsApp
 ```
 
-Replace placeholders with the real values locally. Do not commit the command with real secrets.
+The worker claims queued rows, retries transient failures, records the OpenWA message ID, and updates communication status.
 
-## 8. End-to-end test
+## 6. Inbound WhatsApp flow
 
-### Outbound
+```text
+WhatsApp
+   ↓
+Azure OpenWA
+   ↓
+Cloudflare Tunnel
+   ↓
+openwa-communication-worker
+   ↓
+HMAC verification
+   ↓
+communication_messages
+   ↓
+AI Liaison runtime
+   ↓
+Anthony Isaacs
+   ↓
+communication_outbox
+   ↓
+Azure OpenWA
+   ↓
+WhatsApp
+```
 
-1. Sign in as an authenticated client/staff user.
-2. Queue a WhatsApp message through the application.
-3. Confirm a `communication_messages` row is `QUEUED`.
-4. Confirm a matching `communication_outbox` row is `QUEUED`.
-5. Within the scheduler interval, the worker should claim the row.
-6. OpenWA should receive `/api/sessions/{sessionId}/messages/send-text`.
-7. The message should become `SENT` and receive an OpenWA message ID.
-8. WhatsApp should receive the message.
+Known customer identity is resolved from `communication_contacts` by phone number first and canonical WhatsApp chat ID second. Group, broadcast and newsletter destinations are blocked from the automated direct-message transport.
 
-### Inbound
+The existing Customer Relationship Memory Engine and historical-memory architecture remain in Supabase; Azure does not contain or replace Anthony's business/relationship memory.
 
-1. Send a WhatsApp message to the connected OpenWA number.
-2. OpenWA calls the Supabase webhook.
-3. The HMAC signature is verified.
-4. The message is persisted to `communication_messages`.
-5. If the WhatsApp chat is registered to a known client, the existing AI Liaison runtime is invoked.
-6. Any AI response is queued through the normal outbound communication path.
-7. The outbound scheduler sends the response through OpenWA.
+## 7. Security model
 
-### Security tests
+- OpenWA API key stays server-side.
+- Worker token stays server-side and in Supabase Vault for the scheduler.
+- Webhook HMAC secret stays server-side.
+- Browser JavaScript never calls OpenWA directly.
+- Cloudflare is the public network boundary.
+- OpenWA remains bound privately behind the tunnel.
+- WAF exception is restricted to `openwa.isaacsandpartners.online/api/*` and Super Bot Fight Mode.
+- Group/broadcast WhatsApp destinations are blocked by the worker.
+- Duplicate webhook deliveries are handled idempotently.
+- Unknown WhatsApp numbers do not receive authenticated client context merely by messaging the business.
 
-- Missing HMAC signature must be rejected.
-- Invalid HMAC signature must be rejected.
-- Missing/invalid worker token must return `403`.
-- Browser code must never contain `OPENWA_API_KEY` or `OPENWA_WORKER_TOKEN`.
-- A WhatsApp number not linked to a known client must not gain authenticated client context.
-- Duplicate OpenWA deliveries must be idempotent.
+## 8. Production state
 
-## Production notes
+The intended production chain is now:
 
-The Cloudflare Tunnel is the network bridge to the private OpenWA host. It is not the location of the Supabase Edge Function. The production Edge Function remains on Supabase, while Cloudflare provides the secure public route to the private OpenWA API.
+`Client/Staff → Supabase communication layer → OpenWA worker → Cloudflare → Azure OpenWA → WhatsApp`
+
+and inbound:
+
+`WhatsApp → Azure OpenWA → Cloudflare → Supabase worker → Anthony → communication_outbox → Azure OpenWA → WhatsApp`
+
+No AI or relationship-memory state is moved to Azure; Azure remains the WhatsApp transport runtime.
