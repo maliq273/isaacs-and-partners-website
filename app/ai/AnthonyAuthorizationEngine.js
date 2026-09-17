@@ -1,0 +1,158 @@
+/**
+ * Isaacs & Partners — Anthony Authorisation Engine
+ *
+ * Policy layer between resolved identity and operational intelligence/actions.
+ * It does not create or replace database permissions. It interprets the
+ * authoritative identity + existing permission records and produces the scope
+ * that downstream read/action services must enforce.
+ */
+const AUTHORITY_ROLES = new Set(["SUPER_ADMIN", "DIRECTOR", "SHAREHOLDER", "PARTNER", "STAKEHOLDER", "STAFF"]);
+const CAPABILITIES = Object.freeze({
+  LIAISE_WITH_AI: "can_liaise_with_ai",
+  ANSWER_AI_QUERIES: "can_answer_ai_queries",
+  RELAY_TO_CLIENTS: "can_relay_to_clients",
+  HANDLE_APPOINTMENTS: "can_handle_appointments",
+  PROVIDE_PRICING: "can_provide_pricing",
+  APPROVE_QUOTES: "can_approve_quotes",
+  HANDLE_IMMIGRATION: "can_handle_immigration",
+  HANDLE_HR: "can_handle_hr",
+  HANDLE_BUSINESS_COMPLIANCE: "can_handle_business_compliance",
+  HANDLE_LEGAL: "can_handle_legal",
+  MANAGE_AUTHORITY: "manage_authority",
+  MANAGE_STAFF: "manage_staff",
+  MANAGE_SYSTEM: "manage_system"
+});
+function text(v, max = 500) { return String(v ?? "").trim().slice(0, max); }
+function upper(v) { return text(v, 100).toUpperCase(); }
+function mergedPermissions(identity) {
+  const directory = identity?.authority?.action_permissions && typeof identity.authority.action_permissions === "object" ? identity.authority.action_permissions : {};
+  const staff = identity?.authority?.permissions && typeof identity.authority.permissions === "object" ? identity.authority.permissions : {};
+  return { ...staff, ...directory };
+}
+function hasAny(textValue, patterns) { return patterns.some(pattern => pattern.test(textValue)); }
+export default class AnthonyAuthorizationEngine {
+  constructor({ db = null } = {}) { this.db = db; }
+  isAuthority(identity) { return Boolean(identity?.verified && AUTHORITY_ROLES.has(upper(identity?.authorityRole))); }
+  isSuperAdmin(identity) { return this.isAuthority(identity) && upper(identity.authorityRole) === "SUPER_ADMIN"; }
+  capabilities(identity) {
+    if (this.isSuperAdmin(identity)) return Object.values(CAPABILITIES);
+    const permissions = mergedPermissions(identity);
+    return Object.values(CAPABILITIES).filter(capability => permissions[capability] === true);
+  }
+  can(identity, capability) {
+    const requested = text(capability, 100);
+    if (this.isSuperAdmin(identity)) return true;
+    return this.capabilities(identity).includes(requested);
+  }
+  scopeFor(identity) {
+    if (this.isSuperAdmin(identity)) return {
+      level: "SUPER_ADMIN",
+      allOrganisationData: true,
+      ownDataOnly: false,
+      assignedMattersOnly: false,
+      businessIds: [],
+      matterIds: [],
+      canViewAuthorityDirectory: true,
+      canViewStaffData: true,
+      canViewClientData: true,
+      canViewFinancialData: true,
+      canViewLegalOperationalData: true
+    };
+    const role = upper(identity?.authorityRole);
+    if (role === "STAFF") return {
+      level: "STAFF_ASSIGNED",
+      allOrganisationData: false,
+      ownDataOnly: false,
+      assignedMattersOnly: true,
+      businessIds: [],
+      matterIds: [],
+      canViewAuthorityDirectory: false,
+      canViewStaffData: false,
+      canViewClientData: true,
+      canViewFinancialData: this.can(identity, CAPABILITIES.PROVIDE_PRICING),
+      canViewLegalOperationalData: this.can(identity, CAPABILITIES.HANDLE_LEGAL)
+    };
+    if (this.isAuthority(identity)) return {
+      level: "AUTHORITY_LINKED",
+      allOrganisationData: false,
+      ownDataOnly: true,
+      assignedMattersOnly: Boolean(identity?.staff?.id),
+      businessIds: identity?.businesses?.map(row => row.id).filter(Boolean) || [],
+      matterIds: [],
+      canViewAuthorityDirectory: this.can(identity, CAPABILITIES.MANAGE_AUTHORITY),
+      canViewStaffData: this.can(identity, CAPABILITIES.MANAGE_STAFF),
+      canViewClientData: false,
+      canViewFinancialData: this.can(identity, CAPABILITIES.PROVIDE_PRICING),
+      canViewLegalOperationalData: this.can(identity, CAPABILITIES.HANDLE_LEGAL)
+    };
+    if (identity?.identityType === "CLIENT" || identity?.identityType === "BUSINESS_CONTACT") return {
+      level: "CLIENT_OWN",
+      allOrganisationData: false,
+      ownDataOnly: true,
+      assignedMattersOnly: false,
+      businessIds: identity?.businesses?.map(row => row.id).filter(Boolean) || [],
+      matterIds: identity?.matters?.map(row => row.id).filter(Boolean) || [],
+      canViewAuthorityDirectory: false,
+      canViewStaffData: false,
+      canViewClientData: false,
+      canViewFinancialData: true,
+      canViewLegalOperationalData: false
+    };
+    return {
+      level: "PUBLIC",
+      allOrganisationData: false,
+      ownDataOnly: false,
+      assignedMattersOnly: false,
+      businessIds: [],
+      matterIds: [],
+      canViewAuthorityDirectory: false,
+      canViewStaffData: false,
+      canViewClientData: false,
+      canViewFinancialData: false,
+      canViewLegalOperationalData: false
+    };
+  }
+  classifyRequest(message, { intent = null, domain = null } = {}) {
+    const value = text(message, 4096);
+    const lower = value.toLowerCase();
+    const d = upper(domain);
+    if (hasAny(lower, [/\b(all|every|entire|whole)\b.*\b(client|customer|matter|staff|business|company)\b/i, /\b(other clients?|other customers?|everyone(?:'s|s)? data)\b/i])) return { type: "CROSS_CLIENT_DATA", capability: null };
+    if (hasAny(lower, [/\b(staff|employee|team)\b.*\b(permission|permissions|role|authority|phone|salary|personal)\b/i, /\bauthority directory\b/i])) return { type: "AUTHORITY_DATA", capability: CAPABILITIES.MANAGE_AUTHORITY };
+    if (hasAny(lower, [/\b(invoice|balance|payment|paid|amount owed|financial)\b/i])) return { type: "FINANCIAL_DATA", capability: null };
+    if (hasAny(lower, [/\b(pric(?:e|ing)|quote|quotation|cost|fee|rate)\b/i])) return { type: "PRICING", capability: CAPABILITIES.PROVIDE_PRICING };
+    if (hasAny(lower, [/\b(book|schedule|reschedule|cancel|appointment)\b/i])) return { type: "APPOINTMENT", capability: CAPABILITIES.HANDLE_APPOINTMENTS };
+    if (hasAny(lower, [/\b(immigration|visa|permit|dha|vfs)\b/i) || d === "IMMIGRATION") return { type: "DOMAIN", capability: CAPABILITIES.HANDLE_IMMIGRATION };
+    if (hasAny(lower, [/\b(hr|human resources|industrial relations|labour|labor|ccma)\b/i) || ["HR", "HR_IR"].includes(d)) return { type: "DOMAIN", capability: CAPABILITIES.HANDLE_HR };
+    if (hasAny(lower, [/\b(cipc|sars|uif|coida|business compliance|compliance)\b/i) || d === "BUSINESS_COMPLIANCE") return { type: "DOMAIN", capability: CAPABILITIES.HANDLE_BUSINESS_COMPLIANCE };
+    if (hasAny(lower, [/\b(legal|contract|notary|mediation|attorney|litigation)\b/i) || d === "LEGAL") return { type: "DOMAIN", capability: CAPABILITIES.HANDLE_LEGAL };
+    if (upper(intent) === "PRICING") return { type: "PRICING", capability: CAPABILITIES.PROVIDE_PRICING };
+    return { type: "GENERAL", capability: null };
+  }
+  evaluate({ identity, message, intent = null, domain = null } = {}) {
+    const scope = this.scopeFor(identity);
+    const request = this.classifyRequest(message, { intent, domain });
+    const role = upper(identity?.authorityRole) || "UNKNOWN";
+    let allowed = true;
+    let reason = "General information is permitted.";
+    if (request.type === "CROSS_CLIENT_DATA" || request.type === "AUTHORITY_DATA") {
+      allowed = scope.level === "SUPER_ADMIN" || (request.capability && this.can(identity, request.capability));
+      reason = allowed ? "Identity has authority for the requested organisational data." : "The resolved identity does not have authority to disclose that organisational data.";
+    } else if (request.type === "FINANCIAL_DATA") {
+      allowed = scope.level === "SUPER_ADMIN" || scope.level === "CLIENT_OWN" || this.can(identity, CAPABILITIES.PROVIDE_PRICING);
+      reason = allowed ? "Financial information is limited to the identity's permitted scope." : "Financial information is outside this identity's permitted scope.";
+    } else if (request.capability) {
+      allowed = scope.level === "SUPER_ADMIN" || scope.level === "CLIENT_OWN" || this.can(identity, request.capability);
+      reason = allowed ? "The resolved identity has the required domain capability or own-client scope." : `Required capability is not granted: ${request.capability}.`;
+    }
+    return { allowed, role, request, scope, capabilities: this.capabilities(identity), reason, disclosureRule: this.disclosureRule(scope, request, allowed) };
+  }
+  disclosureRule(scope, request, allowed) {
+    if (!allowed) return "DO_NOT_DISCLOSE_RESTRICTED_DATA";
+    if (scope.level === "SUPER_ADMIN") return "FULL_ORGANISATIONAL_DISCLOSURE_WITHIN_LIVE_DATABASE_SCOPE";
+    if (scope.level === "STAFF_ASSIGNED") return "DISCLOSE_ONLY_ASSIGNED_OPERATIONAL_RECORDS_AND_APPROVED_COMPANY_INFORMATION";
+    if (scope.level === "AUTHORITY_LINKED") return "DISCLOSE_ONLY_LINKED_RECORDS_AND_EXPLICITLY_PERMITTED_OPERATIONAL_INFORMATION";
+    if (scope.level === "CLIENT_OWN") return "DISCLOSE_ONLY_OWN_CLIENT_BUSINESS_MATTER_AND_PAYMENT_INFORMATION";
+    return "PUBLIC_COMPANY_INFORMATION_ONLY";
+  }
+}
+export { CAPABILITIES };
