@@ -273,7 +273,7 @@
   overflow:hidden;
   border:4px solid var(--ip-gold);
   border-radius:50%;
-  background:#111;
+  background:#fff;
   box-shadow:
     0 0 0 3px rgba(201,162,39,.16),
     0 12px 35px rgba(0,0,0,.32),
