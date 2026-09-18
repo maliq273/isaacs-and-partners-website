@@ -8,86 +8,6 @@ const STORAGE_VERSION = 2;
 const MAX_REMEMBERED_MESSAGES = 12;
 const LAYOUT_FIX_HREF = "app/css/public-ai-liaison-layout-fix.css?v=20260905-1";
 
-function whitenConnectedDarkBackground(image) {
-    if (!image || image.dataset.whiteBgApplied === "true") return;
-    if (!image.complete || !image.naturalWidth || !image.naturalHeight) {
-        image.addEventListener("load", () => whitenConnectedDarkBackground(image), { once: true });
-        return;
-    }
-
-    try {
-        const canvas = document.createElement("canvas");
-        canvas.width = image.naturalWidth;
-        canvas.height = image.naturalHeight;
-        const context = canvas.getContext("2d", { willReadFrequently: true });
-        if (!context) return;
-
-        context.drawImage(image, 0, 0);
-        const frame = context.getImageData(0, 0, canvas.width, canvas.height);
-        const pixels = frame.data;
-        const width = canvas.width;
-        const height = canvas.height;
-        const visited = new Uint8Array(width * height);
-        const queue = [];
-
-        const isBackgroundPixel = (index) => {
-            const r = pixels[index];
-            const g = pixels[index + 1];
-            const b = pixels[index + 2];
-            const luminance = (r * 299 + g * 587 + b * 114) / 1000;
-            const chroma = Math.max(r, g, b) - Math.min(r, g, b);
-            return luminance < 105 && chroma < 48;
-        };
-
-        const enqueue = (x, y) => {
-            if (x < 0 || y < 0 || x >= width || y >= height) return;
-            const position = y * width + x;
-            if (visited[position]) return;
-            visited[position] = 1;
-            const index = position * 4;
-            if (!isBackgroundPixel(index)) return;
-            queue.push(position);
-        };
-
-        for (let x = 0; x < width; x++) {
-            enqueue(x, 0);
-            enqueue(x, height - 1);
-        }
-        for (let y = 1; y < height - 1; y++) {
-            enqueue(0, y);
-            enqueue(width - 1, y);
-        }
-
-        let cursor = 0;
-        while (cursor < queue.length) {
-            const position = queue[cursor++];
-            const x = position % width;
-            const y = Math.floor(position / width);
-            const index = position * 4;
-
-            pixels[index] = 255;
-            pixels[index + 1] = 255;
-            pixels[index + 2] = 255;
-            pixels[index + 3] = 255;
-
-            enqueue(x - 1, y);
-            enqueue(x + 1, y);
-            enqueue(x, y - 1);
-            enqueue(x, y + 1);
-        }
-
-        context.putImageData(frame, 0, 0);
-        image.src = canvas.toDataURL("image/jpeg", 0.98);
-        image.dataset.whiteBgApplied = "true";
-    } catch (error) {
-        console.warn("[PublicLeadLiaison] Unable to normalise portrait background:", error);
-    }
-}
-
-function normaliseTeamPortraitBackgrounds(root = document) {
-    root.querySelectorAll(".team-portrait-white-bg").forEach(whitenConnectedDarkBackground);
-}
-
 function correctCommonWords(text) {
     const corrections = [["ccm", "ccma"], ["cma", "ccma"], ["ccmaa", "ccma"], ["retrenchmant", "retrenchment"], ["disciplnary", "disciplinary"], ["disciplinery", "disciplinary"], ["grievnce", "grievance"], ["employement", "employment"], ["immigartion", "immigration"], ["citizanship", "citizenship"], ["complaince", "compliance"], ["compilance", "compliance"], ["notery", "notary"], ["affidavid", "affidavit"]];
     let corrected = String(text || "");
@@ -116,7 +36,6 @@ class PublicLeadLiaison {
     initialise() {
         if (!document.body) return;
         this.installLayoutFix();
-        normaliseTeamPortraitBackgrounds(document);
 
         let root = document.querySelector("[data-public-ai-liaison]");
         if (!root) {
