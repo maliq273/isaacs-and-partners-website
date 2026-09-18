@@ -137,8 +137,8 @@ revoke all on function public.client_portal_submit_rfq(uuid,text,text,jsonb) fro
 grant execute on function public.client_portal_submit_rfq(uuid,text,text,jsonb) to authenticated;
 
 create or replace function public.customer_portal_dashboard_snapshot()
-returns jsonb language plpgsql security invoker
-as $$
+returns jsonb language plpgsql security invoker set search_path=''
+as $
 declare u uuid:=(select auth.uid()); out jsonb;
 begin
  if u is null then raise exception 'Authentication required.' using errcode='42501'; end if;
