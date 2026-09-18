@@ -137,7 +137,7 @@ grant execute on function public.client_portal_submit_rfq(uuid,text,text,jsonb) 
 
 create or replace function public.customer_portal_dashboard_snapshot()
 returns jsonb language plpgsql security invoker set search_path=''
-as $
+as $portal$
 declare u uuid:=(select auth.uid()); out jsonb;
 begin
  if u is null then raise exception 'Authentication required.' using errcode='42501'; end if;
@@ -156,7 +156,7 @@ begin
  'whatsapp_messages',coalesce((select jsonb_agg(to_jsonb(cm) order by cm.created_at desc) from public.communication_messages cm where cm.customer_user_id=u and cm.channel='WHATSAPP'),'[]'::jsonb)
  ) into out;
  return out;
-end $$;
+end $portal$;
 revoke all on function public.customer_portal_dashboard_snapshot() from public,anon;
 grant execute on function public.customer_portal_dashboard_snapshot() to authenticated;
 
