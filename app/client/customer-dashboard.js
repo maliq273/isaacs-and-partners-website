@@ -26,7 +26,7 @@ class CustomerDashboard{
  constructor(){
   this.root=document.getElementById("customer-dashboard-root");
   this.data={businesses:[],matters:[],documents:[],client_documents:[],appointments:[],quotes:[],invoices:[],payments:[],notifications:[],whatsapp_messages:[]};
-  this.user=null;this.role=null;this.supabase=null;this.vault=null;this.ai=new AILiaisonRuntimeService();this.realtime=null;this.bookingMode="virtual";this.selectedFile=null;this.rfqItems=[];
+  this.user=null;this.role=null;this.supabase=null;this.vault=null;this.ai=new AILiaisonRuntimeService();this.realtime=null;this.realtimeRefreshTimer=null;this.bookingMode="virtual";this.selectedFile=null;this.rfqItems=[];
  }
  async start(){
   await auth.initialise();
@@ -83,7 +83,7 @@ class CustomerDashboard{
  }
  connectRealtime(){
   try{
-   const t=auth.getToken();if(t)this.supabase.realtime.setAuth(t);
+   const t=auth.getToken();if(t)this.supabase.realtime.setAuth(t);this.realtimeRefreshTimer=setInterval(()=>{const token=auth.getToken();if(token)this.supabase.realtime.setAuth(token)},300000);
    this.realtime=this.supabase.channel("customer-portal-"+this.user.id)
     .on("postgres_changes",{event:"*",schema:"public",table:"notifications",filter:"recipient_user_id=eq."+this.user.id},()=>this.refresh())
     .on("postgres_changes",{event:"*",schema:"public",table:"communication_messages",filter:"customer_user_id=eq."+this.user.id},()=>this.refresh())
