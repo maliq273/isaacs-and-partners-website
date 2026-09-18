@@ -246,3 +246,16 @@
     font-size:13px;
   }
 }
+
+/* Portrait framing adjustments for the supplied team photographs */
+/* Keep the three portraits that have less headroom aligned lower so the full forehead is visible. */
+.team-grid .team-card:nth-child(1) .team-card-image img,
+.team-grid .team-card:nth-child(2) .team-card-image img,
+.team-grid .team-card:nth-child(4) .team-card-image img{
+  object-position:center 18%;
+}
+
+/* Uzair's existing framing is already correct; leave it centred. */
+.team-grid .team-card:nth-child(3) .team-card-image img{
+  object-position:center;
+}
