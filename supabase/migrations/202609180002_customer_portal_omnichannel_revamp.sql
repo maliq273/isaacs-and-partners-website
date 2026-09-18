@@ -35,8 +35,7 @@ begin
  end if;
  return n;
 end $$;
-revoke all on function public.client_portal_queue_notification(uuid,text,text,jsonb) from public,anon;
-grant execute on function public.client_portal_queue_notification(uuid,text,text,jsonb) to authenticated;
+revoke all on function public.client_portal_queue_notification(uuid,text,text,jsonb) from public,anon,authenticated;
 
 create or replace function public.client_portal_create_service_request(p_service_type text,p_title text,p_description text default null,p_business_id uuid default null)
 returns public.matters language plpgsql security definer set search_path=''
