@@ -1,5 +1,187 @@
-<!doctype html><html lang="en-ZA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Super Admin Control Centre | Isaacs and Partners</title><link rel="stylesheet" href="../css/app.css"><link rel="stylesheet" href="../css/dashboard.css"><style>.super-admin-shell{max-width:1500px;margin:0 auto;padding:28px 22px 56px}.admin-command-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:20px 0}.admin-command{padding:18px;border:1px solid var(--border-color,#ddd);border-radius:14px;background:var(--surface,#fff)}.admin-command strong{display:block;font-size:1.45rem}.admin-command span{display:block;margin-top:5px;opacity:.72}.admin-category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.admin-category{border:1px solid var(--border-color,#ddd);border-radius:18px;padding:20px;background:var(--surface,#fff)}.admin-category-header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}.admin-category-header h2{margin:0}.admin-category-header p{margin:5px 0 0;opacity:.7}.admin-module-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.admin-module{display:block;padding:14px;border-radius:12px;background:var(--surface-muted,#f7f7f7);text-decoration:none;color:inherit;border:1px solid transparent}.admin-module:hover{border-color:currentColor}.admin-module strong,.admin-module span{display:block}.admin-module span{margin-top:4px;font-size:.88rem;opacity:.7}.admin-category--featured{grid-column:span 2}.admin-category--featured .admin-module-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.worker-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.worker-card{padding:15px;border:1px solid var(--border-color,#ddd);border-radius:12px}.worker-card strong,.worker-card span{display:block}.worker-card span{font-size:.88rem;opacity:.72;margin-top:4px}.worker-status{display:inline-block;margin-top:10px;font-size:.78rem;font-weight:700}.admin-lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.portal-access-table{width:100%;border-collapse:collapse}.portal-access-table th,.portal-access-table td{padding:10px;border-bottom:1px solid rgba(0,0,0,.08);text-align:left;vertical-align:top}.portal-access-table td small{display:block;opacity:.65}.portal-access-actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:1000px){.admin-command-grid,.worker-board{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-category-grid,.admin-lower-grid{grid-template-columns:1fr}.admin-category--featured{grid-column:auto}.admin-category--featured .admin-module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.admin-command-grid,.admin-module-grid,.admin-category--featured .admin-module-grid,.worker-board{grid-template-columns:1fr}.portal-access-table{font-size:.85rem}}
-</style></head><body data-page="super-admin"><main class="dashboard-page super-admin-shell"><header class="page-header"><div><p class="eyebrow">Isaacs and Partners · Private Control Plane</p><h1 id="admin-greeting">Super Admin</h1><p class="page-description">One control centre for the entire firm. Every category below routes to an existing operational surface while access, data and worker execution remain governed by the existing control plane.</p></div><div class="page-actions"><span class="control-plane-badge" id="admin-integration-provider-count">Checking services…</span><button type="button" class="btn" data-auth-action="logout">Sign Out</button></div></header><div id="dashboard-data-error" class="login-message login-error" role="alert" hidden></div><section class="admin-command-grid" aria-label="Firm workload summary"><article class="admin-command"><strong id="admin-staff-count">0</strong><span>Staff</span></article><article class="admin-command"><strong id="admin-open-matters">0</strong><span>Open Matters</span></article><article class="admin-command"><strong id="admin-unassigned-count">0</strong><span>Unassigned Matters</span></article><article class="admin-command"><strong id="admin-ai-events">0</strong><span>AI / Integration Events</span></article></section><section class="panel"><div class="panel-header"><div><p class="eyebrow">Super Admin User Dashboard</p><h2>Firm Control Centre</h2><p>Use the category that matches the work you need to control.</p></div><div id="admin-integration-summary" class="control-plane-summary">Loading…</div></div><div id="super-admin-categories" class="admin-category-grid"></div></section>
-<section class="panel" style="margin-top:18px"><div class="panel-header"><div><p class="eyebrow">Client access</p><h2>Portal Approval Queue</h2><p>New client accounts remain pending until a Super Admin explicitly approves portal interaction.</p></div></div><div id="client-portal-access-error" class="login-message login-error" hidden role="alert"></div><div style="overflow:auto"><table class="portal-access-table"><thead><tr><th>Client</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody id="client-portal-access-list"><tr><td colspan="4">Loading client access…</td></tr></tbody></table></div></section>
-<section class="panel" style="margin-top:18px"><div class="panel-header"><div><p class="eyebrow">AI workload</p><h2>Worker Control Board</h2><p>Live health is derived from the existing integration/control-plane registry.</p></div></div><div id="admin-worker-board" class="worker-board"><div class="empty-state">Loading worker health…</div></div></section><div class="admin-lower-grid"><section class="panel"><div class="panel-header"><div><p class="eyebrow">Live services</p><h2>Provider Health</h2><p>Credentials remain server-side.</p></div></div><div id="admin-integrations" class="integration-grid"><div class="empty-state">Loading provider health…</div></div></section><section class="panel"><div class="panel-header"><div><p class="eyebrow">Audit boundary</p><h2>Integration Events</h2></div></div><div id="admin-integration-events" class="integration-event-list"><div class="empty-state">Loading integration events…</div></div></section></div><section class="panel" style="margin-top:18px"><div class="panel-header"><div><p class="eyebrow">Security</p><h2>Administrative Session</h2><p>Administrative access is restricted to SUPER_ADMIN accounts and protected by Supabase RLS.</p></div></div><div id="admin-security-status" class="security-status"></div></section><section class="panel" style="margin-top:18px"><div class="panel-header"><div><p class="eyebrow">GitHub Integration</p><h2>Repository &amp; Asset Storage</h2><p>Super Admin only. The existing secure GitHub integration remains available without exposing its token.</p></div></div><div id="github-integration-status" class="security-status"></div><form id="github-integration-form" class="admin-form" autocomplete="off"><label>Repository<input name="repository" type="text" value="maliq273/isaacs-and-partners-website" required></label><label>GitHub Token<input name="token" type="password" autocomplete="new-password" placeholder="Enter a new token to save or replace it"></label><div class="form-actions"><button id="github-integration-save" type="submit" class="btn btn-primary">Save GitHub Token</button><button id="github-integration-test" type="button" class="btn">Test Connection</button></div><div id="github-integration-message" class="login-message" role="status" hidden></div></form></section></main>
-<script type="module">import dashboardPageController from "./DashboardPageController.js?v=20260909-1";import githubIntegration from "./AdminGithubIntegrationService.js?v=20260829-4";import clientPortalAdmin from "../services/ClientPortalAdminService.js?v=20260906-1";await dashboardPageController.initialise();await githubIntegration.initialise();const list=document.getElementById("client-portal-access-list"),error=document.getElementById("client-portal-access-error");const esc=value=>String(value??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));const label=row=>[row.first_name,row.last_name].filter(Boolean).join(" ")||row.email||row.user_id;const renderEmpty=message=>{list.replaceChildren();const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=4;td.textContent=message;tr.appendChild(td);list.appendChild(tr);};async function loadPortalAccess(){try{error.hidden=true;const snapshot=await clientPortalAdmin.snapshot();list.replaceChildren();for(const row of snapshot?.clients||[]){const access=row.access||{};const tr=document.createElement("tr");const status=String(access.status||"PENDING").toUpperCase();const clientCell=document.createElement("td");const strong=document.createElement("strong");strong.textContent=label(row);const email=document.createElement("small");email.textContent=row.email||"";clientCell.append(strong,email);const statusCell=document.createElement("td");statusCell.textContent=status;const createdCell=document.createElement("td");createdCell.textContent=access.created_at||"";const actionsCell=document.createElement("td");const actions=document.createElement("div");actions.className="portal-access-actions";if(status!=="APPROVED"){const approve=document.createElement("button");approve.className="btn btn-primary";approve.type="button";approve.dataset.portalAction="approve";approve.dataset.userId=row.user_id;approve.textContent="Approve";actions.appendChild(approve);}if(status!=="SUSPENDED"){const suspend=document.createElement("button");suspend.className="btn";suspend.type="button";suspend.dataset.portalAction="suspend";suspend.dataset.userId=row.user_id;suspend.textContent="Suspend";actions.appendChild(suspend);}actionsCell.appendChild(actions);tr.append(clientCell,statusCell,createdCell,actionsCell);list.appendChild(tr)}if(!list.children.length)renderEmpty("No client accounts found.");}catch(e){error.hidden=false;error.textContent=e.message||"Unable to load client access.";renderEmpty("Unable to load client access.");}}list.addEventListener("click",async event=>{const button=event.target.closest("button[data-portal-action]");if(!button)return;button.disabled=true;try{const notes=window.prompt(`${button.dataset.portalAction==="approve"?"Approval":"Suspension"} note (optional):`,"");if(button.dataset.portalAction==="approve")await clientPortalAdmin.approve(button.dataset.userId,notes);else await clientPortalAdmin.suspend(button.dataset.userId,notes);await loadPortalAccess();}catch(e){error.hidden=false;error.textContent=e.message||"Portal access action failed.";}finally{button.disabled=false;}});await loadPortalAccess();</script></body></html>
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Super Admin Control Centre | Isaacs and Partners</title>
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body data-page="super-admin">
+<main class="dashboard-page super-admin-shell">
+<header class="page-header super-admin-header">
+  <div>
+    <p class="eyebrow">Isaacs &amp; Partners · Private Control Plane</p>
+    <h1 id="admin-greeting">Super Admin</h1>
+    <p class="page-description">The operational command centre for people, matters, communications, finance, documents, portal access, integrations and audited administrative activity.</p>
+  </div>
+  <div class="page-actions">
+    <span class="control-plane-badge" id="admin-system-status">Checking live data…</span>
+    <button type="button" class="btn" data-admin-action="refresh">Refresh</button>
+    <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
+  </div>
+</header>
+
+<div id="dashboard-data-error" class="login-message login-error" role="alert" hidden></div>
+
+<section class="admin-command-grid" aria-label="Live firm workload">
+  <article class="admin-command admin-command--primary"><span>Active Matters</span><strong id="admin-open-matters">0</strong><small id="admin-open-matters-meta">Live operational records</small></article>
+  <article class="admin-command"><span>People &amp; Staff</span><strong id="admin-staff-count">0</strong><small id="admin-people-meta">Active staff records</small></article>
+  <article class="admin-command"><span>New / Unassigned Work</span><strong id="admin-unassigned-count">0</strong><small id="admin-unassigned-meta">Open matters without active assignment</small></article>
+  <article class="admin-command"><span>WhatsApp Response SLA</span><strong id="admin-watchdog-open">0</strong><small id="admin-watchdog-meta">Open message obligations</small></article>
+  <article class="admin-command"><span>Appointments</span><strong id="admin-appointments-today">0</strong><small>Today</small></article>
+  <article class="admin-command"><span>Documents</span><strong id="admin-documents-outstanding">0</strong><small>Outstanding / review</small></article>
+  <article class="admin-command"><span>Invoices</span><strong id="admin-invoices-outstanding">0</strong><small id="admin-invoice-meta">Outstanding balance</small></article>
+  <article class="admin-command"><span>Pending Quotes</span><strong id="admin-pending-quotes">0</strong><small>Awaiting commercial action</small></article>
+</section>
+
+<section class="admin-command-layout">
+  <aside class="panel admin-command-nav">
+    <div class="panel-header"><div><p class="eyebrow">Command Centre</p><h2>Control Areas</h2></div></div>
+    <nav id="super-admin-nav" class="admin-nav-list" aria-label="Super Admin navigation"></nav>
+  </aside>
+
+  <section class="panel">
+    <div class="panel-header">
+      <div><p class="eyebrow">Live overview</p><h2>Firm Control Centre</h2><p>Every card below is backed by the existing dashboard routes, Supabase tables/RPCs, RLS and control-plane services.</p></div>
+      <div id="admin-integration-summary" class="control-plane-summary">Loading…</div>
+    </div>
+    <div id="admin-overview-grid" class="admin-overview-grid"></div>
+  </section>
+</section>
+
+<section class="admin-section-grid">
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">People &amp; authority</p><h2>Authority Snapshot</h2><p>Authority remains governed by the existing authoritative directory and server-side access controls.</p></div><a class="btn btn-secondary" href="./authority-people.html">Open Authority &amp; People</a></div>
+    <div id="admin-authority-list" class="admin-list"><div class="empty-state">Loading authority records…</div></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">Customer portal</p><h2>Portal Approval Queue</h2><p>Uses the existing <code>client_portal_admin_snapshot()</code> and approval RPCs.</p></div><a class="btn btn-secondary" href="./accounts.html">Accounts</a></div>
+    <div id="client-portal-access-error" class="login-message login-error" hidden role="alert"></div>
+    <div class="table-wrapper"><table class="admin-table"><thead><tr><th>Client</th><th>Type</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody id="client-portal-access-list"><tr><td colspan="5">Loading client access…</td></tr></tbody></table></div>
+  </section>
+</section>
+
+<section class="admin-section-grid">
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">Communications</p><h2>WhatsApp Command Centre</h2><p>Live counts from the existing communication and watchdog records. Message handling remains in the existing communications route.</p></div><a class="btn btn-secondary" href="./communications.html">Open WhatsApp</a></div>
+    <div class="admin-metric-list" id="admin-communication-metrics"></div>
+    <div class="admin-alert-list" id="admin-watchdog-list"><div class="empty-state">Loading response SLA…</div></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">Operations</p><h2>Work Queue</h2><p>Existing matters, tasks and appointments remain the operational source of truth.</p></div><a class="btn btn-secondary" href="./matters.html">Open Matters</a></div>
+    <div class="admin-metric-list" id="admin-operations-metrics"></div>
+    <div class="admin-link-grid">
+      <a href="./matters.html">Matters<span>Open and monitor work</span></a>
+      <a href="./assignments.html">Assignments<span>Allocate operational work</span></a>
+      <a href="./cases.html">Cases<span>Manage linked cases</span></a>
+      <a href="./document-vault.html">Document Vault<span>Review document state</span></a>
+      <a href="./reports.html">Reports<span>Generate live reports</span></a>
+      <a href="./analytics.html">Analytics<span>Review business intelligence</span></a>
+    </div>
+  </section>
+</section>
+
+<section class="admin-section-grid">
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">Finance</p><h2>Commercial Snapshot</h2><p>Quotes, invoices and payments are read from the existing commercial ledger.</p></div><div class="page-actions"><a class="btn btn-secondary" href="./quotes.html">Quotes</a><a class="btn btn-secondary" href="./invoices.html">Invoices</a></div></div>
+    <div class="admin-finance-grid" id="admin-finance-grid"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">Notifications &amp; audit</p><h2>Administrative Activity</h2><p>Uses the existing notifications and authority action audit records.</p></div></div>
+    <div id="admin-notification-list" class="admin-list"><div class="empty-state">Loading administrative activity…</div></div>
+  </section>
+</section>
+
+<section class="panel admin-section">
+  <div class="panel-header"><div><p class="eyebrow">Infrastructure</p><h2>Integration Health</h2><p>Provider credentials remain server-side. This view exposes status only.</p></div><a class="btn btn-secondary" href="./ai.html">AI Control</a></div>
+  <div id="admin-integrations" class="integration-grid"><div class="empty-state">Loading provider health…</div></div>
+  <div class="admin-event-panel"><div class="subheading-row"><h3>Recent integration events</h3><span id="admin-ai-events">0</span></div><div id="admin-integration-events" class="integration-event-list"><div class="empty-state">Loading events…</div></div></div>
+</section>
+
+<section class="admin-section-grid">
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">Anthony Isaacs</p><h2>AI Oversight</h2><p>Management and visibility only. The production Gemini/Anthony runtime, identity, authorization, OpenWA and watchdog remain untouched by this dashboard revamp.</p></div><a class="btn btn-secondary" href="./ai.html">Open AI Control</a></div>
+    <div class="admin-oversight-grid">
+      <article><strong>Authority</strong><span>Delegated beneath active Super Admin authority.</span></article>
+      <article><strong>Identity</strong><span>WhatsApp-number resolution remains authoritative.</span></article>
+      <article><strong>Memory</strong><span>Existing relationship and historical-memory layers remain the source.</span></article>
+      <article><strong>Response SLA</strong><span>Open inbound obligations are visible in the watchdog panel.</span></article>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">System administration</p><h2>Existing Control Surfaces</h2><p>Open the authoritative route instead of duplicating its functionality here.</p></div></div>
+    <div class="admin-link-grid">
+      <a href="./authority-people.html">Authority &amp; People<span>Roles and Anthony permissions</span></a>
+      <a href="./staff-admin.html">Staff &amp; Permissions<span>Staff accounts and access</span></a>
+      <a href="./organisation-profile.html">Organisation Master<span>Legal identity and firm configuration</span></a>
+      <a href="./service-inventory.html">Service Inventory<span>Services and authoritative rates</span></a>
+      <a href="./document-workspace.html">Document Workspace<span>Controlled document operations</span></a>
+      <a href="./reports.html">Reports<span>Operational and financial reporting</span></a>
+    </div>
+  </section>
+</section>
+
+<section class="panel admin-section">
+  <div class="panel-header"><div><p class="eyebrow">Security boundary</p><h2>Administrative Session</h2><p>Browser access is role-gated and database access remains governed by Supabase RLS and existing Super Admin RPCs.</p></div></div>
+  <div id="admin-security-status" class="security-status"></div>
+</section>
+</main>
+
+<script type="module">
+import dashboardPageController from "./DashboardPageController.js?v=20260919-command-centre-1";
+import clientPortalAdmin from "../services/ClientPortalAdminService.js?v=20260906-1";
+
+const list=document.getElementById("client-portal-access-list");
+const error=document.getElementById("client-portal-access-error");
+const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const label=row=>[row.first_name,row.last_name].filter(Boolean).join(" ")||row.email||row.user_id;
+
+async function loadPortalAccess(){
+  try{
+    error.hidden=true;
+    const snapshot=await clientPortalAdmin.snapshot();
+    const clients=Array.isArray(snapshot?.clients)?snapshot.clients:[];
+    list.replaceChildren();
+    if(!clients.length){
+      const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="No client portal records found.";tr.appendChild(td);list.appendChild(tr);return;
+    }
+    clients.slice(0,20).forEach(row=>{
+      const access=row.access||{};
+      const status=String(access.status||"PENDING").toUpperCase();
+      const tr=document.createElement("tr");
+      tr.innerHTML="<td><strong>"+esc(label(row))+"</strong><small>"+esc(row.email||"")+"</small></td><td>"+esc(row.account_type||row.role||"CLIENT")+"</td><td><span class=\"status-badge "+(status==="APPROVED"?"active":status==="SUSPENDED"?"inactive":"pending")+"\">"+esc(status)+"</span></td><td>"+esc(access.created_at||"—")+"</td><td><div class=\"portal-access-actions\">"+(status!=="APPROVED"?"<button class=\"btn btn-sm btn-primary\" data-portal-action=\"approve\" data-user-id=\""+esc(row.user_id)+"\">Approve</button>":"")+(status!=="SUSPENDED"?"<button class=\"btn btn-sm\" data-portal-action=\"suspend\" data-user-id=\""+esc(row.user_id)+"\">Suspend</button>":"")+"</div></td>";
+      list.appendChild(tr);
+    });
+  }catch(e){
+    error.hidden=false;error.textContent=e.message||"Unable to load client portal access.";
+    list.innerHTML="<tr><td colspan=\"5\">Unable to load client portal access.</td></tr>";
+  }
+}
+
+list.addEventListener("click",async event=>{
+  const button=event.target.closest("button[data-portal-action]");
+  if(!button)return;
+  button.disabled=true;
+  try{
+    const notes=window.prompt((button.dataset.portalAction==="approve"?"Approval":"Suspension")+" note (optional):","");
+    if(button.dataset.portalAction==="approve")await clientPortalAdmin.approve(button.dataset.userId,notes);
+    else await clientPortalAdmin.suspend(button.dataset.userId,notes);
+    await loadPortalAccess();
+  }catch(e){
+    error.hidden=false;error.textContent=e.message||"Portal access action failed.";
+  }finally{button.disabled=false;}
+});
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  await dashboardPageController.initialise();
+  await loadPortalAccess();
+});
+</script>
+</body>
+</html>
