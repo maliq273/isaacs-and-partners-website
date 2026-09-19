@@ -33,8 +33,11 @@ Validate that WhatsApp communication between Isaacs & Partners and customers is 
 5. Valid `message.received` events create an INBOUND message.
 6. `idempotencyKey` prevents duplicate webhook deliveries.
 7. Known contacts are mapped through `communication_contacts`.
-8. Known customers receive an in-app WHATSAPP notification record.
-9. Sent/ack/failed events update the matching outbound message.
+8. Unknown direct contacts are created as `UNAUTHENTICATED_WHATSAPP_CONTACT` prospects and enter the Anthony onboarding state machine without receiving authenticated client authority.
+9. If OpenWA delivers an `@lid` sender, the worker resolves `senderPhone` from the webhook payload or OpenWA contact-phone endpoint before creating the prospect record; unresolved LIDs remain routable by chat ID and conversation state.
+10. Known customers receive an in-app WHATSAPP notification record.
+11. Sent/ack/failed events update the matching outbound message.
+12. The worker reconciles webhook `active`, `events`, `filters`, `retryCount`, and signing secret so stale OpenWA webhook configuration cannot silently exclude inbound traffic.
 
 ## OpenWA runtime
 OpenWA is self-hosted and provides REST API, multi-session support and HMAC-signed webhooks. The project documentation warns that it is an unofficial WhatsApp gateway using reverse-engineered WhatsApp clients, so a dedicated business number and a fallback channel are required for revenue/authentication-critical communication.
@@ -63,7 +66,8 @@ Do not place the OpenWA API key in frontend code.
 - Customer can queue a WhatsApp message from the website.
 - Worker sends it through OpenWA.
 - Customer communication history is visible through RLS-authorised application views.
-- Incoming WhatsApp replies reach the customer communication record.
+- Incoming WhatsApp replies from both known and unknown direct numbers reach the customer communication record.
+- Unknown numbers are automatically preserved and qualified as prospects rather than being dropped because no `communication_contacts` row exists.
 - Duplicate webhook deliveries are ignored.
 - Invalid webhook signatures are rejected.
 - OpenWA/API credentials are absent from browser bundles and repository source.
