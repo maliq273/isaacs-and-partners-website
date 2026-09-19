@@ -59,10 +59,7 @@ export default class WhatsAppAgent {
         if (!chatId) throw new Error("WhatsApp chatId is required."); if (!String(body || "").trim()) return { handled: false, reason: "EMPTY_MESSAGE" };
         const context = conversation || this.conversations.createContext({ chatId, phoneNumber, user, matter }); this.conversations.ensureContext(context);
         this.conversations.addMessage(context, { direction: "INBOUND", body, sender: "CLIENT", messageId });
-        const onboardingStates = new Set([WHATSAPP_IDENTITY_STATES.NEW, WHATSAPP_IDENTITY_STATES.ASK_WHATSAPP_CONSENT, WHATSAPP_IDENTITY_STATES.ASK_MATTER, WHATSAPP_IDENTITY_STATES.ASK_EMAIL, WHATSAPP_IDENTITY_STATES.ASK_NAME, WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE, WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING]);
-        if ((this.isUnauthenticatedContact(contact) || (!user && contact) || (!user && operationalContext?.identityContext?.identityType === "UNKNOWN" && String(operationalContext?.identityContext?.identityStatus || "").toUpperCase() === "UNKNOWN_WHATSAPP_NUMBER")) && onboardingStates.has(String(contact?.onboarding_state || context?.onboardingState || "NEW").toUpperCase()) && !this.isAuthenticatedAuthority(operationalContext)) { const onboardingResult = await this.handleOnboarding({ contact, body, conversation: context }); if (onboardingResult) { this.conversations.mergeFacts(context, onboardingResult.facts); context.onboardingState = onboardingResult.nextState; return { ...onboardingResult, context }; } }
-
-        // Authenticated authority action requests are evaluated before ordinary AI intent, memory, or escalation.
+        // Unauthenticated prospects are handled directly via Gemini AI response generator without static onboarding traps.
         if (this.actionService && this.isAuthenticatedAuthority(operationalContext)) {
             const actionResult = await this.actionService.execute({ identity: operationalContext.authorityContext, message: body, conversationId: context?.id || null });
             if (actionResult?.handled) return { ...actionResult, context, intent: { intent: actionResult.action || "AUTHORITY_ACTION", confidence: 1 } };

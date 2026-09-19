@@ -40,10 +40,10 @@ function normalisePath(path = "") {
 
     try {
         const parsed = new URL(value, window.location.origin);
-        const pathname = parsed.pathname.replace(/\\/+$/, "");
+        const pathname = parsed.pathname.replace(/\/+$/, "");
         return pathname || "/";
     } catch {
-        return value.replace(/\\/+$/, "") || "/";
+        return value.replace(/\/+$/, "") || "/";
     }
 }
 
