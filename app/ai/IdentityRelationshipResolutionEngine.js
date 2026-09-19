@@ -32,7 +32,8 @@ export default class IdentityRelationshipResolutionEngine {
     else if(profile?.role==="BUSINESS")identityType="BUSINESS_CONTACT";
     else if(profile?.role==="INDIVIDUAL")identityType="CLIENT";
     else if(profile?.role==="STAFF")identityType="STAFF";
-    else if(contact?.claimed_account_type)identityType=String(contact.claimed_account_type).toUpperCase()==="BUSINESS"?"PROSPECT":"PROSPECT";
+    else if(contact?.claimed_account_type)identityType="PROSPECT";
+    else if(contact?.user_id==null&&String(contact?.identity_status||"").toUpperCase()==="UNAUTHENTICATED_WHATSAPP_CONTACT")identityType="PROSPECT";
     else if(contact)identityType="EXTERNAL_CONTACT";
     const relationshipTypes=[];
     if(role)relationshipTypes.push({type:"ORGANISATIONAL_AUTHORITY",role});
