@@ -1,215 +1,152 @@
 /**
- * Isaacs and Partners
- * Super Admin Dashboard Data Service
+ * Isaacs & Partners — Super Admin Dashboard Data Service
  *
- * Reads live administrative data from Supabase using the authenticated
- * user's JWT. Supabase remains the source of truth; integration health is
- * read from the durable control-plane registry/outbox.
+ * The dashboard is a read/control surface over the existing production
+ * data plane. It deliberately does not create a second data model.
  */
-
 import auth from "../auth/AuthService.js";
 import authConfig from "../auth/auth.config.js";
 import integrationData from "../integrations/IntegrationDataService.js";
+import clientPortalAdmin from "../services/ClientPortalAdminService.js";
 
-const TABLES = Object.freeze({
-    staff: "staff",
-    matters: "matters",
-    quotes: "quotes",
-    assignments: "assignments"
+const TABLES=Object.freeze({
+  staff:"staff",matters:"matters",quotes:"quotes",assignments:"assignments",
+  tasks:"tasks",appointments:"appointments",documents:"documents",
+  client_documents:"client_documents",invoices:"invoices",payments:"payments",
+  communication_contacts:"communication_contacts",communication_messages:"communication_messages",
+  notifications:"notifications",anthony_response_watchdog:"anthony_response_watchdog",
+  authority_action_audit:"authority_action_audit"
 });
 
-class AdminDashboardDataService {
-    constructor() {
-        this.baseUrl = `${authConfig.supabase.url}/rest/v1`;
-        this.publishableKey = authConfig.supabase.publishableKey;
-        this.timeout = authConfig.request.timeout;
+class AdminDashboardDataService{
+  constructor(){
+    this.baseUrl=`${authConfig.supabase.url}/rest/v1`;
+    this.functionsUrl=`${authConfig.supabase.url}/functions/v1`;
+    this.publishableKey=authConfig.supabase.publishableKey;
+    this.timeout=authConfig.request.timeout;
+  }
+
+  async request(path,options={}){
+    await auth.initialise();
+    if(!auth.isAuthenticated())throw Object.assign(new Error("An authenticated administrator session is required."),{code:"AUTHENTICATION_REQUIRED"});
+    const token=auth.getToken();
+    if(!token)throw Object.assign(new Error("Administrator access token is missing."),{code:"ADMIN_TOKEN_MISSING"});
+    const controller=typeof AbortController!=="undefined"?new AbortController():null;
+    const timer=controller?setTimeout(()=>controller.abort(),this.timeout):null;
+    try{
+      const response=await fetch(`${this.baseUrl}/${path}`,{
+        ...options,
+        headers:{Accept:"application/json",apikey:this.publishableKey,Authorization:`Bearer ${token}`,...(options.headers||{})},
+        signal:controller?.signal
+      });
+      const raw=await response.text();let data=null;
+      try{data=raw?JSON.parse(raw):null}catch{data=null}
+      if(!response.ok)throw Object.assign(new Error(data?.message||data?.hint||`Administrative request failed (${response.status}).`),{status:response.status,details:data});
+      return data;
+    }catch(error){
+      if(error?.name==="AbortError")throw Object.assign(new Error("Administrative data request timed out."),{code:"ADMIN_REQUEST_TIMEOUT"});
+      throw error;
+    }finally{if(timer)clearTimeout(timer)}
+  }
+
+  async table(name,select="id",extra={}){
+    const params=new URLSearchParams({select});
+    Object.entries(extra).forEach(([k,v])=>params.set(k,String(v)));
+    return this.request(`${TABLES[name]}?${params.toString()}`);
+  }
+
+  async optionalTable(name,select,extra={}){
+    try{return{data:Array.isArray(await this.table(name,select,extra))?await this.table(name,select,extra):[],warning:null}}
+    catch(error){
+      try{
+        const data=await this.table(name,"id",extra);
+        return{data:Array.isArray(data)?data:[],warning:`${name}: optional fields unavailable.`};
+      }catch{
+        return{data:[],warning:`${name}: unavailable under the current RLS/schema.`};
+      }
     }
+  }
 
-    async request(table, select = "id", options = {}) {
-        await auth.initialise();
-        if (!auth.isAuthenticated()) {
-            const error = new Error("An authenticated administrator session is required.");
-            error.code = "AUTHENTICATION_REQUIRED";
-            throw error;
-        }
+  async authoritySnapshot(){
+    const response=await fetch(`${this.functionsUrl}/admin-authority-directory`,{
+      headers:{Accept:"application/json",apikey:this.publishableKey,Authorization:`Bearer ${auth.getToken()}`}
+    });
+    const raw=await response.text();let data=null;try{data=raw?JSON.parse(raw):null}catch{data=null}
+    if(!response.ok)throw new Error(data?.error||"Authority directory could not be loaded.");
+    return data;
+  }
 
-        const token = auth.getToken();
-        if (!token) {
-            const error = new Error("Administrator access token is missing.");
-            error.code = "ADMIN_TOKEN_MISSING";
-            throw error;
-        }
+  async getDashboardSummary(verifiedRole=null){
+    await auth.initialise();
+    if(verifiedRole!=="SUPER_ADMIN")throw Object.assign(new Error("SUPER_ADMIN role verification is required before loading administrative data."),{code:"SUPER_ADMIN_PROFILE_NOT_FOUND"});
 
-        const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-        const timeoutId = controller ? setTimeout(() => controller.abort(), this.timeout) : null;
+    const today=new Date();today.setHours(0,0,0,0);
+    const tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);
+    const isoToday=today.toISOString();
+    const isoTomorrow=tomorrow.toISOString();
 
-        try {
-            const params = new URLSearchParams({ select });
-            if (options.filter) {
-                Object.entries(options.filter).forEach(([key, value]) => params.set(key, value));
-            }
+    const results=await Promise.allSettled([
+      this.table("staff","id,user_id,employee_number,department,job_title,is_active,created_at,updated_at"),
+      this.table("matters","id,status,title,service_type,portal_request_status,created_at,updated_at"),
+      this.table("quotes","id,status,customer_decision,total_amount,created_at,updated_at"),
+      this.table("assignments","id,matter_id,case_id,quote_id,staff_id,status,assigned_at"),
+      this.table("tasks","id,status,assigned_staff_id,matter_id,case_id,due_at,created_at,updated_at"),
+      this.table("appointments","id,status,starts_at,ends_at,delivery_mode,individual_user_id,business_id,matter_id,assigned_staff_id,created_at"),
+      this.table("documents","id,status,required,document_type,category,matter_id,individual_user_id,business_id,created_at,updated_at"),
+      this.table("client_documents","id,status,client_id,matter_id,created_at,updated_at"),
+      this.table("invoices","id,status,total_amount,amount_due,balance_due,created_at,updated_at"),
+      this.table("payments","id,invoice_id,amount,paid_amount,paid_at,created_at"),
+      this.table("communication_contacts","id,user_id,phone_number,identity_status,onboarding_state,dashboard_status,contact_type,is_active,created_at,updated_at"),
+      this.table("communication_messages","id,customer_user_id,channel,direction,phone_number,chat_id,body,status,created_at,metadata"),
+      this.table("notifications","id,recipient_user_id,channel,subject,message,status,created_at,updated_at"),
+      this.table("anthony_response_watchdog","id,inbound_message_id,chat_id,phone_number,calendar_date,status,reminder_count,next_due_at,last_escalated_at,last_customer_notice_at,created_at,updated_at"),
+      this.table("authority_action_audit","id,actor_user_id,authority_role,action,decision,disclosure_rule,scope,created_at"),
+      integrationData.getControlPlaneStatus(),
+      this.authoritySnapshot(),
+      clientPortalAdmin.snapshot()
+    ]);
 
-            const response = await fetch(`${this.baseUrl}/${TABLES[table]}?${params.toString()}`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    apikey: this.publishableKey,
-                    Authorization: `Bearer ${token}`
-                },
-                signal: controller?.signal
-            });
+    const value=i=>results[i].status==="fulfilled"?results[i].value:[];
+    const staff=value(0),matters=value(1),quotes=value(2),assignments=value(3),tasks=value(4),appointments=value(5);
+    const documents=value(6),clientDocuments=value(7),invoices=value(8),payments=value(9),contacts=value(10),messages=value(11),notifications=value(12),watchdog=value(13),audit=value(14);
+    const integrations=results[15].status==="fulfilled"?results[15].value:{providers:[],events:[],summary:{},warning:"Integration data unavailable."};
+    const authority=results[16].status==="fulfilled"?results[16].value:{rows:[],warning:"Authority directory unavailable."};
+    const portal=results[17].status==="fulfilled"?results[17].value:{clients:[],warning:"Client portal snapshot unavailable."};
 
-            const raw = await response.text();
-            let data = [];
-            try {
-                data = raw ? JSON.parse(raw) : [];
-            } catch {
-                data = [];
-            }
+    const closed=new Set(["CLOSED","COMPLETED","CANCELLED","ARCHIVED"]);
+    const finalQuotes=new Set(["APPROVED","ACCEPTED","REJECTED","DECLINED","CONVERTED","CANCELLED","CLOSED"]);
+    const activeStaff=staff.filter(x=>x?.is_active===true);
+    const openMatters=matters.filter(x=>!closed.has(String(x?.status||"").toUpperCase()));
+    const activeAssignments=assignments.filter(x=>String(x?.status||"ACTIVE").toUpperCase()==="ACTIVE");
+    const assignedMatterIds=new Set(activeAssignments.map(x=>String(x.matter_id)).filter(Boolean));
+    const unassignedMatters=openMatters.filter(x=>!assignedMatterIds.has(String(x.id)));
+    const pendingQuotes=quotes.filter(x=>!finalQuotes.has(String(x?.status||"").toUpperCase())&&String(x?.customer_decision||"").toUpperCase()!=="ACCEPTED");
+    const openWatchdog=watchdog.filter(x=>["OPEN","WAITING_SUPER_ADMIN"].includes(String(x?.status||"").toUpperCase()));
+    const todayAppointments=appointments.filter(x=>{const t=new Date(x?.starts_at||"");return !Number.isNaN(t.getTime())&&t.toISOString()>=isoToday&&t.toISOString()<isoTomorrow});
+    const outstandingDocs=documents.filter(x=>x?.required!==false&&["OUTSTANDING","REJECTED","UNDER_REVIEW","PENDING"].includes(String(x?.status||"").toUpperCase())).length+
+      clientDocuments.filter(x=>["OUTSTANDING","REJECTED","UNDER_REVIEW","PENDING"].includes(String(x?.status||"").toUpperCase())).length;
+    const outstandingInvoices=invoices.filter(x=>!["PAID","CANCELLED","VOID","CLOSED"].includes(String(x?.status||"").toUpperCase()));
+    const outstandingBalance=outstandingInvoices.reduce((sum,x)=>{const n=Number(x?.balance_due??x?.amount_due??x?.total_amount??0);return sum+(Number.isFinite(n)?n:0)},0);
+    const unreadNotifications=notifications.filter(x=>["UNREAD","RECEIVED","PENDING","OPEN"].includes(String(x?.status||"").toUpperCase()));
+    const inboundToday=messages.filter(x=>x?.direction==="INBOUND"&&x?.channel==="WHATSAPP"&&new Date(x.created_at)>=today).length;
+    const outboundToday=messages.filter(x=>x?.direction==="OUTBOUND"&&x?.channel==="WHATSAPP"&&new Date(x.created_at)>=today).length;
 
-            if (!response.ok) {
-                const error = new Error(
-                    data?.message || data?.hint || `Administrative request failed for ${table} (${response.status}).`
-                );
-                error.code = `ADMIN_HTTP_${response.status}`;
-                error.status = response.status;
-                error.table = table;
-                error.details = data;
-                throw error;
-            }
-
-            return Array.isArray(data) ? data : [];
-        } catch (error) {
-            if (error?.name === "AbortError") {
-                const timeoutError = new Error("Administrative data request timed out.");
-                timeoutError.code = "ADMIN_REQUEST_TIMEOUT";
-                timeoutError.table = table;
-                throw timeoutError;
-            }
-            throw error;
-        } finally {
-            if (timeoutId) clearTimeout(timeoutId);
-        }
-    }
-
-    async requestWithFallback(table, primarySelect, fallbackSelect = "id") {
-        try {
-            return { data: await this.request(table, primarySelect), warning: null };
-        } catch (error) {
-            console.warn(`[AdminDashboardDataService] ${table} primary query failed.`, error);
-            try {
-                return {
-                    data: await this.request(table, fallbackSelect),
-                    warning: `${table}: optional columns unavailable; using basic records.`
-                };
-            } catch (fallbackError) {
-                console.warn(`[AdminDashboardDataService] ${table} fallback query failed.`, fallbackError);
-                return {
-                    data: [],
-                    warning: `${table}: data could not be read under the current RLS/schema.`
-                };
-            }
-        }
-    }
-
-    async getDashboardSummary(verifiedRole = null) {
-        await auth.initialise();
-        if (!auth.isAuthenticated()) {
-            const error = new Error("An authenticated administrator session is required.");
-            error.code = "AUTHENTICATION_REQUIRED";
-            throw error;
-        }
-
-        if (verifiedRole !== "SUPER_ADMIN") {
-            const error = new Error("SUPER_ADMIN role verification is required before loading administrative data.");
-            error.code = "SUPER_ADMIN_PROFILE_NOT_FOUND";
-            throw error;
-        }
-
-        const user = auth.getCurrentUser();
-        const [staffResult, mattersResult, quotesResult, assignmentsResult, controlPlaneResult] = await Promise.all([
-            this.requestWithFallback(
-                "staff",
-                "id,user_id,employee_number,department,job_title,is_active,created_at,updated_at",
-                "id,is_active"
-            ),
-            this.requestWithFallback("matters", "id,status", "id"),
-            this.requestWithFallback("quotes", "id,status", "id"),
-            this.requestWithFallback("assignments", "id,matter_id,case_id,quote_id,staff_id,status,assigned_at", "id"),
-            integrationData.getControlPlaneStatus().catch(error => ({
-                providers: [],
-                events: [],
-                summary: {
-                    providerCount: 0,
-                    connectedProviders: 0,
-                    configuredProviders: 0,
-                    pendingEvents: 0,
-                    processingEvents: 0,
-                    failedEvents: 0
-                },
-                warning: `Integration control plane unavailable: ${error.message}`
-            }))
-        ]);
-
-        const warnings = [
-            staffResult.warning,
-            mattersResult.warning,
-            quotesResult.warning,
-            assignmentsResult.warning,
-            controlPlaneResult.warning
-        ].filter(Boolean);
-
-        const staff = staffResult.data;
-        const matters = mattersResult.data;
-        const quotes = quotesResult.data;
-        const assignments = assignmentsResult.data;
-
-        const assignedMatterIds = new Set(
-            assignments
-                .filter(item => String(item?.status || "ACTIVE").toUpperCase() === "ACTIVE")
-                .map(item => item?.matter_id)
-                .filter(Boolean)
-                .map(String)
-        );
-
-        const closedMatterStatuses = new Set(["closed", "completed", "cancelled", "archived"]);
-        const finalQuoteStatuses = new Set(["approved", "accepted", "rejected", "declined", "converted", "cancelled", "closed"]);
-
-        const openMatters = matters.filter(item => {
-            const status = String(item?.status || "").toLowerCase();
-            return !status || !closedMatterStatuses.has(status);
-        });
-
-        const pendingPreQuotes = quotes.filter(item => {
-            const status = String(item?.status || "").toLowerCase();
-            return !finalQuoteStatuses.has(status);
-        });
-
-        const unassignedMatters = openMatters.filter(item => !assignedMatterIds.has(String(item.id)));
-
-        return {
-            user,
-            role: "SUPER_ADMIN",
-            counts: {
-                staff: staff.length,
-                activeStaff: staff.filter(item => item?.is_active === true).length,
-                pendingPreQuotes: pendingPreQuotes.length,
-                unassignedMatters: unassignedMatters.length,
-                openMatters: openMatters.length
-            },
-            staff,
-            matters,
-            quotes,
-            assignments,
-            unassignedMatters,
-            pendingPreQuotes,
-            integrations: controlPlaneResult,
-            warnings,
-            connected: true
-        };
-    }
+    const warnings=results.map((r,i)=>r.status==="rejected"?`Data source ${i+1} unavailable: ${r.reason?.message||"request failed"}`:null).filter(Boolean);
+    return{
+      user:auth.getCurrentUser(),role:"SUPER_ADMIN",connected:true,
+      counts:{
+        staff:activeStaff.length,activeStaff:activeStaff.length,openMatters:openMatters.length,
+        unassignedMatters:unassignedMatters.length,pendingPreQuotes:pendingQuotes.length,
+        appointmentsToday:todayAppointments.length,outstandingDocuments:outstandingDocs,
+        outstandingInvoices:outstandingInvoices.length,outstandingBalance,pendingNotifications:unreadNotifications.length,
+        openWatchdog:openWatchdog.length,inboundToday,outboundToday,activeContacts:contacts.filter(x=>x?.is_active!==false).length
+      },
+      staff,matters,quotes,assignments,tasks,appointments,documents,clientDocuments,invoices,payments,contacts,messages,notifications,watchdog,audit,
+      authority:authority.rows||[],portal:portal.clients||[],integrations,warnings
+    };
+  }
 }
 
-export const adminDashboardData = new AdminDashboardDataService();
-export { AdminDashboardDataService };
+export const adminDashboardData=new AdminDashboardDataService();
+export {AdminDashboardDataService};
 export default adminDashboardData;
