@@ -20,7 +20,6 @@ export const SUPER_ADMIN_DASHBOARD_CATEGORIES = Object.freeze([
     {title:"Matters",href:"./matters.html",description:"Open and progress firm matters."},
     {title:"Assignments",href:"./assignments.html",description:"Allocate operational work."},
     {title:"Cases",href:"./cases.html",description:"Manage case records linked to matters."},
-    {title:"Appointments",href:"./appointments.html",description:"Manage scheduled client and operational appointments."},
     {title:"Document Vault",href:"./document-vault.html",description:"Review controlled documents and ingestion state."}
   ]},
   { key:"communications", title:"Communications", description:"Controlled WhatsApp and notification operations.", modules:[
