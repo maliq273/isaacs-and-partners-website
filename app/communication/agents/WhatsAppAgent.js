@@ -39,7 +39,7 @@ export default class WhatsAppAgent {
     isUnauthenticatedContact(contact) { return String(contact?.identity_status || "").toUpperCase() === "UNAUTHENTICATED_WHATSAPP_CONTACT"; }
     isAuthenticatedAuthority(operationalContext = null) {
         const authority = operationalContext?.authorityContext;
-        return Boolean(authority?.authenticated && ["STAFF", "SUPER_ADMIN"].includes(String(authority.authorityRole || "").toUpperCase()));
+        return Boolean(authority?.authenticated && ["STAFF", "SUPER_ADMIN", "DIRECTOR", "PARTNER", "SHAREHOLDER", "STAKEHOLDER"].includes(String(authority.authorityRole || "").toUpperCase()));
     }
 
     async handleOnboarding({ contact = null, body, conversation = null } = {}) {
