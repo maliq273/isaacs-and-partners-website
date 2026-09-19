@@ -157,6 +157,9 @@ async function ensureWebhookRegistered() {
           body: JSON.stringify({
             active: true,
             events: desiredEvents,
+            filters: null,
+            retryCount: 5,
+            secret: OPENWA_WEBHOOK_SECRET,
           }),
         },
       );
@@ -192,6 +195,112 @@ async function ensureWebhookRegistered() {
   }
 
   webhookReadyAt = Date.now() + 5 * 60 * 1000;
+}
+
+async function resolveInboundPhone(chatId: string, data: any) {
+  const candidates = [
+    data?.senderPhone,
+    data?.phoneNumber,
+    data?.sender?.phoneNumber,
+    data?.sender?.phone,
+    data?.contact?.phoneNumber,
+    data?.contact?.phone,
+    data?.contact?.number,
+    data?.participantPn,
+    data?.senderPn,
+  ];
+  for (const candidate of candidates) {
+    const resolved = normalisePhone(candidate);
+    if (resolved) return { phone: resolved, source: "webhook_payload" };
+  }
+
+  if (/@lid$/i.test(chatId) && OPENWA_SESSION_ID) {
+    try {
+      const response = await openwaRequest(
+        `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/contacts/${encodeURIComponent(chatId)}/phone`,
+        { method: "GET" },
+      );
+      const result = await response.json().catch(() => ({}));
+      if (response.ok) {
+        const resolved = normalisePhone(result?.phone || result?.phoneNumber || result?.data?.phone || result?.data?.phoneNumber);
+        if (resolved) return { phone: resolved, source: "openwa_lid_resolution" };
+      }
+    } catch (error) {
+      console.warn("Unable to resolve inbound WhatsApp LID to phone", error);
+    }
+  }
+
+  const direct = normalisePhone(chatId);
+  return direct ? { phone: direct, source: "chat_id" } : { phone: null, source: "unresolved" };
+}
+
+async function ensureInboundContact({ phoneNumber, chatId, messageId }: { phoneNumber: string | null; chatId: string; messageId: string | null }) {
+  if (phoneNumber) {
+    const byPhone = await supabase
+      .from("communication_contacts")
+      .select("id,user_id,phone_number,chat_id,is_active,identity_status,onboarding_state,dashboard_status,claimed_account_type,onboarding_facts")
+      .eq("phone_number", phoneNumber)
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
+    if (byPhone.error) throw byPhone.error;
+    if (byPhone.data) {
+      if (byPhone.data.chat_id !== chatId) {
+        const updated = await supabase
+          .from("communication_contacts")
+          .update({ chat_id: chatId, last_inbound_at: new Date().toISOString(), last_message_id: messageId, updated_at: new Date().toISOString() })
+          .eq("id", byPhone.data.id)
+          .select("*")
+          .single();
+        if (updated.error) throw updated.error;
+        return updated.data;
+      }
+      return byPhone.data;
+    }
+  }
+
+  const byChat = await supabase
+    .from("communication_contacts")
+    .select("id,user_id,phone_number,chat_id,is_active,identity_status,onboarding_state,dashboard_status,claimed_account_type,onboarding_facts")
+    .eq("chat_id", chatId)
+    .eq("is_active", true)
+    .limit(1)
+    .maybeSingle();
+  if (byChat.error) throw byChat.error;
+  if (byChat.data) return byChat.data;
+
+  if (!phoneNumber) return null;
+
+  const created = await supabase
+    .from("communication_contacts")
+    .insert({
+      phone_number: phoneNumber,
+      chat_id: chatId,
+      identity_status: "UNAUTHENTICATED_WHATSAPP_CONTACT",
+      contact_type: "WHATSAPP",
+      whatsapp_consent: false,
+      onboarding_state: "NEW",
+      dashboard_status: "NOT_ACTIVATED_PENDING_APPROVAL",
+      account_match_status: "NOT_CHECKED",
+      last_inbound_at: new Date().toISOString(),
+      last_message_id: messageId,
+      onboarding_facts: {},
+    })
+    .select("*")
+    .single();
+  if (!created.error) return created.data;
+  if (created.error.code === "23505") {
+    const retry = await supabase
+      .from("communication_contacts")
+      .select("*")
+      .or(`phone_number.eq.${phoneNumber},chat_id.eq.${chatId}`)
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
+    if (retry.error) throw retry.error;
+    return retry.data || null;
+  }
+  throw created.error;
 }
 
 async function processOutbound(limit = 5) {
@@ -556,39 +665,12 @@ async function processWebhook(req: Request) {
       return json({ received: true, ignored: true, reason: "GROUP_OR_BROADCAST_CHAT_BLOCKED" });
     }
 
-    const fromPhone = normalisePhone(data.senderPhone || data.phoneNumber || data.from);
-    let contact = null;
-    let contactError = null;
-
-    if (fromPhone) {
-      const r = await supabase
-        .from("communication_contacts")
-        .select("id,user_id,phone_number,chat_id,is_active")
-        .eq("phone_number", fromPhone)
-        .eq("is_active", true)
-        .limit(1)
-        .maybeSingle();
-      contact = r.data;
-      contactError = r.error;
-    }
-
-    if (!contact) {
-      const r = await supabase
-        .from("communication_contacts")
-        .select("id,user_id,phone_number,chat_id,is_active")
-        .eq("chat_id", chatId)
-        .eq("is_active", true)
-        .limit(1)
-        .maybeSingle();
-      contact = r.data;
-      contactError = r.error;
-    }
-
-    if (contactError) throw contactError;
-
+    const resolvedSender = await resolveInboundPhone(chatId, data);
+    const fromPhone = resolvedSender.phone;
     const body = clean(data.body || data.text || data.message, 4096);
     if (!body) return json({ received: true, ignored: true, reason: "EMPTY_MESSAGE" });
 
+    const contact = await ensureInboundContact({ phoneNumber: fromPhone, chatId, messageId: data.id || null });
     return json(
       await handleInbound({
         payload,
@@ -598,7 +680,7 @@ async function processWebhook(req: Request) {
         contact,
         body,
         idempotencyKey,
-        sourceEvent: event,
+        sourceEvent: `${event}:${resolvedSender.source}`,
       }),
     );
   }
