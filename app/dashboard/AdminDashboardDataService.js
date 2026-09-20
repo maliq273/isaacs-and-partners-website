@@ -14,7 +14,7 @@ const TABLES=Object.freeze({
   tasks:"tasks",appointments:"appointments",documents:"documents",
   client_documents:"client_documents",invoices:"invoices",payments:"payments",
   communication_contacts:"communication_contacts",communication_messages:"communication_messages",
-  notifications:"notifications",anthony_response_watchdog:"anthony_response_watchdog",
+  notifications:"notifications",
   authority_action_audit:"authority_action_audit"
 });
 
@@ -99,7 +99,6 @@ class AdminDashboardDataService{
       this.table("communication_contacts","id,user_id,phone_number,identity_status,onboarding_state,dashboard_status,contact_type,is_active,created_at,updated_at"),
       this.table("communication_messages","id,customer_user_id,channel,direction,phone_number,chat_id,body,status,created_at,metadata"),
       this.table("notifications","id,recipient_user_id,channel,subject,message,status,created_at,updated_at"),
-      this.table("anthony_response_watchdog","id,inbound_message_id,chat_id,phone_number,calendar_date,status,reminder_count,next_due_at,last_escalated_at,last_customer_notice_at,created_at,updated_at"),
       this.table("authority_action_audit","id,actor_user_id,authority_role,action,decision,disclosure_rule,scope,created_at"),
       integrationData.getControlPlaneStatus(),
       this.authoritySnapshot(),
@@ -108,7 +107,7 @@ class AdminDashboardDataService{
 
     const value=i=>results[i].status==="fulfilled"?results[i].value:[];
     const staff=value(0),matters=value(1),quotes=value(2),assignments=value(3),tasks=value(4),appointments=value(5);
-    const documents=value(6),clientDocuments=value(7),invoices=value(8),payments=value(9),contacts=value(10),messages=value(11),notifications=value(12),watchdog=value(13),audit=value(14);
+    const documents=value(6),clientDocuments=value(7),invoices=value(8),payments=value(9),contacts=value(10),messages=value(11),notifications=value(12),audit=value(13);
     const integrations=results[15].status==="fulfilled"?results[15].value:{providers:[],events:[],summary:{},warning:"Integration data unavailable."};
     const authority=results[16].status==="fulfilled"?results[16].value:{rows:[],warning:"Authority directory unavailable."};
     const portal=results[17].status==="fulfilled"?results[17].value:{clients:[],warning:"Client portal snapshot unavailable."};
@@ -121,7 +120,6 @@ class AdminDashboardDataService{
     const assignedMatterIds=new Set(activeAssignments.map(x=>String(x.matter_id)).filter(Boolean));
     const unassignedMatters=openMatters.filter(x=>!assignedMatterIds.has(String(x.id)));
     const pendingQuotes=quotes.filter(x=>!finalQuotes.has(String(x?.status||"").toUpperCase())&&String(x?.customer_decision||"").toUpperCase()!=="ACCEPTED");
-    const openWatchdog=watchdog.filter(x=>["OPEN","WAITING_SUPER_ADMIN"].includes(String(x?.status||"").toUpperCase()));
     const todayAppointments=appointments.filter(x=>{const t=new Date(x?.starts_at||"");return !Number.isNaN(t.getTime())&&t.toISOString()>=isoToday&&t.toISOString()<isoTomorrow});
     const outstandingDocs=documents.filter(x=>x?.required!==false&&["OUTSTANDING","REJECTED","UNDER_REVIEW","PENDING"].includes(String(x?.status||"").toUpperCase())).length+
       clientDocuments.filter(x=>["OUTSTANDING","REJECTED","UNDER_REVIEW","PENDING"].includes(String(x?.status||"").toUpperCase())).length;
@@ -139,9 +137,9 @@ class AdminDashboardDataService{
         unassignedMatters:unassignedMatters.length,pendingPreQuotes:pendingQuotes.length,
         appointmentsToday:todayAppointments.length,outstandingDocuments:outstandingDocs,
         outstandingInvoices:outstandingInvoices.length,outstandingBalance,pendingNotifications:unreadNotifications.length,
-        openWatchdog:openWatchdog.length,inboundToday,outboundToday,activeContacts:contacts.filter(x=>x?.is_active!==false).length
+        inboundToday,outboundToday,activeContacts:contacts.filter(x=>x?.is_active!==false).length
       },
-      staff,matters,quotes,assignments,tasks,appointments,documents,clientDocuments,invoices,payments,contacts,messages,notifications,watchdog,audit,
+      staff,matters,quotes,assignments,tasks,appointments,documents,clientDocuments,invoices,payments,contacts,messages,notifications,audit,
       authority:authority.rows||[],portal:portal.clients||[],integrations,warnings
     };
   }
