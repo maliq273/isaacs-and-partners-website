@@ -96,7 +96,7 @@ class AdminDashboardDataService{
       this.table("client_documents","id,status,client_id,matter_id,created_at,updated_at"),
       this.table("invoices","id,status,total_amount,amount_due,balance_due,created_at,updated_at"),
       this.table("payments","id,invoice_id,amount,paid_amount,paid_at,created_at"),
-      this.table("communication_contacts","id,user_id,phone_number,identity_status,onboarding_state,dashboard_status,contact_type,is_active,created_at,updated_at"),
+      this.table("communication_contacts","id,user_id,first_name,last_name,email,phone_number,identity_status,onboarding_state,dashboard_status,account_match_status,claimed_account_type,contact_type,is_active,onboarding_facts,created_at,updated_at"),
       this.table("communication_messages","id,customer_user_id,channel,direction,phone_number,chat_id,body,status,created_at,metadata"),
       this.table("notifications","id,recipient_user_id,channel,subject,message,status,created_at,updated_at"),
       this.table("authority_action_audit","id,actor_user_id,authority_role,action,decision,disclosure_rule,scope,created_at"),
@@ -128,6 +128,7 @@ class AdminDashboardDataService{
     const unreadNotifications=notifications.filter(x=>["UNREAD","RECEIVED","PENDING","OPEN"].includes(String(x?.status||"").toUpperCase()));
     const inboundToday=messages.filter(x=>x?.direction==="INBOUND"&&x?.channel==="WHATSAPP"&&new Date(x.created_at)>=today).length;
     const outboundToday=messages.filter(x=>x?.direction==="OUTBOUND"&&x?.channel==="WHATSAPP"&&new Date(x.created_at)>=today).length;
+    const pendingRegistrations=contacts.filter(x=>x?.is_active!==false&&["PENDING_ADMIN_APPROVAL","NOT_ACTIVATED_PENDING_APPROVAL"].includes(String(x?.dashboard_status||"").toUpperCase()));
 
     const warnings=results.map((r,i)=>r.status==="rejected"?`Data source ${i+1} unavailable: ${r.reason?.message||"request failed"}`:null).filter(Boolean);
     return{
@@ -137,10 +138,10 @@ class AdminDashboardDataService{
         unassignedMatters:unassignedMatters.length,pendingPreQuotes:pendingQuotes.length,
         appointmentsToday:todayAppointments.length,outstandingDocuments:outstandingDocs,
         outstandingInvoices:outstandingInvoices.length,outstandingBalance,pendingNotifications:unreadNotifications.length,
-        inboundToday,outboundToday,activeContacts:contacts.filter(x=>x?.is_active!==false).length
+        inboundToday,outboundToday,activeContacts:contacts.filter(x=>x?.is_active!==false).length,pendingRegistrations:pendingRegistrations.length
       },
       staff,matters,quotes,assignments,tasks,appointments,documents,clientDocuments,invoices,payments,contacts,messages,notifications,audit,
-      authority:authority.rows||[],portal:portal.clients||[],integrations,warnings
+      authority:authority.rows||[],portal:portal.clients||[],pendingRegistrations,integrations,warnings
     };
   }
 }
