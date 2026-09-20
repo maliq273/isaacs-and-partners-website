@@ -32,4 +32,34 @@ for (const script of ['test', 'lint', 'production-check']) {
   }
 }
 
-console.log(`Production smoke tests passed: ${required.length} required boundaries verified.`);
+// Verify Communication message thread model approval_needed flag
+const { default: Communication } = await import('../app/models/Communication.js');
+const commDefault = new Communication({ message: 'Test message' });
+if (commDefault.approval_needed !== false || commDefault.approvalNeeded !== false) {
+  console.error('Communication model failed: approval_needed flag must default to false.');
+  process.exit(1);
+}
+commDefault.markApprovalNeeded();
+if (commDefault.approval_needed !== true || commDefault.status !== 'APPROVAL_NEEDED') {
+  console.error('Communication model failed: markApprovalNeeded must set approval_needed to true.');
+  process.exit(1);
+}
+
+// Verify WhatsAppAgent orchestrator transition to approval_needed state
+const { default: WhatsAppAgent, CONVERSATION_STATES } = await import('../app/communication/agents/WhatsAppAgent.js');
+if (CONVERSATION_STATES.APPROVAL_NEEDED !== 'approval_needed') {
+  console.error('WhatsAppAgent failed: CONVERSATION_STATES.APPROVAL_NEEDED must be approval_needed.');
+  process.exit(1);
+}
+
+const agent = new WhatsAppAgent();
+const sensitiveResult = await agent.handleInbound({
+  chatId: 'test-smoke-approval',
+  body: 'We need urgent assistance preparing an appeal strategy and CCMA litigation dismissal filing.'
+});
+if (sensitiveResult.action !== 'APPROVAL_NEEDED' || sensitiveResult.approval_needed !== true || sensitiveResult.context.state !== 'approval_needed') {
+  console.error('WhatsAppAgent failed: Inbound query requiring human review must transition to approval_needed state.');
+  process.exit(1);
+}
+
+console.log(`Production smoke tests passed: ${required.length} required boundaries + communication approval verified.`);

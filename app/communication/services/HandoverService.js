@@ -24,6 +24,15 @@ export default class HandoverService {
         return context.handover;
     }
 
+    requestApproval(context, assessment = {}) {
+        context.state = CONVERSATION_STATES.APPROVAL_NEEDED;
+        context.approval_needed = true;
+        if (!context.facts || typeof context.facts !== "object" || Array.isArray(context.facts)) context.facts = {};
+        context.facts.approval_needed = true;
+        context.handover = { ...(context.handover || {}), ...assessment, pendingReview: true, escalatedAt: new Date().toISOString() };
+        return context.handover;
+    }
+
     takeOver(context, staffId) {
         context.state = CONVERSATION_STATES.HUMAN_ACTIVE;
         context.handover = { ...(context.handover || {}), staffId: staffId || null, takenOverAt: new Date().toISOString() };

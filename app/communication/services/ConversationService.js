@@ -1,4 +1,11 @@
-export const CONVERSATION_STATES = Object.freeze({ AI_ACTIVE: "AI_ACTIVE", AI_ESCALATED: "AI_ESCALATED", HUMAN_ACTIVE: "HUMAN_ACTIVE", HUMAN_RESOLVED: "HUMAN_RESOLVED", AI_RESUMED: "AI_RESUMED" });
+export const CONVERSATION_STATES = Object.freeze({
+    AI_ACTIVE: "AI_ACTIVE",
+    AI_ESCALATED: "AI_ESCALATED",
+    HUMAN_ACTIVE: "HUMAN_ACTIVE",
+    HUMAN_RESOLVED: "HUMAN_RESOLVED",
+    AI_RESUMED: "AI_RESUMED",
+    APPROVAL_NEEDED: "approval_needed"
+});
 
 export default class ConversationService {
     createContext({ chatId, phoneNumber = null, user = null, matter = null, state = CONVERSATION_STATES.AI_ACTIVE } = {}) {
@@ -24,8 +31,14 @@ export default class ConversationService {
 
     setState(context, state) {
         this.ensureContext(context);
-        if (!Object.values(CONVERSATION_STATES).includes(state)) throw new Error(`Invalid conversation state: ${state}`);
-        context.state = state;
+        const normalized = String(state || "").toLowerCase() === "approval_needed" ? "approval_needed" : state;
+        if (!Object.values(CONVERSATION_STATES).includes(normalized)) throw new Error(`Invalid conversation state: ${state}`);
+        context.state = normalized;
+        if (normalized === "approval_needed") {
+            context.approval_needed = true;
+            if (!context.facts || typeof context.facts !== "object" || Array.isArray(context.facts)) context.facts = {};
+            context.facts.approval_needed = true;
+        }
         return context;
     }
 

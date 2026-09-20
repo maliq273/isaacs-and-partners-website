@@ -49,6 +49,18 @@ export default class Communication extends Record {
         this.sentAt =
             data.sentAt ?? null;
 
+        this.threadId =
+            data.threadId ??
+            data.thread_id ??
+            null;
+
+        this.approval_needed =
+            Boolean(
+                data.approval_needed ??
+                data.approvalNeeded ??
+                false
+            );
+
         this.attachments = [
             ...(data.attachments ?? [])
         ];
@@ -62,6 +74,68 @@ export default class Communication extends Record {
         // Communication templates
         // Delivery tracking
         // ====================================================
+    }
+
+
+    get approvalNeeded() {
+
+        return Boolean(this.approval_needed);
+
+    }
+
+
+    set approvalNeeded(value) {
+
+        this.approval_needed = Boolean(value);
+
+    }
+
+
+    isApprovalNeeded() {
+
+        return Boolean(this.approval_needed);
+
+    }
+
+
+    markApprovalNeeded(needed = true) {
+
+        this.approval_needed = Boolean(needed);
+
+        if (this.approval_needed && this.status !== "SENT") {
+
+            this.status = "APPROVAL_NEEDED";
+
+        }
+
+        this.touch();
+
+        return this;
+
+    }
+
+
+    setApprovalNeeded(needed = true) {
+
+        return this.markApprovalNeeded(needed);
+
+    }
+
+
+    approve() {
+
+        this.approval_needed = false;
+
+        if (this.status === "APPROVAL_NEEDED") {
+
+            this.status = "APPROVED";
+
+        }
+
+        this.touch();
+
+        return this;
+
     }
 
 

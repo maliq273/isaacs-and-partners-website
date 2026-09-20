@@ -31,6 +31,8 @@ class PublicLeadLiaison {
         this.selectedCategoryId = null;
         this.opened = false;
         this.busy = false;
+        this.currentRole = "CLIENT";
+        this.clientWants = [];
     }
 
     initialise() {
@@ -54,6 +56,11 @@ class PublicLeadLiaison {
             this.subcategoryList = root.querySelector("[data-ai-subcategories]");
             this.selectedCategoryLabel = root.querySelector("[data-ai-selected-category]");
             this.selectedService = root.querySelector("[data-ai-selected-service]");
+            this.roleBar = root.querySelector("[data-ai-role-bar]");
+            this.roleButtons = root.querySelectorAll("[data-ai-role]");
+            this.roleTitle = root.querySelector("[data-ai-role-title]");
+            this.memoryBadge = root.querySelector("[data-ai-memory-badge]");
+            this.memoryText = root.querySelector("[data-ai-memory-text]");
         }
 
         if (this.root) {
@@ -87,11 +94,19 @@ class PublicLeadLiaison {
             </button>
             <div class="public-ai-liaison__panel" data-ai-panel hidden>
                 <header class="public-ai-liaison__header">
-                    <div class="public-ai-liaison__identity"><span class="public-ai-liaison__avatar"><i class="fa-solid fa-scale-balanced"></i></span><div><strong>Isaacs &amp; Partners</strong><span>AI Liaison · Free 15 min</span></div></div>
+                    <div class="public-ai-liaison__identity"><span class="public-ai-liaison__avatar"><i class="fa-solid fa-comments"></i></span><div><strong>Anthony Isaacs</strong><span data-ai-role-title>AI Executive Assistant · Isaacs &amp; Partners</span></div></div>
                     <div class="public-ai-liaison__controls"><button type="button" class="public-ai-liaison__minimise" data-ai-minimise aria-label="Minimise AI Liaison">−</button><button type="button" class="public-ai-liaison__close" data-ai-close aria-label="Close AI Liaison">&times;</button></div>
                 </header>
+                <div class="public-ai-liaison__role-bar" data-ai-role-bar role="radiogroup" aria-label="Anthony Isaacs Mode">
+                    <button type="button" class="public-ai-liaison__role-btn is-active" data-ai-role="CLIENT" role="radio" aria-checked="true"><i class="fa-solid fa-user"></i> Client</button>
+                    <button type="button" class="public-ai-liaison__role-btn" data-ai-role="STAFF" role="radio" aria-checked="false"><i class="fa-solid fa-user-shield"></i> Staff</button>
+                    <button type="button" class="public-ai-liaison__role-btn" data-ai-role="SUPER_ADMIN" role="radio" aria-checked="false"><i class="fa-solid fa-crown"></i> Super Admin</button>
+                </div>
+                <div class="public-ai-liaison__memory-badge" data-ai-memory-badge hidden>
+                    <i class="fa-solid fa-brain"></i><span data-ai-memory-text>Remembering client request</span>
+                </div>
                 <div class="public-ai-liaison__welcome" data-ai-welcome>
-                    <div class="public-ai-liaison__welcome-avatar"><i class="fa-solid fa-scale-balanced"></i><b>👋</b></div>
+                    <div class="public-ai-liaison__welcome-avatar"><i class="fa-solid fa-comments"></i><b>👋</b></div>
                     <div class="public-ai-liaison__welcome-copy"><span>Welcome</span><h2>How can we help you today?</h2><p>Choose a service area, then select the service you need. I’ll guide you through a free 15-minute preliminary consultation.</p></div>
                     <div class="public-ai-liaison__category-grid" data-ai-categories>
                         ${PUBLIC_SERVICE_DIRECTORY.map(category => `<button type="button" class="public-ai-liaison__category" data-category-id="${category.id}" aria-expanded="false"><span><i class="fa-solid ${CATEGORY_ICONS[category.id] || "fa-circle-question"}"></i></span><strong>${category.name}</strong><small>${category.services.length} services</small><i class="public-ai-liaison__category-chevron fa-solid fa-chevron-right" aria-hidden="true"></i></button>`).join("")}
@@ -122,6 +137,11 @@ class PublicLeadLiaison {
         this.subcategoryList = root.querySelector("[data-ai-subcategories]");
         this.selectedCategoryLabel = root.querySelector("[data-ai-selected-category]");
         this.selectedService = root.querySelector("[data-ai-selected-service]");
+        this.roleBar = root.querySelector("[data-ai-role-bar]");
+        this.roleButtons = root.querySelectorAll("[data-ai-role]");
+        this.roleTitle = root.querySelector("[data-ai-role-title]");
+        this.memoryBadge = root.querySelector("[data-ai-memory-badge]");
+        this.memoryText = root.querySelector("[data-ai-memory-text]");
     }
 
     bind() {
@@ -129,6 +149,9 @@ class PublicLeadLiaison {
         this.root.querySelector("[data-ai-minimise]")?.addEventListener("click", () => this.minimise());
         this.root.querySelector("[data-ai-close]")?.addEventListener("click", () => this.close());
         this.root.querySelector("[data-ai-change-category]")?.addEventListener("click", () => this.showCategoryPicker());
+        this.roleButtons?.forEach(btn => {
+            btn.addEventListener("click", () => this.setRole(btn.dataset.aiRole));
+        });
         this.categoryGrid?.addEventListener("click", event => {
             const button = event.target.closest("[data-category-id]");
             if (button) this.selectCategory(button.dataset.categoryId);
@@ -145,6 +168,44 @@ class PublicLeadLiaison {
                 this.form?.requestSubmit();
             }
         });
+    }
+
+    setRole(role) {
+        if (!["CLIENT", "STAFF", "SUPER_ADMIN"].includes(role)) return;
+        this.currentRole = role;
+        this.roleButtons?.forEach(btn => {
+            const active = btn.dataset.aiRole === role;
+            btn.classList.toggle("is-active", active);
+            btn.setAttribute("aria-checked", active ? "true" : "false");
+        });
+
+        const titles = {
+            CLIENT: "AI Executive Assistant & Client Liaison",
+            STAFF: "Staff Support Agent & Colleague",
+            SUPER_ADMIN: "Executive Personal Assistant to Super Admin"
+        };
+        if (this.roleTitle) {
+            this.roleTitle.textContent = `${titles[role]} · Isaacs & Partners`;
+        }
+
+        const greetings = {
+            CLIENT: "Client Liaison mode active. How can I assist you with immigration, labour law, or business compliance today?",
+            STAFF: "Staff Support mode active. I can assist with internal SOPs, drafting correspondence, matter overviews, and policy queries.",
+            SUPER_ADMIN: "Super Admin mode active. Good day, Director. Executive briefings, matter summaries, and priority overviews are ready."
+        };
+        this.appendMessage("AI", greetings[role] || greetings.CLIENT);
+        this.persistState();
+    }
+
+    updateWantsBadge(wants) {
+        if (!this.memoryBadge || !this.memoryText) return;
+        if (Array.isArray(wants) && wants.length > 0) {
+            this.clientWants = wants;
+            this.memoryBadge.hidden = false;
+            this.memoryText.textContent = `Remembering: ${wants.join(" · ")}`;
+        } else {
+            this.memoryBadge.hidden = true;
+        }
     }
 
     autoSizeInput() {
@@ -349,10 +410,6 @@ class PublicLeadLiaison {
         if (this.busy) return;
         const originalBody = String(this.input?.value || "").trim();
         if (!originalBody) return;
-        if (!this.serviceId) {
-            this.showCategoryPicker();
-            return;
-        }
 
         const body = correctCommonWords(originalBody);
         this.busy = true;
@@ -363,12 +420,52 @@ class PublicLeadLiaison {
         this.autoSizeInput();
 
         try {
-            const result = await this.agent.handleInbound({ chatId: `public-web:${this.getSessionId()}`, body, conversation: this.context });
-            this.context = result.context || this.context;
-            this.serviceId = result.servicePlan?.service?.id || this.serviceId;
-            this.serviceName = result.servicePlan?.service?.name || this.serviceName;
-            if (result.reply) this.appendMessage("AI", result.reply);
-            if (result.context?.publicLead?.qualified) this.showCta();
+            let aiResponse = null;
+
+            // Direct call to Gemini Chatbot API
+            try {
+                const response = await fetch("/api/anthony/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        sessionId: this.getSessionId(),
+                        message: body,
+                        role: this.currentRole,
+                        serviceCategory: this.selectedCategoryId,
+                        serviceName: this.serviceName
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.reply) {
+                        aiResponse = data.reply;
+                        if (data.clientWants && data.clientWants.length > 0) {
+                            this.updateWantsBadge(data.clientWants);
+                        }
+                    }
+                }
+            } catch (fetchErr) {
+                console.warn("[PublicLeadLiaison] Server Gemini endpoint notice, falling back to local agent:", fetchErr);
+            }
+
+            // Fallback to local agent if server response was not received
+            if (!aiResponse) {
+                const result = await this.agent.handleInbound({ chatId: `public-web:${this.getSessionId()}`, body, conversation: this.context });
+                this.context = result.context || this.context;
+                this.serviceId = result.servicePlan?.service?.id || this.serviceId;
+                this.serviceName = result.servicePlan?.service?.name || this.serviceName;
+                aiResponse = result.reply;
+            }
+
+            if (aiResponse) {
+                this.appendMessage("AI", aiResponse);
+            }
+
+            if (this.currentRole === "CLIENT" && (this.clientWants.length > 0 || this.context?.publicLead?.qualified)) {
+                this.showCta();
+            }
+
             this.persistState();
         } catch (error) {
             console.error("[PublicLeadLiaison]", error);

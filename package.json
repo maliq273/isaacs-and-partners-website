@@ -13,6 +13,7 @@
     "production-check:ci": "node scripts/production-check.mjs --ci --write"
   },
   "dependencies": {
+    "@google/genai": "^2.23.0",
     "express": "^4.19.2"
   }
 }

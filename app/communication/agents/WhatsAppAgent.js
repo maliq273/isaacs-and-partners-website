@@ -1,7 +1,7 @@
 import ServiceIntelligenceEngine from "../../ai/ServiceIntelligenceEngine.js";
 import ServiceClassifier from "../../ai/classifier/ServiceClassifier.js";
 import WhatsAppIntentClassifier from "../classifiers/WhatsAppIntentClassifier.js";
-import ConversationService from "../services/ConversationService.js";
+import ConversationService, { CONVERSATION_STATES } from "../services/ConversationService.js";
 import HandoverService from "../services/HandoverService.js";
 import LeadService from "../services/LeadService.js";
 import SalesService from "../services/SalesService.js";
@@ -10,6 +10,9 @@ import StaffAuthorityService from "../services/StaffAuthorityService.js";
 import CommercialPolicyService from "../services/CommercialPolicyService.js";
 import CustomerMemoryService from "../../ai/CustomerMemoryService.js";
 import AuthorityActionService from "../../ai/AuthorityActionService.js";
+import Communication from "../../models/Communication.js";
+
+export { CONVERSATION_STATES };
 
 export const WHATSAPP_IDENTITY_STATES = Object.freeze({
     NEW: "NEW", ASK_WHATSAPP_CONSENT: "ASK_WHATSAPP_CONSENT", ASK_MATTER: "ASK_MATTER", ASK_EMAIL: "ASK_EMAIL",
@@ -99,8 +102,94 @@ export default class WhatsAppAgent {
         const lead = this.leads.qualify({ message: body, user, service: servicePlan.service, facts: context.facts });
         context.lastIntent = intent.intent; context.lastService = servicePlan.service; this.conversations.mergeFacts(context, lead.facts);
         if (context.state === "HUMAN_ACTIVE") return { handled: true, action: "ROUTE_TO_HUMAN", context, intent, lead, servicePlan };
-        const sales = this.sales.buildState({ servicePlan, lead }); const replyResult = await this.generateReply({ context, body, intent, servicePlan, lead, sales, user, matter, operationalContext, historicalMemory }); const reply = typeof replyResult === "object" ? replyResult?.text : replyResult;
-        return { handled: true, action: "RESPOND", context, intent, lead, servicePlan, sales, reply, aiProvider: typeof replyResult === "object" ? replyResult?.provider || null : null, aiModel: typeof replyResult === "object" ? replyResult?.model || null : null, companySources: typeof replyResult === "object" ? replyResult?.companySources || [] : [] };
+        const sales = this.sales.buildState({ servicePlan, lead });
+        const replyResult = await this.generateReply({ context, body, intent, servicePlan, lead, sales, user, matter, operationalContext, historicalMemory });
+        const reply = typeof replyResult === "object" ? replyResult?.text : replyResult;
+
+        // When the AI query has been fully processed (reply generated),
+        // determine if it is pending human review (sensitive legal areas, formal quote approval, or explicit review flags)
+        const pendingReview = Boolean(
+            assessment?.humanRequired ||
+            operationalContext?.requiresApproval ||
+            operationalContext?.pendingReview ||
+            operationalContext?.approval_needed ||
+            (typeof replyResult === "object" && (replyResult?.requiresApproval || replyResult?.approvalNeeded || replyResult?.approval_needed || replyResult?.pendingReview)) ||
+            context?.approval_needed ||
+            context?.facts?.approval_needed ||
+            (servicePlan?.commercial?.quoteApprovalRequired && ["PRICING", "QUOTE", "PAYMENT"].includes(intent?.intent))
+        );
+
+        if (pendingReview) {
+            this.transitionToApprovalNeeded(context, { assessment, proposedReply: reply });
+
+            const communication = new Communication({
+                matterId: matter?.id || context?.matter?.id || null,
+                clientId: user?.id || context?.user?.id || null,
+                userId: user?.id || context?.user?.id || null,
+                channel: "WHATSAPP",
+                direction: "OUTBOUND",
+                subject: intent?.intent ? `AI Response: ${intent.intent}` : "WhatsApp AI Consultation",
+                message: reply || "",
+                recipient: phoneNumber || context?.phoneNumber || null,
+                sender: "ANTHONY_AI",
+                status: "APPROVAL_NEEDED",
+                threadId: chatId || context?.chatId || null,
+                approval_needed: true
+            });
+
+            return {
+                handled: true,
+                action: "APPROVAL_NEEDED",
+                state: CONVERSATION_STATES.APPROVAL_NEEDED,
+                approval_needed: true,
+                approvalNeeded: true,
+                requiresApproval: true,
+                pendingReview: true,
+                context,
+                intent,
+                lead,
+                servicePlan,
+                sales,
+                reply,
+                proposedReply: reply,
+                communication,
+                assessment,
+                reasons: assessment?.reasons || [],
+                aiProvider: typeof replyResult === "object" ? replyResult?.provider || null : null,
+                aiModel: typeof replyResult === "object" ? replyResult?.model || null : null,
+                companySources: typeof replyResult === "object" ? replyResult?.companySources || [] : []
+            };
+        }
+
+        return {
+            handled: true,
+            action: "RESPOND",
+            context,
+            intent,
+            lead,
+            servicePlan,
+            sales,
+            reply,
+            aiProvider: typeof replyResult === "object" ? replyResult?.provider || null : null,
+            aiModel: typeof replyResult === "object" ? replyResult?.model || null : null,
+            companySources: typeof replyResult === "object" ? replyResult?.companySources || [] : []
+        };
+    }
+
+    transitionToApprovalNeeded(context, { assessment = null, proposedReply = null, reason = "Pending human review" } = {}) {
+        this.conversations.setState(context, CONVERSATION_STATES.APPROVAL_NEEDED);
+        context.approval_needed = true;
+        if (!context.facts || typeof context.facts !== "object" || Array.isArray(context.facts)) context.facts = {};
+        context.facts.approval_needed = true;
+        context.handover = {
+            ...(context.handover || {}),
+            ...(assessment || {}),
+            reason,
+            proposedReply,
+            pendingReview: true,
+            pendingApprovalAt: new Date().toISOString()
+        };
+        return context;
     }
     canStaffAnswer(staff, servicePlan = {}) { return this.authority.canAnswer(staff) && this.authority.canHandleDomain(staff, servicePlan.domain); }
     canStaffProvidePricing(staff) { return this.authority.canPrice(staff); }

@@ -1,0 +1,800 @@
+{
+  "generatedAt": "2026-09-20T06:15:05.619Z",
+  "repository": "maliq273/isaacs-and-partners-website",
+  "branch": "main",
+  "filesScanned": 820,
+  "sourceFilesScanned": 607,
+  "edgeFunctions": [
+    "admin-authority-directory",
+    "admin-create-account",
+    "admin-create-staff",
+    "admin-github-config",
+    "admin-manage-account",
+    "admin-organisation-document-ingest",
+    "admin-upload-brand-asset",
+    "ai-liaison-runtime",
+    "ai-review-staff-response",
+    "openwa-communication-worker",
+    "trusted-document-worker"
+  ],
+  "counts": {
+    "P1": 2,
+    "P2": 84
+  },
+  "findings": [
+    {
+      "severity": "P1",
+      "subsystem": "CI/testing",
+      "file": "package-lock.json",
+      "missing": "No npm lockfile",
+      "risk": "Dependency installation is not reproducible outside the CI-generated workspace.",
+      "action": "Commit package-lock.json after npm install.",
+      "detail": ""
+    },
+    {
+      "severity": "P1",
+      "subsystem": "Environment",
+      "file": "server/anthonyGeminiService.js",
+      "missing": "Environment variable PALM_API_KEY is absent from .env.example",
+      "risk": "Deployment configuration can drift.",
+      "action": "Document it in .env.example or remove the usage.",
+      "detail": "Line 57"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/booking/booking.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 122"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/booking/booking.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 153"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/booking/booking.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 303"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/booking/calendar.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 50"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/booking/calendar.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 325"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/booking/calendar.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 334"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/booking/confirmation.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 60"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 40"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 120"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 122"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 122"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 122"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 123"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 123"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 127"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 128"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 129"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 132"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 134"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 136"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 138"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 138"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 140"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 142"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 144"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/client/customer-dashboard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 148"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/communication/public/PublicLeadLiaison.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 87"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/communication/public/PublicLeadLiaison.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 327"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/communication/public/PublicLeadLiaison.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 345"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/consultation/review.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 33"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/consultation/summary.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 51"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/consultation/wizard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 228"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/consultation/wizard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 495"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/consultation/wizard.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 558"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AdminAccountsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 22"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AdminAccountsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 23"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AdminAccountsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 25"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AdminAccountsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 29"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AdminGithubIntegrationService.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 43"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AnalyticsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 19"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AnalyticsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 20"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AnalyticsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 21"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AssignmentController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 17"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AssignmentController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 18"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/AuthorityPeopleController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 18"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/CaseController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 17"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/CaseController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 18"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/ClientsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 47"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/ClientsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 50"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/communications.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 33"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/communications.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 34"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/communications.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 35"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/communications.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 39"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/communications.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 39"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/communications.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 39"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 45"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 55"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 56"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 57"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 58"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 59"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 60"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 61"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 61"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/DashboardPageController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 62"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/InvoiceController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 75"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/InvoiceController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 77"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/MatterController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 274"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/MatterController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 280"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/OrganisationProfileService.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 23"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/OrganisationProfileService.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 24"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/QuoteController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 34"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/QuoteController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 40"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/QuoteController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 41"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/ReportsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 21"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/ReportsController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 21"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/StaffAdminController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 85"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/StaffAdminController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 95"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/StaffAdminController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 498"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/StaffLivePermissionController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 157"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/StaffLivePermissionController.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 167"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/dashboard/super-admin.html",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 158"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "app/templates/invoice.html",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 777"
+    },
+    {
+      "severity": "P2",
+      "subsystem": "Security",
+      "file": "script.js",
+      "missing": "Dynamic innerHTML assignment requires XSS review",
+      "risk": "Untrusted or insufficiently constrained HTML may execute in the browser.",
+      "action": "Prefer textContent/DOM construction or sanitise with a trusted allowlist.",
+      "detail": "Line 440"
+    }
+  ]
+}

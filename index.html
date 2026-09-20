@@ -2849,9 +2849,17 @@ id="backToTop">
     </button>
     <div class="public-ai-liaison__panel" data-ai-panel hidden>
         <header class="public-ai-liaison__header">
-            <div class="public-ai-liaison__identity"><span class="public-ai-liaison__avatar"><i class="fa-solid fa-comments"></i></span><div><strong>Anthony Isaacs</strong><span>AI Executive Assistant · Isaacs &amp; Partners</span></div></div>
+            <div class="public-ai-liaison__identity"><span class="public-ai-liaison__avatar"><i class="fa-solid fa-comments"></i></span><div><strong>Anthony Isaacs</strong><span data-ai-role-title>AI Executive Assistant · Isaacs &amp; Partners</span></div></div>
             <div class="public-ai-liaison__controls"><button type="button" class="public-ai-liaison__minimise" data-ai-minimise aria-label="Minimise AI Liaison">−</button><button type="button" class="public-ai-liaison__close" data-ai-close aria-label="Close AI Liaison">&times;</button></div>
         </header>
+        <div class="public-ai-liaison__role-bar" data-ai-role-bar role="radiogroup" aria-label="Anthony Isaacs Mode">
+            <button type="button" class="public-ai-liaison__role-btn is-active" data-ai-role="CLIENT" role="radio" aria-checked="true"><i class="fa-solid fa-user"></i> Client</button>
+            <button type="button" class="public-ai-liaison__role-btn" data-ai-role="STAFF" role="radio" aria-checked="false"><i class="fa-solid fa-user-shield"></i> Staff</button>
+            <button type="button" class="public-ai-liaison__role-btn" data-ai-role="SUPER_ADMIN" role="radio" aria-checked="false"><i class="fa-solid fa-crown"></i> Super Admin</button>
+        </div>
+        <div class="public-ai-liaison__memory-badge" data-ai-memory-badge hidden>
+            <i class="fa-solid fa-brain"></i><span data-ai-memory-text>Remembering client request</span>
+        </div>
         <div class="public-ai-liaison__welcome" data-ai-welcome>
             <div class="public-ai-liaison__welcome-avatar"><i class="fa-solid fa-comments"></i><b class="ai-wave-hand">👋</b></div>
             <div class="public-ai-liaison__welcome-copy"><span>Anthony Isaacs</span><h2>Hi, can I assist you today?</h2><p>Choose a service area, then select the service you need. I’ll guide you through a free 15-minute preliminary consultation.</p></div>

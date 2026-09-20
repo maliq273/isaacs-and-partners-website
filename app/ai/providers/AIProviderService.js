@@ -12,7 +12,13 @@
  *   GEMINI_MODEL=gemini-2.5-flash
  */
 
-const env = (name) => globalThis.Deno?.env?.get(name) ?? undefined;
+const env = (name) => {
+    try {
+        return (typeof process !== "undefined" && process?.env?.[name]) || globalThis.Deno?.env?.get(name) || undefined;
+    } catch {
+        return undefined;
+    }
+};
 
 function clean(value, max = 12000) {
     return String(value ?? "").trim().slice(0, max);
