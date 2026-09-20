@@ -29,7 +29,7 @@
   <article class="admin-command admin-command--primary"><span>Active Matters</span><strong id="admin-open-matters">0</strong><small id="admin-open-matters-meta">Live operational records</small></article>
   <article class="admin-command"><span>People &amp; Staff</span><strong id="admin-staff-count">0</strong><small id="admin-people-meta">Active staff records</small></article>
   <article class="admin-command"><span>New / Unassigned Work</span><strong id="admin-unassigned-count">0</strong><small id="admin-unassigned-meta">Open matters without active assignment</small></article>
-  <article class="admin-command"><span>WhatsApp Response SLA</span><strong id="admin-watchdog-open">0</strong><small id="admin-watchdog-meta">Open message obligations</small></article>
+  <article class="admin-command"><span>WhatsApp Registrations</span><strong id="admin-registration-pending">0</strong><small id="admin-registration-meta">Awaiting authorised review</small></article>
   <article class="admin-command"><span>Appointments</span><strong id="admin-appointments-today">0</strong><small>Today</small></article>
   <article class="admin-command"><span>Documents</span><strong id="admin-documents-outstanding">0</strong><small>Outstanding / review</small></article>
   <article class="admin-command"><span>Invoices</span><strong id="admin-invoices-outstanding">0</strong><small id="admin-invoice-meta">Outstanding balance</small></article>
@@ -66,9 +66,9 @@
 
 <section class="admin-section-grid">
   <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">Communications</p><h2>WhatsApp Command Centre</h2><p>Live counts from the existing communication and watchdog records. Message handling remains in the existing communications route.</p></div><a class="btn btn-secondary" href="./communications.html">Open WhatsApp</a></div>
+    <div class="panel-header"><div><p class="eyebrow">Communications</p><h2>WhatsApp Command Centre</h2><p>Live communication activity plus new WhatsApp registration requests awaiting authorised review. Message handling remains in the existing communications route.</p></div><a class="btn btn-secondary" href="./communications.html">Open WhatsApp</a></div>
     <div class="admin-metric-list" id="admin-communication-metrics"></div>
-    <div class="admin-alert-list" id="admin-watchdog-list"><div class="empty-state">Loading response SLA…</div></div>
+    <div class="admin-alert-list" id="admin-registration-list"><div class="empty-state">Loading WhatsApp registrations…</div></div>
   </section>
 
   <section class="panel">
@@ -105,12 +105,12 @@
 
 <section class="admin-section-grid">
   <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">Anthony Isaacs</p><h2>AI Oversight</h2><p>Management and visibility only. The production Gemini/Anthony runtime, identity, authorization, OpenWA and watchdog remain untouched by this dashboard revamp.</p></div><a class="btn btn-secondary" href="./ai.html">Open AI Control</a></div>
+    <div class="panel-header"><div><p class="eyebrow">Anthony Isaacs</p><h2>AI Oversight</h2><p>Management and visibility only. The production Gemini/Anthony runtime, identity, authorization and OpenWA remain under the existing control plane.</p></div><a class="btn btn-secondary" href="./ai.html">Open AI Control</a></div>
     <div class="admin-oversight-grid">
       <article><strong>Authority</strong><span>Delegated beneath active Super Admin authority.</span></article>
       <article><strong>Identity</strong><span>WhatsApp-number resolution remains authoritative.</span></article>
       <article><strong>Memory</strong><span>Existing relationship and historical-memory layers remain the source.</span></article>
-      <article><strong>Response SLA</strong><span>Open inbound obligations are visible in the watchdog panel.</span></article>
+      <article><strong>Qualification</strong><span>New WhatsApp contacts are classified before access is activated and pending registrations remain under authorised review.</span></article>
     </div>
   </section>
 
