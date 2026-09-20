@@ -50,8 +50,35 @@ export default class WhatsAppAgent {
         if (current === WHATSAPP_IDENTITY_STATES.ASK_MATTER) { facts.enquiry = text; next.nextState = WHATSAPP_IDENTITY_STATES.ASK_EMAIL; next.reply = "Thanks. What email address would you like us to associate with this WhatsApp contact?"; return next; }
         if (current === WHATSAPP_IDENTITY_STATES.ASK_EMAIL) { if (!looksLikeEmail(text)) { next.nextState = WHATSAPP_IDENTITY_STATES.ASK_EMAIL; next.reply = "Could you send me your email address? For example: name@example.com."; return next; } facts.email = clean(text, 320).toLowerCase(); next.nextState = WHATSAPP_IDENTITY_STATES.ASK_NAME; next.reply = "Thank you. What is your name and surname?"; return next; }
         if (current === WHATSAPP_IDENTITY_STATES.ASK_NAME) { const name = splitName(text); if (!name.firstName || !name.lastName) { next.nextState = WHATSAPP_IDENTITY_STATES.ASK_NAME; next.reply = "Please send me both your first name and surname so I can record you correctly."; return next; } facts.firstName = name.firstName; facts.lastName = name.lastName; next.nextState = WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE; next.reply = `Thanks, ${name.firstName}. Are you contacting us as 1) an Isaacs & Partners staff member, or 2) a potential client?`; return next; }
-        if (current === WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE) { const accountType = classifyAccountType(text); if (!accountType) { next.nextState = WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE; next.reply = "Please reply with 1 for an Isaacs & Partners staff member, or 2 for a potential client."; return next; } facts.claimedAccountType = accountType; next.nextState = WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING; next.identityMatchRequired = true; next.reply = "Thank you. I’m checking the information you provided against our system. Nothing is activated automatically — any dashboard or staff access still requires the appropriate approval."; return next; }
-        if (current === WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING) { next.nextState = current; next.reply = "I’m still processing your registration. You can continue your enquiry here while the account check is completed."; return next; }
+        if (current === WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE) {
+            const accountType = classifyAccountType(text);
+            if (!accountType) {
+                next.nextState = WHATSAPP_IDENTITY_STATES.ASK_ACCOUNT_TYPE;
+                next.reply = "Please reply with 1 for an Isaacs & Partners staff member, or 2 for a potential client.";
+                return next;
+            }
+            facts.claimedAccountType = accountType;
+            facts.registrationStatus = "PENDING_ADMIN_APPROVAL";
+            next.nextState = accountType === "STAFF" ? WHATSAPP_IDENTITY_STATES.STAFF_PENDING_APPROVAL : WHATSAPP_IDENTITY_STATES.CLIENT_PENDING_APPROVAL;
+            next.identityMatchRequired = true;
+            next.approvalRequired = true;
+            next.reply = "Thank you. Your information has been saved to the Isaacs & Partners database. Your WhatsApp contact has been linked to your registration request. Your dashboard is not active yet because an authorised member of our team must review and approve your account. We will continue assisting you here on WhatsApp while your account is awaiting activation.";
+            return next;
+        }
+        if (current === WHATSAPP_IDENTITY_STATES.IDENTITY_MATCHING) {
+            next.nextState = facts.claimedAccountType === "STAFF" ? WHATSAPP_IDENTITY_STATES.STAFF_PENDING_APPROVAL : WHATSAPP_IDENTITY_STATES.CLIENT_PENDING_APPROVAL;
+            next.reply = "Your registration is still awaiting authorised review. Your WhatsApp enquiry remains active and we can continue assisting you here.";
+            next.approvalRequired = true;
+            return next;
+        }
+        if (current === WHATSAPP_IDENTITY_STATES.STAFF_PENDING_APPROVAL || current === WHATSAPP_IDENTITY_STATES.CLIENT_PENDING_APPROVAL) {
+            next.handled = false;
+            next.onboarding = false;
+            next.pendingApproval = true;
+            next.nextState = current;
+            next.facts = facts;
+            return next;
+        }
         return null;
     }
 
