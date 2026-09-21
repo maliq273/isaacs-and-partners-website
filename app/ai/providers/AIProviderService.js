@@ -47,7 +47,7 @@ export default class AIProviderService {
         provider = env("AI_PROVIDER") || "gemini",
         openAIKey = env("OPENAI_API_KEY"),
         openAIModel = env("OPENAI_MODEL") || "gpt-4.1-mini",
-        geminiKey = env("GEMINI_API_KEY") || env("PALM_API_KEY"),
+        geminiKey = env("GEMINI_API_KEY"),
         geminiModel = env("GEMINI_MODEL") || "gemini-3.8-flash",
         fetchImpl = globalThis.fetch
     } = {}) {
