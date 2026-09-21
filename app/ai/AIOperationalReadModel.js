@@ -189,7 +189,7 @@ export default class AIOperationalReadModel {
         try {
             let q = this.db
                 .from("invoices")
-                .select("id, matter_id, invoice_number, status, total_amount, paid_amount, due_date, created_at, individual_user_id, business_id")
+                .select("id, matter_id, invoice_number, status, total_amount:total, paid_amount:amount_paid, due_date, created_at, individual_user_id, business_id")
                 .order("created_at", { ascending: false })
                 .limit(50);
 
