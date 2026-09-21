@@ -75,7 +75,7 @@ export class ExecutivePAReminderService {
         // 2. Quotes & Pre-Quotes
         const quotes = summary.quotes || [];
         const pendingQuotes = quotes.filter(q => !["APPROVED", "ACCEPTED", "REJECTED", "DECLINED", "CANCELLED"].includes(String(q.status || "").toUpperCase()));
-        const totalQuoteValue = pendingQuotes.reduce((sum, q) => sum + (Number(q.total_amount) || 0), 0);
+        const totalQuoteValue = pendingQuotes.reduce((sum, q) => sum + (Number(q.total_amount ?? q.total ?? q.amount) || 0), 0);
 
         if (pendingQuotes.length > 0) {
             reminders.push({
@@ -92,7 +92,7 @@ export class ExecutivePAReminderService {
         // 3. Invoices & Outstanding Balances
         const invoices = summary.invoices || [];
         const outstandingInvoices = invoices.filter(i => !["PAID", "CANCELLED", "VOID"].includes(String(i.status || "").toUpperCase()));
-        const outstandingBalance = counts.outstandingBalance || outstandingInvoices.reduce((sum, i) => sum + (Number(i.balance_due ?? i.amount_due ?? i.total_amount) || 0), 0);
+        const outstandingBalance = counts.outstandingBalance || outstandingInvoices.reduce((sum, i) => sum + (Number(i.balance_due ?? i.amount_due ?? i.total_amount ?? i.total ?? i.amount) || 0), 0);
 
         if (outstandingInvoices.length > 0) {
             reminders.push({
