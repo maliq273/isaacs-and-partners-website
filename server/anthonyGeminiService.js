@@ -54,7 +54,7 @@ function getOrCreateSession(sessionId, initialData = {}) {
 // Lazy Gemini client helper
 let geminiClient = null;
 function getGeminiClient() {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.PALM_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return null;
   }
