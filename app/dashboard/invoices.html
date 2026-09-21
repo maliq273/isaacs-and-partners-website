@@ -1,14 +1,17 @@
 <!doctype html>
 <html lang="en-ZA">
 <head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>Invoices | Isaacs and Partners</title>
 <link rel="stylesheet" href="../css/app.css"><link rel="stylesheet" href="../css/dashboard.css"><link rel="stylesheet" href="../css/sales-transactions.css">
 <style>.invoice-pdf-action{white-space:nowrap}.invoice-pdf-action.is-loading{opacity:.6;pointer-events:none}</style>
 </head>
 <body data-page="invoices">
-<main class="dashboard-page">
-<header class="page-header"><div><p class="eyebrow">Isaacs and Partners · Accounts Receivable</p><h1>Invoices</h1><p class="page-description">Create, send, track, collect and audit invoices from the same control plane as quotes.</p></div><div class="page-actions"><a class="btn btn-secondary" href="./super-admin.html">← Super Admin</a><a class="btn btn-secondary" href="./quotes.html">Quotes</a><button class="btn btn-secondary" data-invoice-action="refresh">Refresh</button><button class="btn btn-primary" data-invoice-action="new">+ New Invoice</button><button class="btn" data-auth-action="logout">Sign Out</button></div></header>
+<main class="dashboard-page v2-main">
+<header class="page-header v2-header"><div><p class="eyebrow">Isaacs and Partners · Accounts Receivable</p><h1 class="v2-title">Invoices</h1><p class="page-description">Create, send, track, collect and audit invoices from the same control plane as quotes.</p></div><div class="page-actions"><a class="btn btn-secondary" href="./super-admin.html">← Super Admin</a><a class="btn btn-secondary" href="./quotes.html">Quotes</a><button class="btn btn-secondary" data-invoice-action="refresh">Refresh</button><button class="btn btn-primary" data-invoice-action="new">+ New Invoice</button><button class="btn" data-auth-action="logout">Sign Out</button></div></header>
 <div id="invoice-message" class="login-message" hidden></div>
 <section class="stats-grid"><article class="stat-card"><span class="stat-label">Invoices</span><strong id="invoice-total">0</strong></article><article class="stat-card"><span class="stat-label">Outstanding</span><strong id="invoice-outstanding">R0.00</strong></article><article class="stat-card"><span class="stat-label">Paid</span><strong id="invoice-paid">R0.00</strong></article><article class="stat-card"><span class="stat-label">Overdue</span><strong id="invoice-overdue">0</strong></article></section>
 <section class="panel"><div class="panel-header"><div><h2>Accounts Receivable</h2><p>Draft → Sent → Outstanding/Overdue → Partially Paid → Paid, with audit-preserving voids. Every invoice can be rendered as a branded visual PDF.</p></div></div><div class="table-wrapper"><table><thead><tr><th>Invoice #</th><th>Customer</th><th>Subject</th><th>Total</th><th>Balance</th><th>Status</th><th>Due</th><th>Actions</th></tr></thead><tbody id="invoices-table"><tr><td colspan="8">Loading invoices...</td></tr></tbody></table></div></section>
