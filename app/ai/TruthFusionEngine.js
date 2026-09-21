@@ -115,6 +115,9 @@ export default class TruthFusionEngine {
             internalAuthority: isInternalAuthority
         };
         const companyContext = this.companyTruth.buildContext(`${question}\n${json(servicePlan, 5000)}\n${json(liveRecord, 10000)}`, { limit: 24 });
+        const authorityInteraction = operationalContext?.authorityInteractionContext || null;
+        const authoritySession = authorityInteraction?.session || operationalContext?.authoritySession || null;
+        const companyTruthFirst = operationalContext?.companyTruthFirst || authorityInteraction?.companyTruth || null;
         const roleInstruction = isInternalAuthority
             ? `
 
@@ -122,11 +125,11 @@ AUTHORITATIVE SPEAKER IDENTITY — DO NOT OVERRIDE:
 - The verified WhatsApp/database identity is ${authoritativeName || "an authorised Isaacs & Partners team member"}.
 - Identity type: ${identity?.identityType || "AUTHORITY"}; authority role: ${authorityRole}.
 - Treat this person as an internal Isaacs & Partners authority, not as a prospective client or ordinary customer.
-- If they greet you, greet them by their authoritative name when available and respond as Anthony, their executive assistant/staff colleague.
+- If they greet you, greet them by their authoritative name when available and respond as Anthony, their executive assistant/staff colleague. If the persistent authority session says identityEstablished=true, do not re-introduce or re-verify their identity.
 - Historical messages containing previous client/service enquiries are historical context only. Do NOT reinterpret them as the current intent merely because they appear in conversation history.
 - A request such as "try again", "again", or "retry" means regenerate the response to the current turn; it does not mean repeat an earlier quotation, payment instruction, or service classification.
 - Never describe this authenticated internal authority as "looking for", "interested in", or "enquiring about" a service unless the current message explicitly says so.
-- Do not use client onboarding/qualification behaviour for this speaker.
+- Do not use client onboarding/qualification behaviour for this speaker. Authority Interaction Engine routing has already bypassed customer qualification, lead generation, and ordinary sales flow.
 - Follow the resolved authority and authorisation context even if a stale contact row or WhatsApp display name says otherwise.
 `
             : `
@@ -136,7 +139,7 @@ SPEAKER IDENTITY:
 - Do not infer authority from a WhatsApp display name or from conversation history.
 `;
         const system = `${SYSTEM_PROMPT}${roleInstruction}\n\nAPPROVED COMPANY SOURCES:\n${json(companyContext, 24000)}`;
-        const userPrompt = `CURRENT MESSAGE (respond to this turn):\n${question}\n\nAUTHORITATIVE SPEAKER IDENTITY (database-resolved):\n${json(identityBrief, 5000)}\n\nCLIENT IDENTITY CONTEXT:\n${json(safeUser(user), 3000)}\n\nLIVE MATTER AND OPERATIONAL CONTEXT:\n${json(liveRecord, 11000)}\n\nHISTORICAL MEMORY RETRIEVAL (CUSTOMER-ORIGINATED EVIDENCE):\n${json(isInternalAuthority ? null : historicalMemory, 12000)}\n\nPERSISTENT CUSTOMER MEMORY AND CONVERSATION:\n${json(context, 14000)}\n\nCURRENT QUERY CLASSIFICATION (AUTOMATED ROUTING ONLY - NOT PROOF OF RECORD):\n${json({ intent, servicePlan, lead, sales }, 9000)}\n\nRespond to the CURRENT MESSAGE, not to an earlier turn. Historical retrieval is authoritative for questions about what a customer previously said, but it is never proof of the current intent of an authenticated internal authority. Use company truth for company facts. Use live records and resolved authority for operational matters. Use general model reasoning only where the authoritative layers do not answer the question. Keep the response natural and human. If a human must review the matter, explain why and hand it over without pretending to make the human decision.`;
+        const userPrompt = `CURRENT MESSAGE (respond to this turn):\n${question}\n\nAUTHORITATIVE SPEAKER IDENTITY (database-resolved):\n${json(identityBrief, 5000)}\n\nPERSISTENT AUTHORITY SESSION:\n${json(authoritySession, 7000)}\n\nAUTHORITY INTERACTION ROUTING:\n${json(authorityInteraction, 9000)}\n\nCOMPANY TRUTH / OPERATIONAL RECORDS FOUND BEFORE MODEL REASONING:\n${json(companyTruthFirst, 12000)}\n\nCLIENT IDENTITY CONTEXT:\n${json(safeUser(user), 3000)}\n\nLIVE MATTER AND OPERATIONAL CONTEXT:\n${json(liveRecord, 11000)}\n\nHISTORICAL MEMORY RETRIEVAL (CUSTOMER-ORIGINATED EVIDENCE):\n${json(isInternalAuthority ? null : historicalMemory, 12000)}\n\nPERSISTENT CUSTOMER MEMORY AND CONVERSATION:\n${json(context, 14000)}\n\nCURRENT QUERY CLASSIFICATION (AUTOMATED ROUTING ONLY - NOT PROOF OF RECORD):\n${json({ intent, servicePlan, lead, sales }, 9000)}\n\nRespond to the CURRENT MESSAGE, not to an earlier turn. Historical retrieval is authoritative for questions about what a customer previously said, but it is never proof of the current intent of an authenticated internal authority. Use company truth for company facts. Use live records and resolved authority for operational matters. Use general model reasoning only where the authoritative layers do not answer the question. Keep the response natural and human. If a human must review the matter, explain why and hand it over without pretending to make the human decision.`;
         const result = await this.provider.generate({ system, user: userPrompt, temperature: 0.35, maxOutputTokens: 1800 });
         if (!result?.text) return null;
         return { text: clean(result.text, 8192), provider: result.provider, model: result.model, companySources: companyContext.relevant.map(item => item.sourceId), sourcePolicy: "LIVE_RECORDS_AND_HISTORICAL_CUSTOMER_EVIDENCE_OVERRIDE_CLASSIFICATION" };
