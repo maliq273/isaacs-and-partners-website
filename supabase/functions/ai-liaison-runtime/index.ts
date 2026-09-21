@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import WhatsAppAgent from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/communication/agents/WhatsAppAgent.js";
 import AIProviderService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/providers/AIProviderService.js";
 import CompanyTruthService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/CompanyTruthService.js";
-import TruthFusionEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/TruthFusionEngine.js";
+import TruthFusionEngine from "./TruthFusionEngine.js";
 import HistoricalMemoryRetrievalService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/HistoricalMemoryRetrievalService.js";
 import CustomerRelationshipMemoryEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/CustomerRelationshipMemoryEngine.js";
 import RelationshipOperationalIntelligenceEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/RelationshipOperationalIntelligenceEngine.js";
@@ -10,7 +10,7 @@ import AuthorityRoleIntelligenceEngine from "https://raw.githubusercontent.com/m
 import IdentityRelationshipResolutionEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/IdentityRelationshipResolutionEngine.js";
 import AnthonyAuthorizationEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AnthonyAuthorizationEngine.js";
 import AuthorityActionService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AuthorityActionService.js";
-import AuthorityInteractionEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AuthorityInteractionEngine.js";
+import AuthorityInteractionEngine from "./AuthorityInteractionEngine.js";
 
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL");
 const SERVICE_ROLE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
