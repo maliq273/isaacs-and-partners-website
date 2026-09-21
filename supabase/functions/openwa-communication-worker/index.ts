@@ -308,7 +308,6 @@ async function processOutbound(limit = 5) {
     throw new Error("OpenWA outbound configuration is incomplete.");
   }
 
-  await ensureWebhookRegistered();
   const results = [];
 
   for (let i = 0; i < limit; i++) {
@@ -324,6 +323,8 @@ async function processOutbound(limit = 5) {
 
     if (error) throw error;
     if (!row) break;
+
+    await ensureWebhookRegistered();
 
     const message = row.communication_messages;
     const chatId = normaliseChatId(row.chat_id);
@@ -700,19 +701,15 @@ async function processWebhook(req: Request) {
     const body = clean(data.selectedButtonId || data.selectedId || data.buttonResponse?.selectedButtonId || data.buttonOrListResponse?.id || data.body || data.text || data.message, 4096);
     if (!body) return json({ received: true, ignored: true, reason: "EMPTY_MESSAGE" });
 
-    const contact = await ensureInboundContact({ phoneNumber: fromPhone, chatId, messageId: data.id || null });
-    return json(
-      await handleInbound({
-        payload,
-        data,
-        chatId,
-        phoneNumber: fromPhone || normalisePhone(contact?.phone_number),
-        contact,
-        body,
-        idempotencyKey,
-        sourceEvent: `${event}:${resolvedSender.source}`,
-      }),
-    );
+    EdgeRuntime.waitUntil((async () => {
+      try {
+        const contact = await ensureInboundContact({ phoneNumber: fromPhone, chatId, messageId: data.id || null });
+        await handleInbound({ payload, data, chatId, phoneNumber: fromPhone || normalisePhone(contact?.phone_number), contact, body, idempotencyKey, sourceEvent: `${event}:${resolvedSender.source}` });
+      } catch (error) {
+        console.error("OpenWA inbound processing failed", { event, messageId: data?.id || null, chatId, error });
+      }
+    })());
+    return json({ received: true, queued: true }, 202);
   }
 
   if (event === "message.sent") {
