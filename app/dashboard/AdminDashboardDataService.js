@@ -88,18 +88,18 @@ class AdminDashboardDataService{
     const results=await Promise.allSettled([
       this.table("staff","id,user_id,employee_number,department,job_title,is_active,created_at,updated_at"),
       this.table("matters","id,status,title,service_type,portal_request_status,created_at,updated_at"),
-      this.table("quotes","id,status,customer_decision,total_amount,created_at,updated_at"),
+      this.table("quotes","id,status,customer_decision,total_amount:total,amount,total_amount_legacy:amount,created_at,updated_at"),
       this.table("assignments","id,matter_id,case_id,quote_id,staff_id,status,assigned_at"),
       this.table("tasks","id,status,assigned_staff_id,matter_id,case_id,due_at,created_at,updated_at"),
       this.table("appointments","id,status,starts_at,ends_at,delivery_mode,individual_user_id,business_id,matter_id,assigned_staff_id,created_at"),
       this.table("documents","id,status,required,document_type,category,matter_id,individual_user_id,business_id,created_at,updated_at"),
       this.table("client_documents","id,status,client_id,matter_id,created_at,updated_at"),
-      this.table("invoices","id,status,total_amount,amount_due,balance_due,created_at,updated_at"),
-      this.table("payments","id,invoice_id,amount,paid_amount,paid_at,created_at"),
+      this.table("invoices","id,status,total_amount:total,amount,amount_paid,balance_due,created_at,updated_at"),
+      this.table("payments","id,invoice_id,amount,paid_amount:amount,paid_at,created_at"),
       this.table("communication_contacts","id,user_id,first_name,last_name,email,phone_number,identity_status,onboarding_state,dashboard_status,account_match_status,claimed_account_type,contact_type,is_active,onboarding_facts,created_at,updated_at"),
       this.table("communication_messages","id,customer_user_id,channel,direction,phone_number,chat_id,body,status,created_at,metadata"),
       this.table("notifications","id,recipient_user_id,channel,subject,message,status,created_at,updated_at"),
-      this.table("authority_action_audit","id,actor_user_id,authority_role,action,decision,disclosure_rule,scope,created_at"),
+      this.table("authority_action_audit","id,authority_id,actor_user_id,actor_phone,action,target_type,target_id,request_text,decision,reason,before_data,after_data,metadata,created_at"),
       integrationData.getControlPlaneStatus(),
       this.authoritySnapshot(),
       clientPortalAdmin.snapshot()
@@ -107,7 +107,7 @@ class AdminDashboardDataService{
 
     const value=i=>results[i].status==="fulfilled"?results[i].value:[];
     const staff=value(0),matters=value(1),quotes=value(2),assignments=value(3),tasks=value(4),appointments=value(5);
-    const documents=value(6),clientDocuments=value(7),invoices=value(8),payments=value(9),contacts=value(10),messages=value(11),notifications=value(12),audit=value(13);
+    const documents=value(6),clientDocuments=value(7),invoices=value(8),payments=value(9),contacts=value(10),messages=value(11),notifications=value(12),rawAudit=value(13);\n    const audit=rawAudit.map(row=>({...row,authority_role:row?.metadata?.authority_role||null,disclosure_rule:row?.metadata?.disclosure_rule||null,scope:row?.metadata?.authorization_scope||null}));
     const integrations=results[15].status==="fulfilled"?results[15].value:{providers:[],events:[],summary:{},warning:"Integration data unavailable."};
     const authority=results[16].status==="fulfilled"?results[16].value:{rows:[],warning:"Authority directory unavailable."};
     const portal=results[17].status==="fulfilled"?results[17].value:{clients:[],warning:"Client portal snapshot unavailable."};
