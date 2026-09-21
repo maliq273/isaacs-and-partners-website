@@ -19,7 +19,6 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 });
 
 const MAX_ATTEMPTS = 5;
-let webhookReadyAt = 0;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -96,105 +95,6 @@ async function openwaRequest(path: string, init: RequestInit = {}) {
       ...(init.headers || {}),
     },
   });
-}
-
-async function ensureWebhookRegistered() {
-  if (!OPENWA_BASE_URL || !OPENWA_API_KEY || !OPENWA_SESSION_ID || !OPENWA_WEBHOOK_SECRET) {
-    throw new Error("OpenWA webhook configuration is incomplete.");
-  }
-
-  if (Date.now() < webhookReadyAt) return;
-
-  const webhookUrl = `${SUPABASE_URL}/functions/v1/openwa-communication-worker`;
-  const desiredEvents = [
-    "message.received",
-    "message.sent",
-    "message.ack",
-    "message.failed",
-  ];
-
-  const listResponse = await openwaRequest(
-    `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/webhooks`,
-    { method: "GET" },
-  );
-  const listed = await listResponse.json().catch(() => ({}));
-
-  if (!listResponse.ok) {
-    throw new Error(
-      `OpenWA webhook list HTTP ${listResponse.status}: ${JSON.stringify(listed).slice(0, 1000)}`,
-    );
-  }
-
-  const webhooks = Array.isArray(listed) ? listed : Array.isArray(listed?.data) ? listed.data : [];
-  const matches = webhooks.filter((webhook: any) => clean(webhook?.url, 2048) === webhookUrl);
-
-  if (matches.length > 0) {
-    const keeper = matches[0];
-
-    for (const duplicate of matches.slice(1)) {
-      if (!duplicate?.id) continue;
-      const deleteResponse = await openwaRequest(
-        `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/webhooks/${encodeURIComponent(duplicate.id)}`,
-        { method: "DELETE" },
-      );
-      if (!deleteResponse.ok && deleteResponse.status !== 404) {
-        const deleteResult = await deleteResponse.json().catch(() => ({}));
-        throw new Error(
-          `OpenWA duplicate webhook delete HTTP ${deleteResponse.status}: ${JSON.stringify(deleteResult).slice(0, 1000)}`,
-        );
-      }
-    }
-
-    const needsUpdate =
-      keeper.active !== true ||
-      JSON.stringify(keeper.events || []) !== JSON.stringify(desiredEvents);
-
-    if (needsUpdate && keeper.id) {
-      const updateResponse = await openwaRequest(
-        `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/webhooks/${encodeURIComponent(keeper.id)}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            active: true,
-            events: desiredEvents,
-            filters: null,
-            retryCount: 5,
-            secret: OPENWA_WEBHOOK_SECRET,
-          }),
-        },
-      );
-      if (!updateResponse.ok) {
-        const updateResult = await updateResponse.json().catch(() => ({}));
-        throw new Error(
-          `OpenWA webhook update HTTP ${updateResponse.status}: ${JSON.stringify(updateResult).slice(0, 1000)}`,
-        );
-      }
-    }
-
-    webhookReadyAt = Date.now() + 5 * 60 * 1000;
-    return;
-  }
-
-  const createResponse = await openwaRequest(
-    `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/webhooks`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        url: webhookUrl,
-        events: desiredEvents,
-        secret: OPENWA_WEBHOOK_SECRET,
-      }),
-    },
-  );
-
-  const created = await createResponse.json().catch(() => ({}));
-  if (!createResponse.ok && createResponse.status !== 409) {
-    throw new Error(
-      `OpenWA webhook registration HTTP ${createResponse.status}: ${JSON.stringify(created).slice(0, 1000)}`,
-    );
-  }
-
-  webhookReadyAt = Date.now() + 5 * 60 * 1000;
 }
 
 async function resolveInboundPhone(chatId: string, data: any) {
@@ -323,8 +223,6 @@ async function processOutbound(limit = 5) {
 
     if (error) throw error;
     if (!row) break;
-
-    await ensureWebhookRegistered();
 
     const message = row.communication_messages;
     const chatId = normaliseChatId(row.chat_id);
