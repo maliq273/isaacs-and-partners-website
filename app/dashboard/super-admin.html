@@ -5,260 +5,974 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Super Admin Control Centre | Isaacs and Partners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/app.css">
 <link rel="stylesheet" href="../css/dashboard.css">
+<style>
+:root {
+  --bg: #0c0c0e;
+  --ink: #edeeef;
+  --accent: #c9a227;
+  --surface: #161618;
+  --border: rgba(237, 238, 239, 0.08);
+  --border-color: rgba(237, 238, 239, 0.08);
+  --ink-muted: rgba(237, 238, 239, 0.5);
+  --ink-faint: rgba(237, 238, 239, 0.05);
+  --text-primary: #edeeef;
+  --text-secondary: rgba(237, 238, 239, 0.65);
+  --text-muted: rgba(237, 238, 239, 0.5);
+  --background-primary: #161618;
+  --background-secondary: #0c0c0e;
+}
+
+* { box-sizing: border-box; }
+
+body[data-page="super-admin"] {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: 'Geist', sans-serif;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Sidebar Navigation */
+aside.v2-sidebar {
+  border-right: 1px solid var(--border);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.brand-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.nav-section-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ink-muted);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.nav-list { list-style: none; padding: 0; margin: 0; }
+.nav-item { margin-bottom: 4px; }
+.nav-link {
+  color: var(--ink-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  display: block;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.nav-link:hover {
+  color: var(--ink);
+  background: var(--ink-faint);
+}
+.nav-link strong { display: block; color: var(--ink); }
+
+/* Dynamic Super Admin Nav Groups */
+.admin-nav-group h3 {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin: 16px 0 8px 0;
+}
+.admin-nav-group a {
+  color: var(--ink-muted);
+  text-decoration: none;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  display: block;
+  border-radius: 6px;
+  transition: all 0.2s;
+  margin-bottom: 4px;
+}
+.admin-nav-group a:hover {
+  color: var(--ink);
+  background: var(--ink-faint);
+}
+.admin-nav-group a strong { display: block; color: var(--ink); font-weight: 500; }
+
+/* Main Content Area */
+main.v2-main {
+  padding: 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  background: var(--bg);
+}
+
+.v2-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin: 0 0 6px 0;
+}
+
+h1.v2-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 0.95;
+  margin: 0;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.page-description {
+  max-width: 650px;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+
+.page-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Metric Grid */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.metric-card, .admin-command {
+  background: var(--bg);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: auto;
+}
+
+.metric-label, .admin-command span {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  display: block;
+}
+
+.metric-value, .admin-command strong {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  display: block;
+  margin: 8px 0;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.metric-meta, .admin-command small {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+/* Panes & Panels */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-shadow: none;
+}
+
+.panel-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.panel-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+}
+
+.panel-header p {
+  margin: 4px 0 0 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+/* Tables */
+.table-wrapper { width: 100%; overflow-x: auto; }
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.admin-table th {
+  text-align: left;
+  padding: 14px 20px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.01);
+}
+.admin-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+  vertical-align: middle;
+}
+
+/* Badges */
+.status-badge, .control-plane-badge {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.65rem;
+  padding: 4px 10px;
+  border-radius: 3px;
+  background: var(--ink-faint);
+  color: var(--ink-muted);
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border);
+}
+.status-badge.pending { color: var(--accent); border-color: rgba(201,162,39,0.25); background: rgba(201,162,39,0.08); }
+.status-badge.active { color: #10b981; border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.08); }
+.status-badge.inactive { color: #ef4444; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.08); }
+
+/* Buttons */
+.btn {
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  padding: 10px 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Geist', sans-serif;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.btn:hover {
+  opacity: 0.9;
+}
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+.btn-secondary:hover {
+  background: var(--ink-faint);
+  border-color: rgba(237, 238, 239, 0.2);
+}
+.btn-primary {
+  background: var(--accent);
+  color: #0c0c0e;
+}
+.btn-sm { padding: 6px 12px; font-size: 0.72rem; }
+
+/* Anthony Executive Briefing Panel */
+.anthony-panel {
+  background: linear-gradient(to right, #1a160d, var(--surface));
+  border-left: 3px solid var(--accent);
+  padding: 32px;
+  border-radius: 6px;
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.anthony-panel h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  margin: 12px 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+#anthony-pa-narrative {
+  color: var(--ink-muted);
+  line-height: 1.6;
+  max-width: 850px;
+  font-size: 0.95rem;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px;
+  white-space: pre-line;
+}
+
+/* Grids */
+.admin-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 20px 24px;
+}
+
+.admin-overview-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.admin-overview-card:hover {
+  border-color: var(--accent);
+  background: rgba(201, 162, 39, 0.03);
+}
+.admin-overview-card strong {
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.admin-overview-card span {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  margin-top: 6px;
+  min-height: 36px;
+  display: block;
+}
+.admin-overview-card small {
+  color: var(--accent);
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.7rem;
+  margin-top: 12px;
+  display: block;
+}
+
+.admin-list-row, .admin-alert-row {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.admin-list-row:last-child, .admin-alert-row:last-child {
+  border-bottom: none;
+}
+.admin-list-row small, .admin-alert-row small {
+  color: var(--ink-muted);
+  margin-top: 4px;
+  display: block;
+}
+
+.admin-metric-list, .admin-finance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 20px 24px;
+}
+.admin-finance-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+.admin-metric-list > div, .admin-finance-grid article {
+  background: var(--bg);
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.admin-metric-list span, .admin-finance-grid span {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  display: block;
+}
+.admin-metric-list strong, .admin-finance-grid strong {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  margin-top: 6px;
+  display: block;
+  color: var(--ink);
+}
+
+.admin-link-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 20px 24px;
+}
+.admin-link-grid a {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.2s;
+}
+.admin-link-grid a:hover {
+  border-color: var(--accent);
+}
+.admin-link-grid span {
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.admin-oversight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 20px 24px;
+}
+.admin-oversight-grid article {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 4px;
+}
+.admin-oversight-grid strong {
+  color: var(--ink);
+  font-size: 0.9rem;
+  display: block;
+}
+.admin-oversight-grid span {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  margin-top: 6px;
+  display: block;
+}
+
+.integration-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 20px 24px;
+}
+.integration-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 4px;
+}
+
+#admin-security-status {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  text-align: center;
+  padding: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+.form-control {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-family: 'Geist', sans-serif;
+  font-size: 0.85rem;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.login-message {
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  background: rgba(201, 162, 39, 0.1);
+  border: 1px solid rgba(201, 162, 39, 0.2);
+  color: var(--accent);
+}
+.login-message.login-error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); }
+::selection { background: var(--accent); color: var(--bg); }
+
+@media (max-width: 1024px) {
+  body[data-page="super-admin"] {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: auto;
+  }
+  aside.v2-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .metric-grid, .admin-overview-grid, .admin-section-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-finance-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
 </head>
 <body data-page="super-admin">
-<main class="dashboard-page super-admin-shell">
-<header class="page-header super-admin-header">
-  <div>
-    <p class="eyebrow">Isaacs &amp; Partners · Private Control Plane</p>
-    <h1 id="admin-greeting">Super Admin</h1>
-    <p class="page-description">The operational command centre for people, matters, communications, finance, documents, portal access, integrations and audited administrative activity.</p>
-  </div>
-  <div class="page-actions">
-    <span class="control-plane-badge" id="admin-system-status">Checking live data…</span>
-    <button type="button" class="btn" data-admin-action="refresh">Refresh</button>
-    <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
-  </div>
-</header>
 
-<div id="dashboard-data-error" class="login-message login-error" role="alert" hidden></div>
+<aside class="v2-sidebar">
+  <div class="brand-logo">Isaacs &amp; Partners</div>
+  
+  <nav aria-label="Super Admin navigation">
+    <span class="nav-section-label">Command Centre</span>
+    <div id="super-admin-nav" class="admin-nav-list"></div>
+    
+    <div style="margin-top: 28px;">
+      <span class="nav-section-label">Operations</span>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="./matters.html" class="nav-link">Matters</a></li>
+        <li class="nav-item"><a href="./communications.html" class="nav-link">WhatsApp Command</a></li>
+        <li class="nav-item"><a href="./document-vault.html" class="nav-link">Document Vault</a></li>
+      </ul>
+    </div>
 
-<section class="admin-command-grid" aria-label="Live firm workload">
-  <article class="admin-command admin-command--primary"><span>Active Matters</span><strong id="admin-open-matters">0</strong><small id="admin-open-matters-meta">Live operational records</small></article>
-  <article class="admin-command"><span>People &amp; Staff</span><strong id="admin-staff-count">0</strong><small id="admin-people-meta">Active staff records</small></article>
-  <article class="admin-command"><span>New / Unassigned Work</span><strong id="admin-unassigned-count">0</strong><small id="admin-unassigned-meta">Open matters without active assignment</small></article>
-  <article class="admin-command"><span>WhatsApp Registrations</span><strong id="admin-registration-pending">0</strong><small id="admin-registration-meta">Awaiting authorised review</small></article>
-  <article class="admin-command"><span>Appointments</span><strong id="admin-appointments-today">0</strong><small>Today</small></article>
-  <article class="admin-command"><span>Documents</span><strong id="admin-documents-outstanding">0</strong><small>Outstanding / review</small></article>
-  <article class="admin-command"><span>Invoices</span><strong id="admin-invoices-outstanding">0</strong><small id="admin-invoice-meta">Outstanding balance</small></article>
-  <article class="admin-command"><span>Pending Quotes</span><strong id="admin-pending-quotes">0</strong><small>Awaiting commercial action</small></article>
-</section>
+    <div style="margin-top: 28px;">
+      <span class="nav-section-label">System</span>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="./authority-people.html" class="nav-link">Authority &amp; People</a></li>
+        <li class="nav-item"><a href="./staff-admin.html" class="nav-link">Staff Accounts</a></li>
+        <li class="nav-item"><a href="./organisation-profile.html" class="nav-link">Organisation Master</a></li>
+        <li class="nav-item"><a href="./ai.html" class="nav-link">AI Control</a></li>
+      </ul>
+    </div>
+  </nav>
+</aside>
 
-<section class="admin-command-layout">
-  <aside class="panel admin-command-nav">
-    <div class="panel-header"><div><p class="eyebrow">Command Centre</p><h2>Control Areas</h2></div></div>
-    <nav id="super-admin-nav" class="admin-nav-list" aria-label="Super Admin navigation"></nav>
-  </aside>
+<main class="v2-main">
+  <header class="v2-header">
+    <div>
+      <p class="eyebrow">Private Control Plane</p>
+      <h1 id="admin-greeting" class="v2-title">Super Admin</h1>
+      <p class="page-description">The operational command centre for people, matters, communications, finance, documents, portal access, integrations and audited administrative activity.</p>
+    </div>
+    <div class="page-actions">
+      <span class="control-plane-badge" id="admin-system-status">Checking live data…</span>
+      <button type="button" class="btn btn-secondary" data-admin-action="refresh">Refresh</button>
+      <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
+    </div>
+  </header>
 
+  <div id="dashboard-data-error" class="login-message login-error" role="alert" hidden></div>
+
+  <!-- Command Metrics Grid -->
+  <section class="metric-grid" aria-label="Live firm workload">
+    <article class="metric-card admin-command">
+      <span class="metric-label">Active Matters</span>
+      <strong class="metric-value" id="admin-open-matters">0</strong>
+      <span class="metric-meta" id="admin-open-matters-meta">Live operational records</span>
+    </article>
+    <article class="metric-card admin-command">
+      <span class="metric-label">People &amp; Staff</span>
+      <strong class="metric-value" id="admin-staff-count">0</strong>
+      <span class="metric-meta" id="admin-people-meta">Active staff records</span>
+    </article>
+    <article class="metric-card admin-command">
+      <span class="metric-label">Unassigned</span>
+      <strong class="metric-value" id="admin-unassigned-count">0</strong>
+      <span class="metric-meta" id="admin-unassigned-meta">Awaiting allocation</span>
+    </article>
+    <article class="metric-card admin-command">
+      <span class="metric-label">WhatsApp Reg</span>
+      <strong class="metric-value" id="admin-registration-pending">0</strong>
+      <span class="metric-meta" id="admin-registration-meta">Awaiting review</span>
+    </article>
+  </section>
+
+  <!-- Secondary Metrics Grid -->
+  <section class="metric-grid" aria-label="Secondary workload indicators">
+    <article class="metric-card admin-command">
+      <span class="metric-label">Appointments Today</span>
+      <strong class="metric-value" id="admin-appointments-today">0</strong>
+      <span class="metric-meta">Scheduled consultations</span>
+    </article>
+    <article class="metric-card admin-command">
+      <span class="metric-label">Documents</span>
+      <strong class="metric-value" id="admin-documents-outstanding">0</strong>
+      <span class="metric-meta">Outstanding / review</span>
+    </article>
+    <article class="metric-card admin-command">
+      <span class="metric-label">Invoices</span>
+      <strong class="metric-value" id="admin-invoices-outstanding">0</strong>
+      <span class="metric-meta" id="admin-invoice-meta">Outstanding balance</span>
+    </article>
+    <article class="metric-card admin-command">
+      <span class="metric-label">Pending Quotes</span>
+      <strong class="metric-value" id="admin-pending-quotes">0</strong>
+      <span class="metric-meta">Awaiting commercial action</span>
+    </article>
+  </section>
+
+  <!-- Executive Briefing Panel (Anthony) -->
+  <section class="anthony-panel" id="anthony-pa-panel">
+    <p class="eyebrow">Executive Assistant · Anthony</p>
+    <h2>Executive Briefing &amp; Proactive Reminders</h2>
+    <div id="anthony-pa-status" class="login-message" role="status" style="margin-bottom: 1rem;">Compiling executive reminders…</div>
+    
+    <div id="anthony-pa-reminders-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 1.25rem;">
+      <div class="empty-state">Loading reminders…</div>
+    </div>
+
+    <div id="anthony-pa-narrative">
+      Loading Anthony's executive briefing…
+    </div>
+
+    <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <button id="anthony-pa-refresh" class="btn btn-secondary btn-sm" type="button">Refresh Briefing</button>
+      <button id="anthony-pa-notify" class="btn btn-sm" type="button">Dispatch Reminders</button>
+    </div>
+  </section>
+
+  <!-- Control Centre Overview -->
   <section class="panel">
     <div class="panel-header">
-      <div><p class="eyebrow">Live overview</p><h2>Firm Control Centre</h2><p>Every card below is backed by the existing dashboard routes, Supabase tables/RPCs, RLS and control-plane services.</p></div>
-      <div id="admin-integration-summary" class="control-plane-summary">Loading…</div>
+      <div>
+        <p class="eyebrow">Live Overview</p>
+        <h2>Firm Control Centre</h2>
+        <p>Every card below is backed by the existing dashboard routes, Supabase tables/RPCs, RLS and control-plane services.</p>
+      </div>
+      <div id="admin-integration-summary" class="control-plane-badge">Loading…</div>
     </div>
     <div id="admin-overview-grid" class="admin-overview-grid"></div>
   </section>
-</section>
 
-<!-- Anthony: Super Admin PA & Executive Reminders -->
-<section class="panel admin-section" id="anthony-pa-panel" style="margin-top: 1.5rem; border-left: 4px solid var(--gold, #c5a880);">
-  <div class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-    <div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="background: var(--gold, #c5a880); color: #fff; font-weight: bold; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px;">A</span>
-        <p class="eyebrow" style="margin: 0;">Anthony · Super Admin PA &amp; Staff Colleague</p>
-      </div>
-      <h2 style="margin-top: 4px;">Executive Briefing &amp; Proactive Reminders</h2>
-      <p>Automated reminders of bookings, quotes, invoices, and operational matters compiled live for the Director.</p>
-    </div>
-    <div style="display: flex; gap: 8px;">
-      <button id="anthony-pa-refresh" class="btn btn-secondary" type="button">Refresh Briefing</button>
-      <button id="anthony-pa-notify" class="btn btn-primary" type="button">Dispatch All Reminders</button>
-    </div>
-  </div>
-
-  <div id="anthony-pa-status" class="login-message" role="status" style="margin-bottom: 1rem;">Compiling executive reminders…</div>
-
-  <div id="anthony-pa-reminders-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 1.25rem;">
-    <div class="empty-state">Loading reminders…</div>
-  </div>
-
-  <div id="anthony-pa-narrative" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color, rgba(255,255,255,0.08)); border-radius: 8px; padding: 1rem; font-family: inherit; font-size: 0.9rem; line-height: 1.5; white-space: pre-line; color: var(--text-secondary, #cbd5e1);">
-    Loading Anthony's executive briefing…
-  </div>
-</section>
-
-<section class="admin-section-grid">
-  <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">People &amp; authority</p><h2>Authority Snapshot</h2><p>Authority remains governed by the existing authoritative directory and server-side access controls.</p></div><a class="btn btn-secondary" href="./authority-people.html">Open Authority &amp; People</a></div>
-    <div id="admin-authority-list" class="admin-list"><div class="empty-state">Loading authority records…</div></div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">Customer portal</p><h2>Portal Approval Queue</h2><p>Uses the existing <code>client_portal_admin_snapshot()</code> and approval RPCs.</p></div><a class="btn btn-secondary" href="./accounts.html">Accounts</a></div>
-    <div id="client-portal-access-error" class="login-message login-error" hidden role="alert"></div>
-    <div class="table-wrapper"><table class="admin-table"><thead><tr><th>Client</th><th>Type</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody id="client-portal-access-list"><tr><td colspan="5">Loading client access…</td></tr></tbody></table></div>
-  </section>
-</section>
-
-<section class="panel admin-section" style="margin-top: 1.5rem;">
-  <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-    <div>
-      <p class="eyebrow">Workforce management</p>
-      <h2>Staff Directory &amp; Live Permissions</h2>
-      <p>Manage staff profiles, toggle live operational permissions, and audit account access directly from Super Admin.</p>
-    </div>
-    <div style="display: flex; gap: 8px;">
-      <button id="staff-refresh" class="btn btn-secondary" type="button">Refresh Directory</button>
-      <a class="btn btn-secondary" href="./staff-admin.html">Dedicated Admin View</a>
-    </div>
-  </div>
-  <div id="staff-admin-status" class="login-message" role="status" style="margin-bottom: 1rem;">Ready.</div>
-  
-  <div class="table-wrapper">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Staff Member</th>
-          <th>Role</th>
-          <th>Department</th>
-          <th>Status</th>
-          <th>User ID</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="staff-admin-table">
-        <tr><td colspan="6">Loading staff directory…</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <section id="staff-editor" class="panel staff-editor" hidden style="margin-top: 1.5rem; border: 1px solid var(--border-color, rgba(255,255,255,0.12)); border-radius: 12px; padding: 1.5rem; background: rgba(255,255,255,0.02);">
-    <header class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
-      <div>
-        <p class="eyebrow">Staff Access Control</p>
-        <h3 style="margin: 0;">Edit Staff Member</h3>
-        <p style="margin: 4px 0 0 0; font-size: 0.9rem;">Update staff profile and configure live operational permissions.</p>
-      </div>
-      <button id="staff-editor-close" type="button" class="btn btn-secondary btn-sm">Close</button>
-    </header>
-
-    <form id="staff-editor-form" autocomplete="off" style="margin-bottom: 1.5rem;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 1rem;">
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">First name</label>
-          <input id="edit-first-name" class="form-control" name="first_name" required style="width: 100%;">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Last name</label>
-          <input id="edit-last-name" class="form-control" name="last_name" required style="width: 100%;">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Email</label>
-          <input id="edit-email" class="form-control" name="email" type="email" disabled style="width: 100%;">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Phone</label>
-          <input id="edit-phone" class="form-control" name="phone" style="width: 100%;">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Employee number</label>
-          <input id="edit-employee-number" class="form-control" name="employee_number" style="width: 100%;">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Department</label>
-          <select id="edit-department" class="form-control" name="department" style="width: 100%;">
-            <option value="immigration">Immigration</option>
-            <option value="hr-ir">HR & Industrial Relations</option>
-            <option value="business-compliance">Business Compliance</option>
-            <option value="legal">Legal Services</option>
-          </select>
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Job title</label>
-          <input id="edit-job-title" class="form-control" name="job_title" style="width: 100%;">
-        </div>
-      </div>
-      <div style="display: flex; justify-content: flex-end;">
-        <button type="submit" class="btn btn-primary">Save Staff Details</button>
-      </div>
-    </form>
-
-    <div style="border-top: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-top: 1.25rem;">
+  <!-- Section Grid: Authority Snapshot & Portal Approval Queue -->
+  <section class="admin-section-grid">
+    <section class="panel">
       <div class="panel-header">
         <div>
-          <p class="eyebrow">Permission Manager</p>
-          <h3 style="margin: 0;">Live Permissions</h3>
-          <p style="margin: 4px 0 0 0; font-size: 0.9rem;">Toggle live permissions and define scope for this staff member.</p>
+          <p class="eyebrow">People &amp; Authority</p>
+          <h2>Authority Snapshot</h2>
+          <p>Authority remains governed by the existing authoritative directory and server-side access controls.</p>
+        </div>
+        <a class="btn btn-secondary btn-sm" href="./authority-people.html">Open Authority &amp; People</a>
+      </div>
+      <div id="admin-authority-list" class="admin-list"><div class="empty-state">Loading authority records…</div></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Customer Portal</p>
+          <h2>Portal Approval Queue</h2>
+          <p>Uses the existing <code>client_portal_admin_snapshot()</code> and approval RPCs.</p>
+        </div>
+        <a class="btn btn-secondary btn-sm" href="./accounts.html">Manage Accounts</a>
+      </div>
+      <div id="client-portal-access-error" class="login-message login-error" hidden role="alert"></div>
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Client</th><th>Type</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="client-portal-access-list">
+            <tr><td colspan="5" class="empty-state">Loading client access…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <!-- Workforce Management Section -->
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Workforce Management</p>
+        <h2>Staff Directory &amp; Live Permissions</h2>
+        <p>Manage staff profiles, toggle live operational permissions, and audit account access directly from Super Admin.</p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button id="staff-refresh" class="btn btn-secondary btn-sm" type="button">Refresh Directory</button>
+        <a class="btn btn-secondary btn-sm" href="./staff-admin.html">Dedicated Admin View</a>
+      </div>
+    </div>
+    <div id="staff-admin-status" class="login-message" role="status" style="margin: 12px 24px 0 24px;">Ready.</div>
+    
+    <div class="table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Staff Member</th>
+            <th>Role</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>User ID</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="staff-admin-table">
+          <tr><td colspan="6" class="empty-state">Loading staff directory…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Staff Editor Drawer / Drawer Section -->
+    <section id="staff-editor" class="panel staff-editor" hidden style="margin: 20px 24px; padding: 20px; background: rgba(0,0,0,0.2); border: 1px solid var(--border);">
+      <header class="panel-header" style="padding: 0 0 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px;">
+        <div>
+          <p class="eyebrow">Staff Access Control</p>
+          <h3 style="margin: 0; font-family: 'Syne', sans-serif;">Edit Staff Member</h3>
+          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--ink-muted);">Update staff profile and configure live operational permissions.</p>
+        </div>
+        <button id="staff-editor-close" type="button" class="btn btn-secondary btn-sm">Close</button>
+      </header>
+
+      <form id="staff-editor-form" autocomplete="off" style="margin-bottom: 1.5rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 4px;">First name</label>
+            <input id="edit-first-name" class="form-control" name="first_name" required style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 4px;">Last name</label>
+            <input id="edit-last-name" class="form-control" name="last_name" required style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 4px;">Email</label>
+            <input id="edit-email" class="form-control" name="email" type="email" disabled style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 4px;">Phone</label>
+            <input id="edit-phone" class="form-control" name="phone" style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 4px;">Employee number</label>
+            <input id="edit-employee-number" class="form-control" name="employee_number" style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 4px;">Department</label>
+            <select id="edit-department" class="form-control" name="department" style="width: 100%;">
+              <option value="immigration">Immigration</option>
+              <option value="hr-ir">HR &amp; Industrial Relations</option>
+              <option value="business-compliance">Business Compliance</option>
+              <option value="legal">Legal Services</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--ink-muted); margin-bottom: 4px;">Job title</label>
+            <input id="edit-job-title" class="form-control" name="job_title" style="width: 100%;">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn btn-primary">Save Staff Details</button>
+        </div>
+      </form>
+
+      <div style="border-top: 1px solid var(--border); padding-top: 1.25rem;">
+        <div class="panel-header" style="padding: 0 0 12px 0; border: none;">
+          <div>
+            <p class="eyebrow">Permission Manager</p>
+            <h3 style="margin: 0; font-family: 'Syne', sans-serif;">Live Permissions</h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--ink-muted);">Toggle live permissions and define scope for this staff member.</p>
+          </div>
+        </div>
+        <div id="permissions-grid" style="margin: 1rem 0;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button id="permissions-cancel" type="button" class="btn btn-secondary">Cancel</button>
+          <button id="permissions-save" type="button" class="btn btn-primary">Save Permissions</button>
         </div>
       </div>
-      <div id="permissions-grid" style="margin: 1rem 0;"></div>
-      <div style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button id="permissions-cancel" type="button" class="btn btn-secondary">Cancel</button>
-        <button id="permissions-save" type="button" class="btn btn-primary">Save Permissions</button>
+    </section>
+  </section>
+
+  <!-- Communications & Operations Grid -->
+  <section class="admin-section-grid">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Communications</p>
+          <h2>WhatsApp Command Centre</h2>
+          <p>Live communication activity plus new WhatsApp registration requests awaiting authorised review.</p>
+        </div>
+        <a class="btn btn-secondary btn-sm" href="./communications.html">Open WhatsApp</a>
       </div>
+      <div class="admin-metric-list" id="admin-communication-metrics"></div>
+      <div class="admin-alert-list" id="admin-registration-list"><div class="empty-state">Loading WhatsApp registrations…</div></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Operations</p>
+          <h2>Work Queue</h2>
+          <p>Existing matters, tasks and appointments remain the operational source of truth.</p>
+        </div>
+        <a class="btn btn-secondary btn-sm" href="./matters.html">Open Matters</a>
+      </div>
+      <div class="admin-metric-list" id="admin-operations-metrics"></div>
+      <div class="admin-link-grid">
+        <a href="./matters.html"><strong>Matters</strong><span>Open and monitor work</span></a>
+        <a href="./assignments.html"><strong>Assignments</strong><span>Allocate operational work</span></a>
+        <a href="./cases.html"><strong>Cases</strong><span>Manage linked cases</span></a>
+        <a href="./document-vault.html"><strong>Document Vault</strong><span>Review document state</span></a>
+        <a href="./reports.html"><strong>Reports</strong><span>Generate live reports</span></a>
+        <a href="./analytics.html"><strong>Analytics</strong><span>Review business intelligence</span></a>
+      </div>
+    </section>
+  </section>
+
+  <!-- Finance & Activity Grid -->
+  <section class="admin-section-grid">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Finance</p>
+          <h2>Commercial Snapshot</h2>
+          <p>Quotes, invoices and payments are read from the existing commercial ledger.</p>
+        </div>
+        <div class="page-actions">
+          <a class="btn btn-secondary btn-sm" href="./quotes.html">Quotes</a>
+          <a class="btn btn-secondary btn-sm" href="./invoices.html">Invoices</a>
+        </div>
+      </div>
+      <div class="admin-finance-grid" id="admin-finance-grid"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Notifications &amp; Audit</p>
+          <h2>Administrative Activity</h2>
+          <p>Uses the existing notifications and authority action audit records.</p>
+        </div>
+      </div>
+      <div id="admin-notification-list" class="admin-list"><div class="empty-state">Loading administrative activity…</div></div>
+    </section>
+  </section>
+
+  <!-- Integration Health -->
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Infrastructure</p>
+        <h2>Integration Health</h2>
+        <p>Provider credentials remain server-side. This view exposes status only.</p>
+      </div>
+      <a class="btn btn-secondary btn-sm" href="./ai.html">AI Control</a>
+    </div>
+    <div id="admin-integrations" class="integration-grid"><div class="empty-state">Loading provider health…</div></div>
+    <div class="admin-event-panel" style="padding: 20px 24px; border-top: 1px solid var(--border);">
+      <div class="subheading-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin:0; font-family: 'Syne', sans-serif; font-size: 1.1rem; color: var(--ink);">Recent Integration Events</h3>
+        <span id="admin-ai-events" class="status-badge" style="font-size: 0.75rem; color: var(--accent);">0</span>
+      </div>
+      <div id="admin-integration-events" class="integration-event-list"><div class="empty-state">Loading events…</div></div>
     </div>
   </section>
-</section>
 
-<section class="admin-section-grid">
-  <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">Communications</p><h2>WhatsApp Command Centre</h2><p>Live communication activity plus new WhatsApp registration requests awaiting authorised review. Message handling remains in the existing communications route.</p></div><a class="btn btn-secondary" href="./communications.html">Open WhatsApp</a></div>
-    <div class="admin-metric-list" id="admin-communication-metrics"></div>
-    <div class="admin-alert-list" id="admin-registration-list"><div class="empty-state">Loading WhatsApp registrations…</div></div>
+  <!-- AI Oversight & Control Surfaces -->
+  <section class="admin-section-grid">
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Anthony Isaacs</p>
+          <h2>AI Oversight</h2>
+          <p>Management and visibility only. The production Gemini/Anthony runtime remains under the control plane.</p>
+        </div>
+        <a class="btn btn-secondary btn-sm" href="./ai.html">Open AI Control</a>
+      </div>
+      <div class="admin-oversight-grid">
+        <article><strong>Authority</strong><span>Delegated beneath active Super Admin authority.</span></article>
+        <article><strong>Identity</strong><span>WhatsApp-number resolution remains authoritative.</span></article>
+        <article><strong>Memory</strong><span>Existing relationship and historical-memory layers remain the source.</span></article>
+        <article><strong>Qualification</strong><span>New WhatsApp contacts are classified before access is activated.</span></article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">System Administration</p>
+          <h2>Control Surfaces</h2>
+          <p>Open the authoritative route directly.</p>
+        </div>
+      </div>
+      <div class="admin-link-grid">
+        <a href="./authority-people.html"><strong>Authority &amp; People</strong><span>Roles and Anthony permissions</span></a>
+        <a href="./staff-admin.html"><strong>Staff &amp; Permissions</strong><span>Staff accounts and access</span></a>
+        <a href="./organisation-profile.html"><strong>Organisation Master</strong><span>Legal identity and firm configuration</span></a>
+        <a href="./service-inventory.html"><strong>Service Inventory</strong><span>Services and authoritative rates</span></a>
+        <a href="./document-workspace.html"><strong>Document Workspace</strong><span>Controlled document operations</span></a>
+        <a href="./reports.html"><strong>Reports</strong><span>Operational and financial reporting</span></a>
+      </div>
+    </section>
   </section>
 
-  <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">Operations</p><h2>Work Queue</h2><p>Existing matters, tasks and appointments remain the operational source of truth.</p></div><a class="btn btn-secondary" href="./matters.html">Open Matters</a></div>
-    <div class="admin-metric-list" id="admin-operations-metrics"></div>
-    <div class="admin-link-grid">
-      <a href="./matters.html">Matters<span>Open and monitor work</span></a>
-      <a href="./assignments.html">Assignments<span>Allocate operational work</span></a>
-      <a href="./cases.html">Cases<span>Manage linked cases</span></a>
-      <a href="./document-vault.html">Document Vault<span>Review document state</span></a>
-      <a href="./reports.html">Reports<span>Generate live reports</span></a>
-      <a href="./analytics.html">Analytics<span>Review business intelligence</span></a>
-    </div>
-  </section>
-</section>
-
-<section class="admin-section-grid">
-  <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">Finance</p><h2>Commercial Snapshot</h2><p>Quotes, invoices and payments are read from the existing commercial ledger.</p></div><div class="page-actions"><a class="btn btn-secondary" href="./quotes.html">Quotes</a><a class="btn btn-secondary" href="./invoices.html">Invoices</a></div></div>
-    <div class="admin-finance-grid" id="admin-finance-grid"></div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">Notifications &amp; audit</p><h2>Administrative Activity</h2><p>Uses the existing notifications and authority action audit records.</p></div></div>
-    <div id="admin-notification-list" class="admin-list"><div class="empty-state">Loading administrative activity…</div></div>
-  </section>
-</section>
-
-<section class="panel admin-section">
-  <div class="panel-header"><div><p class="eyebrow">Infrastructure</p><h2>Integration Health</h2><p>Provider credentials remain server-side. This view exposes status only.</p></div><a class="btn btn-secondary" href="./ai.html">AI Control</a></div>
-  <div id="admin-integrations" class="integration-grid"><div class="empty-state">Loading provider health…</div></div>
-  <div class="admin-event-panel"><div class="subheading-row"><h3>Recent integration events</h3><span id="admin-ai-events">0</span></div><div id="admin-integration-events" class="integration-event-list"><div class="empty-state">Loading events…</div></div></div>
-</section>
-
-<section class="admin-section-grid">
-  <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">Anthony Isaacs</p><h2>AI Oversight</h2><p>Management and visibility only. The production Gemini/Anthony runtime, identity, authorization and OpenWA remain under the existing control plane.</p></div><a class="btn btn-secondary" href="./ai.html">Open AI Control</a></div>
-    <div class="admin-oversight-grid">
-      <article><strong>Authority</strong><span>Delegated beneath active Super Admin authority.</span></article>
-      <article><strong>Identity</strong><span>WhatsApp-number resolution remains authoritative.</span></article>
-      <article><strong>Memory</strong><span>Existing relationship and historical-memory layers remain the source.</span></article>
-      <article><strong>Qualification</strong><span>New WhatsApp contacts are classified before access is activated and pending registrations remain under authorised review.</span></article>
-    </div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-header"><div><p class="eyebrow">System administration</p><h2>Existing Control Surfaces</h2><p>Open the authoritative route instead of duplicating its functionality here.</p></div></div>
-    <div class="admin-link-grid">
-      <a href="./authority-people.html">Authority &amp; People<span>Roles and Anthony permissions</span></a>
-      <a href="./staff-admin.html">Staff &amp; Permissions<span>Staff accounts and access</span></a>
-      <a href="./organisation-profile.html">Organisation Master<span>Legal identity and firm configuration</span></a>
-      <a href="./service-inventory.html">Service Inventory<span>Services and authoritative rates</span></a>
-      <a href="./document-workspace.html">Document Workspace<span>Controlled document operations</span></a>
-      <a href="./reports.html">Reports<span>Operational and financial reporting</span></a>
-    </div>
-  </section>
-</section>
-
-<section class="panel admin-section">
-  <div class="panel-header"><div><p class="eyebrow">Security boundary</p><h2>Administrative Session</h2><p>Browser access is role-gated and database access remains governed by Supabase RLS and existing Super Admin RPCs.</p></div></div>
-  <div id="admin-security-status" class="security-status"></div>
-</section>
+  <!-- Footer / Security Boundary -->
+  <footer>
+    <div id="admin-security-status">SESSION ENCRYPTED · SUPABASE RLS ACTIVE · AUTHORED BY ISAACS &amp; PARTNERS</div>
+  </footer>
 </main>
 
 <script type="module">
@@ -292,16 +1006,23 @@ async function loadPABriefing(){
     briefing.reminders.forEach(r => {
       const card = document.createElement("article");
       card.className = "stat-card";
+      card.style.background = "var(--bg)";
+      card.style.padding = "16px";
+      card.style.borderRadius = "4px";
+      card.style.border = "1px solid var(--border)";
       card.style.borderLeft = `3px solid ${r.severity === "HIGH" ? "#ef4444" : r.severity === "MEDIUM" ? "#f59e0b" : "#3b82f6"}`;
       const labelSpan = document.createElement("span");
-      labelSpan.className = "stat-label";
+      labelSpan.className = "metric-label";
       labelSpan.textContent = `${r.category} · ${r.severity} PRIORITY`;
       const titleStrong = document.createElement("strong");
+      titleStrong.style.display = "block";
+      titleStrong.style.margin = "6px 0 4px 0";
+      titleStrong.style.color = "var(--ink)";
       titleStrong.textContent = r.title;
       const descP = document.createElement("p");
       descP.style.fontSize = "0.85rem";
-      descP.style.margin = "6px 0 8px 0";
-      descP.style.color = "var(--text-secondary)";
+      descP.style.margin = "0 0 12px 0";
+      descP.style.color = "var(--ink-muted)";
       descP.textContent = r.description;
       const actionA = document.createElement("a");
       actionA.href = r.actionUrl;
@@ -317,12 +1038,12 @@ async function loadPABriefing(){
 
 async function loadPortalAccess(){
   try{
-    error.hidden=true;
+    if (error) error.hidden=true;
     const snapshot=await clientPortalAdmin.snapshot();
     const clients=Array.isArray(snapshot?.clients)?snapshot.clients:[];
-    list.replaceChildren();
+    if (list) list.replaceChildren();
     if(!clients.length){
-      const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="No client portal records found.";tr.appendChild(td);list.appendChild(tr);return;
+      const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="empty-state";td.textContent="No client portal records found.";tr.appendChild(td);if(list)list.appendChild(tr);return;
     }
     clients.slice(0,20).forEach(row=>{
       const access=row.access||{};
@@ -330,7 +1051,7 @@ async function loadPortalAccess(){
       const tr=document.createElement("tr");
       const td1=document.createElement("td");
       const strong=document.createElement("strong");strong.textContent=label(row);
-      const small=document.createElement("small");small.textContent=row.email||"";
+      const small=document.createElement("small");small.style.display="block";small.style.color="var(--ink-muted)";small.textContent=row.email||"";
       td1.append(strong,small);
 
       const td2=document.createElement("td");
@@ -358,7 +1079,7 @@ async function loadPortalAccess(){
       }
       if(status!=="SUSPENDED"){
         const btn=document.createElement("button");
-        btn.className="btn btn-sm";
+        btn.className="btn btn-sm btn-secondary";
         btn.dataset.portalAction="suspend";
         btn.dataset.userId=row.user_id;
         btn.textContent="Suspend";
@@ -366,15 +1087,15 @@ async function loadPortalAccess(){
       }
       td5.appendChild(actions);
       tr.append(td1,td2,td3,td4,td5);
-      list.appendChild(tr);
+      if(list)list.appendChild(tr);
     });
   }catch(e){
-    error.hidden=false;error.textContent=e.message||"Unable to load client portal access.";
-    const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="Unable to load client portal access.";tr.appendChild(td);list.replaceChildren(tr);
+    if(error){error.hidden=false;error.textContent=e.message||"Unable to load client portal access.";}
+    const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="empty-state";td.textContent="Unable to load client portal access.";tr.appendChild(td);if(list)list.replaceChildren(tr);
   }
 }
 
-list.addEventListener("click",async event=>{
+list?.addEventListener("click",async event=>{
   const button=event.target.closest("button[data-portal-action]");
   if(!button)return;
   button.disabled=true;
@@ -384,7 +1105,7 @@ list.addEventListener("click",async event=>{
     else await clientPortalAdmin.suspend(button.dataset.userId,notes);
     await loadPortalAccess();
   }catch(e){
-    error.hidden=false;error.textContent=e.message||"Portal access action failed.";
+    if(error){error.hidden=false;error.textContent=e.message||"Portal access action failed.";}
   }finally{button.disabled=false;}
 });
 
