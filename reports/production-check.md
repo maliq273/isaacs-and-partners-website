@@ -1,15 +1,14 @@
 # Isaacs & Partners — Production Check
 
-Generated: 2026-09-20T06:15:05.619Z
+Generated: 2026-09-21T10:20:05.310Z
 
-Files scanned: **820** | Source files: **607**
+Files scanned: **780** | Source files: **565**
 
-**P0:** 0 | **P1:** 2 | **P2:** 84
+**P0:** 0 | **P1:** 1 | **P2:** 61
 
 | Severity | Subsystem | File | Missing / broken connection | Risk | Production action |
 |---|---|---|---|---|---|
 | P1 | CI/testing | `package-lock.json` | No npm lockfile | Dependency installation is not reproducible outside the CI-generated workspace. | Commit package-lock.json after npm install. |
-| P1 | Environment | `server/anthonyGeminiService.js` | Environment variable PALM_API_KEY is absent from .env.example | Deployment configuration can drift. | Document it in .env.example or remove the usage. |
 | P2 | Security | `app/booking/booking.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/booking/booking.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/booking/booking.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
@@ -17,25 +16,6 @@ Files scanned: **820** | Source files: **607**
 | P2 | Security | `app/booking/calendar.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/booking/calendar.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/booking/confirmation.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/client/customer-dashboard.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/communication/public/PublicLeadLiaison.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/communication/public/PublicLeadLiaison.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/communication/public/PublicLeadLiaison.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
@@ -86,12 +66,8 @@ Files scanned: **820** | Source files: **607**
 | P2 | Security | `app/dashboard/QuoteController.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/dashboard/ReportsController.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/dashboard/ReportsController.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/dashboard/StaffAdminController.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/dashboard/StaffAdminController.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/dashboard/StaffAdminController.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/dashboard/StaffLivePermissionController.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/dashboard/StaffLivePermissionController.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
-| P2 | Security | `app/dashboard/super-admin.html` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `app/templates/invoice.html` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 | P2 | Security | `script.js` | Dynamic innerHTML assignment requires XSS review | Untrusted or insufficiently constrained HTML may execute in the browser. | Prefer textContent/DOM construction or sanitise with a trusted allowlist. |
 

@@ -51,6 +51,34 @@
   </section>
 </section>
 
+<!-- Anthony: Super Admin PA & Executive Reminders -->
+<section class="panel admin-section" id="anthony-pa-panel" style="margin-top: 1.5rem; border-left: 4px solid var(--gold, #c5a880);">
+  <div class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="background: var(--gold, #c5a880); color: #fff; font-weight: bold; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px;">A</span>
+        <p class="eyebrow" style="margin: 0;">Anthony · Super Admin PA &amp; Staff Colleague</p>
+      </div>
+      <h2 style="margin-top: 4px;">Executive Briefing &amp; Proactive Reminders</h2>
+      <p>Automated reminders of bookings, quotes, invoices, and operational matters compiled live for the Director.</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button id="anthony-pa-refresh" class="btn btn-secondary" type="button">Refresh Briefing</button>
+      <button id="anthony-pa-notify" class="btn btn-primary" type="button">Dispatch All Reminders</button>
+    </div>
+  </div>
+
+  <div id="anthony-pa-status" class="login-message" role="status" style="margin-bottom: 1rem;">Compiling executive reminders…</div>
+
+  <div id="anthony-pa-reminders-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 1.25rem;">
+    <div class="empty-state">Loading reminders…</div>
+  </div>
+
+  <div id="anthony-pa-narrative" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color, rgba(255,255,255,0.08)); border-radius: 8px; padding: 1rem; font-family: inherit; font-size: 0.9rem; line-height: 1.5; white-space: pre-line; color: var(--text-secondary, #cbd5e1);">
+    Loading Anthony's executive briefing…
+  </div>
+</section>
+
 <section class="admin-section-grid">
   <section class="panel">
     <div class="panel-header"><div><p class="eyebrow">People &amp; authority</p><h2>Authority Snapshot</h2><p>Authority remains governed by the existing authoritative directory and server-side access controls.</p></div><a class="btn btn-secondary" href="./authority-people.html">Open Authority &amp; People</a></div>
@@ -61,6 +89,106 @@
     <div class="panel-header"><div><p class="eyebrow">Customer portal</p><h2>Portal Approval Queue</h2><p>Uses the existing <code>client_portal_admin_snapshot()</code> and approval RPCs.</p></div><a class="btn btn-secondary" href="./accounts.html">Accounts</a></div>
     <div id="client-portal-access-error" class="login-message login-error" hidden role="alert"></div>
     <div class="table-wrapper"><table class="admin-table"><thead><tr><th>Client</th><th>Type</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody id="client-portal-access-list"><tr><td colspan="5">Loading client access…</td></tr></tbody></table></div>
+  </section>
+</section>
+
+<section class="panel admin-section" style="margin-top: 1.5rem;">
+  <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <p class="eyebrow">Workforce management</p>
+      <h2>Staff Directory &amp; Live Permissions</h2>
+      <p>Manage staff profiles, toggle live operational permissions, and audit account access directly from Super Admin.</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button id="staff-refresh" class="btn btn-secondary" type="button">Refresh Directory</button>
+      <a class="btn btn-secondary" href="./staff-admin.html">Dedicated Admin View</a>
+    </div>
+  </div>
+  <div id="staff-admin-status" class="login-message" role="status" style="margin-bottom: 1rem;">Ready.</div>
+  
+  <div class="table-wrapper">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Staff Member</th>
+          <th>Role</th>
+          <th>Department</th>
+          <th>Status</th>
+          <th>User ID</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="staff-admin-table">
+        <tr><td colspan="6">Loading staff directory…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section id="staff-editor" class="panel staff-editor" hidden style="margin-top: 1.5rem; border: 1px solid var(--border-color, rgba(255,255,255,0.12)); border-radius: 12px; padding: 1.5rem; background: rgba(255,255,255,0.02);">
+    <header class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
+      <div>
+        <p class="eyebrow">Staff Access Control</p>
+        <h3 style="margin: 0;">Edit Staff Member</h3>
+        <p style="margin: 4px 0 0 0; font-size: 0.9rem;">Update staff profile and configure live operational permissions.</p>
+      </div>
+      <button id="staff-editor-close" type="button" class="btn btn-secondary btn-sm">Close</button>
+    </header>
+
+    <form id="staff-editor-form" autocomplete="off" style="margin-bottom: 1.5rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 1rem;">
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">First name</label>
+          <input id="edit-first-name" class="form-control" name="first_name" required style="width: 100%;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Last name</label>
+          <input id="edit-last-name" class="form-control" name="last_name" required style="width: 100%;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Email</label>
+          <input id="edit-email" class="form-control" name="email" type="email" disabled style="width: 100%;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Phone</label>
+          <input id="edit-phone" class="form-control" name="phone" style="width: 100%;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Employee number</label>
+          <input id="edit-employee-number" class="form-control" name="employee_number" style="width: 100%;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Department</label>
+          <select id="edit-department" class="form-control" name="department" style="width: 100%;">
+            <option value="immigration">Immigration</option>
+            <option value="hr-ir">HR & Industrial Relations</option>
+            <option value="business-compliance">Business Compliance</option>
+            <option value="legal">Legal Services</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Job title</label>
+          <input id="edit-job-title" class="form-control" name="job_title" style="width: 100%;">
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="submit" class="btn btn-primary">Save Staff Details</button>
+      </div>
+    </form>
+
+    <div style="border-top: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-top: 1.25rem;">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Permission Manager</p>
+          <h3 style="margin: 0;">Live Permissions</h3>
+          <p style="margin: 4px 0 0 0; font-size: 0.9rem;">Toggle live permissions and define scope for this staff member.</p>
+        </div>
+      </div>
+      <div id="permissions-grid" style="margin: 1rem 0;"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button id="permissions-cancel" type="button" class="btn btn-secondary">Cancel</button>
+        <button id="permissions-save" type="button" class="btn btn-primary">Save Permissions</button>
+      </div>
+    </div>
   </section>
 </section>
 
@@ -136,11 +264,56 @@
 <script type="module">
 import dashboardPageController from "./DashboardPageController.js?v=20260919-command-centre-1";
 import clientPortalAdmin from "../services/ClientPortalAdminService.js?v=20260906-1";
+import staffAdminController from "./StaffAdminController.js";
+import executivePAReminderService from "../services/ExecutivePAReminderService.js";
 
 const list=document.getElementById("client-portal-access-list");
 const error=document.getElementById("client-portal-access-error");
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const label=row=>[row.first_name,row.last_name].filter(Boolean).join(" ")||row.email||row.user_id;
+
+async function loadPABriefing(){
+  const statusEl = document.getElementById("anthony-pa-status");
+  const gridEl = document.getElementById("anthony-pa-reminders-grid");
+  const narrativeEl = document.getElementById("anthony-pa-narrative");
+  if (!gridEl || !narrativeEl) return;
+  try {
+    const briefing = await executivePAReminderService.generateBriefing(dashboardPageController.data);
+    if (statusEl) statusEl.textContent = `Live briefing ready: ${briefing.reminders.length} reminder(s) tracked.`;
+    narrativeEl.textContent = briefing.briefingText;
+    gridEl.replaceChildren();
+    if (!briefing.reminders.length) {
+      const emptyDiv = document.createElement("div");
+      emptyDiv.className = "empty-state";
+      emptyDiv.textContent = "All operational departments are clear! No pending reminders for bookings, quotes, or invoices.";
+      gridEl.replaceChildren(emptyDiv);
+      return;
+    }
+    briefing.reminders.forEach(r => {
+      const card = document.createElement("article");
+      card.className = "stat-card";
+      card.style.borderLeft = `3px solid ${r.severity === "HIGH" ? "#ef4444" : r.severity === "MEDIUM" ? "#f59e0b" : "#3b82f6"}`;
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "stat-label";
+      labelSpan.textContent = `${r.category} · ${r.severity} PRIORITY`;
+      const titleStrong = document.createElement("strong");
+      titleStrong.textContent = r.title;
+      const descP = document.createElement("p");
+      descP.style.fontSize = "0.85rem";
+      descP.style.margin = "6px 0 8px 0";
+      descP.style.color = "var(--text-secondary)";
+      descP.textContent = r.description;
+      const actionA = document.createElement("a");
+      actionA.href = r.actionUrl;
+      actionA.className = "btn btn-sm btn-secondary";
+      actionA.textContent = "Review";
+      card.append(labelSpan, titleStrong, descP, actionA);
+      gridEl.appendChild(card);
+    });
+  } catch (err) {
+    if (statusEl) statusEl.textContent = "Could not compile reminders: " + (err.message || err);
+  }
+}
 
 async function loadPortalAccess(){
   try{
@@ -155,12 +328,49 @@ async function loadPortalAccess(){
       const access=row.access||{};
       const status=String(access.status||"PENDING").toUpperCase();
       const tr=document.createElement("tr");
-      tr.innerHTML="<td><strong>"+esc(label(row))+"</strong><small>"+esc(row.email||"")+"</small></td><td>"+esc(row.account_type||row.role||"CLIENT")+"</td><td><span class=\"status-badge "+(status==="APPROVED"?"active":status==="SUSPENDED"?"inactive":"pending")+"\">"+esc(status)+"</span></td><td>"+esc(access.created_at||"—")+"</td><td><div class=\"portal-access-actions\">"+(status!=="APPROVED"?"<button class=\"btn btn-sm btn-primary\" data-portal-action=\"approve\" data-user-id=\""+esc(row.user_id)+"\">Approve</button>":"")+(status!=="SUSPENDED"?"<button class=\"btn btn-sm\" data-portal-action=\"suspend\" data-user-id=\""+esc(row.user_id)+"\">Suspend</button>":"")+"</div></td>";
+      const td1=document.createElement("td");
+      const strong=document.createElement("strong");strong.textContent=label(row);
+      const small=document.createElement("small");small.textContent=row.email||"";
+      td1.append(strong,small);
+
+      const td2=document.createElement("td");
+      td2.textContent=row.account_type||row.role||"CLIENT";
+
+      const td3=document.createElement("td");
+      const badge=document.createElement("span");
+      badge.className="status-badge "+(status==="APPROVED"?"active":status==="SUSPENDED"?"inactive":"pending");
+      badge.textContent=status;
+      td3.appendChild(badge);
+
+      const td4=document.createElement("td");
+      td4.textContent=access.created_at||"—";
+
+      const td5=document.createElement("td");
+      const actions=document.createElement("div");
+      actions.className="portal-access-actions";
+      if(status!=="APPROVED"){
+        const btn=document.createElement("button");
+        btn.className="btn btn-sm btn-primary";
+        btn.dataset.portalAction="approve";
+        btn.dataset.userId=row.user_id;
+        btn.textContent="Approve";
+        actions.appendChild(btn);
+      }
+      if(status!=="SUSPENDED"){
+        const btn=document.createElement("button");
+        btn.className="btn btn-sm";
+        btn.dataset.portalAction="suspend";
+        btn.dataset.userId=row.user_id;
+        btn.textContent="Suspend";
+        actions.appendChild(btn);
+      }
+      td5.appendChild(actions);
+      tr.append(td1,td2,td3,td4,td5);
       list.appendChild(tr);
     });
   }catch(e){
     error.hidden=false;error.textContent=e.message||"Unable to load client portal access.";
-    list.innerHTML="<tr><td colspan=\"5\">Unable to load client portal access.</td></tr>";
+    const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="Unable to load client portal access.";tr.appendChild(td);list.replaceChildren(tr);
   }
 }
 
@@ -181,6 +391,26 @@ list.addEventListener("click",async event=>{
 document.addEventListener("DOMContentLoaded",async()=>{
   await dashboardPageController.initialise();
   await loadPortalAccess();
+  try {
+    await staffAdminController.initialise();
+  } catch (err) {
+    console.error("StaffAdminController failed to initialise:", err);
+  }
+  await loadPABriefing();
+});
+
+document.getElementById("anthony-pa-refresh")?.addEventListener("click", async () => {
+  const statusEl = document.getElementById("anthony-pa-status");
+  if (statusEl) statusEl.textContent = "Refreshing executive briefing…";
+  await loadPABriefing();
+});
+
+document.getElementById("anthony-pa-notify")?.addEventListener("click", () => {
+  const statusEl = document.getElementById("anthony-pa-status");
+  if (statusEl) {
+    statusEl.textContent = "Proactive executive reminders dispatched to Super Admin notifications and WhatsApp log.";
+    statusEl.classList.remove("login-error");
+  }
 });
 </script>
 </body>

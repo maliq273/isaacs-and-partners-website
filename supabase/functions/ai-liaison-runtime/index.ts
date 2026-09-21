@@ -85,8 +85,12 @@ if(qualification){
   return json({ok:true,conversation:{...con,state:qualification.nextState,facts},message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"QUALIFY",qualificationState:qualification.nextState,registrationPending:Boolean(qualification.approvalRequired)},context:{identity:{type:identity?.identityType,status:identity?.identityStatus,authorityRole,verified:identity?.verified},authorization}});
 }
 
-async function notifySuperAdminWithAlert(adminDb:any,alertText:string,conversationId:string,customerPhone:string,chatId:string){
+async function notifySuperAdminWithAlert(adminDb:any,alertText:string,conversationId:string,customerPhone:string,chatId:string,compiledQuote:any=null,proposedReply:string=""){
   const admins=await adminDb.from("authority_directory").select("user_id, phone_number, authority_role").eq("authority_role","SUPER_ADMIN").eq("is_active",true);
+  const actionButtons=[
+    {id:"APPROVE_YES",text:"Yes - Approve",type:"reply"},
+    {id:"REJECT_NO",text:"No - Reject",type:"reply"}
+  ];
   if(admins.data&&admins.data.length>0){
     for(const adm of admins.data){
       const adminPhone=adm.phone_number;
@@ -95,8 +99,50 @@ async function notifySuperAdminWithAlert(adminDb:any,alertText:string,conversati
         const key=`sa-alert:${conversationId}:${adminPhone}`;
         const existing=await adminDb.from("communication_messages").select("id").eq("idempotency_key",key).maybeSingle();
         if(existing.data?.id)continue;
-        const m=await adminDb.from("communication_messages").insert({customer_user_id:adm.user_id||null,channel:"WHATSAPP",direction:"OUTBOUND",phone_number:adminPhone,chat_id:adminChatId,body:alertText,status:"QUEUED",idempotency_key:key,metadata:{source:"ai-liaison-runtime",type:"SUPER_ADMIN_APPROVAL_ALERT",conversation_id:conversationId,customer_phone:customerPhone,customer_chat_id:chatId}}).select("id").single();
+        const m=await adminDb.from("communication_messages").insert({
+          customer_user_id:adm.user_id||null,
+          channel:"WHATSAPP",
+          direction:"OUTBOUND",
+          phone_number:adminPhone,
+          chat_id:adminChatId,
+          body:alertText,
+          status:"QUEUED",
+          idempotency_key:key,
+          metadata:{
+            source:"ai-liaison-runtime",
+            type:"SUPER_ADMIN_APPROVAL_ALERT",
+            conversation_id:conversationId,
+            customer_phone:customerPhone,
+            customer_chat_id:chatId,
+            interactive:true,
+            action_buttons:actionButtons,
+            buttons:actionButtons,
+            compiled_quote:compiledQuote,
+            proposed_reply:proposedReply
+          }
+        }).select("id").single();
         if(m.data?.id)await adminDb.from("communication_outbox").insert({message_id:m.data.id,chat_id:adminChatId,status:"QUEUED"});
+      }
+      if(adm.user_id){
+        const notifKey=`notif-approval:${conversationId}`;
+        const existingNotif=await adminDb.from("notifications").select("id").eq("recipient_user_id",adm.user_id).contains("metadata",{alert_key:notifKey}).maybeSingle();
+        if(!existingNotif.data?.id){
+          await adminDb.from("notifications").insert({
+            recipient_user_id:adm.user_id,
+            channel:"IN_APP",
+            subject:`⚠️ Approval Needed: ${customerPhone}`,
+            message:alertText,
+            status:"UNREAD",
+            metadata:{
+              alert_key:notifKey,
+              conversation_id:conversationId,
+              customer_phone:customerPhone,
+              action_buttons:actionButtons,
+              compiled_quote:compiledQuote,
+              proposed_reply:proposedReply
+            }
+          });
+        }
       }
     }
   }
@@ -105,30 +151,55 @@ async function notifySuperAdminWithAlert(adminDb:any,alertText:string,conversati
 // Lead Persistence for all incoming enquiries matched by WhatsApp / Phone Number
 if(chatId||phone){const cleanPhone=phone||chatId.replace(/@.*$/,"");await admin.from("public_enquiries").upsert({session_id:chatId,service_domain:nullable(p?.serviceDomain,100),answers:[{message:body,timestamp:new Date().toISOString()}],qualified:true,metadata:{phone:cleanPhone,channel,chat_id:chatId,created_by:"ai-liaison-runtime"}},{onConflict:"session_id"}).catch(()=>null);}
 
-// Super Admin Approval Decision Interceptor ("Can I proceed? YES or NO")
+// Super Admin Approval Decision Interceptor (Button or Text: YES/APPROVE_YES or NO/REJECT_NO)
 const cleanBody=body.trim().toLowerCase();
-const isApproval=/^(yes|y|proceed|approve|approved|go ahead|ok|okay)$/i.test(cleanBody);
-const isRejection=/^(no|n|reject|rejected|decline)$/i.test(cleanBody);
+const isApproval=/^(approve_yes|yes|y|proceed|approve|approved|go ahead|ok|okay)$/i.test(cleanBody);
+const isRejection=/^(reject_no|no|n|reject|rejected|decline)$/i.test(cleanBody);
 if((isApproval||isRejection)&&staffConversation&&String(authorityRole).toUpperCase()==="SUPER_ADMIN"){
   const pendingConv=await admin.from("ai_conversations").select("*").eq("state","approval_needed").order("updated_at",{ascending:false}).limit(1).maybeSingle();
   const targetConvId=pendingConv?.data?.id;
 
   if(targetConvId){
+    const pendingFacts=pendingConv?.data?.facts||{};
+    const targetCustomerPhone=pendingConv?.data?.phone_number||pendingFacts.customerPhone||"enquiry";
+    const targetChatId=pendingConv?.data?.chat_id||(targetCustomerPhone?`${targetCustomerPhone.replace(/[^0-9]/g,"")}@c.us`:null);
+    const proposedReply=pendingFacts.proposedReply||"";
+
     if(isApproval){
-      if(targetConvId){
-        const cur=await admin.from("ai_conversations").select("facts").eq("id",targetConvId).single();
-        await admin.from("ai_conversations").update({state:"AI_ACTIVE",facts:{...(cur.data?.facts||{}),approval_needed:false,super_admin_approved:true},updated_at:new Date().toISOString()}).eq("id",targetConvId);
+      await admin.from("ai_conversations").update({state:"AI_ACTIVE",facts:{...pendingFacts,approval_needed:false,super_admin_approved:true,approved_at:new Date().toISOString()},updated_at:new Date().toISOString()}).eq("id",targetConvId);
+
+      // Send the approved quotation/reply to the customer on WhatsApp!
+      if(proposedReply&&targetChatId){
+        const custKey=`approved-quote-dispatch:${targetConvId}:${Date.now()}`;
+        const custMsg=await admin.from("communication_messages").insert({
+          customer_user_id:pendingConv?.data?.user_id||null,
+          channel:"WHATSAPP",
+          direction:"OUTBOUND",
+          phone_number:targetCustomerPhone,
+          chat_id:targetChatId,
+          body:proposedReply,
+          status:"QUEUED",
+          idempotency_key:custKey,
+          metadata:{
+            source:"ai-liaison-runtime",
+            approved_by_super_admin:true,
+            conversation_id:targetConvId,
+            compiled_quote:pendingFacts.compiledQuote||null
+          }
+        }).select("id").single();
+        if(custMsg.data?.id){
+          await admin.from("communication_outbox").insert({message_id:custMsg.data.id,chat_id:targetChatId,status:"QUEUED"});
+        }
       }
-      const reply=`Thank you. Super Admin authorization CONFIRMED (YES) for customer ${pendingConv?.data?.phone_number||"enquiry"}. Anthony will proceed.`;
+
+      const reply=`✅ Authorization CONFIRMED (YES). The compiled quote has been sent to customer ${targetCustomerPhone}.`;
       const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"SUPER_ADMIN_APPROVAL",null,{source:"ai-liaison-runtime"});
       const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,mid,msgId):null;
-      return json({ok:true,conversation:con,message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"SUPER_ADMIN_APPROVED"}});
+      return json({ok:true,conversation:con,message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"SUPER_ADMIN_APPROVED",customerSent:Boolean(proposedReply)}});
     }else{
-      if(targetConvId){
-        const cur=await admin.from("ai_conversations").select("facts").eq("id",targetConvId).single();
-        await admin.from("ai_conversations").update({state:"HUMAN_ACTIVE",facts:{...(cur.data?.facts||{}),approval_needed:false,super_admin_rejected:true},updated_at:new Date().toISOString()}).eq("id",targetConvId);
-      }
-      const reply=`Understood. Super Admin authorization DECLINED (NO) for customer ${pendingConv?.data?.phone_number||"enquiry"}. Request assigned for manual human intervention.`;
+      await admin.from("ai_conversations").update({state:"HUMAN_ACTIVE",facts:{...pendingFacts,approval_needed:false,super_admin_rejected:true,rejected_at:new Date().toISOString()},updated_at:new Date().toISOString()}).eq("id",targetConvId);
+
+      const reply=`❌ Authorization DECLINED (NO). Quote was NOT sent to customer ${targetCustomerPhone}. The matter is routed for manual staff intervention.`;
       const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"SUPER_ADMIN_DECLINED",null,{source:"ai-liaison-runtime"});
       const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,mid,msgId):null;
       return json({ok:true,conversation:con,message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"SUPER_ADMIN_DECLINED"}});
@@ -142,20 +213,50 @@ if(["HUMAN_ACTIVE"].includes(String(con.state||"").toUpperCase())&&!staffConvers
 const historicalMemory=!staffConversation?await historicalRetriever.retrieve({db:admin,conversationId:con.id,contactId:contact?.id||null,userId:uid,query:body,history:prior}):{found:false,records:[],isHistoricalRecall:false};const relationshipRecords=!staffConversation?relationshipMemory.observe({body,contact,onboardingFacts:contact?.onboarding_facts||{},user,conversationId:con.id,sourceMessageId:clientMsg?.id||null}).records:[];await persistMemories(relationshipRecords);const rawOperational=await roi.build({contactId:contact?.id||null,userId:uid,matterId:mid});const operationalIntelligence=await scopeOperational(rawOperational,identity);
 const ctx={id:con.id,chatId,phoneNumber:con.phone_number||phone,state:con.state||"AI_ACTIVE",facts:con.facts||{},memory:con.facts?.customerMemory||{},lastIntent:con.last_intent||null,lastService:con.last_service||null,messages:prior};let result:any;if(identity?.verified&&/^(?:hi[,.]?\s*)?(?:who am i|identify me|what is my identity|what identity do you have for me)\??$/i.test(body)){result={handled:true,action:"RESPOND",intent:{intent:"IDENTITY_AUTHORITY",confidence:1},servicePlan:{domain:null,service:null,commercial:{quoteRequired:false}},reply:`Hello ${identity.authoritativeName||"there"}. I recognise this WhatsApp number in the Isaacs & Partners database as ${String(identity.identityType||"UNKNOWN").replace(/_/g," ")}${authorityRole?` with authority role ${authorityRole.replace(/_/g," ")}`:""}. The identity resolution used the verified WhatsApp number and existing organisational/client records; your WhatsApp display name does not grant authority.`,aiProvider:"DETERMINISTIC_IDENTITY",aiModel:null,companySources:[identity.source||"database"]};}else result=await agent().handleInbound({chatId,phoneNumber:ctx.phoneNumber,body,messageId:msgId,user:staffConversation?null:user,matter:resolvedMatter,operationalContext:{...operationalIntelligence,authorityContext:identity?.authority||null,identityContext:identity,authorizationContext:authorization,assistantName:"Anthony"},conversation:ctx,contact,historicalMemory});
 
-const isApprovalNeeded=Boolean(result?.requiresApproval||result?.action==="ESCALATE"||result?.context?.facts?.approval_needed);
+const isApprovalNeeded=Boolean(
+  result?.approval_needed||
+  result?.approvalNeeded||
+  result?.requiresApproval||
+  result?.action==="APPROVAL_NEEDED"||
+  result?.context?.facts?.approval_needed||
+  con?.facts?.approval_needed
+);
 const nextState=isApprovalNeeded?"approval_needed":(result?.action==="ESCALATE"&&!staffConversation?"AI_ESCALATED":con.state||"AI_ACTIVE");
 
 if(result?.action==="ESCALATE"&&!staffConversation){const intervention=await admin.rpc("ai_create_human_intervention",{p_conversation_id:con.id,p_matter_id:mid||con.matter_id||null,p_client_user_id:uid,p_reason:result?.reason||"Anthony has requested authorised human assistance.",p_priority:result?.priority||"NORMAL",p_question:body,p_ai_context:{assistant_name:"Anthony",identity:identity?{type:identity.identityType,status:identity.identityStatus,authority_role:authorityRole}:null,authorization,operational:operationalIntelligence.portfolio||null}});if(intervention.error)throw intervention.error;}
 const reply=clean(result?.reply,8192);const aiMsg=reply?await append(con.id,"AI","OUTBOUND",reply,result?.intent?.intent||null,result?.servicePlan?.domain||null,{source:"ai-liaison-runtime",runtime:"WhatsAppAgent",assistant_name:"Anthony",action:result?.action||"RESPOND",ai_provider:result?.aiProvider||null,ai_model:result?.aiModel||null,company_truth_sources:result?.companySources||[],context_messages_loaded:prior.length,historical_memory_found:historicalMemory.found,portfolio_attention:operationalIntelligence.portfolio.attentionLevel,next_action:operationalIntelligence.portfolio.nextAction,identity_type:identity?.identityType||"UNKNOWN",identity_status:identity?.identityStatus||"UNKNOWN",authority_id:identity?.authority?.authorityId||null,authority_role:authorityRole||null,phone_verified:Boolean(identity?.verified),authorization_scope:authorization.scope.level,authorization_allowed:authorization.allowed,disclosure_rule:authorization.disclosureRule}):null;
-const facts={...(con.facts||{}),...(result?.context?.facts||{}),approval_needed:isApprovalNeeded,customerMemory:result?.context?.memory||con.facts?.customerMemory||{}};
+const customerPhone=phone||con.phone_number||chatId.replace(/@.*$/,"");
+const facts={
+  ...(con.facts||{}),
+  ...(result?.context?.facts||{}),
+  approval_needed:isApprovalNeeded,
+  customerPhone,
+  proposedReply:result?.proposedReply||reply||null,
+  compiledQuote:result?.compiledQuote||result?.context?.facts?.compiledQuote||null,
+  customerMemory:result?.context?.memory||con.facts?.customerMemory||{}
+};
 await admin.from("ai_conversations").update({facts,last_intent:result?.intent?.intent||con.last_intent||null,last_service:result?.servicePlan?.service?.name||con.last_service||null,state:nextState,updated_at:new Date().toISOString()}).eq("id",con.id);
 
 if(isApprovalNeeded&&!staffConversation){
-  const customerPhone=phone||con.phone_number||chatId.replace(/@.*$/,"");
   const transcriptLines=[...prior.map((x:any)=>`${x.sender_type||x.sender||"CLIENT"}: ${x.body}`),`CLIENT: ${body}`];
   const transcript=transcriptLines.join("\n");
-  const alertText=`⚠️ APPROVAL NEEDED FOR ANTHONY AI\n\nCustomer Phone: ${customerPhone}\n\nFull Conversation Transcript:\n${transcript.slice(-3000)}\n\nProposed Response / Action:\n"${reply||"Human Verification Required"}"\n\nCan I proceed? (Reply YES or NO)`;
-  await notifySuperAdminWithAlert(admin,alertText,con.id,customerPhone,chatId);
+  const compiledQuote=result?.compiledQuote||result?.context?.facts?.compiledQuote||null;
+  const quoteSummary=compiledQuote?.alertSummary||"";
+  const alertText=[
+    `⚠️ APPROVAL NEEDED FOR ANTHONY AI`,
+    ``,
+    `Customer Phone: ${customerPhone}`,
+    ``,
+    `Full Conversation Transcript:`,
+    `${transcript.slice(-3000)}`,
+    ``,
+    quoteSummary?`Compiled Price / Quotation Details:\n${quoteSummary}\n`:null,
+    `Proposed Response / Action:`,
+    `"${reply||"Human Verification Required"}"`,
+    ``,
+    `Can I proceed? (Tap Yes or No button below)`
+  ].filter(Boolean).join("\n");
+  await notifySuperAdminWithAlert(admin,alertText,con.id,customerPhone,chatId,compiledQuote,reply);
 }
 
-let out=null;if(reply&&channel==="WHATSAPP"&&(result?.action==="RESPOND"||staffConversation))out=await queue(con,uid,reply,phone,mid,msgId);return json({ok:true,conversation:{...con,state:nextState,facts},message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:result?.action||null,intent:result?.intent||null,servicePlan:result?.servicePlan||null,sales:result?.sales||null,escalated:result?.action==="ESCALATE",approvalNeeded:isApprovalNeeded,aiProvider:result?.aiProvider||null,aiModel:result?.aiModel||null,companySources:result?.companySources||[]},context:{historyLoaded:prior.length,maxHistory:40,historicalMemoryFound:historicalMemory.found,historicalRecall:historicalMemory.isHistoricalRecall,portfolio:operationalIntelligence.portfolio,identity:identity?{type:identity.identityType,status:identity.identityStatus,authorityRole,verified:identity.verified,source:identity.source,relationships:identity.relationships}:null,authorization}})}catch(e){if(e instanceof Response)return e;console.error("AI liaison runtime failed",e);return json({error:e instanceof Error?e.message:"AI liaison runtime failed."},500)}});
+let out=null;if(reply&&channel==="WHATSAPP"&&(result?.action==="RESPOND"||staffConversation)&&!isApprovalNeeded)out=await queue(con,uid,reply,phone,mid,msgId);return json({ok:true,conversation:{...con,state:nextState,facts},message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:result?.action||null,intent:result?.intent||null,servicePlan:result?.servicePlan||null,sales:result?.sales||null,escalated:result?.action==="ESCALATE",approvalNeeded:isApprovalNeeded,aiProvider:result?.aiProvider||null,aiModel:result?.aiModel||null,companySources:result?.companySources||[]},context:{historyLoaded:prior.length,maxHistory:40,historicalMemoryFound:historicalMemory.found,historicalRecall:historicalMemory.isHistoricalRecall,portfolio:operationalIntelligence.portfolio,identity:identity?{type:identity.identityType,status:identity.identityStatus,authorityRole,verified:identity.verified,source:identity.source,relationships:identity.relationships}:null,authorization}})}catch(e){if(e instanceof Response)return e;console.error("AI liaison runtime failed",e);return json({error:e instanceof Error?e.message:"AI liaison runtime failed."},500)}});

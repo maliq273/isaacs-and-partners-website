@@ -4,7 +4,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
-const ignored = new Set(['.git', 'node_modules', 'dist', 'build', 'coverage', '.next', '.cache', 'reports']);
+const ignored = new Set(['.git', 'node_modules', 'dist', 'build', 'coverage', '.next', '.cache', 'reports', '.aistudio']);
 const extensions = new Set(['.js', '.mjs', '.cjs']);
 const files = [];
 

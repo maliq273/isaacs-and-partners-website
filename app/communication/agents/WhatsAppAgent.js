@@ -11,6 +11,7 @@ import CommercialPolicyService from "../services/CommercialPolicyService.js";
 import CustomerMemoryService from "../../ai/CustomerMemoryService.js";
 import AuthorityActionService from "../../ai/AuthorityActionService.js";
 import Communication from "../../models/Communication.js";
+import CostingModelService from "../../ai/CostingModelService.js";
 
 export { CONVERSATION_STATES };
 
@@ -34,6 +35,7 @@ export default class WhatsAppAgent {
     constructor({ serviceCatalog = null, pricingPolicy = null, responseGenerator = null, mode = "OPERATIONS", db = null } = {}) {
         this.intentClassifier = new WhatsAppIntentClassifier(); this.serviceClassifier = new ServiceClassifier();
         this.serviceIntelligence = new ServiceIntelligenceEngine({ serviceCatalog, pricingPolicy }); this.conversations = new ConversationService();
+        this.costingModel = new CostingModelService({ pricing: pricingPolicy, catalog: serviceCatalog });
         this.memory = new CustomerMemoryService(); this.handover = new HandoverService(); this.leads = new LeadService(); this.sales = new SalesService();
         this.escalations = new EscalationHandler(); this.authority = new StaffAuthorityService(); this.commercial = new CommercialPolicyService();
         this.actionService = db ? new AuthorityActionService({ db }) : null;
@@ -103,12 +105,42 @@ export default class WhatsAppAgent {
         context.lastIntent = intent.intent; context.lastService = servicePlan.service; this.conversations.mergeFacts(context, lead.facts);
         if (context.state === "HUMAN_ACTIVE") return { handled: true, action: "ROUTE_TO_HUMAN", context, intent, lead, servicePlan };
         const sales = this.sales.buildState({ servicePlan, lead });
-        const replyResult = await this.generateReply({ context, body, intent, servicePlan, lead, sales, user, matter, operationalContext, historicalMemory });
-        const reply = typeof replyResult === "object" ? replyResult?.text : replyResult;
+
+        // Compile price quote from the costing model if query asks for quotes/pricing
+        const isPricingInquiry = this.costingModel.isPricingOrQuoteInquiry(body, intent?.intent, servicePlan);
+        let compiledQuote = null;
+        if (isPricingInquiry) {
+            compiledQuote = this.costingModel.compilePriceQuote({
+                domain: servicePlan.domain,
+                serviceId: servicePlan.service?.id || null,
+                serviceName: servicePlan.service?.name || null,
+                message: body,
+                facts: context.facts,
+                clientType: user?.user_metadata?.account_type || "INDIVIDUAL"
+            });
+        }
+
+        let replyResult = null;
+        let reply = "";
+        if (isPricingInquiry && compiledQuote) {
+            reply = compiledQuote.clientQuoteText;
+            replyResult = {
+                text: reply,
+                provider: "COSTING_MODEL",
+                model: "CostingModelService",
+                requiresApproval: true,
+                approval_needed: true
+            };
+        } else {
+            replyResult = await this.generateReply({ context, body, intent, servicePlan, lead, sales, user, matter, operationalContext, historicalMemory });
+            reply = typeof replyResult === "object" ? replyResult?.text : replyResult;
+        }
 
         // When the AI query has been fully processed (reply generated),
-        // determine if it is pending human review (sensitive legal areas, formal quote approval, or explicit review flags)
+        // determine if it is pending human review (for quotes/pricing: must compile price and ask approval before sending to client)
         const pendingReview = Boolean(
+            isPricingInquiry ||
+            compiledQuote ||
             assessment?.humanRequired ||
             operationalContext?.requiresApproval ||
             operationalContext?.pendingReview ||
@@ -120,7 +152,7 @@ export default class WhatsAppAgent {
         );
 
         if (pendingReview) {
-            this.transitionToApprovalNeeded(context, { assessment, proposedReply: reply });
+            this.transitionToApprovalNeeded(context, { assessment, proposedReply: reply, compiledQuote });
 
             const communication = new Communication({
                 matterId: matter?.id || context?.matter?.id || null,
@@ -128,13 +160,18 @@ export default class WhatsAppAgent {
                 userId: user?.id || context?.user?.id || null,
                 channel: "WHATSAPP",
                 direction: "OUTBOUND",
-                subject: intent?.intent ? `AI Response: ${intent.intent}` : "WhatsApp AI Consultation",
+                subject: intent?.intent ? `AI Response: ${intent.intent}` : (isPricingInquiry ? "Quotation Estimate" : "WhatsApp AI Consultation"),
                 message: reply || "",
                 recipient: phoneNumber || context?.phoneNumber || null,
                 sender: "ANTHONY_AI",
                 status: "APPROVAL_NEEDED",
                 threadId: chatId || context?.chatId || null,
-                approval_needed: true
+                approval_needed: true,
+                metadata: {
+                    approval_needed: true,
+                    is_pricing: isPricingInquiry,
+                    compiled_quote: compiledQuote || null
+                }
             });
 
             return {
@@ -152,9 +189,10 @@ export default class WhatsAppAgent {
                 sales,
                 reply,
                 proposedReply: reply,
+                compiledQuote,
                 communication,
                 assessment,
-                reasons: assessment?.reasons || [],
+                reasons: assessment?.reasons || (isPricingInquiry ? ["Price quote compiled from costing model awaiting Super Admin verification."] : []),
                 aiProvider: typeof replyResult === "object" ? replyResult?.provider || null : null,
                 aiModel: typeof replyResult === "object" ? replyResult?.model || null : null,
                 companySources: typeof replyResult === "object" ? replyResult?.companySources || [] : []
@@ -176,17 +214,21 @@ export default class WhatsAppAgent {
         };
     }
 
-    transitionToApprovalNeeded(context, { assessment = null, proposedReply = null, reason = "Pending human review" } = {}) {
+    transitionToApprovalNeeded(context, { assessment = null, proposedReply = null, compiledQuote = null, reason = "Pending human review" } = {}) {
         this.conversations.setState(context, CONVERSATION_STATES.APPROVAL_NEEDED);
         context.approval_needed = true;
         if (!context.facts || typeof context.facts !== "object" || Array.isArray(context.facts)) context.facts = {};
         context.facts.approval_needed = true;
+        if (proposedReply) context.facts.proposedReply = proposedReply;
+        if (compiledQuote) context.facts.compiledQuote = compiledQuote;
         context.handover = {
             ...(context.handover || {}),
             ...(assessment || {}),
             reason,
             proposedReply,
+            compiledQuote,
             pendingReview: true,
+            approval_needed: true,
             pendingApprovalAt: new Date().toISOString()
         };
         return context;

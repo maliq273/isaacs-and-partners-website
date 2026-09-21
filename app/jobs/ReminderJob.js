@@ -11,10 +11,13 @@
  * - client communication reminders
  */
 
+import executivePAReminderService from "../services/ExecutivePAReminderService.js";
+
 export class ReminderJob {
     constructor({
         reminderManager = null,
         notificationService = null,
+        executiveReminderService = executivePAReminderService,
         logger = console
     } = {}) {
         this.reminderManager =
@@ -22,6 +25,9 @@ export class ReminderJob {
 
         this.notificationService =
             notificationService;
+
+        this.executiveReminderService =
+            executiveReminderService;
 
         this.logger = logger;
         this.name = "ReminderJob";
@@ -86,8 +92,18 @@ export class ReminderJob {
             );
         }
 
+        if (
+            this.executiveReminderService &&
+            typeof this.executiveReminderService.runReminders ===
+                "function"
+        ) {
+            return this.executiveReminderService.runReminders(
+                options
+            );
+        }
+
         throw new Error(
-            "ReminderJob requires ReminderManager or NotificationService"
+            "ReminderJob requires ReminderManager, NotificationService or ExecutiveReminderService"
         );
     }
 }

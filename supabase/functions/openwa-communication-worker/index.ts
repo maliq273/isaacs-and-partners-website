@@ -382,13 +382,43 @@ async function processOutbound(limit = 5) {
         })
         .eq("id", message.id);
 
-      const response = await openwaRequest(
-        `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-text`,
-        {
-          method: "POST",
-          body: JSON.stringify({ chatId, text: message.body }),
-        },
-      );
+      const actionButtons = message.metadata?.action_buttons || message.metadata?.buttons;
+      let response: Response;
+      if (Array.isArray(actionButtons) && actionButtons.length > 0) {
+        response = await openwaRequest(
+          `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-buttons`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              chatId,
+              text: message.body,
+              title: message.metadata?.title || "Isaacs & Partners Executive Authority",
+              footer: message.metadata?.footer || "Tap an action button below to decide",
+              buttons: actionButtons.map((b: any) => ({
+                id: b.id || b.value || b.text,
+                text: b.text || b.title || String(b)
+              }))
+            }),
+          }
+        );
+        if (!response.ok) {
+          response = await openwaRequest(
+            `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-text`,
+            {
+              method: "POST",
+              body: JSON.stringify({ chatId, text: message.body }),
+            }
+          );
+        }
+      } else {
+        response = await openwaRequest(
+          `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-text`,
+          {
+            method: "POST",
+            body: JSON.stringify({ chatId, text: message.body }),
+          }
+        );
+      }
 
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -667,7 +697,7 @@ async function processWebhook(req: Request) {
 
     const resolvedSender = await resolveInboundPhone(chatId, data);
     const fromPhone = resolvedSender.phone;
-    const body = clean(data.body || data.text || data.message, 4096);
+    const body = clean(data.selectedButtonId || data.selectedId || data.buttonResponse?.selectedButtonId || data.buttonOrListResponse?.id || data.body || data.text || data.message, 4096);
     if (!body) return json({ received: true, ignored: true, reason: "EMPTY_MESSAGE" });
 
     const contact = await ensureInboundContact({ phoneNumber: fromPhone, chatId, messageId: data.id || null });

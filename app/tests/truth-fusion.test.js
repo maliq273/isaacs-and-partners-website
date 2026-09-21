@@ -15,7 +15,7 @@ const fakeCompanyTruth = {
 
 const fakeProvider = {
     async generate({ system, user }) {
-        assert.match(system, /Isaacs & Partners AI Liaison/);
+        assert.match(system, /Anthony/);
         assert.match(system, /Professional fee is R12,500/);
         assert.match(user, /immigration/i);
         return { text: "The current Isaacs & Partners professional fee is R12,500.", provider: "TEST", model: "test-model" };

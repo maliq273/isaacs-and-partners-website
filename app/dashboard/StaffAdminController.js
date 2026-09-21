@@ -82,118 +82,65 @@ class StaffAdminController {
         if (!tbody) return;
 
         if (!this.staff.length) {
-            tbody.innerHTML =
-                `<tr>
-                    <td colspan="6">
-                        No staff members have been created yet.
-                    </td>
-                </tr>`;
-
+            tbody.replaceChildren();
+            const tr = document.createElement("tr");
+            const td = document.createElement("td");
+            td.colSpan = 6;
+            td.textContent = "No staff members have been created yet.";
+            tr.appendChild(td);
+            tbody.appendChild(tr);
             return;
         }
 
-        tbody.innerHTML =
-            this.staff.map(member => {
-                const profile =
-                    member.profiles || {};
+        tbody.replaceChildren();
+        this.staff.forEach(member => {
+            const profile = member.profiles || {};
+            const name = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || profile.email || member.user_id || member.id;
+            const active = member.is_active === true;
+            const tr = document.createElement("tr");
 
-                const name =
-                    [
-                        profile.first_name,
-                        profile.last_name
-                    ]
-                    .filter(Boolean)
-                    .join(" ") ||
-                    profile.email ||
-                    member.user_id ||
-                    member.id;
+            const tdName = document.createElement("td");
+            const strong = document.createElement("strong");
+            strong.textContent = name;
+            const small = document.createElement("small");
+            small.textContent = profile.email || "";
+            tdName.append(strong, small);
 
-                const active =
-                    member.is_active === true;
+            const tdRole = document.createElement("td");
+            tdRole.textContent = profile.role || "STAFF";
 
-                return `
-                    <tr>
-                        <td>
-                            <strong>
-                                ${this.escape(name)}
-                            </strong>
-                            <small>
-                                ${this.escape(
-                                    profile.email || ""
-                                )}
-                            </small>
-                        </td>
+            const tdDept = document.createElement("td");
+            tdDept.textContent = member.department || "—";
 
-                        <td>
-                            ${this.escape(
-                                profile.role || "STAFF"
-                            )}
-                        </td>
+            const tdStatus = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = `status-badge ${active ? "active" : "inactive"}`;
+            badge.textContent = active ? "Active" : "Inactive";
+            tdStatus.appendChild(badge);
 
-                        <td>
-                            ${this.escape(
-                                member.department || "—"
-                            )}
-                        </td>
+            const tdUser = document.createElement("td");
+            tdUser.textContent = member.user_id || "—";
 
-                        <td>
-                            <span class="status-badge ${
-                                active
-                                    ? "active"
-                                    : "inactive"
-                            }">
-                                ${
-                                    active
-                                        ? "Active"
-                                        : "Inactive"
-                                }
-                            </span>
-                        </td>
+            const tdActions = document.createElement("td");
+            tdActions.className = "table-actions";
+            const editBtn = document.createElement("button");
+            editBtn.type = "button";
+            editBtn.className = "btn btn-sm";
+            editBtn.dataset.action = "edit";
+            editBtn.dataset.id = member.id;
+            editBtn.textContent = "Edit";
 
-                        <td>
-                            ${this.escape(
-                                member.user_id || "—"
-                            )}
-                        </td>
+            const toggleBtn = document.createElement("button");
+            toggleBtn.type = "button";
+            toggleBtn.className = `btn btn-sm ${active ? "btn-danger" : "btn-primary"}`;
+            toggleBtn.dataset.action = active ? "deactivate" : "activate";
+            toggleBtn.dataset.id = member.id;
+            toggleBtn.textContent = active ? "Deactivate" : "Activate";
 
-                        <td class="table-actions">
-                            <button
-                                type="button"
-                                class="btn btn-sm"
-                                data-action="edit"
-                                data-id="${this.escape(
-                                    member.id
-                                )}"
-                            >
-                                Edit
-                            </button>
-
-                            <button
-                                type="button"
-                                class="btn btn-sm ${
-                                    active
-                                        ? "btn-danger"
-                                        : "btn-primary"
-                                }"
-                                data-action="${
-                                    active
-                                        ? "deactivate"
-                                        : "activate"
-                                }"
-                                data-id="${this.escape(
-                                    member.id
-                                )}"
-                            >
-                                ${
-                                    active
-                                        ? "Deactivate"
-                                        : "Activate"
-                                }
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join("");
+            tdActions.append(editBtn, toggleBtn);
+            tr.append(tdName, tdRole, tdDept, tdStatus, tdUser, tdActions);
+            tbody.appendChild(tr);
+        });
     }
 
     bindEvents() {
@@ -495,145 +442,64 @@ class StaffAdminController {
             ].push(permission);
         });
 
-        container.innerHTML =
-            Object.entries(grouped)
-                .map(
-                    ([category, permissions]) => `
-                        <section class="permission-group">
-                            <header>
-                                <h3>
-                                    ${this.escape(
-                                        this.formatCategory(
-                                            category
-                                        )
-                                    )}
-                                </h3>
-                            </header>
+        container.replaceChildren();
+        Object.entries(grouped).forEach(([category, permissions]) => {
+            const section = document.createElement("section");
+            section.className = "permission-group";
+            const header = document.createElement("header");
+            const h3 = document.createElement("h3");
+            h3.textContent = this.formatCategory(category);
+            header.appendChild(h3);
+            section.appendChild(header);
 
-                            ${permissions.map(
-                                permission => {
-                                    const saved =
-                                        current.get(
-                                            permission.permission_key
-                                        );
+            permissions.forEach(permission => {
+                const saved = current.get(permission.permission_key);
+                const enabled = saved?.is_enabled === true;
+                const scope = saved?.access_scope && saved.access_scope !== "NONE" ? saved.access_scope : "ASSIGNED";
 
-                                    const enabled =
-                                        saved?.is_enabled ===
-                                        true;
+                const row = document.createElement("div");
+                row.className = "permission-row";
+                row.dataset.permissionRow = permission.permission_key;
 
-                                    const scope =
-                                        saved?.access_scope &&
-                                        saved.access_scope !==
-                                            "NONE"
-                                            ? saved.access_scope
-                                            : "ASSIGNED";
+                const textDiv = document.createElement("div");
+                const strong = document.createElement("strong");
+                strong.textContent = permission.permission_name;
+                const small = document.createElement("small");
+                small.textContent = permission.description || "";
+                textDiv.append(strong, small);
 
-                                    return `
-                                        <div
-                                            class="permission-row"
-                                            data-permission-row="${this.escape(
-                                                permission.permission_key
-                                            )}"
-                                        >
-                                            <div>
-                                                <strong>
-                                                    ${this.escape(
-                                                        permission.permission_name
-                                                    )}
-                                                </strong>
+                const label = document.createElement("label");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.dataset.permissionEnabled = "";
+                checkbox.dataset.permissionKey = permission.permission_key;
+                checkbox.checked = enabled;
+                label.append(checkbox, " Enabled");
 
-                                                <small>
-                                                    ${this.escape(
-                                                        permission.description ||
-                                                            ""
-                                                    )}
-                                                </small>
-                                            </div>
+                const select = document.createElement("select");
+                select.className = "form-control";
+                select.dataset.permissionScope = "";
+                select.dataset.permissionKey = permission.permission_key;
+                select.disabled = !enabled;
 
-                                            <label>
-                                                <input
-                                                    type="checkbox"
-                                                    data-permission-enabled
-                                                    data-permission-key="${this.escape(
-                                                        permission.permission_key
-                                                    )}"
-                                                    ${
-                                                        enabled
-                                                            ? "checked"
-                                                            : ""
-                                                    }
-                                                >
-                                                Enabled
-                                            </label>
+                [
+                    ["OWN", "Own"],
+                    ["ASSIGNED", "Assigned"],
+                    ["DEPARTMENT", "Department"],
+                    ["ALL", "All"]
+                ].forEach(([val, labelText]) => {
+                    const opt = document.createElement("option");
+                    opt.value = val;
+                    opt.textContent = labelText;
+                    if (scope === val) opt.selected = true;
+                    select.appendChild(opt);
+                });
 
-                                            <select
-                                                class="form-control"
-                                                data-permission-scope
-                                                data-permission-key="${this.escape(
-                                                    permission.permission_key
-                                                )}"
-                                                ${
-                                                    enabled
-                                                        ? ""
-                                                        : "disabled"
-                                                }
-                                            >
-                                                <option
-                                                    value="OWN"
-                                                    ${
-                                                        scope ===
-                                                        "OWN"
-                                                            ? "selected"
-                                                            : ""
-                                                    }
-                                                >
-                                                    Own
-                                                </option>
-
-                                                <option
-                                                    value="ASSIGNED"
-                                                    ${
-                                                        scope ===
-                                                        "ASSIGNED"
-                                                            ? "selected"
-                                                            : ""
-                                                    }
-                                                >
-                                                    Assigned
-                                                </option>
-
-                                                <option
-                                                    value="DEPARTMENT"
-                                                    ${
-                                                        scope ===
-                                                        "DEPARTMENT"
-                                                            ? "selected"
-                                                            : ""
-                                                    }
-                                                >
-                                                    Department
-                                                </option>
-
-                                                <option
-                                                    value="ALL"
-                                                    ${
-                                                        scope ===
-                                                        "ALL"
-                                                            ? "selected"
-                                                            : ""
-                                                    }
-                                                >
-                                                    All
-                                                </option>
-                                            </select>
-                                        </div>
-                                    `;
-                                }
-                            ).join("")}
-                        </section>
-                    `
-                )
-                .join("");
+                row.append(textDiv, label, select);
+                section.appendChild(row);
+            });
+            container.appendChild(section);
+        });
 
         container
             .querySelectorAll(
