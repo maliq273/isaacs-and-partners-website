@@ -149,7 +149,7 @@ async function notifySuperAdminWithAlert(adminDb:any,alertText:string,conversati
 }
 
 // Lead Persistence for all incoming enquiries matched by WhatsApp / Phone Number
-if(chatId||phone){const cleanPhone=phone||chatId.replace(/@.*$/,"");await admin.from("public_enquiries").upsert({session_id:chatId,service_domain:nullable(p?.serviceDomain,100),answers:[{message:body,timestamp:new Date().toISOString()}],qualified:true,metadata:{phone:cleanPhone,channel,chat_id:chatId,created_by:"ai-liaison-runtime"}},{onConflict:"session_id"}).catch(()=>null);}
+if(chatId||phone){const cleanPhone=phone||chatId.replace(/@.*$/,"");try{const enquiry=await admin.from("public_enquiries").upsert({session_id:chatId,service_domain:nullable(p?.serviceDomain,100),answers:[{message:body,timestamp:new Date().toISOString()}],qualified:true,metadata:{phone:cleanPhone,channel,chat_id:chatId,created_by:"ai-liaison-runtime"}},{onConflict:"session_id"});if(enquiry.error)console.warn("Lead persistence failed",enquiry.error.message);}catch(error){console.warn("Lead persistence exception",error);}}
 
 // Super Admin Approval Decision Interceptor (Button or Text: YES/APPROVE_YES or NO/REJECT_NO)
 const cleanBody=body.trim().toLowerCase();
