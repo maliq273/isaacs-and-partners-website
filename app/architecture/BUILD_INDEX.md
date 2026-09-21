@@ -341,55 +341,27 @@ Other AI components include:
 
 ---
 
-# 23. Database
+# 23. Database / Supabase
 
-Schemas:
+Production persistence is Supabase-backed.
 
-- Appointment.sql
-- Client.sql
-- Company.sql
-- Document.sql
-- Invoice.sql
-- Knowledge.sql
-- Matter.sql
-- Payment.sql
-- Task.sql
-- User.sql
-- Workflow.sql
+Repository database source of truth:
 
-Migrations:
+- supabase/migrations/
+- supabase/functions/
+- app/services/
+- app/client/
+- app/dashboard/
 
-- 001_initial.sql
-- 002_users.sql
-- 003_clients.sql
-- 004_matters.sql
-- 005_documents.sql
-- 006_tasks.sql
-- 007_notes.sql
-- 008_workflows.sql
-- 009_ai.sql
-- 010_reporting.sql
-
-Additional database layers:
-
-- functions;
-- indexes;
-- seeds;
-- tables;
-- transactions;
-- triggers;
-- views.
+The former `app/database/` shadow SQL/table/model layer has been removed because it was not connected to the production Supabase architecture.
 
 ---
 
-# 24. Templates
+# 24. Document / Invoice Generation
 
-- appointment.docx
-- cover-sheet.html
-- invoice.html
-- power-of-attorney.docx
-- receipt.html
-- retainer.docx
+Production document generation is handled by the active controllers/services and Supabase-backed data.
+
+The former `app/templates/` runtime template collection has been removed where it was not referenced by production code.
 
 ---
 
