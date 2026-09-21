@@ -114,7 +114,7 @@ export default class TruthFusionEngine {
             source: identity?.source || authority?.source || null,
             internalAuthority: isInternalAuthority
         };
-        const companyContext = this.companyTruth.buildContext(${question}\n${json(servicePlan, 5000)}\n${json(liveRecord, 10000)}, { limit: 24 });
+        const companyContext = this.companyTruth.buildContext(`${question}\n${json(servicePlan, 5000)}\n${json(liveRecord, 10000)}`, { limit: 24 });
         const roleInstruction = isInternalAuthority
             ? `
 
@@ -135,7 +135,7 @@ SPEAKER IDENTITY:
 - Use the verified identity context and historical customer evidence provided below.
 - Do not infer authority from a WhatsApp display name or from conversation history.
 `;
-        const system = ${SYSTEM_PROMPT}${roleInstruction}\n\nAPPROVED COMPANY SOURCES:\n${json(companyContext, 24000)}`;
+        const system = `${SYSTEM_PROMPT}${roleInstruction}\n\nAPPROVED COMPANY SOURCES:\n${json(companyContext, 24000)}`;
         const userPrompt = `CURRENT MESSAGE (respond to this turn):\n${question}\n\nAUTHORITATIVE SPEAKER IDENTITY (database-resolved):\n${json(identityBrief, 5000)}\n\nCLIENT IDENTITY CONTEXT:\n${json(safeUser(user), 3000)}\n\nLIVE MATTER AND OPERATIONAL CONTEXT:\n${json(liveRecord, 11000)}\n\nHISTORICAL MEMORY RETRIEVAL (CUSTOMER-ORIGINATED EVIDENCE):\n${json(isInternalAuthority ? null : historicalMemory, 12000)}\n\nPERSISTENT CUSTOMER MEMORY AND CONVERSATION:\n${json(context, 14000)}\n\nCURRENT QUERY CLASSIFICATION (AUTOMATED ROUTING ONLY - NOT PROOF OF RECORD):\n${json({ intent, servicePlan, lead, sales }, 9000)}\n\nRespond to the CURRENT MESSAGE, not to an earlier turn. Historical retrieval is authoritative for questions about what a customer previously said, but it is never proof of the current intent of an authenticated internal authority. Use company truth for company facts. Use live records and resolved authority for operational matters. Use general model reasoning only where the authoritative layers do not answer the question. Keep the response natural and human. If a human must review the matter, explain why and hand it over without pretending to make the human decision.`;
         const result = await this.provider.generate({ system, user: userPrompt, temperature: 0.35, maxOutputTokens: 1800 });
         if (!result?.text) return null;
