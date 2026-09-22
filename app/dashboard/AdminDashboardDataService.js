@@ -116,7 +116,8 @@ class AdminDashboardDataService{
 
     const value=i=>results[i].status==="fulfilled"?results[i].value:[];
     const staff=value(0),matters=value(1),quotes=value(2),assignments=value(3),tasks=value(4),appointments=value(5);
-    const documents=value(6),clientDocuments=value(7),invoices=value(8),payments=value(9),contacts=value(10),messages=value(11),notifications=value(12),rawAudit=value(13);\n    const audit=rawAudit.map(row=>({...row,authority_role:row?.metadata?.authority_role||null,disclosure_rule:row?.metadata?.disclosure_rule||null,scope:row?.metadata?.authorization_scope||null}));
+    const documents=value(6),clientDocuments=value(7),invoices=value(8),payments=value(9),contacts=value(10),messages=value(11),notifications=value(12),rawAudit=value(13);
+    const audit=rawAudit.map(row=>({...row,authority_role:row?.metadata?.authority_role||null,disclosure_rule:row?.metadata?.disclosure_rule||null,scope:row?.metadata?.authorization_scope||null}));
     const integrations=results[14].status==="fulfilled"?results[14].value:{providers:[],events:[],summary:{},warning:"Integration data unavailable."};
     const authority=results[15].status==="fulfilled"?results[15].value:{rows:[],warning:"Authority directory unavailable."};
     const portal=results[16].status==="fulfilled"?results[16].value:{clients:[],warning:"Client portal snapshot unavailable."};
