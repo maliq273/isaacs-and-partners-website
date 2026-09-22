@@ -175,7 +175,7 @@ if(approvalAction&&staffConversation&&String(authorityRole).toUpperCase()==="SUP
     const reply="Commercial request "+label;
     const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"SUPER_ADMIN_"+approvalAction,null,{source:"commercial-approval-engine",estimate_id:estimateId});
     const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,mid,msgId):null;
-    await admin.from("ai_conversations").update({state:approvalAction==="REJECT"?"HUMAN_ACTIVE":"AI_ACTIVE",facts:{...pendingFacts,approval_needed:false,lastApprovalAction:approvalAction,approvalResult:result},updated_at:new Date().toISOString()}).eq("id",pendingConv.data.id);
+    if(pendingConv?.data?.id)await admin.from("ai_conversations").update({state:approvalAction==="REJECT"?"HUMAN_ACTIVE":"AI_ACTIVE",facts:{...pendingFacts,approval_needed:false,lastApprovalAction:approvalAction,approvalResult:result},updated_at:new Date().toISOString()}).eq("id",pendingConv.data.id);
     return json({ok:true,conversation:con,message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"SUPER_ADMIN_"+approvalAction,estimateId,engine:result}});
   }
 }
