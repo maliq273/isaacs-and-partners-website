@@ -1,7 +1,7 @@
 import auth from "../auth/AuthService.js";
 import navigation from "../core/navigation.js";
 import dashboardData from "./DashboardDataService.js";
-import adminDashboardData from "./AdminDashboardDataService.js";
+import adminDashboardData from "./AdminDashboardDataService.js?v=20260922-costing-fix-1";
 import {resolveUserDashboardRole,clearRoleCache} from "./DashboardAccess.js";
 import {getSuperAdminCategories} from "./SuperAdminDashboardConfig.js";
 
