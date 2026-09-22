@@ -12,7 +12,7 @@ export default class ClientEstimateEngine{
    this.supabase.from("service_catalog").select("id,code,name,service_domain,description,pricing_mode,default_currency,minimum_fee").eq("active",true).order("name"),
    this.supabase.from("service_qualification_questions").select("*").eq("active",true).order("service_code").order("sort_order")
   ]);
-  if(s.error)throw s.error;if(q.error)throw q.error;this.services=s.data||[];this.questions=q.data||[];return this.services;
+  if(s.error)throw s.error;if(q.error)throw q.error;const clientCodes=["IMMIGRATION","BUSINESS-COMPLIANCE-RETAINER","HR-PAYROLL-OUTSOURCING","HR-TEMP-STAFFING","TEMP_OUTSOURCING","PERM_OUTSOURCING","LEGAL_SERVICES","NOTARY_MEDIATION"];this.services=(s.data||[]).filter(x=>clientCodes.includes(x.code));this.questions=q.data||[];return this.services;
  }
  async open(){
   await this.load();
