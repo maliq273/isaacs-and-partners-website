@@ -93,10 +93,11 @@ class DashboardPageController{
       const input=r.type==="text"?'<input data-wb-key="'+r.key+'" type="text" value="'+esc(val)+'">':'<input data-wb-key="'+r.key+'" type="number" step="'+step+'" min="0" value="'+esc(val)+'">';
       return '<tr><td><strong>'+esc(r.label)+'</strong>'+(r.optional?'<span class="optional-tag">Optional</span>':"")+'<small>'+esc(r.help||"")+'</small></td><td>'+input+'</td><td>'+esc(r.type==="percent"?(Number(val)||0)+"%":r.type==="money"?money(val):String(val??""))+'</td></tr>';
     }).join("");
-    const benchmark=key==="IMMIGRATION"?'<div class="benchmark-table-wrap"><h4>2026 South Africa market benchmark — editable</h4><table class="costing-sheet"><thead><tr><th>Immigration service</th><th>Observed market range</th><th>Midpoint starting benchmark</th><th>Use in quote</th></tr></thead><tbody>'+this.getImmigrationBenchmarks().map((r,i)=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><input class="benchmark-input" data-benchmark="'+i+'" value="'+esc(r[2])+'"></td><td><button type="button" class="btn btn-secondary btn-sm" data-use-benchmark="'+i+'">Use</button></td></tr>').join("")+'</tbody></table><p class="sheet-note">Benchmarks are research references, not Isaacs &amp; Partners approved prices. Government/VFS/third-party costs are separate unless you deliberately include them.</p></div>':"";
+    const benchmark=(key==="IMMIGRATION"||key==="BUSINESS_COMPLIANCE")?'<div class="benchmark-table-wrap"><h4>2026 South Africa market benchmark — editable</h4><table class="costing-sheet"><thead><tr><th>Immigration service</th><th>Observed market range</th><th>Midpoint starting benchmark</th><th>Use in quote</th></tr></thead><tbody>'+this.getImmigrationBenchmarks().map((r,i)=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><input class="benchmark-input" data-benchmark="'+i+'" value="'+esc(r[2])+'"></td><td><button type="button" class="btn btn-secondary btn-sm" data-use-benchmark="'+i+'">Use</button></td></tr>').join("")+'</tbody></table><p class="sheet-note">Benchmarks are research references, not Isaacs &amp; Partners approved prices. Government/VFS/third-party costs are separate unless you deliberately include them.</p></div>':"";
     body.innerHTML='<div class="workbook-note">'+esc(template.formula)+'</div><div class="table-wrapper"><table class="costing-sheet"><thead><tr><th>Input / line</th><th>Enter figure</th><th>Current value</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="workbook-total"><div><span>Base</span><strong>'+money(result.base)+'</strong></div><div><span>Additional charges</span><strong>'+money(result.charges)+'</strong></div><div><span>Subtotal</span><strong>'+money(result.subtotal)+'</strong></div><div><span>Tax</span><strong>'+money(result.tax)+'</strong></div><div class="final"><span>FINAL TOTAL</span><strong>'+money(result.total)+'</strong></div></div><div class="workbook-actions"><button type="button" class="btn btn-primary" id="save-costing-workbook">Save costing template</button><button type="button" class="btn btn-secondary" id="clear-costing-workbook">Clear inputs</button></div>'+benchmark;
     const refreshTotals=()=>{const vals=this.readWorkbookValues(template);localStorage.setItem("ip-costing-"+key,JSON.stringify(vals));const r=this.calculateWorkbook(key,vals);const cells=body.querySelectorAll(".workbook-total strong");if(cells.length>=5){cells[0].textContent=money(r.base);cells[1].textContent=money(r.charges);cells[2].textContent=money(r.subtotal);cells[3].textContent=money(r.tax);cells[4].textContent=money(r.total)}};\n    body.querySelectorAll("[data-wb-key]").forEach(el=>el.addEventListener("input",refreshTotals));
     body.querySelectorAll("[data-use-benchmark]").forEach(btn=>btn.addEventListener("click",()=>{const i=Number(btn.dataset.useBenchmark);const row=this.getImmigrationBenchmarks()[i];const input=body.querySelector('[data-wb-key="professional_fee"]');if(input){input.value=String(row[2]).replace(/[^0-9.]/g,"");input.dispatchEvent(new Event("input",{bubbles:true}))}const svc=body.querySelector('[data-wb-key="selected_service"]');if(svc){svc.value=row[0];svc.dispatchEvent(new Event("input",{bubbles:true}))}}));
+    body.querySelectorAll("[data-use-biz-benchmark]").forEach(btn=>btn.addEventListener("click",()=>{const i=Number(btn.dataset.useBizBenchmark);const row=this.getBusinessComplianceBenchmarks()[i];const input=body.querySelector('[data-wb-key="other"]');if(input){input.value=String(row[2]).replace(/[^0-9.]/g,"");input.dispatchEvent(new Event("input",{bubbles:true}))}}));
     body.querySelector("#save-costing-workbook")?.addEventListener("click",async()=>{const vals=this.readWorkbookValues(template);try{await adminDashboardData.saveWorkbook({template_key:key,name:template.name,formula_version:"2026-09-22.1",data:vals,active:true});this.data.costing.workbooks=[...(this.data.costing.workbooks||[]).filter(x=>x.template_key!==key),{template_key:key,name:template.name,data:vals,active:true}];alert("Costing template saved.");}catch(error){alert(error.message||"Could not save costing template.");}});
     body.querySelector("#clear-costing-workbook")?.addEventListener("click",()=>{localStorage.removeItem("ip-costing-"+key);this.renderCostingWorkbook(key)});
     document.querySelectorAll(".workbook-tab").forEach(btn=>{if(!btn.dataset.bound){btn.dataset.bound="1";btn.addEventListener("click",()=>this.renderCostingWorkbook(btn.dataset.workbook))}});
@@ -107,7 +108,8 @@ class DashboardPageController{
       TEMP_OUTSOURCING:{
         name:"Temporary Employee Outsourcing",
         rows:[
-          {key:"employee_rate",label:"Employee rate / wage",type:"money",value:0,help:"Enter the applicable minimum/market/custom employee rate."},
+          {key:"position",label:"Position / wage category",type:"text",value:"",help:"Record the position or applicable sector wage category."},
+          {key:"employee_rate",label:"Employee rate / wage",type:"money",value:30.23,help:"Enter the applicable minimum/sector/custom employee rate. The 2026 national minimum is R30.23/hour; sectoral rates may be higher."},
           {key:"rate_quantity",label:"Rate quantity",type:"number",value:1,help:"Use 1 for a monthly base; enter hours/units where your rate is hourly."},
           {key:"uif_sdl_wca",label:"UIF + SDL + WCA",type:"percent",value:5},
           {key:"criminal_check",label:"Criminal check",type:"percent",value:1},
@@ -168,6 +170,26 @@ class DashboardPageController{
         formula:"professional fee + separately itemised statutory/third-party disbursements; tax is calculated on the taxable professional/disbursement subtotal according to your VAT treatment. Government/VFS figures should be verified at quote time."
       }
     };
+  }
+  getBusinessComplianceBenchmarks(){
+    return [
+      ["Private company registration / setup","R790–R1,250","R1,000","Professional handling benchmark; CIPC statutory fees may be separate"],
+      ["CIPC annual return","R190–R450+","R320","Provider fee; CIPC statutory fee varies by turnover"],
+      ["Beneficial ownership filing","R150–R590","R370","Provider benchmark; filing requirements vary"],
+      ["Director / address amendment","R250–R650","R450","Provider benchmark; CIPC fee may be separate"],
+      ["Income tax / SARS registration","R350–R500","R425","Provider benchmark"],
+      ["Tax clearance / TCS assistance","R350–R1,290","R820","Depends on compliance condition"],
+      ["VAT registration","R850–R2,990","R1,920","Provider benchmark; complexity varies"],
+      ["PAYE / UIF / SDL registration","R650–R2,490","R1,570","Bundled registrations vary by provider"],
+      ["UIF registration","R650–R1,250","R950","Provider benchmark"],
+      ["COIDA registration","R790–R3,500","R2,145","Provider benchmark; industry/workforce complexity matters"],
+      ["Letter of Good Standing","R400–R690","R545","Provider benchmark"],
+      ["B-BBEE affidavit / assistance","R350–R390","R370","EME/QSE status and certification route may differ"],
+      ["CSD registration","R490–R750","R620","Provider benchmark"],
+      ["Governance / policy pack","R3,500–R4,500","R4,000","Scope-dependent"],
+      ["Shareholders agreement","R2,500","R2,500","Document scope dependent"],
+      ["SLA / service agreement","R1,250–R1,500","R1,375","Scope dependent"]
+    ];
   }
   getImmigrationBenchmarks(){
     return [
