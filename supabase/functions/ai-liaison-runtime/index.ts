@@ -156,11 +156,13 @@ if(chatId||phone){const cleanPhone=phone||chatId.replace(/@.*$/,"");try{const en
 
 // Super Admin Commercial Approval Decision Interceptor.
 const cleanBody=body.trim().toUpperCase();
-const approvalAction=/^(APPROVE|MODIFY|REJECT)$/.exec(cleanBody)?.[1]||null;
+const approvalMatch=/^(APPROVE|MODIFY|REJECT)(?:_([0-9A-F-]{36}))?$/.exec(cleanBody);
+const approvalAction=approvalMatch?.[1]||null;
+const buttonEstimateId=approvalMatch?.[2]?.toLowerCase()||null;
 if(approvalAction&&staffConversation&&String(authorityRole).toUpperCase()==="SUPER_ADMIN"){
   const pendingConv=await admin.from("ai_conversations").select("*").eq("state","approval_needed").order("updated_at",{ascending:false}).limit(1).maybeSingle();
   const pendingFacts=pendingConv?.data?.facts||{};
-  const estimateId=pendingFacts.estimateId||null;
+  const estimateId=buttonEstimateId||pendingFacts.estimateId||null;
   if(estimateId){
     const response=await fetch(`${SUPABASE_URL}/functions/v1/commercial-approval-engine`,{
       method:"POST",
