@@ -597,6 +597,14 @@ h1.v2-title {
 .workbook-actions{display:flex;gap:10px;padding:16px;flex-wrap:wrap}.benchmark-table-wrap{padding:18px;border-top:1px solid var(--border)}.benchmark-table-wrap h4{margin:0 0 12px}.benchmark-input{background:#fff7c7;color:#111;border:1px solid #b89c2c;border-radius:4px;padding:7px;width:130px}.sheet-note{color:var(--ink-muted);font-size:.78rem;margin:12px 0 0}
 @media(max-width:800px){.workbook-total{grid-template-columns:repeat(2,1fr)}.costing-sheet{min-width:760px}.table-wrapper{overflow-x:auto}}
 </style>
+<style id="commercial-approval-styles">
+.commercial-approval-card{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:24px;align-items:center}
+.commercial-approval-card:last-child{border-bottom:0}.commercial-approval-card h3{margin:4px 0 8px;font-family:Syne,sans-serif}
+.commercial-approval-card p{margin:0;color:var(--ink-muted);max-width:760px;line-height:1.45}
+.commercial-approval-metrics{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:.78rem;color:var(--ink-muted)}
+.commercial-approval-metrics strong{color:var(--ink)}.commercial-approval-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
+@media(max-width:900px){.commercial-approval-card{align-items:flex-start;flex-direction:column}}
+</style>
 </head>
 <body data-page="super-admin">
 
@@ -992,7 +1000,7 @@ h1.v2-title {
           <p>Uses the existing notifications and authority action audit records.</p>
         </div>
       </div>
-      <div id="admin-notification-list" class="admin-list"><div class="empty-state">Loading administrative activity…</div></div>
+      <div id="admin-notification-list" class="admin-list"><div class="empty-state">Loading administrative activity…</div></div><div id="commercial-approval-center" class="admin-list"><div class="empty-state">Loading commercial approvals…</div></div>
     </section>
   </section>
 
@@ -1219,5 +1227,6 @@ document.getElementById("anthony-pa-notify")?.addEventListener("click", () => {
   }
 });
 </script>
+<script type="module" src="./CommercialApprovalCenter.js?v=20260922-1"></script>
 </body>
 </html>
