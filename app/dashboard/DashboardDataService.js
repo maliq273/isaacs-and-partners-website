@@ -317,7 +317,7 @@ class DashboardDataService {
         return this._request("matters", {
             filters: [
                 {
-                    column: "user_id",
+                    column: "individual_user_id",
                     operator: "eq",
                     value: userId
                 }
@@ -333,7 +333,7 @@ class DashboardDataService {
         return this._request("documents", {
             filters: [
                 {
-                    column: "user_id",
+                    column: "individual_user_id",
                     operator: "eq",
                     value: userId
                 }
@@ -349,12 +349,12 @@ class DashboardDataService {
         return this._request("appointments", {
             filters: [
                 {
-                    column: "user_id",
+                    column: "individual_user_id",
                     operator: "eq",
                     value: userId
                 }
             ],
-            order: "start_at.asc",
+            order: "starts_at.asc",
             limit
         });
     }
@@ -381,7 +381,7 @@ class DashboardDataService {
         return this._request("quotes", {
             filters: [
                 {
-                    column: "user_id",
+                    column: "individual_user_id",
                     operator: "eq",
                     value: userId
                 }
@@ -397,7 +397,7 @@ class DashboardDataService {
         return this._request("invoices", {
             filters: [
                 {
-                    column: "user_id",
+                    column: "individual_user_id",
                     operator: "eq",
                     value: userId
                 }
@@ -407,17 +407,12 @@ class DashboardDataService {
         });
     }
 
-    async getPayments({ limit = DEFAULT_LIMIT } = {}) {
-        const userId = this._getUserId();
-
+    async getPayments({ limit = DEFAULT_LIMIT, invoiceIds = [] } = {}) {
+        const filters = invoiceIds.length
+            ? [{ column: "invoice_id", operator: "in", value: `(${invoiceIds.join(",")})` }]
+            : [];
         return this._request("payments", {
-            filters: [
-                {
-                    column: "user_id",
-                    operator: "eq",
-                    value: userId
-                }
-            ],
+            filters,
             order: "created_at.desc",
             limit
         });
@@ -429,7 +424,7 @@ class DashboardDataService {
         return this._request("businesses", {
             filters: [
                 {
-                    column: "owner_id",
+                    column: "owner_user_id",
                     operator: "eq",
                     value: userId
                 }
@@ -461,7 +456,7 @@ class DashboardDataService {
         return this._request("notifications", {
             filters: [
                 {
-                    column: "user_id",
+                    column: "recipient_user_id",
                     operator: "eq",
                     value: userId
                 }
