@@ -77,3 +77,25 @@ set metadata=metadata || case code
  else '{}'::jsonb end,
 updated_at=now()
 where code in ('HR-PAYROLL-OUTSOURCING','HR-TEMP-STAFFING','PERM_OUTSOURCING','TEMP_OUTSOURCING');
+
+
+insert into public.service_catalog(code,name,service_domain,description,pricing_mode,default_currency,tax_rate,minimum_fee,active,metadata)
+values(
+'IMM-FOREIGN-EMPLOYMENT-OFFER',
+'Foreign Employment Offer / Placement Retainer',
+'IMMIGRATION',
+'Isaacs & Partners internal commercial model: R1,250 monthly retainer plus R10,000 repatriation reserve subject to signed terms.',
+'FIXED','ZAR',0,0,true,
+jsonb_build_object('pricing_status','APPROVED_ANCHOR','pricing_basis','R1,250/month + R10,000 repatriation reserve','monthly_retainer',1250,'repatriation_reserve',10000,'editable_in_admin',true)
+)
+on conflict(code) do update set
+name=excluded.name,description=excluded.description,pricing_mode=excluded.pricing_mode,
+tax_rate=excluded.tax_rate,active=true,metadata=public.service_catalog.metadata || excluded.metadata,updated_at=now();
+
+delete from public.service_pricing_rules r using public.service_catalog c
+where r.service_id=c.id and c.code='IMM-FOREIGN-EMPLOYMENT-OFFER';
+
+insert into public.service_pricing_rules(service_id,rule_name,pricing_mode,fixed_price,markup_percent,minimum_fee,maximum_discount_percent,active,effective_from,priority,metadata)
+select id,'Approved internal monthly retainer','FIXED',1250,0,0,0,true,current_date,10,
+jsonb_build_object('repatriation_reserve',10000,'pricing_basis','R1,250/month + R10,000 reserve','editable_in_admin',true)
+from public.service_catalog where code='IMM-FOREIGN-EMPLOYMENT-OFFER';
