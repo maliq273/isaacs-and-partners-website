@@ -119,9 +119,18 @@ class DashboardPageController{
           {key:"invoice_fee",label:"Invoice fee",type:"percent",value:5},
           {key:"hr_admin",label:"HR administration",type:"percent",value:12.5},
           {key:"service_fee",label:"Service fee",type:"percent",value:8},
+          {key:"nt_hours",label:"Normal time hours",type:"number",value:0},
+          {key:"nt_rate",label:"NT hourly rate",type:"money",value:0,help:"Use the agreed employee/client base hourly rate."},
+          {key:"ot_hours",label:"Overtime hours",type:"number",value:0},
+          {key:"ot_multiplier",label:"OT multiplier",type:"number",value:1.5},
+          {key:"sunday_hours",label:"Sunday hours",type:"number",value:0},
+          {key:"sunday_multiplier",label:"Sunday multiplier",type:"number",value:2},
+          {key:"retail_sunday",label:"Retail Sunday is ordinary day",type:"number",value:0,help:"Enter 1 for retail arrangements where Sunday is the ordinary working day; this changes Sunday to ×1.5."},
+          {key:"public_holiday_hours",label:"Public holiday hours",type:"number",value:0},
+          {key:"public_holiday_multiplier",label:"Public holiday multiplier",type:"number",value:2},
           {key:"tax",label:"Tax",type:"percent",value:15}
         ],
-        formula:"base = employee_rate × rate_quantity; each percentage charge is calculated against base; subtotal = base + all selected charges; tax = subtotal × tax%; final = subtotal + tax."
+        formula:"Labour = NT hours × NT rate + OT hours × NT rate × OT multiplier + Sunday hours × NT rate × Sunday multiplier + public-holiday hours × NT rate × public-holiday multiplier. For retail Sunday-as-ordinary-day, Sunday multiplier becomes 1.5. This workbook is a commercial estimate; the applicable BCEA, sectoral determination, bargaining council agreement and employment contract must be checked before invoicing."
       },
       PERM_OUTSOURCING:{
         name:"Permanent Outsourcing",
@@ -212,11 +221,23 @@ class DashboardPageController{
   calculateWorkbook(template,values){
     const v=values||{}; const num=k=>Number(v[k]??0)||0;
     if(template==="TEMP_OUTSOURCING"){
-      const base=num("employee_rate")*Math.max(num("rate_quantity"),0);
-      const keys=["uif_sdl_wca","criminal_check","medical_test","ppe","invoice_fee","hr_admin","service_fee"];
-      const charges=keys.reduce((sum,k)=>sum+(num(k)/100*base),0);
-      const subtotal=base+charges; const tax=subtotal*num("tax")/100;
-      return {base,charges,subtotal,tax,total:subtotal+tax};
+      const baseRate=num("nt_rate")||num("employee_rate");
+      const nt=num("nt_hours")*baseRate;
+      const ot=num("ot_hours")*baseRate*num("ot_multiplier");
+      const sundayMultiplier=num("retail_sunday")?1.5:num("sunday_multiplier");
+      const sunday=num("sunday_hours")*baseRate*sundayMultiplier;
+      const ph=num("public_holiday_hours")*baseRate*num("public_holiday_multiplier");
+      const labour=nt+ot+sunday+ph;
+      const statutory=labour*num("uif_sdl_wca")/100;
+      const criminal=labour*num("criminal_check")/100;
+      const medical=labour*num("medical_test")/100;
+      const ppe=labour*num("ppe")/100;
+      const invoice=labour*num("invoice_fee")/100;
+      const hr=labour*num("hr_admin")/100;
+      const service=labour*num("service_fee")/100;
+      const charges=statutory+criminal+medical+ppe+invoice+hr+service;
+      const subtotal=labour+charges; const tax=subtotal*num("tax")/100;
+      return {base:labour,charges,subtotal,tax,total:subtotal+tax,breakdown:{nt,ot,sunday,ph}};
     }
     if(template==="PERM_OUTSOURCING"){
       const annual=num("monthly_salary")*Math.max(num("months"),0); const fee=annual*num("service_percent")/100;
