@@ -60,22 +60,158 @@ class DashboardPageController{
   renderCostingCenter(){
     const root=document.querySelector("#admin-costing-center");
     if(!root)return;
-    const c=this.data.costing||{},services=c.services||[],components=c.components||[],rules=c.rules||[];
+    const c=this.data.costing||{},services=c.services||[],components=c.components||[],rules=c.rules||[],saved=c.workbooks||[];
     const money2=v=>money(v);
-    root.innerHTML=services.length?services.map(s=>{
+    const serviceCards=services.map(s=>{
       const comps=components.filter(x=>String(x.service_id)===String(s.service_id));
       const rule=rules.filter(x=>String(x.service_id)===String(s.service_id)&&x.active).sort((a,b)=>Number(a.priority||100)-Number(b.priority||100))[0];
       const price=s.fixed_price!=null?Number(s.fixed_price):Math.max(Number(s.effective_minimum_fee||0),Number(s.component_billable_total||0)*(1+Number(s.rule_markup_percent||0)/100));
       const tax=price*Number(s.tax_rate||0)/100;
       return '<article class="costing-card"><header><div><span class="eyebrow">'+esc(s.code||"SERVICE")+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.service_domain||"")+'</p></div><span class="status-badge '+(s.active?"active":"inactive")+'">'+(s.active?"ACTIVE":"INACTIVE")+'</span></header><div class="costing-summary"><div><span>Direct cost</span><strong>'+money2(s.direct_cost)+'</strong></div><div><span>Billable cost</span><strong>'+money2(s.component_billable_total)+'</strong></div><div><span>Quote before tax</span><strong>'+money2(price)+'</strong></div><div><span>Tax</span><strong>'+money2(tax)+'</strong></div><div><span>Quote total</span><strong>'+money2(price+tax)+'</strong></div></div><div class="costing-components">'+(comps.length?comps.map(x=>'<div><span>'+esc(x.component_name)+'</span><small>'+esc(x.component_type)+' · '+esc(x.quantity)+' × '+money2(x.unit_cost)+' · '+esc(x.markup_percent||0)+'% markup</small></div>').join(""):'<div class="empty-state">No cost components configured.</div>')+'</div><footer><span>Pricing: '+esc(rule?.pricing_mode||s.pricing_mode||"COST_PLUS")+'</span><span>Tax: '+esc(s.tax_rate||0)+'%</span><span>Minimum: '+money2(s.effective_minimum_fee||0)+'</span></footer></article>';
-    }).join(""):'<div class="empty-state">No services have been configured in the costing centre yet. Add the service catalog and its cost components to make Anthony pricing-authoritative.</div>';
+    }).join("");
     const totalDirect=services.reduce((n,x)=>n+Number(x.direct_cost||0),0),totalPrices=services.reduce((n,x)=>n+(x.fixed_price!=null?Number(x.fixed_price):Math.max(Number(x.effective_minimum_fee||0),Number(x.component_billable_total||0)*(1+Number(x.rule_markup_percent||0)/100))),0);
     this.setText("#admin-costing-count",services.length);this.setText("#admin-costing-direct",money2(totalDirect));this.setText("#admin-costing-prices",money2(totalPrices));
+    root.innerHTML=serviceCards+'<div class="costing-workbooks"><div class="workbook-heading"><div><span class="eyebrow">Excel-style calculation sheets</span><h3>Costing Workbooks</h3><p>Enter your figures in the yellow input cells. Totals calculate immediately and can be saved as the current company costing template.</p></div></div><div class="workbook-tabs">'+Object.entries(this.getCostingWorkbookTemplates()).map(([k,t],i)=>'<button type="button" class="workbook-tab '+(i===0?"active":"")+'" data-workbook="'+k+'">'+esc(t.name)+'</button>').join("")+'</div><div id="admin-costing-workbook-body"></div></div>';
+    this.renderCostingWorkbook();
     const form=document.querySelector("#admin-costing-service-form");
     if(form&&!form.dataset.bound){form.dataset.bound="1";form.addEventListener("submit",async e=>{e.preventDefault();try{await adminDashboardData.saveService({code:form.code.value.trim(),name:form.name.value.trim(),service_domain:form.domain.value.trim()||null,description:form.description.value.trim()||null,pricing_mode:form.mode.value,default_currency:"ZAR",tax_rate:Number(form.tax.value||0),minimum_fee:Number(form.minimum.value||0),active:true});await this.handleRefresh();}catch(error){console.error(error);alert(error.message||"Could not save service.");}})}
     const cform=document.querySelector("#admin-costing-component-form");
     if(cform&&!cform.dataset.bound){cform.dataset.bound="1";cform.addEventListener("submit",async e=>{e.preventDefault();try{await adminDashboardData.saveCostComponent({service_id:cform.service.value,component_name:cform.component.value.trim(),component_type:cform.type.value,unit:cform.unit.value,quantity:Number(cform.quantity.value||1),unit_cost:Number(cform.unitCost.value||0),markup_percent:Number(cform.markup.value||0),billable:cform.billable.checked,active:true,sort_order:0,notes:cform.notes.value.trim()||null});await this.handleRefresh();}catch(error){console.error(error);alert(error.message||"Could not save cost component.");}})}
     const sel=document.querySelector("#admin-costing-component-service");if(sel)sel.innerHTML=services.map(x=>'<option value="'+esc(x.service_id)+'">'+esc(x.code+' — '+x.name)+'</option>').join("");
+  }
+  renderCostingWorkbook(activeKey=null){
+    const body=document.querySelector("#admin-costing-workbook-body");if(!body)return;
+    const tabs=[...document.querySelectorAll(".workbook-tab")];
+    const key=activeKey||document.querySelector(".workbook-tab.active")?.dataset.workbook||"TEMP_OUTSOURCING";
+    tabs.forEach(t=>t.classList.toggle("active",t.dataset.workbook===key));
+    const template=this.getCostingWorkbookTemplates()[key]; const saved=(this.data.costing?.workbooks||[]).find(x=>x.template_key===key);
+    let values={}; try{values=saved?.data&&typeof saved.data==="object"?saved.data:JSON.parse(localStorage.getItem("ip-costing-"+key)||"{}")}catch{values={}};
+    values={...Object.fromEntries(template.rows.map(r=>[r.key,r.value])),...values};
+    const result=this.calculateWorkbook(key,values);
+    const rows=template.rows.map(r=>{
+      const val=values[r.key]??r.value??""; const step=r.type==="money"?"0.01":"0.01";
+      const input=r.type==="text"?'<input data-wb-key="'+r.key+'" type="text" value="'+esc(val)+'">':'<input data-wb-key="'+r.key+'" type="number" step="'+step+'" min="0" value="'+esc(val)+'">';
+      return '<tr><td><strong>'+esc(r.label)+'</strong>'+(r.optional?'<span class="optional-tag">Optional</span>':"")+'<small>'+esc(r.help||"")+'</small></td><td>'+input+'</td><td>'+esc(r.type==="percent"?(Number(val)||0)+"%":r.type==="money"?money(val):String(val??""))+'</td></tr>';
+    }).join("");
+    const benchmark=key==="IMMIGRATION"?'<div class="benchmark-table-wrap"><h4>2026 South Africa market benchmark — editable</h4><table class="costing-sheet"><thead><tr><th>Immigration service</th><th>Observed market range</th><th>Midpoint starting benchmark</th><th>Use in quote</th></tr></thead><tbody>'+this.getImmigrationBenchmarks().map((r,i)=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><input class="benchmark-input" data-benchmark="'+i+'" value="'+esc(r[2])+'"></td><td><button type="button" class="btn btn-secondary btn-sm" data-use-benchmark="'+i+'">Use</button></td></tr>').join("")+'</tbody></table><p class="sheet-note">Benchmarks are research references, not Isaacs &amp; Partners approved prices. Government/VFS/third-party costs are separate unless you deliberately include them.</p></div>':"";
+    body.innerHTML='<div class="workbook-note">'+esc(template.formula)+'</div><div class="table-wrapper"><table class="costing-sheet"><thead><tr><th>Input / line</th><th>Enter figure</th><th>Current value</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="workbook-total"><div><span>Base</span><strong>'+money(result.base)+'</strong></div><div><span>Additional charges</span><strong>'+money(result.charges)+'</strong></div><div><span>Subtotal</span><strong>'+money(result.subtotal)+'</strong></div><div><span>Tax</span><strong>'+money(result.tax)+'</strong></div><div class="final"><span>FINAL TOTAL</span><strong>'+money(result.total)+'</strong></div></div><div class="workbook-actions"><button type="button" class="btn btn-primary" id="save-costing-workbook">Save costing template</button><button type="button" class="btn btn-secondary" id="clear-costing-workbook">Clear inputs</button></div>'+benchmark;
+    body.querySelectorAll("[data-wb-key]").forEach(el=>el.addEventListener("input",()=>{const vals=this.readWorkbookValues(template);localStorage.setItem("ip-costing-"+key,JSON.stringify(vals));this.renderCostingWorkbook(key)}));
+    body.querySelectorAll("[data-use-benchmark]").forEach(btn=>btn.addEventListener("click",()=>{const i=Number(btn.dataset.useBenchmark);const row=this.getImmigrationBenchmarks()[i];const input=body.querySelector('[data-wb-key="professional_fee"]');if(input){input.value=String(row[2]).replace(/[^0-9.]/g,"");input.dispatchEvent(new Event("input",{bubbles:true}))}const svc=body.querySelector('[data-wb-key="selected_service"]');if(svc){svc.value=row[0];svc.dispatchEvent(new Event("input",{bubbles:true}))}}));
+    body.querySelector("#save-costing-workbook")?.addEventListener("click",async()=>{const vals=this.readWorkbookValues(template);try{await adminDashboardData.saveWorkbook({template_key:key,name:template.name,formula_version:"2026-09-22.1",data:vals,active:true});this.data.costing.workbooks=[...(this.data.costing.workbooks||[]).filter(x=>x.template_key!==key),{template_key:key,name:template.name,data:vals,active:true}];alert("Costing template saved.");}catch(error){alert(error.message||"Could not save costing template.");}});
+    body.querySelector("#clear-costing-workbook")?.addEventListener("click",()=>{localStorage.removeItem("ip-costing-"+key);this.renderCostingWorkbook(key)});
+    document.querySelectorAll(".workbook-tab").forEach(btn=>{if(!btn.dataset.bound){btn.dataset.bound="1";btn.addEventListener("click",()=>this.renderCostingWorkbook(btn.dataset.workbook))}});
+  }
+  readWorkbookValues(template){const values={};template.rows.forEach(r=>{const el=document.querySelector('[data-wb-key="'+r.key+'"]');if(el)values[r.key]=r.type==="text"?el.value:Number(el.value||0)});return values}
+  getCostingWorkbookTemplates(){
+    return {
+      TEMP_OUTSOURCING:{
+        name:"Temporary Employee Outsourcing",
+        rows:[
+          {key:"employee_rate",label:"Employee rate / wage",type:"money",value:0,help:"Enter the applicable minimum/market/custom employee rate."},
+          {key:"rate_quantity",label:"Rate quantity",type:"number",value:1,help:"Use 1 for a monthly base; enter hours/units where your rate is hourly."},
+          {key:"uif_sdl_wca",label:"UIF + SDL + WCA",type:"percent",value:5},
+          {key:"criminal_check",label:"Criminal check",type:"percent",value:1},
+          {key:"medical_test",label:"Medical test",type:"percent",value:2,optional:true},
+          {key:"ppe",label:"PPE",type:"percent",value:1.5,optional:true},
+          {key:"invoice_fee",label:"Invoice fee",type:"percent",value:5},
+          {key:"hr_admin",label:"HR administration",type:"percent",value:12.5},
+          {key:"service_fee",label:"Service fee",type:"percent",value:8},
+          {key:"tax",label:"Tax",type:"percent",value:15}
+        ],
+        formula:"base = employee_rate × rate_quantity; each percentage charge is calculated against base; subtotal = base + all selected charges; tax = subtotal × tax%; final = subtotal + tax."
+      },
+      PERM_OUTSOURCING:{
+        name:"Permanent Outsourcing",
+        rows:[
+          {key:"monthly_salary",label:"Monthly salary offered",type:"money",value:0},
+          {key:"months",label:"Months",type:"number",value:12},
+          {key:"service_percent",label:"Service percentage",type:"percent",value:15}
+        ],
+        formula:"annual salary = monthly salary × 12; final service amount = annual salary × service percentage."
+      },
+      FOREIGNER_EMPLOYMENT_OFFER:{
+        name:"Foreigner Employment Offer / Retainer",
+        rows:[
+          {key:"monthly_retainer",label:"Monthly retainer",type:"money",value:1250},
+          {key:"repatriation",label:"Repatriation reserve",type:"money",value:10000},
+          {key:"months",label:"Retainer months",type:"number",value:1}
+        ],
+        formula:"retainer = monthly retainer × months; reserve = repatriation reserve; total commercial commitment = retainer + reserve. Any termination/repatriation action must remain subject to the signed agreement and applicable law."
+      },
+      BUSINESS_COMPLIANCE:{
+        name:"Business Compliance — Retainer + Individual Services",
+        rows:[
+          {key:"retainer",label:"Monthly retainer",type:"money",value:1250},
+          {key:"cipc",label:"CIPC / company service",type:"money",value:0},
+          {key:"sars",label:"SARS / tax service",type:"money",value:0},
+          {key:"uif",label:"UIF service",type:"money",value:0},
+          {key:"coida",label:"COIDA service",type:"money",value:0},
+          {key:"bank",label:"Bank account setup",type:"money",value:0},
+          {key:"bbbee",label:"B-BBEE service",type:"money",value:0},
+          {key:"other",label:"Other compliance service",type:"money",value:0},
+          {key:"tax",label:"Tax",type:"percent",value:15}
+        ],
+        formula:"monthly retainer is the base; every selected business-compliance service is added separately; tax is applied to the subtotal."
+      },
+      IMMIGRATION:{
+        name:"Immigration Market Benchmark & Quote Builder",
+        rows:[
+          {key:"selected_service",label:"Service / category",type:"text",value:""},
+          {key:"professional_fee",label:"Professional fee",type:"money",value:0},
+          {key:"dha_fee",label:"DHA / Home Affairs fee",type:"money",value:0},
+          {key:"vfs_fee",label:"VFS fee",type:"money",value:0},
+          {key:"saqa",label:"SAQA / qualification evaluation",type:"money",value:0},
+          {key:"police_medical",label:"Police / medical / certification",type:"money",value:0},
+          {key:"other_disbursements",label:"Other disbursements",type:"money",value:0},
+          {key:"tax",label:"Tax",type:"percent",value:15}
+        ],
+        formula:"professional fee + separately itemised statutory/third-party disbursements; tax is calculated on the taxable professional/disbursement subtotal according to your VAT treatment. Government/VFS figures should be verified at quote time."
+      }
+    };
+  }
+  getImmigrationBenchmarks(){
+    return [
+      ["Visitor / temporary residence assistance","R8,000–R25,000","R16,500","Attorney market range; government/VFS extra"],
+      ["Critical Skills Work Visa","R15,000–R45,000","R30,000","Professional fee benchmark; DHA/VFS/SAQA/professional body extra"],
+      ["General Work Visa","R15,000–R45,000","R30,000","Professional fee benchmark; DHA/VFS/other third-party costs extra"],
+      ["Intra-Company Transfer (ICT)","R15,500–R80,000+","R30,000","Observed market spans from fixed-package providers to complex corporate matters"],
+      ["Corporate Visa (CSV)","R20,000–R50,000+","R35,000","Complexity/volume dependent; government and VFS costs separate"],
+      ["Permanent Residence","R20,000–R60,000+","R40,000","Category dependent; DHA/VFS and document costs extra"],
+      ["Spousal / Relative Visa","R10,000–R30,000","R20,000","Professional fee benchmark; official fees may differ by route"],
+      ["Visa renewal / extension","R5,000–R15,000","R10,000","Routine cases; complexity can increase fee"],
+      ["Refusal appeal / reapplication strategy","R8,000–R30,000","R19,000","Documented market range; scope depends on refusal reasons"],
+      ["High Court immigration review","R60,000–R250,000","R155,000","Litigation/counsel costs can materially vary"],
+      ["Section 22 / asylum-related work","CUSTOM","0","Use hourly + per-page + service flat-rate model; no reliable single market average"],
+      ["Section 24 / status-related application","CUSTOM","0","Use hourly + per-page + service flat-rate model; case complexity varies"],
+      ["Foreign employment offer / placement retainer","R1,250/month + R10,000 reserve","1,250/month","Isaacs & Partners internal commercial model; reserve subject to signed terms"]
+    ];
+  }
+  calculateWorkbook(template,values){
+    const v=values||{}; const num=k=>Number(v[k]??0)||0;
+    if(template==="TEMP_OUTSOURCING"){
+      const base=num("employee_rate")*Math.max(num("rate_quantity"),0);
+      const keys=["uif_sdl_wca","criminal_check","medical_test","ppe","invoice_fee","hr_admin","service_fee"];
+      const charges=keys.reduce((sum,k)=>sum+(num(k)/100*base),0);
+      const subtotal=base+charges; const tax=subtotal*num("tax")/100;
+      return {base,charges,subtotal,tax,total:subtotal+tax};
+    }
+    if(template==="PERM_OUTSOURCING"){
+      const annual=num("monthly_salary")*Math.max(num("months"),0); const fee=annual*num("service_percent")/100;
+      return {base:annual,charges:fee,subtotal:fee,tax:0,total:fee};
+    }
+    if(template==="FOREIGNER_EMPLOYMENT_OFFER"){
+      const retainer=num("monthly_retainer")*Math.max(num("months"),0), reserve=num("repatriation");
+      return {base:retainer,charges:reserve,subtotal:retainer+reserve,tax:0,total:retainer+reserve};
+    }
+    if(template==="BUSINESS_COMPLIANCE"){
+      const subtotal=["retainer","cipc","sars","uif","coida","bank","bbbee","other"].reduce((s,k)=>s+num(k),0);
+      const tax=subtotal*num("tax")/100; return {base:num("retainer"),charges:subtotal-num("retainer"),subtotal,tax,total:subtotal+tax};
+    }
+    if(template==="IMMIGRATION"){
+      const subtotal=["professional_fee","dha_fee","vfs_fee","saqa","police_medical","other_disbursements"].reduce((s,k)=>s+num(k),0);
+      const tax=subtotal*num("tax")/100; return {base:num("professional_fee"),charges:subtotal-num("professional_fee"),subtotal,tax,total:subtotal+tax};
+    }
+    return {base:0,charges:0,subtotal:0,tax:0,total:0};
   }
   renderNotifications(){const root=document.querySelector("#admin-notification-list");if(!root)return;const rows=[...(this.data.notifications||[])].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,8);root.innerHTML=rows.length?rows.map(n=>`<div class="admin-list-row"><div><strong>${esc(n.subject||"Notification")}</strong><small>${esc(n.message||"")} · ${esc(formatDate(n.created_at))}</small></div><span class="status-badge ${["UNREAD","OPEN","RECEIVED"].includes(String(n.status||"").toUpperCase())?"pending":"active"}">${esc(n.status||"")}</span></div>`).join(""):"<div class='empty-state'>No recent notifications available.</div>"}
   renderIntegrations(){const i=this.data.integrations||{},providers=i.providers||[],events=i.events||[];const root=document.querySelector("#admin-integrations");if(root)root.innerHTML=providers.length?providers.map(p=>{const s=String(p.status||"NOT_CONFIGURED").toUpperCase(),cl=s==="CONNECTED"?"active":s==="ERROR"?"inactive":"pending";return`<article class="integration-card"><div class="integration-card-header"><div><strong>${esc(p.display_name||p.provider_key)}</strong><small>${esc(p.provider_key)}</small></div><span class="status-badge ${cl}">${esc(s)}</span></div><div class="integration-meta"><span>${p.enabled?"Enabled":"Not configured"}</span><span>${esc(formatDate(p.last_success_at))}</span></div>${p.last_error?`<small class="integration-error">${esc(p.last_error)}</small>`:""}</article>`}).join(""):"<div class='empty-state'>Integration registry unavailable.</div>";const eroot=document.querySelector("#admin-integration-events");if(eroot)eroot.innerHTML=events.length?events.slice(0,10).map(e=>`<div class="integration-event-row"><div><strong>${esc(e.event_type||"EVENT")}</strong><small>${esc(e.entity_type||"")}${e.entity_id?" · "+esc(e.entity_id):""}</small></div><div><span class="status-badge ${String(e.status).toUpperCase()==="FAILED"?"inactive":String(e.status).toUpperCase()==="COMPLETED"?"active":"pending"}">${esc(e.status||"")}</span><small>${esc(formatDate(e.created_at))}</small></div></div>`).join(""):"<div class='empty-state'>No recent integration events.</div>"}
