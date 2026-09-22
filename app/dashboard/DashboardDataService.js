@@ -360,14 +360,16 @@ class DashboardDataService {
     }
 
     async getTasks({ limit = DEFAULT_LIMIT } = {}) {
-        const userId = this._getUserId();
+        const staff = await this.getStaffRecord();
+        const staffId = staff?.id;
+        if (!staffId) return [];
 
         return this._request("tasks", {
             filters: [
                 {
-                    column: "assigned_to",
+                    column: "assigned_staff_id",
                     operator: "eq",
-                    value: userId
+                    value: staffId
                 }
             ],
             order: "due_at.asc",
