@@ -280,11 +280,21 @@ export default class AuthorityInteractionEngine {
     }
 
     const records = this.companyTruth.search(message, { limit: 24 });
+    let liveCosting = [];
+    if ([AUTHORITY_INTENTS.QUOTE_REQUEST, AUTHORITY_INTENTS.INTERNAL_INFORMATION_REQUEST].includes(classification.intent)) {
+      try {
+        const costing = await this.db.from("service_costing_summary").select("service_id,code,name,service_domain,description,pricing_mode,default_currency,tax_rate,minimum_fee,active,direct_cost,component_billable_total,fixed_price,rule_markup_percent,effective_minimum_fee").eq("active", true);
+        if (!costing.error) liveCosting = costing.data || [];
+      } catch (error) {
+        console.warn("Live service costing lookup failed", error);
+      }
+    }
     return {
       required: true,
-      found: records.length > 0,
+      found: records.length > 0 || liveCosting.length > 0,
       records,
-      sourcePolicy: "COMPANY_TRUTH_BEFORE_GENERAL_MODEL_REASONING"
+      liveCosting,
+      sourcePolicy: "LIVE_SERVICE_COSTING_AND_COMPANY_TRUTH_BEFORE_GENERAL_MODEL_REASONING"
     };
   }
 
