@@ -249,12 +249,12 @@ class AdminDashboardDataService{
 
     const results=await Promise.allSettled([
       this.table("staff","id,user_id,employee_number,department,job_title,is_active,created_at,updated_at"),
-      this.table("matters","id,status,title,service_type,portal_request_status,created_at,updated_at"),
+      this.table("matters","id,reference_number,individual_user_id,business_id,title,description,status,priority,service_type,portal_request_status,created_at,updated_at"),
       this.table("quotes","id,status,customer_decision,total_amount:total,amount,total_amount_legacy:amount,created_at,updated_at"),
       this.table("assignments","id,matter_id,case_id,quote_id,staff_id,status,assigned_at"),
       this.table("tasks","id,status,assigned_staff_id,matter_id,case_id,due_at,created_at,updated_at"),
       this.table("appointments","id,status,starts_at,ends_at,delivery_mode,individual_user_id,business_id,matter_id,assigned_staff_id,created_at"),
-      this.table("documents","id,status,required,document_type,category,matter_id,individual_user_id,business_id,created_at,updated_at"),
+      this.table("documents","id,status,required,document_type,name,matter_id,individual_user_id,business_id,created_at,updated_at"),
       this.table("client_documents","id,status,client_id,matter_id,created_at,updated_at"),
       this.table("invoices","id,status,total_amount:total,amount,amount_paid,balance_due,created_at,updated_at"),
       this.table("payments","id,invoice_id,amount,paid_amount:amount,paid_at,created_at"),
