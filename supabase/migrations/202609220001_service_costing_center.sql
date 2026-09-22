@@ -83,15 +83,17 @@ group by s.id;
 
 create or replace function public.calculate_service_price(p_service_id uuid,p_quantity numeric default 1)
 returns jsonb language plpgsql security definer set search_path=public as $$
-declare s public.service_catalog; v_direct numeric:=0; v_billable numeric:=0; v_price numeric:=0; v_markup numeric:=0; v_fixed numeric; v_minimum numeric:=0;
+declare s public.service_catalog; v_direct numeric:=0; v_billable numeric:=0; v_price numeric:=0; v_markup numeric:=0; v_fixed numeric; v_minimum numeric:=0; v_qty numeric:=greatest(coalesce(p_quantity,1),0);
 begin
 select * into s from public.service_catalog where id=p_service_id and active=true;
 if not found then raise exception 'SERVICE_NOT_FOUND'; end if;
 select coalesce(sum(quantity*unit_cost),0),coalesce(sum(quantity*unit_cost*(1+markup_percent/100)) filter(where billable),0) into v_direct,v_billable from public.service_cost_components where service_id=p_service_id and active=true;
 select max(fixed_price),coalesce(max(markup_percent),0),coalesce(max(minimum_fee),s.minimum_fee) into v_fixed,v_markup,v_minimum from public.service_pricing_rules where service_id=p_service_id and active=true;
-if s.pricing_mode='FIXED' and v_fixed is not null then v_price=v_fixed; else v_price=v_billable*(1+v_markup/100)*greatest(coalesce(p_quantity,1),0); end if;
+if s.pricing_mode='FIXED' and v_fixed is not null then v_price=v_fixed*v_qty;
+elsif s.pricing_mode='HOURLY' and v_fixed is not null then v_price=v_fixed*v_qty;
+else v_price=v_billable*(1+v_markup/100)*v_qty; end if;
 v_price=greatest(v_price,v_minimum);
-return jsonb_build_object('service_id',s.id,'code',s.code,'name',s.name,'currency',s.default_currency,'direct_cost',round(v_direct,2),'billable_component_total',round(v_billable,2),'markup_percent',v_markup,'minimum_fee',v_minimum,'price_before_tax',round(v_price,2),'tax_rate',s.tax_rate,'tax_amount',round(v_price*s.tax_rate/100,2),'total',round(v_price*(1+s.tax_rate/100),2));
+return jsonb_build_object('service_id',s.id,'code',s.code,'name',s.name,'currency',s.default_currency,'direct_cost',round(v_direct*v_qty,2),'billable_component_total',round(v_billable*v_qty,2),'markup_percent',v_markup,'minimum_fee',v_minimum,'price_before_tax',round(v_price,2),'tax_rate',s.tax_rate,'tax_amount',round(v_price*s.tax_rate/100,2),'total',round(v_price*(1+s.tax_rate/100),2));
 end $$;
 
 grant select on public.service_costing_summary to authenticated;
