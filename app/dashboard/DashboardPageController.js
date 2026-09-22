@@ -125,7 +125,6 @@ class DashboardPageController{
   }
   ruleModeForService(service,rules){const rule=(rules||[]).filter(x=>String(x.service_id)===String(service.service_id)&&x.active).sort((a,b)=>Number(a.priority||100)-Number(b.priority||100))[0];return rule?.pricing_mode||service?.pricing_mode||"CUSTOM";}
 
-  }
   renderCostingWorkbook(activeKey=null){
     const body=document.querySelector("#admin-costing-workbook-body");if(!body)return;
     const tabs=[...document.querySelectorAll(".workbook-tab")];
