@@ -22,7 +22,10 @@ class DashboardPageController{
       this.data=pageRole==="SUPER_ADMIN"?await adminDashboardData.getDashboardSummary(role):await dashboardData.getCurrentDashboard({limit:10});
       this.data.user=user;this.data.role=role;this.data.dashboard=pageRole;this.render();
     }catch(error){console.error("[DashboardPageController] Dashboard data load failed:",error);this.renderError(error)}
-    this.bindEvents();this.initialised=true;return this;
+    finally{
+      this.bindEvents();this.initialised=true;
+    }
+    return this;
   }
   getPageRole(){return typeof document==="undefined"?null:PAGE_ROLES[document.body?.dataset?.page]||null}
   canUsePage(actualRole,pageRole){if(!pageRole)return true;if(actualRole==="SUPER_ADMIN")return pageRole==="SUPER_ADMIN"||pageRole==="STAFF";return actualRole===pageRole}
@@ -35,12 +38,36 @@ class DashboardPageController{
   renderStaff(){const m=this.data.matters||[],t=this.data.tasks||[],d=this.data.documents||[];this.setText("#staff-my-matters",m.length);this.setText("#staff-outstanding-tasks",t.length);this.setText("#staff-document-count",d.length);this.setText("#staff-ai-queue",t.length);this.setText("#staff-workload",m.length?`${m.length} matter(s) currently linked to your workload.`:"No matters currently assigned.")}
   renderSuperAdmin(){
     const d=this.data,c=d.counts||{};
-    this.setText("#admin-open-matters",c.openMatters??0);this.setText("#admin-staff-count",c.activeStaff??0);this.setText("#admin-unassigned-count",c.unassignedMatters??0);
-    this.setText("#admin-registration-pending",c.pendingRegistrations??0);this.setText("#admin-appointments-today",c.appointmentsToday??0);this.setText("#admin-documents-outstanding",c.outstandingDocuments??0);this.setText("#admin-invoices-outstanding",c.outstandingInvoices??0);this.setText("#admin-pending-quotes",c.pendingPreQuotes??0);
-    this.setText("#admin-people-meta",`${c.activeStaff??0} active staff record(s)`);this.setText("#admin-open-matters-meta",`${c.openMatters??0} active matter(s)`);this.setText("#admin-unassigned-meta",`${c.unassignedMatters??0} require assignment`);this.setText("#admin-registration-meta",c.pendingRegistrations?`${c.pendingRegistrations} WhatsApp registration(s) awaiting review`:"No WhatsApp registrations awaiting review");this.setText("#admin-invoice-meta",money(c.outstandingBalance));
-    const i=d.integrations||{},s=i.summary||{};this.setText("#admin-ai-events",(i.events||[]).length);this.setText("#admin-integration-summary",`${s.connectedProviders??0}/${s.providerCount??0} providers connected · ${s.pendingEvents??0} pending · ${s.failedEvents??0} failed`);
-    this.setText("#admin-system-status",(s.failedEvents||0)>0?"Integration attention required":"Live control plane connected");this.setText("#admin-security-status","Authenticated SUPER_ADMIN session is active. Administrative reads remain subject to the existing RLS and server-side RPC/Edge Function boundaries.");
-    this.renderNav();this.renderOverview();this.renderAuthority();this.renderCommunication();this.renderOperations();this.renderFinance();this.renderCostingCenter();this.renderNotifications();this.renderIntegrations();this.renderRegistrationQueue();
+    try{this.setText("#admin-open-matters",c.openMatters??0);}catch(e){}
+    try{this.setText("#admin-staff-count",c.activeStaff??0);}catch(e){}
+    try{this.setText("#admin-unassigned-count",c.unassignedMatters??0);}catch(e){}
+    try{this.setText("#admin-registration-pending",c.pendingRegistrations??0);}catch(e){}
+    try{this.setText("#admin-appointments-today",c.appointmentsToday??0);}catch(e){}
+    try{this.setText("#admin-documents-outstanding",c.outstandingDocuments??0);}catch(e){}
+    try{this.setText("#admin-invoices-outstanding",c.outstandingInvoices??0);}catch(e){}
+    try{this.setText("#admin-pending-quotes",c.pendingPreQuotes??0);}catch(e){}
+    try{this.setText("#admin-people-meta",`${c.activeStaff??0} active staff record(s)`);}catch(e){}
+    try{this.setText("#admin-open-matters-meta",`${c.openMatters??0} active matter(s)`);}catch(e){}
+    try{this.setText("#admin-unassigned-meta",`${c.unassignedMatters??0} require assignment`);}catch(e){}
+    try{this.setText("#admin-registration-meta",c.pendingRegistrations?`${c.pendingRegistrations} WhatsApp registration(s) awaiting review`:"No WhatsApp registrations awaiting review");}catch(e){}
+    try{this.setText("#admin-invoice-meta",money(c.outstandingBalance));}catch(e){}
+    const i=d.integrations||{},s=i.summary||{};
+    try{this.setText("#admin-ai-events",(i.events||[]).length);}catch(e){}
+    try{this.setText("#admin-integration-summary",`${s.connectedProviders??0}/${s.providerCount??0} providers connected · ${s.pendingEvents??0} pending · ${s.failedEvents??0} failed`);}catch(e){}
+    try{this.setText("#admin-system-status",(s.failedEvents||0)>0?"Integration attention required":"Live control plane connected");}catch(e){}
+    try{this.setText("#admin-security-status","Authenticated SUPER_ADMIN session is active. Administrative reads remain subject to the existing RLS and server-side RPC/Edge Function boundaries.");}catch(e){}
+    
+    const safeRun=fn=>{try{fn();}catch(err){console.warn("[DashboardPageController] Render step error:",err);}};
+    safeRun(()=>this.renderNav());
+    safeRun(()=>this.renderOverview());
+    safeRun(()=>this.renderAuthority());
+    safeRun(()=>this.renderCommunication());
+    safeRun(()=>this.renderOperations());
+    safeRun(()=>this.renderFinance());
+    safeRun(()=>this.renderCostingCenter());
+    safeRun(()=>this.renderNotifications());
+    safeRun(()=>this.renderIntegrations());
+    safeRun(()=>this.renderRegistrationQueue());
   }
   renderNav(){const root=document.querySelector("#super-admin-nav");if(!root)return;root.innerHTML=getSuperAdminCategories().map(c=>`<section class="admin-nav-group"><h3>${esc(c.title)}</h3>${c.modules.map(m=>`<a href="${esc(m.href)}"><strong>${esc(m.title)}</strong><span>${esc(m.description)}</span></a>`).join("")}</section>`).join("")}
   renderOverview(){const d=this.data,c=d.counts||{},i=d.integrations?.summary||{};const root=document.querySelector("#admin-overview-grid");if(!root)return;const cards=[
@@ -60,7 +87,11 @@ class DashboardPageController{
   renderCostingCenter(){
     const root=document.querySelector("#admin-costing-center");
     if(!root)return;
-    const c=this.data.costing||{},services=c.services||[],components=c.components||[],rules=c.rules||[],saved=c.workbooks||[];
+    const c=this.data.costing||{};
+    const services=Array.isArray(c.services)?c.services:[];
+    const components=Array.isArray(c.components)?c.components:[];
+    const rules=Array.isArray(c.rules)?c.rules:[];
+    const saved=Array.isArray(c.workbooks)?c.workbooks:[];
     const money2=v=>money(v);
     const serviceCards=services.map(s=>{
       const comps=components.filter(x=>String(x.service_id)===String(s.service_id));

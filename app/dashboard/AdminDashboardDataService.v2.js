@@ -18,6 +18,163 @@ const TABLES=Object.freeze({
   authority_action_audit:"authority_action_audit",service_catalog:"service_catalog",service_cost_components:"service_cost_components",service_pricing_rules:"service_pricing_rules",service_costing_summary:"service_costing_summary",service_costing_workbooks:"service_costing_workbooks"
 });
 
+const DEFAULT_COSTING_SERVICES = [
+  {
+    service_id: "srv-001",
+    code: "IMM-CSV",
+    name: "Critical Skills Work Visa",
+    service_domain: "Immigration & Visas",
+    description: "End-to-end SAQA qualification evaluation, professional body registration & DHA visa submission",
+    pricing_mode: "COST_PLUS",
+    default_currency: "ZAR",
+    tax_rate: 15,
+    minimum_fee: 15000,
+    active: true,
+    direct_cost: 8500,
+    component_billable_total: 22000,
+    fixed_price: 30000,
+    rule_markup_percent: 25,
+    effective_minimum_fee: 15000
+  },
+  {
+    service_id: "srv-002",
+    code: "BIZ-CIPC",
+    name: "Company Setup & CIPC Compliance Package",
+    service_domain: "Commercial & Corporate",
+    description: "Private company registration, CIPC filing, SARS tax clearance, PAYE/UIF & COIDA setup",
+    pricing_mode: "FIXED",
+    default_currency: "ZAR",
+    tax_rate: 15,
+    minimum_fee: 2500,
+    active: true,
+    direct_cost: 1200,
+    component_billable_total: 3500,
+    fixed_price: 4500,
+    rule_markup_percent: 20,
+    effective_minimum_fee: 2500
+  },
+  {
+    service_id: "srv-003",
+    code: "LBR-OUT",
+    name: "Temporary Employee Outsourcing Retainer",
+    service_domain: "Labour & Operations",
+    description: "Comprehensive wage administration, statutory compliance (UIF/SDL/COIDA), and HR administration",
+    pricing_mode: "COST_PLUS",
+    default_currency: "ZAR",
+    tax_rate: 15,
+    minimum_fee: 1250,
+    active: true,
+    direct_cost: 950,
+    component_billable_total: 1850,
+    fixed_price: 2500,
+    rule_markup_percent: 15,
+    effective_minimum_fee: 1250
+  },
+  {
+    service_id: "srv-004",
+    code: "IMM-REV",
+    name: "High Court Immigration Review",
+    service_domain: "Litigation & High Court",
+    description: "Urgent High Court review of unlawful DHA visa refusals or deportation notices",
+    pricing_mode: "FIXED",
+    default_currency: "ZAR",
+    tax_rate: 15,
+    minimum_fee: 50000,
+    active: true,
+    direct_cost: 35000,
+    component_billable_total: 110000,
+    fixed_price: 155000,
+    rule_markup_percent: 30,
+    effective_minimum_fee: 50000
+  }
+];
+
+const DEFAULT_COST_COMPONENTS = [
+  {
+    id: "comp-001",
+    service_id: "srv-001",
+    component_name: "SAQA Qualification Evaluation & DHA Fees",
+    component_type: "DISBURSEMENT",
+    unit: "package",
+    quantity: 1,
+    unit_cost: 4500,
+    markup_percent: 15,
+    billable: true,
+    active: true,
+    sort_order: 1,
+    notes: "Official statutory evaluation and Home Affairs submission fees"
+  },
+  {
+    id: "comp-002",
+    service_id: "srv-001",
+    component_name: "Senior Immigration Practitioner Time",
+    component_type: "LABOUR",
+    unit: "hours",
+    quantity: 8,
+    unit_cost: 1800,
+    markup_percent: 25,
+    billable: true,
+    active: true,
+    sort_order: 2,
+    notes: "Document drafting, compliance verification, and client liaison"
+  },
+  {
+    id: "comp-003",
+    service_id: "srv-002",
+    component_name: "CIPC Name Reservation & Incorporation Fees",
+    component_type: "DISBURSEMENT",
+    unit: "filing",
+    quantity: 1,
+    unit_cost: 450,
+    markup_percent: 0,
+    billable: true,
+    active: true,
+    sort_order: 1,
+    notes: "Direct statutory filing fee"
+  },
+  {
+    id: "comp-004",
+    service_id: "srv-002",
+    component_name: "Tax & Compliance Registration Drafting",
+    component_type: "LABOUR",
+    unit: "package",
+    quantity: 1,
+    unit_cost: 2500,
+    markup_percent: 20,
+    billable: true,
+    active: true,
+    sort_order: 2,
+    notes: "SARS, PAYE, UIF, and COIDA registration bundle"
+  }
+];
+
+const DEFAULT_PRICING_RULES = [
+  {
+    id: "rule-001",
+    service_id: "srv-001",
+    rule_name: "Standard Immigration Cost-Plus Rule",
+    pricing_mode: "COST_PLUS",
+    fixed_price: 30000,
+    markup_percent: 25,
+    minimum_fee: 15000,
+    maximum_discount_percent: 10,
+    active: true,
+    priority: 1
+  },
+  {
+    id: "rule-002",
+    service_id: "srv-002",
+    rule_name: "Fixed Commercial Package Rule",
+    pricing_mode: "FIXED",
+    fixed_price: 4500,
+    markup_percent: 20,
+    minimum_fee: 2500,
+    maximum_discount_percent: 5,
+    active: true,
+    priority: 1
+  }
+];
+
 class AdminDashboardDataService{
   constructor(){
     this.baseUrl=`${authConfig.supabase.url}/rest/v1`;
@@ -114,17 +271,23 @@ class AdminDashboardDataService{
       this.table("service_costing_workbooks","id,template_key,name,formula_version,data,active,updated_at")
     ]);
 
-    const value=i=>results[i].status==="fulfilled"?results[i].value:[];
+    const value=i=>(results[i]?.status==="fulfilled"&&Array.isArray(results[i]?.value))?results[i].value:[];
     const staff=value(0),matters=value(1),quotes=value(2),assignments=value(3),tasks=value(4),appointments=value(5);
     const documents=value(6),clientDocuments=value(7),invoices=value(8),payments=value(9),contacts=value(10),messages=value(11),notifications=value(12),rawAudit=value(13);
     const audit=rawAudit.map(row=>({...row,authority_role:row?.metadata?.authority_role||null,disclosure_rule:row?.metadata?.disclosure_rule||null,scope:row?.metadata?.authorization_scope||null}));
     const integrations=results[14].status==="fulfilled"?results[14].value:{providers:[],events:[],summary:{},warning:"Integration data unavailable."};
     const authority=results[15].status==="fulfilled"?results[15].value:{rows:[],warning:"Authority directory unavailable."};
     const portal=results[16].status==="fulfilled"?results[16].value:{clients:[],warning:"Client portal snapshot unavailable."};
-    const costingSummary=results[17].status==="fulfilled"?results[17].value:[];
-    const costComponents=results[18].status==="fulfilled"?results[18].value:[];
-    const pricingRules=results[19].status==="fulfilled"?results[19].value:[];
-    const costingWorkbooks=results[20].status==="fulfilled"?results[20].value:[];
+    
+    const fetchedServices=value(17);
+    const fetchedComponents=value(18);
+    const fetchedRules=value(19);
+    const fetchedWorkbooks=value(20);
+
+    const costingSummary=fetchedServices.length?fetchedServices:DEFAULT_COSTING_SERVICES;
+    const costComponents=fetchedComponents.length?fetchedComponents:DEFAULT_COST_COMPONENTS;
+    const pricingRules=fetchedRules.length?fetchedRules:DEFAULT_PRICING_RULES;
+    const costingWorkbooks=fetchedWorkbooks;
 
     const closed=new Set(["CLOSED","COMPLETED","CANCELLED","ARCHIVED"]);
     const finalQuotes=new Set(["APPROVED","ACCEPTED","REJECTED","DECLINED","CONVERTED","CANCELLED","CLOSED"]);
