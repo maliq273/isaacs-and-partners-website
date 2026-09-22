@@ -282,8 +282,29 @@ async function processOutbound(limit = 5) {
         .eq("id", message.id);
 
       const actionButtons = message.metadata?.action_buttons || message.metadata?.buttons;
+      const documentUrl = message.metadata?.document_url || message.metadata?.documentUrl;
       let response: Response;
-      if (Array.isArray(actionButtons) && actionButtons.length > 0) {
+      if (documentUrl) {
+        response = await openwaRequest(
+          `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-document`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              chatId,
+              url: documentUrl,
+              filename: message.metadata?.document_filename || "Isaacs-Partners-Document.pdf",
+              mimetype: message.metadata?.document_mimetype || "application/pdf",
+              caption: message.body,
+            }),
+          },
+        );
+        if (!response.ok) {
+          response = await openwaRequest(
+            `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-text`,
+            { method: "POST", body: JSON.stringify({ chatId, text: message.body }) },
+          );
+        }
+      } else if (Array.isArray(actionButtons) && actionButtons.length > 0) {
         response = await openwaRequest(
           `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-buttons`,
           {
