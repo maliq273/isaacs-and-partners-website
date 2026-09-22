@@ -67,6 +67,8 @@ class AdminDashboardDataService{
     }
   }
 
+  async writeTable(name,method,body,query=""){ return this.request(`${this.baseUrl}/${TABLES[name]}${query ? `?${query}` : ""}`,{method,headers:{"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(body)}); }
+
   async authoritySnapshot(){
     const response=await fetch(`${this.functionsUrl}/admin-authority-directory`,{
       headers:{Accept:"application/json",apikey:this.publishableKey,Authorization:`Bearer ${auth.getToken()}`}
@@ -76,6 +78,8 @@ class AdminDashboardDataService{
     return data;
   }
 
+  async saveService(service){ return this.writeTable("service_catalog","POST",service); }
+  async saveCostComponent(component){ return this.writeTable("service_cost_components","POST",component); }
   async getDashboardSummary(verifiedRole=null){
     await auth.initialise();
     if(verifiedRole!=="SUPER_ADMIN")throw Object.assign(new Error("SUPER_ADMIN role verification is required before loading administrative data."),{code:"SUPER_ADMIN_PROFILE_NOT_FOUND"});
