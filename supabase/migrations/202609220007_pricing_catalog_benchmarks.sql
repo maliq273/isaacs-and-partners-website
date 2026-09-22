@@ -99,3 +99,43 @@ insert into public.service_pricing_rules(service_id,rule_name,pricing_mode,fixed
 select id,'Approved internal monthly retainer','FIXED',1250,0,0,0,true,current_date,10,
 jsonb_build_object('repatriation_reserve',10000,'pricing_basis','R1,250/month + R10,000 reserve','editable_in_admin',true)
 from public.service_catalog where code='IMM-FOREIGN-EMPLOYMENT-OFFER';
+
+
+delete from public.service_pricing_rules r
+using public.service_catalog c
+where r.service_id=c.id
+and c.code in (
+'BUS-COMPANY-SETUP','BUS-CIPC-ANNUAL-RETURN','BUS-BENEFICIAL-OWNERSHIP','BUS-DIRECTOR-ADDRESS-AMENDMENT',
+'BUS-SARS-INCOME-TAX','BUS-TCS','BUS-VAT-REGISTRATION','BUS-PAYE-UIF-SDL','BUS-UIF-REGISTRATION',
+'BUS-COIDA-REGISTRATION','BUS-LETTER-GOOD-STANDING','BUS-BBBEE-AFFIDAVIT','BUS-CSD',
+'BUS-GOVERNANCE-POLICY-PACK','BUS-SHAREHOLDERS-AGREEMENT','BUS-SLA-SERVICE-AGREEMENT'
+);
+
+insert into public.service_pricing_rules(service_id,rule_name,pricing_mode,fixed_price,markup_percent,minimum_fee,maximum_discount_percent,active,effective_from,priority,metadata)
+select id,'2026 research starting benchmark','FIXED',
+case code
+ when 'BUS-COMPANY-SETUP' then 1000
+ when 'BUS-CIPC-ANNUAL-RETURN' then 320
+ when 'BUS-BENEFICIAL-OWNERSHIP' then 370
+ when 'BUS-DIRECTOR-ADDRESS-AMENDMENT' then 450
+ when 'BUS-SARS-INCOME-TAX' then 425
+ when 'BUS-TCS' then 820
+ when 'BUS-VAT-REGISTRATION' then 1920
+ when 'BUS-PAYE-UIF-SDL' then 1570
+ when 'BUS-UIF-REGISTRATION' then 950
+ when 'BUS-COIDA-REGISTRATION' then 2145
+ when 'BUS-LETTER-GOOD-STANDING' then 545
+ when 'BUS-BBBEE-AFFIDAVIT' then 370
+ when 'BUS-CSD' then 620
+ when 'BUS-GOVERNANCE-POLICY-PACK' then 4000
+ when 'BUS-SHAREHOLDERS-AGREEMENT' then 2500
+ when 'BUS-SLA-SERVICE-AGREEMENT' then 1375
+end,0,0,0,true,current_date,10,
+jsonb_build_object('rule_type','RESEARCHED_MARKET_BENCHMARK','editable_in_admin',true)
+from public.service_catalog
+where code in (
+'BUS-COMPANY-SETUP','BUS-CIPC-ANNUAL-RETURN','BUS-BENEFICIAL-OWNERSHIP','BUS-DIRECTOR-ADDRESS-AMENDMENT',
+'BUS-SARS-INCOME-TAX','BUS-TCS','BUS-VAT-REGISTRATION','BUS-PAYE-UIF-SDL','BUS-UIF-REGISTRATION',
+'BUS-COIDA-REGISTRATION','BUS-LETTER-GOOD-STANDING','BUS-BBBEE-AFFIDAVIT','BUS-CSD',
+'BUS-GOVERNANCE-POLICY-PACK','BUS-SHAREHOLDERS-AGREEMENT','BUS-SLA-SERVICE-AGREEMENT'
+);
