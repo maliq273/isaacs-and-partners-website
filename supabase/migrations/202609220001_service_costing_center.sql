@@ -73,7 +73,7 @@ create or replace view public.service_costing_summary as
 select s.id as service_id,s.code,s.name,s.service_domain,s.description,s.pricing_mode,s.default_currency,s.tax_rate,s.minimum_fee,s.active,
 coalesce(sum(c.quantity*c.unit_cost) filter(where c.active),0)::numeric(14,2) as direct_cost,
 coalesce(sum(c.quantity*c.unit_cost*(1+c.markup_percent/100)) filter(where c.active and c.billable),0)::numeric(14,2) as component_billable_total,
-coalesce(max(r.fixed_price) filter(where r.active and r.pricing_mode='FIXED'),null)::numeric(14,2) as fixed_price,
+coalesce(max(r.fixed_price) filter(where r.active),null)::numeric(14,2) as fixed_price,
 coalesce(max(r.markup_percent) filter(where r.active),0)::numeric(9,4) as rule_markup_percent,
 coalesce(max(r.minimum_fee) filter(where r.active),s.minimum_fee)::numeric(14,2) as effective_minimum_fee
 from public.service_catalog s
