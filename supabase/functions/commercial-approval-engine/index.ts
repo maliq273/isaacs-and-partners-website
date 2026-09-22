@@ -41,6 +41,10 @@ function range(service:any,a:any){
   const total=n(a.monthly_salary)*12*.15*Math.max(n(a.employees)||1,1);
   return {low:Math.round(total*.9),high:Math.round(total*1.1),proposed:Math.round(total),formula:{annual_salary:n(a.monthly_salary)*12}};
  }
+ if(code==="IMMIGRATION")return {low:8000,high:45000,proposed:30000,formula:{basis:"2026 published South African immigration market range; final company price requires approval"}};
+ if(code==="LEGAL_SERVICES")return {low:2000,high:10000,proposed:6000,formula:{basis:"2026 published South African legal-service market references; final company price requires approval"}};
+ if(code==="NOTARY_MEDIATION")return {low:1000,high:10000,proposed:5000,formula:{basis:"indicative market reference; final company price requires approval"}};
+ if(code==="BUSINESS-COMPLIANCE-RETAINER")return {low:1250,high:1500,proposed:1250,formula:{basis:"company costing centre retainer anchor"}};
  const fixed=service?.pricing_mode==="FIXED"?n(service?.minimum_fee):n(service?.minimum_fee);
  return fixed?{low:Math.round(fixed*.9),high:Math.round(fixed*1.2),proposed:Math.round(fixed),formula:{basis:"company service catalogue"}}:{low:0,high:0,proposed:null,formula:{basis:"qualification required"}};
 }
