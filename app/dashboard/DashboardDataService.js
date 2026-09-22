@@ -491,15 +491,18 @@ class DashboardDataService {
     async getIndividualDashboard(options = {}) {
         const common = await this.getCommonDashboardData(options);
 
-        const [matters, documents, appointments, quotes, invoices, payments] =
+        const [matters, documents, appointments, quotes, invoices] =
             await Promise.all([
                 this.getMatters(options),
                 this.getDocuments(options),
                 this.getAppointments(options),
                 this.getQuotes(options),
-                this.getInvoices(options),
-                this.getPayments(options)
+                this.getInvoices(options)
             ]);
+        const payments = await this.getPayments({
+            ...options,
+            invoiceIds: (invoices || []).map(invoice => invoice?.id).filter(Boolean)
+        });
 
         return {
             ...common,
