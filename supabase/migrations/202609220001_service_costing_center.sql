@@ -96,3 +96,26 @@ end $$;
 
 grant select on public.service_costing_summary to authenticated;
 grant execute on function public.calculate_service_price(uuid,numeric) to authenticated;
+
+-- Seed approved pricing anchors from the existing company pricing catalogue.
+insert into public.service_catalog (code,name,service_domain,description,pricing_mode,default_currency,tax_rate,active,metadata) values
+('CONSULTATION-PAID','Paid Consultation','Legal','Approved paid consultation rate.','FIXED','ZAR',0,true,jsonb_build_object('vat','EXCLUDED','source','app/data/service-pricing.json')),
+('HR-HEARING-REP-HOURLY','HR / IR Hearing Representation','HR & Industrial Relations','Approved hourly hearing representation rate.','HOURLY','ZAR',0,true,jsonb_build_object('source','app/data/service-pricing.json')),
+('HR-DOCUMENT-SUPPLIED','HR / IR Document Supplied','HR & Industrial Relations','Approved supplied-document rate.','FIXED','ZAR',0,true,jsonb_build_object('source','app/data/service-pricing.json')),
+('BUSINESS-COMPLIANCE-RETAINER','Business Compliance Retainer','Business Compliance','Approved monthly base retainer.','FIXED','ZAR',0,true,jsonb_build_object('baseIncludedItems',3,'source','app/data/service-pricing.json')),
+('HR-PAYROLL-OUTSOURCING','Payroll Outsourcing','HR & Industrial Relations','Percentage-based payroll outsourcing.','CUSTOM','ZAR',0,true,jsonb_build_object('formula','12.5_PERCENT_OF_MONTHLY_EMPLOYEE_SALARY','source','app/data/service-pricing.json')),
+('HR-TEMP-STAFFING','Temporary Staffing','HR & Industrial Relations','Percentage-based temporary staffing.','CUSTOM','ZAR',0,true,jsonb_build_object('formula','23.5_PERCENT_OF_EMPLOYEE_HOURLY_RATE','source','app/data/service-pricing.json'))
+on conflict(code) do update set name=excluded.name,service_domain=excluded.service_domain,description=excluded.description,pricing_mode=excluded.pricing_mode,metadata=excluded.metadata,updated_at=now();
+
+insert into public.service_pricing_rules(service_id,rule_name,pricing_mode,fixed_price,active,priority,metadata)
+select id,'Approved catalogue price','FIXED',1250,true,10,jsonb_build_object('vat','EXCLUDED') from public.service_catalog where code='CONSULTATION-PAID'
+and not exists(select 1 from public.service_pricing_rules r where r.service_id=public.service_catalog.id and r.rule_name='Approved catalogue price');
+insert into public.service_pricing_rules(service_id,rule_name,pricing_mode,fixed_price,active,priority)
+select id,'Approved catalogue hourly rate','HOURLY',400,true,10 from public.service_catalog where code='HR-HEARING-REP-HOURLY'
+and not exists(select 1 from public.service_pricing_rules r where r.service_id=public.service_catalog.id and r.rule_name='Approved catalogue hourly rate');
+insert into public.service_pricing_rules(service_id,rule_name,pricing_mode,fixed_price,active,priority)
+select id,'Approved catalogue document rate','FIXED',150,true,10 from public.service_catalog where code='HR-DOCUMENT-SUPPLIED'
+and not exists(select 1 from public.service_pricing_rules r where r.service_id=public.service_catalog.id and r.rule_name='Approved catalogue document rate');
+insert into public.service_pricing_rules(service_id,rule_name,pricing_mode,fixed_price,active,priority,metadata)
+select id,'Approved catalogue monthly retainer','FIXED',1250,true,10,jsonb_build_object('baseIncludedItems',3) from public.service_catalog where code='BUSINESS-COMPLIANCE-RETAINER'
+and not exists(select 1 from public.service_pricing_rules r where r.service_id=public.service_catalog.id and r.rule_name='Approved catalogue monthly retainer');
