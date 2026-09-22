@@ -98,7 +98,7 @@ class DashboardPageController{
       const rule=rules.filter(x=>String(x.service_id)===String(s.service_id)&&x.active).sort((a,b)=>Number(a.priority||100)-Number(b.priority||100))[0];
       const price=s.fixed_price!=null?Number(s.fixed_price):Math.max(Number(s.effective_minimum_fee||0),Number(s.component_billable_total||0)*(1+Number(s.rule_markup_percent||0)/100));
       const tax=price*Number(s.tax_rate||0)/100;
-      return '<article class="costing-card"><header><div><span class="eyebrow">'+esc(s.code||"SERVICE")+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.service_domain||"")+'</p></div><span class="status-badge '+(s.active?"active":"inactive")+'">'+(s.active?"ACTIVE":"INACTIVE")+'</span></header><div class="costing-summary"><div><span>Direct cost</span><strong>'+money2(s.direct_cost)+'</strong></div><div><span>Billable cost</span><strong>'+money2(s.component_billable_total)+'</strong></div><div><span>Quote before tax</span><strong>'+money2(price)+'</strong></div><div><span>Tax</span><strong>'+money2(tax)+'</strong></div><div><span>Quote total</span><strong>'+money2(price+tax)+'</strong></div></div><div class="costing-components">'+(comps.length?comps.map(x=>'<div><span>'+esc(x.component_name)+'</span><small>'+esc(x.component_type)+' · '+esc(x.quantity)+' × '+money2(x.unit_cost)+' · '+esc(x.markup_percent||0)+'% markup</small></div>').join(""):'<div class="empty-state">No cost components configured.</div>')+'</div><footer><span>Pricing: '+esc(rule?.pricing_mode||s.pricing_mode||"COST_PLUS")+'</span><span>Tax: '+esc(s.tax_rate||0)+'%</span><span>Minimum: '+money2(s.effective_minimum_fee||0)+'</span></footer></article>';
+      return '<article class="costing-card"><header><div><span class="eyebrow">'+esc(s.code||"SERVICE")+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.service_domain||"")+'</p></div><span class="status-badge '+(s.active?"active":"inactive")+'">'+(s.active?"ACTIVE":"INACTIVE")+'</span></header><div class="costing-summary"><div><span>Direct cost</span><strong>'+money2(s.direct_cost)+'</strong></div><div><span>Billable cost</span><strong>'+money2(s.component_billable_total)+'</strong></div><div><span>Quote before tax</span><strong>'+money2(price)+'</strong></div><div><span>Tax</span><strong>'+money2(tax)+'</strong></div><div><span>Quote total</span><strong>'+money2(price+tax)+'</strong></div></div><div class="costing-components">'+(comps.length?comps.map(x=>'<div><span>'+esc(x.component_name)+'</span><small>'+esc(x.component_type)+' · '+esc(x.quantity)+' × '+money2(x.unit_cost)+' · '+esc(x.markup_percent||0)+'% markup</small></div>').join(""):'<div class="empty-state">No cost components configured.</div>')+'</div><footer><span>Pricing: '+esc(rule?.pricing_mode||s.pricing_mode||"COST_PLUS")+'</span><span>Tax: '+esc(s.tax_rate||0)+'%</span><span>Minimum: '+money2(s.effective_minimum_fee||0)+'</span><button type="button" class="btn btn-secondary btn-sm" data-edit-costing-service="'+esc(s.code||"")+'">Edit price</button></footer></article>';
     }).join("");
     const totalDirect=services.reduce((n,x)=>n+Number(x.direct_cost||0),0),totalPrices=services.reduce((n,x)=>n+(x.fixed_price!=null?Number(x.fixed_price):Math.max(Number(x.effective_minimum_fee||0),Number(x.component_billable_total||0)*(1+Number(x.rule_markup_percent||0)/100))),0);
     this.setText("#admin-costing-count",services.length);this.setText("#admin-costing-direct",money2(totalDirect));this.setText("#admin-costing-prices",money2(totalPrices));
@@ -109,6 +109,23 @@ class DashboardPageController{
     const cform=document.querySelector("#admin-costing-component-form");
     if(cform&&!cform.dataset.bound){cform.dataset.bound="1";cform.addEventListener("submit",async e=>{e.preventDefault();try{await adminDashboardData.saveCostComponent({service_id:cform.service.value,component_name:cform.component.value.trim(),component_type:cform.type.value,unit:cform.unit.value,quantity:Number(cform.quantity.value||1),unit_cost:Number(cform.unitCost.value||0),markup_percent:Number(cform.markup.value||0),billable:cform.billable.checked,active:true,sort_order:0,notes:cform.notes.value.trim()||null});await this.handleRefresh();}catch(error){console.error(error);alert(error.message||"Could not save cost component.");}})}
     const sel=document.querySelector("#admin-costing-component-service");if(sel)sel.innerHTML=services.map(x=>'<option value="'+esc(x.service_id)+'">'+esc(x.code+' — '+x.name)+'</option>').join("");
+    root.querySelectorAll("[data-edit-costing-service]").forEach(btn=>btn.addEventListener("click",()=>{
+      const service=services.find(x=>String(x.code||"")===String(btn.dataset.editCostingService||""));
+      if(!service)return;
+      const fixed=service.fixed_price!=null?Number(service.fixed_price):0;
+      form?.code&&(form.code.value=service.code||"");
+      form?.name&&(form.name.value=service.name||"");
+      form?.domain&&(form.domain.value=service.service_domain||"");
+      form?.mode&&(form.mode.value=ruleModeForService(service,rules)||service.pricing_mode||"CUSTOM");
+      form?.tax&&(form.tax.value=Number(service.tax_rate||0));
+      form?.minimum&&(form.minimum.value=Number(service.effective_minimum_fee||0));
+      form?.description&&(form.description.value=service.description||"");
+      form?.scrollIntoView({behavior:"smooth",block:"center"});
+      if(form?.querySelector("[name='code']"))form.querySelector("[name='code']").focus();
+    }));
+  }
+  ruleModeForService(service,rules){const rule=(rules||[]).filter(x=>String(x.service_id)===String(service.service_id)&&x.active).sort((a,b)=>Number(a.priority||100)-Number(b.priority||100))[0];return rule?.pricing_mode||service?.pricing_mode||"CUSTOM";}
+
   }
   renderCostingWorkbook(activeKey=null){
     const body=document.querySelector("#admin-costing-workbook-body");if(!body)return;
