@@ -315,4 +315,4 @@ export default class AuthorityInteractionEngine {
   }
 }
 
-export { AUTHORITY_INTENTS };
+export { AuthorityInteractionEngine };
