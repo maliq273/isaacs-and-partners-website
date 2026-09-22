@@ -48,6 +48,19 @@ function range(service:any,a:any){
  const fixed=service?.pricing_mode==="FIXED"?n(service?.minimum_fee):n(service?.minimum_fee);
  return fixed?{low:Math.round(fixed*.9),high:Math.round(fixed*1.2),proposed:Math.round(fixed),formula:{basis:"company service catalogue"}}:{low:0,high:0,proposed:null,formula:{basis:"qualification required"}};
 }
+async function googleResearch(service:any,answers:any){
+ const key=Deno.env.get("GEMINI_API_KEY"); if(!key)return {status:"NO_GEMINI_KEY",sources:[]};
+ const model=Deno.env.get("GEMINI_MODEL")||"gemini-3.8-flash";
+ const prompt="Research current South African market pricing for the following service for an indicative client estimate only: "+service.name+". Use Google Search and prefer current 2026 sources, official sources where relevant, and multiple independent market sources. Do not invent an Isaacs & Partners price. Return JSON only with market_low, market_high, currency, methodology, caveats. Client inputs: "+JSON.stringify(answers);
+ try{
+  const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent",{method:"POST",headers:{"x-goog-api-key":key,"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],tools:[{googleSearch:{}}],generationConfig:{responseMimeType:"application/json"}})});
+  const d=await r.json(); if(!r.ok)return {status:"SEARCH_ERROR",error:d?.error?.message||"Gemini search failed",sources:[]};
+  const text=d?.candidates?.[0]?.content?.parts?.map((p:any)=>p.text||"").join("")||"{}"; let parsed:any={}; try{parsed=JSON.parse(text)}catch{parsed={methodology:text}};
+  const chunks=d?.candidates?.[0]?.groundingMetadata?.groundingChunks||[];
+  const sources=chunks.map((x:any)=>x.web).filter(Boolean).map((x:any)=>({title:x.title,uri:x.uri}));
+  return {...parsed,status:"LIVE_GOOGLE_GROUNDING",sources,queries:d?.candidates?.[0]?.groundingMetadata?.webSearchQueries||[],checked_at:new Date().toISOString()};
+ }catch(e){return {status:"SEARCH_ERROR",error:e instanceof Error?e.message:"Search failed",sources:[]};}
+}
 async function pdf(estimate:any,quote:any,client:any,org:any){
  const d=await PDFDocument.create(),p=d.addPage([595.28,841.89]),f=await d.embedFont(StandardFonts.Helvetica),b=await d.embedFont(StandardFonts.HelveticaBold);
  const gold=rgb(.788,.635,.153),ink=rgb(.08,.08,.1),muted=rgb(.38,.4,.45),white=rgb(1,1,1);
@@ -86,8 +99,14 @@ async function main(req:Request){
  if(action==="CREATE_ESTIMATE"){
   if(a.userId!==body.client_user_id||!["INDIVIDUAL","BUSINESS"].includes(a.role))throw new Error("Customer identity required.");
   const s=await admin.from("service_catalog").select("*").eq("code",c(body.service_code,100)).eq("active",true).maybeSingle(); if(s.error||!s.data)throw new Error("Selected service is not available.");
-  const rr=range(s.data,body.qualifying_answers||{});
-  const research=body.research_snapshot||{sources:[{label:"South Africa National Minimum Wage 2026",url:"https://www.labour.gov.za/Media-Desk/Media-Statements/Pages/Minister-of-Employment-and-Labour,-Meth-increases-the-statutory-National-Minimum-Wage-to-R30,23-per-hour.aspx",checked_at:new Date().toISOString()},{label:"APSO TES costing guidance",url:"https://apso.org.za/industry-news/500-calculation-of-statutory-provision-on-temp-mark-up",checked_at:new Date().toISOString()}]};
+  let rr=range(s.data,body.qualifying_answers||{});
+  const liveResearch=await googleResearch(s.data,body.qualifying_answers||{});
+  const marketLow=n(liveResearch.market_low),marketHigh=n(liveResearch.market_high);
+  if(marketLow>0&&marketHigh>=marketLow){
+    if(!rr.proposed){rr={...rr,low:Math.round(marketLow),high:Math.round(marketHigh),proposed:Math.round((marketLow+marketHigh)/2),formula:{...rr.formula,basis:"Live Google-grounded 2026 market research"}}}
+    else rr={...rr,low:Math.min(rr.low||marketLow,marketLow),high:Math.max(rr.high||marketHigh,marketHigh)};
+  }
+  const research={live:liveResearch,company_sources:[{label:"South Africa National Minimum Wage 2026",url:"https://www.labour.gov.za/Media-Desk/Media-Statements/Pages/Minister-of-Employment-and-Labour,-Meth-increases-the-statutory-National-Minimum-Wage-to-R30,23-per-hour.aspx"},{label:"APSO TES costing guidance",url:"https://apso.org.za/industry-news/500-calculation-of-statutory-provision-on-temp-mark-up"}],client_supplied:body.research_snapshot||null};
   const ins=await admin.from("client_estimates").insert({client_user_id:body.client_user_id,business_id:body.business_id||null,service_id:s.data.id,service_code:s.data.code,service_name:s.data.name,status:"ESTIMATE_READY",request_data:body.request_data||{},qualifying_answers:body.qualifying_answers||{},research_snapshot:research,rough_low:rr.low,rough_high:rr.high,proposed_total:rr.proposed,internal_costing_snapshot:{formula:rr.formula,source:"service_costing_and_workbook_rules"},created_by:a.userId}).select("id").single(); if(ins.error)throw ins.error;
   const admins=await admin.from("authority_directory").select("user_id,phone_number").eq("authority_role","SUPER_ADMIN").eq("is_active",true);
   for(const x of admins.data||[]){const alertText="⚠️ COMMERCIAL APPROVAL REQUIRED\n\nService: "+s.data.name+"\nIndicative range: R"+Number(rr.low||0).toLocaleString("en-ZA")+" - R"+Number(rr.high||0).toLocaleString("en-ZA")+"\nProposed: R"+Number(rr.proposed||0).toLocaleString("en-ZA")+"\n\nAnthony has prepared an indicative estimate. No final price may be sent until you decide.";const buttons=[{id:"APPROVE_"+ins.data.id,text:"APPROVE",type:"reply"},{id:"MODIFY_"+ins.data.id,text:"MODIFY",type:"reply"},{id:"REJECT_"+ins.data.id,text:"REJECT",type:"reply"}];if(x.user_id)await admin.from("notifications").insert({recipient_user_id:x.user_id,channel:"IN_APP",subject:"Commercial approval required",message:alertText,status:"UNREAD",metadata:{estimate_id:ins.data.id,action_buttons:buttons}});if(x.phone_number){const chatId=String(x.phone_number).replace(/\D/g,"")+"@c.us";const m=await admin.from("communication_messages").insert({customer_user_id:x.user_id||null,channel:"WHATSAPP",direction:"OUTBOUND",phone_number:x.phone_number,chat_id:chatId,body:alertText,status:"QUEUED",metadata:{source:"commercial-approval-engine",type:"COMMERCIAL_APPROVAL",estimate_id:ins.data.id,action_buttons:buttons,buttons}}).select("id").single();if(m.data?.id)await admin.from("communication_outbox").insert({message_id:m.data.id,chat_id:chatId,status:"QUEUED"});}};
