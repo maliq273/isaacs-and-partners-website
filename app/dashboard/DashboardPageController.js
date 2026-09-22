@@ -227,7 +227,7 @@ class DashboardPageController{
       const sundayMultiplier=num("retail_sunday")?1.5:num("sunday_multiplier");
       const sunday=num("sunday_hours")*baseRate*sundayMultiplier;
       const ph=num("public_holiday_hours")*baseRate*num("public_holiday_multiplier");
-      const labour=nt+ot+sunday+ph;
+      const labour=(nt+ot+sunday+ph)>0?(nt+ot+sunday+ph):num("employee_rate")*num("rate_quantity");
       const statutory=labour*num("uif_sdl_wca")/100;
       const criminal=labour*num("criminal_check")/100;
       const medical=labour*num("medical_test")/100;
