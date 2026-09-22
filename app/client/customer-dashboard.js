@@ -50,7 +50,7 @@ class CustomerDashboard{
    '<section class="cp-hero"><div><span class="cp-eyebrow">Secure customer workspace</span><h1>Good day, <span data-name>Customer</span>.</h1><p>One connected workspace for matters, documents, appointments, financials and communication with Isaacs & Partners.</p></div><div class="cp-hero-actions"><button class="cp-btn cp-btn-gold" data-action="new">＋ New service request</button><button class="cp-btn cp-btn-light" data-section="anthony">Ask Anthony</button></div></section>'+
    '<section class="cp-workspace-switcher"><button class="is-active" data-workspace="individual"><span>Individual Dashboard Workspace</span><small>Matters, documents, bookings & financials</small></button><button data-workspace="business" '+(business?"":"hidden")+'><span>Corporate RSA Compliance Matrix</span><small>CIPC, SARS, B-BBEE, RFQ & quotes</small></button></section>'+
    '<div class="cp-alert" data-alert hidden></div>'+
-   this.panelOverview()+this.panelRequests()+this.panelNotifications()+this.panelDocuments()+this.panelAppointments()+this.panelFinancials()+
+   this.panelOverview()+this.panelRequests()+this.panelNotifications()+this.panelDocuments()+this.panelAppointments()+this.panelFinancials()+this.panelEstimates()+
    (business?this.panelBusiness():"")+this.panelAnthony()+
    '</main></div><div class="cp-modal" data-modal hidden><div class="cp-modal-card"><button class="cp-modal-close" data-close>×</button><div data-modal-content></div></div></div>'+
    '<footer class="cp-footer">Isaacs & Partners · Secure Customer Portal · <a href="mailto:info@isaacsandpartners.online">info@isaacsandpartners.online</a></footer>'
