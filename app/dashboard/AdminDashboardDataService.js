@@ -15,7 +15,7 @@ const TABLES=Object.freeze({
   client_documents:"client_documents",invoices:"invoices",payments:"payments",
   communication_contacts:"communication_contacts",communication_messages:"communication_messages",
   notifications:"notifications",
-  authority_action_audit:"authority_action_audit"
+  authority_action_audit:"authority_action_audit",service_catalog:"service_catalog",service_cost_components:"service_cost_components",service_pricing_rules:"service_pricing_rules",service_costing_summary:"service_costing_summary"
 });
 
 class AdminDashboardDataService{
@@ -102,7 +102,10 @@ class AdminDashboardDataService{
       this.table("authority_action_audit","id,authority_id,actor_user_id,actor_phone,action,target_type,target_id,request_text,decision,reason,before_data,after_data,metadata,created_at"),
       integrationData.getControlPlaneStatus(),
       this.authoritySnapshot(),
-      clientPortalAdmin.snapshot()
+      clientPortalAdmin.snapshot(),
+      this.table("service_costing_summary","service_id,code,name,service_domain,description,pricing_mode,default_currency,tax_rate,minimum_fee,active,direct_cost,component_billable_total,fixed_price,rule_markup_percent,effective_minimum_fee"),
+      this.table("service_cost_components","id,service_id,component_name,component_type,unit,quantity,unit_cost,markup_percent,billable,active,sort_order,notes"),
+      this.table("service_pricing_rules","id,service_id,rule_name,pricing_mode,fixed_price,markup_percent,minimum_fee,maximum_discount_percent,active,effective_from,effective_to,priority")
     ]);
 
     const value=i=>results[i].status==="fulfilled"?results[i].value:[];
@@ -111,6 +114,9 @@ class AdminDashboardDataService{
     const integrations=results[15].status==="fulfilled"?results[15].value:{providers:[],events:[],summary:{},warning:"Integration data unavailable."};
     const authority=results[16].status==="fulfilled"?results[16].value:{rows:[],warning:"Authority directory unavailable."};
     const portal=results[17].status==="fulfilled"?results[17].value:{clients:[],warning:"Client portal snapshot unavailable."};
+    const costingSummary=results[18].status==="fulfilled"?results[18].value:[];
+    const costComponents=results[19].status==="fulfilled"?results[19].value:[];
+    const pricingRules=results[20].status==="fulfilled"?results[20].value:[];
 
     const closed=new Set(["CLOSED","COMPLETED","CANCELLED","ARCHIVED"]);
     const finalQuotes=new Set(["APPROVED","ACCEPTED","REJECTED","DECLINED","CONVERTED","CANCELLED","CLOSED"]);
@@ -141,7 +147,7 @@ class AdminDashboardDataService{
         inboundToday,outboundToday,activeContacts:contacts.filter(x=>x?.is_active!==false).length,pendingRegistrations:pendingRegistrations.length
       },
       staff,matters,quotes,assignments,tasks,appointments,documents,clientDocuments,invoices,payments,contacts,messages,notifications,audit,
-      authority:authority.rows||[],portal:portal.clients||[],pendingRegistrations,integrations,warnings
+      authority:authority.rows||[],portal:portal.clients||[],pendingRegistrations,integrations,warnings,costing:{services:costingSummary,components:costComponents,rules:pricingRules}
     };
   }
 }
