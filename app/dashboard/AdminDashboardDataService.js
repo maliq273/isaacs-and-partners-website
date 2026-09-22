@@ -67,7 +67,7 @@ class AdminDashboardDataService{
     }
   }
 
-  async writeTable(name,method,body,query=""){ return this.request(`${this.baseUrl}/${TABLES[name]}${query ? `?${query}` : ""}`,{method,headers:{"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(body)}); }
+  async writeTable(name,method,body,query=""){ return this.request(`${TABLES[name]}${query ? `?${query}` : ""}`,{method,headers:{"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(body)}); }
 
   async authoritySnapshot(){
     const response=await fetch(`${this.functionsUrl}/admin-authority-directory`,{
