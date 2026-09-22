@@ -90,8 +90,9 @@ if(qualification){
 async function notifySuperAdminWithAlert(adminDb:any,alertText:string,conversationId:string,customerPhone:string,chatId:string,compiledQuote:any=null,proposedReply:string=""){
   const admins=await adminDb.from("authority_directory").select("user_id, phone_number, authority_role").eq("authority_role","SUPER_ADMIN").eq("is_active",true);
   const actionButtons=[
-    {id:"APPROVE_YES",text:"Yes - Approve",type:"reply"},
-    {id:"REJECT_NO",text:"No - Reject",type:"reply"}
+    {id:"APPROVE",text:"APPROVE",type:"reply"},
+    {id:"MODIFY",text:"MODIFY",type:"reply"},
+    {id:"REJECT",text:"REJECT",type:"reply"}
   ];
   if(admins.data&&admins.data.length>0){
     for(const adm of admins.data){
@@ -153,59 +154,27 @@ async function notifySuperAdminWithAlert(adminDb:any,alertText:string,conversati
 // Lead Persistence for all incoming enquiries matched by WhatsApp / Phone Number
 if(chatId||phone){const cleanPhone=phone||chatId.replace(/@.*$/,"");try{const enquiry=await admin.from("public_enquiries").upsert({session_id:chatId,service_domain:nullable(p?.serviceDomain,100),answers:[{message:body,timestamp:new Date().toISOString()}],qualified:true,metadata:{phone:cleanPhone,channel,chat_id:chatId,created_by:"ai-liaison-runtime"}},{onConflict:"session_id"});if(enquiry.error)console.warn("Lead persistence failed",enquiry.error.message);}catch(error){console.warn("Lead persistence exception",error);}}
 
-// Super Admin Approval Decision Interceptor (Button or Text: YES/APPROVE_YES or NO/REJECT_NO)
-const cleanBody=body.trim().toLowerCase();
-const isApproval=/^(approve_yes|yes|y|proceed|approve|approved|go ahead|ok|okay)$/i.test(cleanBody);
-const isRejection=/^(reject_no|no|n|reject|rejected|decline)$/i.test(cleanBody);
-if((isApproval||isRejection)&&staffConversation&&String(authorityRole).toUpperCase()==="SUPER_ADMIN"){
+// Super Admin Commercial Approval Decision Interceptor.
+const cleanBody=body.trim().toUpperCase();
+const approvalAction=/^(APPROVE|MODIFY|REJECT)$/.exec(cleanBody)?.[1]||null;
+if(approvalAction&&staffConversation&&String(authorityRole).toUpperCase()==="SUPER_ADMIN"){
   const pendingConv=await admin.from("ai_conversations").select("*").eq("state","approval_needed").order("updated_at",{ascending:false}).limit(1).maybeSingle();
-  const targetConvId=pendingConv?.data?.id;
-
-  if(targetConvId){
-    const pendingFacts=pendingConv?.data?.facts||{};
-    const targetCustomerPhone=pendingConv?.data?.phone_number||pendingFacts.customerPhone||"enquiry";
-    const targetChatId=pendingConv?.data?.chat_id||(targetCustomerPhone?`${targetCustomerPhone.replace(/[^0-9]/g,"")}@c.us`:null);
-    const proposedReply=pendingFacts.proposedReply||"";
-
-    if(isApproval){
-      await admin.from("ai_conversations").update({state:"AI_ACTIVE",facts:{...pendingFacts,approval_needed:false,super_admin_approved:true,approved_at:new Date().toISOString()},updated_at:new Date().toISOString()}).eq("id",targetConvId);
-
-      // Send the approved quotation/reply to the customer on WhatsApp!
-      if(proposedReply&&targetChatId){
-        const custKey=`approved-quote-dispatch:${targetConvId}:${Date.now()}`;
-        const custMsg=await admin.from("communication_messages").insert({
-          customer_user_id:pendingConv?.data?.user_id||null,
-          channel:"WHATSAPP",
-          direction:"OUTBOUND",
-          phone_number:targetCustomerPhone,
-          chat_id:targetChatId,
-          body:proposedReply,
-          status:"QUEUED",
-          idempotency_key:custKey,
-          metadata:{
-            source:"ai-liaison-runtime",
-            approved_by_super_admin:true,
-            conversation_id:targetConvId,
-            compiled_quote:pendingFacts.compiledQuote||null
-          }
-        }).select("id").single();
-        if(custMsg.data?.id){
-          await admin.from("communication_outbox").insert({message_id:custMsg.data.id,chat_id:targetChatId,status:"QUEUED"});
-        }
-      }
-
-      const reply=`✅ Authorization CONFIRMED (YES). The compiled quote has been sent to customer ${targetCustomerPhone}.`;
-      const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"SUPER_ADMIN_APPROVAL",null,{source:"ai-liaison-runtime"});
-      const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,mid,msgId):null;
-      return json({ok:true,conversation:con,message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"SUPER_ADMIN_APPROVED",customerSent:Boolean(proposedReply)}});
-    }else{
-      await admin.from("ai_conversations").update({state:"HUMAN_ACTIVE",facts:{...pendingFacts,approval_needed:false,super_admin_rejected:true,rejected_at:new Date().toISOString()},updated_at:new Date().toISOString()}).eq("id",targetConvId);
-
-      const reply=`❌ Authorization DECLINED (NO). Quote was NOT sent to customer ${targetCustomerPhone}. The matter is routed for manual staff intervention.`;
-      const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"SUPER_ADMIN_DECLINED",null,{source:"ai-liaison-runtime"});
-      const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,mid,msgId):null;
-      return json({ok:true,conversation:con,message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"SUPER_ADMIN_DECLINED"}});
-    }
+  const pendingFacts=pendingConv?.data?.facts||{};
+  const estimateId=pendingFacts.estimateId||null;
+  if(estimateId){
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/commercial-approval-engine`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","X-AI-Internal-Worker-Token":Deno.env.get("OPENWA_WORKER_TOKEN")||""},
+      body:JSON.stringify({action:approvalAction,estimate_id:estimateId,actor_phone:phone,approved_total:pendingFacts.compiledQuote?.approvedTotal||pendingFacts.compiledQuote?.total||pendingFacts.proposedTotal||null})
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(result?.error||"Commercial approval action failed.");
+    const label=approvalAction==="APPROVE"?"approved and the official quotation is being generated.":approvalAction==="MODIFY"?"marked for modification.":"rejected and will not be sent to the client.";
+    const reply="Commercial request "+label;
+    const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"SUPER_ADMIN_"+approvalAction,null,{source:"commercial-approval-engine",estimate_id:estimateId});
+    const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,mid,msgId):null;
+    await admin.from("ai_conversations").update({state:approvalAction==="REJECT"?"HUMAN_ACTIVE":"AI_ACTIVE",facts:{...pendingFacts,approval_needed:false,lastApprovalAction:approvalAction,approvalResult:result},updated_at:new Date().toISOString()}).eq("id",pendingConv.data.id);
+    return json({ok:true,conversation:con,message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"SUPER_ADMIN_"+approvalAction,estimateId,engine:result}});
   }
 }
 
@@ -228,12 +197,25 @@ const nextState=isApprovalNeeded?"approval_needed":(result?.action==="ESCALATE"&
 if(result?.action==="ESCALATE"&&!staffConversation){const intervention=await admin.rpc("ai_create_human_intervention",{p_conversation_id:con.id,p_matter_id:mid||con.matter_id||null,p_client_user_id:uid,p_reason:result?.reason||"Anthony has requested authorised human assistance.",p_priority:result?.priority||"NORMAL",p_question:body,p_ai_context:{assistant_name:"Anthony",identity:identity?{type:identity.identityType,status:identity.identityStatus,authority_role:authorityRole}:null,authorization,operational:operationalIntelligence.portfolio||null}});if(intervention.error)throw intervention.error;}
 const reply=clean(result?.reply,8192);const aiMsg=reply?await append(con.id,"AI","OUTBOUND",reply,result?.intent?.intent||null,result?.servicePlan?.domain||null,{source:"ai-liaison-runtime",runtime:"WhatsAppAgent",assistant_name:"Anthony",action:result?.action||"RESPOND",ai_provider:result?.aiProvider||null,ai_model:result?.aiModel||null,company_truth_sources:result?.companySources||[],context_messages_loaded:prior.length,historical_memory_found:historicalMemory.found,portfolio_attention:operationalIntelligence.portfolio.attentionLevel,next_action:operationalIntelligence.portfolio.nextAction,identity_type:identity?.identityType||"UNKNOWN",identity_status:identity?.identityStatus||"UNKNOWN",authority_id:identity?.authority?.authorityId||null,authority_role:authorityRole||null,phone_verified:Boolean(identity?.verified),authorization_scope:authorization.scope.level,authorization_allowed:authorization.allowed,disclosure_rule:authorization.disclosureRule}):null;
 const customerPhone=phone||con.phone_number||chatId.replace(/@.*$/,"");
+let estimateId=(con.facts||{}).estimateId||null;
+if(isApprovalNeeded&&!staffConversation&&!estimateId){
+  const serviceCode=result?.servicePlan?.service?.code||result?.compiledQuote?.serviceCode||result?.context?.facts?.serviceCode||null;
+  const serviceName=result?.servicePlan?.service?.name||result?.compiledQuote?.serviceName||result?.context?.facts?.serviceName||"Requested Service";
+  if(serviceCode){
+    const sq=await admin.from("service_catalog").select("id,code,name").eq("code",serviceCode).maybeSingle();
+    if(sq.data){
+      const ei=await admin.from("client_estimates").insert({client_user_id:uid||null,service_id:sq.data.id,service_code:sq.data.code,service_name:serviceName,status:"AWAITING_APPROVAL",request_data:{chat_id:chatId,phone_number:phone,matter_id:mid||null},qualifying_answers:{message:body},research_snapshot:{source:"Anthony runtime",checked_at:new Date().toISOString()},proposed_total:result?.compiledQuote?.total||result?.compiledQuote?.estimatedTotal||null,internal_costing_snapshot:{compiledQuote:result?.compiledQuote||null}}).select("id").single();
+      if(ei.data?.id)estimateId=ei.data.id;
+    }
+  }
+}
 const facts={
   ...(con.facts||{}),
   ...(authoritySession?{authoritySession}:{}) ,
   ...(result?.context?.facts||{}),
   approval_needed:isApprovalNeeded,
   customerPhone,
+  estimateId,
   proposedReply:result?.proposedReply||reply||null,
   compiledQuote:result?.compiledQuote||result?.context?.facts?.compiledQuote||null,
   customerMemory:result?.context?.memory||con.facts?.customerMemory||{}
