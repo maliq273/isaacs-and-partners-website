@@ -30,7 +30,7 @@ async function superAdmin(a:any){
 }
 function range(service:any,a:any){
  const code=String(service?.code||"");
- if(code==="TEMP_OUTSOURCING"){
+ if(code==="TEMP_OUTSOURCING"||code==="HR-TEMP-STAFFING"){
   const rate=n(a.nt_rate||a.employee_rate), employees=Math.max(n(a.employees)||1,1);
   const nt=n(a.nt_hours)*rate, ot=n(a.ot_hours)*rate*1.5, sun=n(a.sunday_hours)*rate*(a.retail_sunday?1.5:2), ph=n(a.public_holiday_hours)*rate*2;
   const labour=(nt+ot+sun+ph)*employees, optional=(a.medical_test?2:0)+(a.ppe?1.5:0);
