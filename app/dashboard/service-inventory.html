@@ -1,4 +1,147 @@
-<!doctype html><html lang="en-ZA"><head>
+<!doctype html>
+<html lang="en-ZA">
+<head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Service Inventory | Isaacs and Partners</title><link rel="stylesheet" href="../css/app.css"><link rel="stylesheet" href="../css/dashboard.css"></head><body data-page="service-inventory"><main class="dashboard-page v2-main"><header class="page-header v2-header"><div><p class="eyebrow">Super Admin · Pricing Source of Truth</p><h1 class="v2-title">Service Inventory</h1><p class="page-description">Maintain the exact services, categories and rates used by downstream quote and invoice engines.</p></div><div class="page-actions"><a class="btn" href="./super-admin.html">← Super Admin</a><button type="button" class="btn" data-auth-action="logout">Sign Out</button></div></header><div id="service-inventory-message" class="login-message" role="status" hidden></div><section class="panel"><div class="panel-header"><div><p class="eyebrow">Single source of truth</p><h2>Service catalogue</h2><p>Rates are authoritative. Existing financial documents retain their issued price when a future rate changes.</p></div><button class="btn btn-primary" type="button" disabled>Add Service</button></div><div class="table-wrapper"><table><thead><tr><th>Service</th><th>Category</th><th>Description</th><th>Rate</th><th>Status</th><th>Actions</th></tr></thead><tbody id="service-inventory-table"><tr><td colspan="6">Service inventory skeleton — CRUD wiring follows verification of the live services schema.</td></tr></tbody></table></div></section><section class="dashboard-grid"><article class="panel"><div class="panel-header"><h2>Pricing rules</h2></div><ul class="activity-list"><li>Currency follows the organisation master record.</li><li>Rates are stored as authoritative numeric values.</li><li>Historical quotes/invoices are immutable financial records.</li><li>The AI can read active services and rates but cannot invent or alter pricing.</li></ul></article><article class="panel"><div class="panel-header"><h2>Downstream consumers</h2></div><div class="empty-state">Client AI, staff workflows, quote generation and invoice generation will consume this inventory through secured application services.</div></article></section></main><script type="module">import dashboardPageController from "./DashboardPageController.js?v=20260901-1";await dashboardPageController.initialise();</script></body></html>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Service Inventory &amp; Costing Model | Isaacs and Partners</title>
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<style>
+.costing-admin-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin: 20px 0; }
+.costing-form { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.costing-form strong { font-family: "Syne", sans-serif; color: var(--ink); font-size: 1.05rem; }
+.costing-form input, .costing-form select { width: 100%; box-sizing: border-box; }
+.costing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-top: 20px; }
+.costing-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.costing-card header { display: flex; justify-content: space-between; align-items: flex-start; }
+.costing-card h3 { margin: 4px 0; font-family: "Syne", sans-serif; font-size: 1.2rem; }
+.costing-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; }
+.costing-summary span { font-size: 0.72rem; color: var(--ink-muted); text-transform: uppercase; display: block; }
+.costing-summary strong { font-size: 1.05rem; color: var(--ink); display: block; margin-top: 2px; }
+.costing-components { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border); padding-top: 12px; }
+.costing-components div { font-size: 0.85rem; color: var(--ink); }
+.costing-components small { display: block; color: var(--ink-muted); font-size: 0.75rem; }
+.costing-card footer { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px; font-size: 0.78rem; color: var(--ink-muted); }
+.costing-workbooks { margin-top: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+.workbook-heading h3 { font-family: "Syne", sans-serif; font-size: 1.3rem; margin: 4px 0; }
+.workbook-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+.workbook-tab { background: transparent; border: 1px solid var(--border); color: var(--ink-muted); padding: 8px 16px; border-radius: 4px; font-size: 0.82rem; cursor: pointer; }
+.workbook-tab.active { background: var(--accent); color: #0c0c0e; border-color: var(--accent); font-weight: 600; }
+.costing-sheet { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85rem; }
+.costing-sheet th, .costing-sheet td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+.costing-sheet input { background: #fffbe6 !important; color: #111 !important; font-weight: 600 !important; border: 1px solid #d4b106 !important; padding: 6px 10px !important; border-radius: 4px !important; }
+.workbook-total { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 20px; background: rgba(0,0,0,0.3); padding: 16px; border-radius: 6px; border: 1px solid var(--border); }
+.workbook-total span { font-size: 0.72rem; color: var(--ink-muted); text-transform: uppercase; display: block; }
+.workbook-total strong { font-size: 1.2rem; color: var(--ink); display: block; margin-top: 4px; }
+.workbook-total .final strong { color: var(--accent); font-size: 1.4rem; }
+.workbook-actions { display: flex; gap: 12px; margin-top: 16px; }
+.benchmark-table-wrap { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 18px; }
+.benchmark-input { width: 90px; }
+.sheet-note { font-size: 0.78rem; color: var(--ink-muted); margin-top: 8px; }
+</style>
+</head>
+<body data-page="service-inventory">
+<main class="dashboard-page v2-main">
+<header class="page-header v2-header">
+<div>
+  <p class="eyebrow">Super Admin · Authoritative Service Rates</p>
+  <h1 class="v2-title">Service Inventory &amp; Costing Model</h1>
+  <p class="page-description">Maintain authoritative services, direct cost breakdowns, markups, tax rates and Excel-style calculation sheets used by quoting and invoicing engines.</p>
+</div>
+<div class="page-actions">
+  <a class="btn btn-secondary" href="./super-admin.html">&larr; Return to Super Admin Dashboard</a>
+  <button type="button" class="btn" data-auth-action="logout">Sign Out</button>
+</div>
+</header>
+
+<div id="service-inventory-message" class="login-message" role="status" hidden></div>
+
+<!-- Commercial Metrics Header -->
+<section class="admin-finance-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden;">
+  <article class="metric-card" style="padding: 20px; background: var(--bg);">
+    <span class="metric-label">Configured Services</span>
+    <strong class="metric-value" id="admin-costing-count">0</strong>
+  </article>
+  <article class="metric-card" style="padding: 20px; background: var(--bg);">
+    <span class="metric-label">Total Direct Cost Base</span>
+    <strong class="metric-value" id="admin-costing-direct">R0.00</strong>
+  </article>
+  <article class="metric-card" style="padding: 20px; background: var(--bg);">
+    <span class="metric-label">Configured Quote Value</span>
+    <strong class="metric-value" id="admin-costing-prices">R0.00</strong>
+  </article>
+  <article class="metric-card" style="padding: 20px; background: var(--bg);">
+    <span class="metric-label">Pricing Authority</span>
+    <strong class="metric-value" style="font-size: 1.4rem; color: var(--accent);">Company Truth</strong>
+  </article>
+</section>
+
+<!-- Add/Update Forms -->
+<section class="costing-admin-tools">
+  <form id="admin-costing-service-form" class="costing-form">
+    <strong>Add / Update Service</strong>
+    <input name="code" class="form-control" placeholder="Service code (e.g. IMM-WORK-01)" required>
+    <input name="name" class="form-control" placeholder="Service name" required>
+    <input name="domain" class="form-control" placeholder="Service domain / category">
+    <select name="mode" class="form-control">
+      <option value="COST_PLUS">Cost plus</option>
+      <option value="FIXED">Fixed price</option>
+      <option value="HOURLY">Hourly rate</option>
+      <option value="CUSTOM">Custom formula</option>
+    </select>
+    <input name="tax" class="form-control" type="number" step="0.01" min="0" placeholder="Tax rate % (e.g. 15)">
+    <input name="minimum" class="form-control" type="number" step="0.01" min="0" placeholder="Minimum fee (ZAR)">
+    <input name="description" class="form-control" placeholder="Description &amp; billing terms">
+    <button class="btn btn-primary" type="submit">Save Service</button>
+  </form>
+
+  <form id="admin-costing-component-form" class="costing-form">
+    <strong>Add Direct Cost Component</strong>
+    <select name="service" id="admin-costing-component-service" class="form-control" required></select>
+    <input name="component" class="form-control" placeholder="Component name (e.g. VFS Fee, Counsel)" required>
+    <select name="type" class="form-control">
+      <option value="LABOUR">LABOUR</option>
+      <option value="EXTERNAL">EXTERNAL</option>
+      <option value="OVERHEAD">OVERHEAD</option>
+      <option value="DISBURSEMENT">DISBURSEMENT</option>
+      <option value="INTERNAL">INTERNAL</option>
+      <option value="OTHER">OTHER</option>
+    </select>
+    <input name="unit" class="form-control" value="FIXED" placeholder="Unit (e.g. HOUR, FIXED)">
+    <input name="quantity" class="form-control" type="number" step="0.01" min="0" value="1" placeholder="Quantity">
+    <input name="unitCost" class="form-control" type="number" step="0.01" min="0" value="0" placeholder="Unit cost (ZAR)">
+    <input name="markup" class="form-control" type="number" step="0.01" min="0" value="0" placeholder="Markup %">
+    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--ink);">
+      <input name="billable" type="checkbox" checked> Billable component
+    </label>
+    <input name="notes" class="form-control" placeholder="Notes / vendor references">
+    <button class="btn btn-primary" type="submit">Add Component</button>
+  </form>
+</section>
+
+<!-- Active Services Grid -->
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <p class="eyebrow">Service Catalogue</p>
+      <h2>Authoritative Rates &amp; Cost Breakdowns</h2>
+      <p>Click "Edit price" on any card to populate the service form above.</p>
+    </div>
+  </div>
+  <div id="admin-costing-center" class="costing-grid" style="padding: 20px;">
+    <div class="empty-state">Loading service costing records...</div>
+  </div>
+</section>
+
+</main>
+
+<script type="module">
+import dashboardPageController from "./DashboardPageController.js";
+await dashboardPageController.initialise();
+</script>
+</body>
+</html>
