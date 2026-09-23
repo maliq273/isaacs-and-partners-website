@@ -236,6 +236,7 @@ class AdminDashboardDataService{
   }
 
   async saveService(service){ return this.request("service_catalog?on_conflict=code",{method:"POST",headers:{"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=representation"},body:JSON.stringify(service)}); }
+  async savePricingRule(rule){ return this.request("service_pricing_rules?on_conflict=id",{method:"POST",headers:{"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=representation"},body:JSON.stringify(rule)}); }
   async saveCostComponent(component){ return this.writeTable("service_cost_components","POST",component); }
   async saveWorkbook(workbook){ return this.request("service_costing_workbooks?on_conflict=template_key",{method:"POST",headers:{"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=representation"},body:JSON.stringify(workbook)}); }
   async getDashboardSummary(verifiedRole=null){
