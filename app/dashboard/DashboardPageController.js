@@ -91,36 +91,118 @@ class DashboardPageController{
     const services=Array.isArray(c.services)?c.services:[];
     const components=Array.isArray(c.components)?c.components:[];
     const rules=Array.isArray(c.rules)?c.rules:[];
-    const saved=Array.isArray(c.workbooks)?c.workbooks:[];
     const money2=v=>money(v);
     const serviceCards=services.map(s=>{
       const comps=components.filter(x=>String(x.service_id)===String(s.service_id));
       const rule=rules.filter(x=>String(x.service_id)===String(s.service_id)&&x.active).sort((a,b)=>Number(a.priority||100)-Number(b.priority||100))[0];
-      const price=s.fixed_price!=null?Number(s.fixed_price):Math.max(Number(s.effective_minimum_fee||0),Number(s.component_billable_total||0)*(1+Number(s.rule_markup_percent||0)/100));
+      const price=rule?.fixed_price!=null?Number(rule.fixed_price):Math.max(Number(s.effective_minimum_fee||0),Number(s.component_billable_total||0)*(1+Number(rule?.markup_percent??s.rule_markup_percent??0)/100));
       const tax=price*Number(s.tax_rate||0)/100;
-      return '<article class="costing-card"><header><div><span class="eyebrow">'+esc(s.code||"SERVICE")+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.service_domain||"")+'</p></div><span class="status-badge '+(s.active?"active":"inactive")+'">'+(s.active?"ACTIVE":"INACTIVE")+'</span></header><div class="costing-summary"><div><span>Direct cost</span><strong>'+money2(s.direct_cost)+'</strong></div><div><span>Billable cost</span><strong>'+money2(s.component_billable_total)+'</strong></div><div><span>Quote before tax</span><strong>'+money2(price)+'</strong></div><div><span>Tax</span><strong>'+money2(tax)+'</strong></div><div><span>Quote total</span><strong>'+money2(price+tax)+'</strong></div></div><div class="costing-components">'+(comps.length?comps.map(x=>'<div><span>'+esc(x.component_name)+'</span><small>'+esc(x.component_type)+' · '+esc(x.quantity)+' × '+money2(x.unit_cost)+' · '+esc(x.markup_percent||0)+'% markup</small></div>').join(""):'<div class="empty-state">No cost components configured.</div>')+'</div><footer><span>Pricing: '+esc(rule?.pricing_mode||s.pricing_mode||"COST_PLUS")+'</span><span>Tax: '+esc(s.tax_rate||0)+'%</span><span>Minimum: '+money2(s.effective_minimum_fee||0)+'</span>'+(s.metadata?.pricing_basis?'<span>Basis: '+esc(s.metadata.pricing_basis)+'</span>':"")+'<button type="button" class="btn btn-secondary btn-sm" data-edit-costing-service="'+esc(s.code||"")+'">Edit price</button></footer></article>';
+      const status=s.active?"ACTIVE":"INACTIVE";
+      return '<article class="costing-card"><header><div><span class="eyebrow">'+esc(s.code||"SERVICE")+'</span><h3>'+esc(s.name)+'</h3><p>'+esc(s.service_domain||"")+'</p></div><span class="status-badge '+(s.active?"active":"inactive")+'">'+status+'</span></header><div class="costing-summary"><div><span>Direct cost</span><strong>'+money2(s.direct_cost)+'</strong></div><div><span>Billable cost</span><strong>'+money2(s.component_billable_total)+'</strong></div><div><span>Quote before tax</span><strong>'+money2(price)+'</strong></div><div><span>Tax</span><strong>'+money2(tax)+'</strong></div><div><span>Quote total</span><strong>'+money2(price+tax)+'</strong></div></div><div class="costing-components">'+(comps.length?comps.map(x=>'<div><span>'+esc(x.component_name)+'</span><small>'+esc(x.component_type)+' · '+esc(x.quantity)+' × '+money2(x.unit_cost)+' · '+esc(x.markup_percent||0)+'% markup</small></div>').join(""):'<div class="empty-state">No cost components configured.</div>')+'</div><footer><span>Pricing: '+esc(rule?.pricing_mode||s.pricing_mode||"COST_PLUS")+'</span><span>Tax: '+esc(s.tax_rate||0)+'%</span><span>Minimum: '+money2(s.effective_minimum_fee||0)+'</span>'+(s.metadata?.pricing_status?'<span>Status: '+esc(s.metadata.pricing_status)+'</span>':"")+'<button type="button" class="btn btn-secondary btn-sm" data-edit-costing-service="'+esc(s.code||"")+'">Edit pricing</button></footer></article>';
     }).join("");
-    const totalDirect=services.reduce((n,x)=>n+Number(x.direct_cost||0),0),totalPrices=services.reduce((n,x)=>n+(x.fixed_price!=null?Number(x.fixed_price):Math.max(Number(x.effective_minimum_fee||0),Number(x.component_billable_total||0)*(1+Number(x.rule_markup_percent||0)/100))),0);
-    this.setText("#admin-costing-count",services.length);this.setText("#admin-costing-direct",money2(totalDirect));this.setText("#admin-costing-prices",money2(totalPrices));
+
+    const totalDirect=services.reduce((n,x)=>n+Number(x.direct_cost||0),0);
+    const totalPrices=services.reduce((n,x)=>{
+      const rule=rules.filter(r=>String(r.service_id)===String(x.service_id)&&r.active).sort((a,b)=>Number(a.priority||100)-Number(b.priority||100))[0];
+      return n+(rule?.fixed_price!=null?Number(rule.fixed_price):Math.max(Number(x.effective_minimum_fee||0),Number(x.component_billable_total||0)*(1+Number(rule?.markup_percent??x.rule_markup_percent??0)/100)));
+    },0);
+    this.setText("#admin-costing-count",services.length);
+    this.setText("#admin-costing-direct",money2(totalDirect));
+    this.setText("#admin-costing-prices",money2(totalPrices));
+
     root.innerHTML=serviceCards+'<div class="costing-workbooks"><div class="workbook-heading"><div><span class="eyebrow">Excel-style calculation sheets</span><h3>Costing Workbooks</h3><p>Enter your figures in the yellow input cells. Totals calculate immediately and can be saved as the current company costing template.</p></div></div><div class="workbook-tabs">'+Object.entries(this.getCostingWorkbookTemplates()).map(([k,t],i)=>'<button type="button" class="workbook-tab '+(i===0?"active":"")+'" data-workbook="'+k+'">'+esc(t.name)+'</button>').join("")+'</div><div id="admin-costing-workbook-body"></div></div>';
     this.renderCostingWorkbook();
+
     const form=document.querySelector("#admin-costing-service-form");
-    if(form&&!form.dataset.bound){form.dataset.bound="1";form.addEventListener("submit",async e=>{e.preventDefault();try{await adminDashboardData.saveService({code:form.code.value.trim(),name:form.name.value.trim(),service_domain:form.domain.value.trim()||null,description:form.description.value.trim()||null,pricing_mode:form.mode.value,default_currency:"ZAR",tax_rate:Number(form.tax.value||0),minimum_fee:Number(form.minimum.value||0),active:true});await this.handleRefresh();}catch(error){console.error(error);alert(error.message||"Could not save service.");}})}
+    if(form&&!form.dataset.bound){
+      form.dataset.bound="1";
+      form.addEventListener("submit",async e=>{
+        e.preventDefault();
+        try{
+          const existing=services.find(x=>String(x.code||"")===String(form.code.value.trim()));
+          const metadata={...(existing?.metadata||{}),
+            pricing_status:form.pricingStatus.value||"BENCHMARK",
+            editable_in_admin:true,
+            market_range_low:form.marketLow.value?Number(form.marketLow.value):null,
+            market_range_high:form.marketHigh.value?Number(form.marketHigh.value):null,
+            starting_benchmark:form.fixedPrice.value?Number(form.fixedPrice.value):null,
+            pricing_basis:form.pricingBasis.value.trim()||existing?.metadata?.pricing_basis||null
+          };
+          const saved=await adminDashboardData.saveService({
+            ...(form.serviceId.value?{id:form.serviceId.value}:{}),
+            code:form.code.value.trim(),
+            name:form.name.value.trim(),
+            service_domain:form.domain.value.trim()||null,
+            description:form.description.value.trim()||null,
+            pricing_mode:form.mode.value,
+            default_currency:"ZAR",
+            tax_rate:Number(form.tax.value||0),
+            minimum_fee:Number(form.minimum.value||0),
+            active:true,
+            metadata
+          });
+          const savedService=Array.isArray(saved)?saved[0]:saved;
+          const serviceId=savedService?.id||form.serviceId.value||existing?.service_id;
+          if(serviceId){
+            const currentRule=rules.find(x=>String(x.service_id)===String(serviceId)&&x.active) || rules.find(x=>String(x.service_id)===String(existing?.service_id));
+            await adminDashboardData.savePricingRule({
+              ...(form.ruleId.value?{id:form.ruleId.value}:currentRule?.id?{id:currentRule.id}:{}),
+              service_id:serviceId,
+              rule_name:currentRule?.rule_name||form.name.value.trim()+" pricing rule",
+              pricing_mode:form.mode.value,
+              fixed_price:Number(form.fixedPrice.value||0),
+              markup_percent:Number(form.markup.value||0),
+              minimum_fee:Number(form.minimum.value||0),
+              maximum_discount_percent:Number(form.maxDiscount.value||0),
+              active:true,
+              priority:Number(currentRule?.priority||1)
+            });
+          }
+          form.reset();
+          form.pricingStatus.value="BENCHMARK";
+          form.mode.value="COST_PLUS";
+          await this.handleRefresh();
+        }catch(error){console.error(error);alert(error.message||"Could not save service pricing.");}
+      });
+    }
+
     const cform=document.querySelector("#admin-costing-component-form");
-    if(cform&&!cform.dataset.bound){cform.dataset.bound="1";cform.addEventListener("submit",async e=>{e.preventDefault();try{await adminDashboardData.saveCostComponent({service_id:cform.service.value,component_name:cform.component.value.trim(),component_type:cform.type.value,unit:cform.unit.value,quantity:Number(cform.quantity.value||1),unit_cost:Number(cform.unitCost.value||0),markup_percent:Number(cform.markup.value||0),billable:cform.billable.checked,active:true,sort_order:0,notes:cform.notes.value.trim()||null});await this.handleRefresh();}catch(error){console.error(error);alert(error.message||"Could not save cost component.");}})}
-    const sel=document.querySelector("#admin-costing-component-service");if(sel)sel.innerHTML=services.map(x=>'<option value="'+esc(x.service_id)+'">'+esc(x.code+' — '+x.name)+'</option>').join("");
+    if(cform&&!cform.dataset.bound){
+      cform.dataset.bound="1";
+      cform.addEventListener("submit",async e=>{
+        e.preventDefault();
+        try{
+          await adminDashboardData.saveCostComponent({service_id:cform.service.value,component_name:cform.component.value.trim(),component_type:cform.type.value,unit:cform.unit.value,quantity:Number(cform.quantity.value||1),unit_cost:Number(cform.unitCost.value||0),markup_percent:Number(cform.markup.value||0),billable:cform.billable.checked,active:true,sort_order:0,notes:cform.notes.value.trim()||null});
+          await this.handleRefresh();
+        }catch(error){console.error(error);alert(error.message||"Could not save cost component.");}
+      });
+    }
+
+    const sel=document.querySelector("#admin-costing-component-service");
+    if(sel)sel.innerHTML=services.map(x=>'<option value="'+esc(x.service_id)+'">'+esc(x.code+' — '+x.name)+'</option>').join("");
+
     root.querySelectorAll("[data-edit-costing-service]").forEach(btn=>btn.addEventListener("click",()=>{
       const service=services.find(x=>String(x.code||"")===String(btn.dataset.editCostingService||""));
       if(!service)return;
+      const rule=rules.filter(x=>String(x.service_id)===String(service.service_id)&&x.active).sort((a,b)=>Number(a.priority||100)-Number(b.priority||100))[0];
       form?.code&&(form.code.value=service.code||"");
       form?.name&&(form.name.value=service.name||"");
       form?.domain&&(form.domain.value=service.service_domain||"");
-      form?.mode&&(form.mode.value=this.ruleModeForService(service,rules)||service.pricing_mode||"CUSTOM");
+      form?.mode&&(form.mode.value=rule?.pricing_mode||service.pricing_mode||"CUSTOM");
       form?.tax&&(form.tax.value=Number(service.tax_rate||0));
-      form?.minimum&&(form.minimum.value=Number(service.effective_minimum_fee||0));
+      form?.minimum&&(form.minimum.value=Number(rule?.minimum_fee??service.effective_minimum_fee??service.minimum_fee??0));
+      form?.fixedPrice&&(form.fixedPrice.value=Number(rule?.fixed_price??service.metadata?.starting_benchmark??0));
+      form?.markup&&(form.markup.value=Number(rule?.markup_percent??service.rule_markup_percent??0));
+      form?.maxDiscount&&(form.maxDiscount.value=Number(rule?.maximum_discount_percent??0));
+      form?.pricingStatus&&(form.pricingStatus.value=service.metadata?.pricing_status||"BENCHMARK");
+      form?.marketLow&&(form.marketLow.value=service.metadata?.market_range_low??"");
+      form?.marketHigh&&(form.marketHigh.value=service.metadata?.market_range_high??"");
+      form?.pricingBasis&&(form.pricingBasis.value=service.metadata?.pricing_basis||"");
+      form?.serviceId&&(form.serviceId.value=service.service_id||"");
+      form?.ruleId&&(form.ruleId.value=rule?.id||"");
       form?.description&&(form.description.value=service.description||"");
       form?.scrollIntoView({behavior:"smooth",block:"center"});
-      if(form?.querySelector("[name='code']"))form.querySelector("[name='code']").focus();
+      form?.querySelector("[name='code']")?.focus();
     }));
   }
   ruleModeForService(service,rules){const rule=(rules||[]).filter(x=>String(x.service_id)===String(service.service_id)&&x.active).sort((a,b)=>Number(a.priority||100)-Number(b.priority||100))[0];return rule?.pricing_mode||service?.pricing_mode||"CUSTOM";}
