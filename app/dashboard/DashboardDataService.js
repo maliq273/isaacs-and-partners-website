@@ -323,7 +323,8 @@ class DashboardDataService {
                 }
             ],
             order: "created_at.desc",
-            limit
+            limit,
+            optional: true
         });
     }
 
@@ -339,7 +340,8 @@ class DashboardDataService {
                 }
             ],
             order: "created_at.desc",
-            limit
+            limit,
+            optional: true
         });
     }
 
@@ -355,7 +357,8 @@ class DashboardDataService {
                 }
             ],
             order: "starts_at.asc",
-            limit
+            limit,
+            optional: true
         });
     }
 
@@ -373,7 +376,8 @@ class DashboardDataService {
                 }
             ],
             order: "due_at.asc",
-            limit
+            limit,
+            optional: true
         });
     }
 
@@ -389,7 +393,8 @@ class DashboardDataService {
                 }
             ],
             order: "created_at.desc",
-            limit
+            limit,
+            optional: true
         });
     }
 
@@ -405,7 +410,8 @@ class DashboardDataService {
                 }
             ],
             order: "created_at.desc",
-            limit
+            limit,
+            optional: true
         });
     }
 
@@ -416,7 +422,8 @@ class DashboardDataService {
         return this._request("payments", {
             filters,
             order: "created_at.desc",
-            limit
+            limit,
+            optional: true
         });
     }
 
@@ -433,7 +440,8 @@ class DashboardDataService {
             ],
             order: "created_at.desc",
             limit,
-            single: true
+            single: true,
+            optional: true
         });
     }
 
@@ -448,7 +456,8 @@ class DashboardDataService {
                     value: userId
                 }
             ],
-            single: true
+            single: true,
+            optional: true
         });
     }
 
@@ -464,7 +473,8 @@ class DashboardDataService {
                 }
             ],
             order: "created_at.desc",
-            limit
+            limit,
+            optional: true
         });
     }
 
