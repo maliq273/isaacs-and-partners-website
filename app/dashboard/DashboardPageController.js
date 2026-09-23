@@ -5,7 +5,7 @@ import adminDashboardData from "./AdminDashboardDataService.js";
 import {resolveUserDashboardRole,clearRoleCache} from "./DashboardAccess.js";
 import {getSuperAdminCategories} from "./SuperAdminDashboardConfig.js";
 
-const PAGE_ROLES=Object.freeze({"client-dashboard":"INDIVIDUAL","business-dashboard":"BUSINESS","staff-dashboard":"STAFF","super-admin":"SUPER_ADMIN"});
+const PAGE_ROLES=Object.freeze({"client-dashboard":"INDIVIDUAL","business-dashboard":"BUSINESS","staff-dashboard":"STAFF","super-admin":"SUPER_ADMIN","service-inventory":"SUPER_ADMIN"});
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const formatDate=value=>{if(!value)return"—";const d=new Date(value);return Number.isNaN(d.getTime())?String(value):new Intl.DateTimeFormat("en-ZA",{dateStyle:"medium",timeStyle:"short"}).format(d)};
 const money=value=>{const n=Number(value||0);return Number.isFinite(n)?new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR",maximumFractionDigits:2}).format(n):"R0.00"};
