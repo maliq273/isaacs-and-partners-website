@@ -82,13 +82,18 @@ const ROUTES = {
     {key:"asylum.protection",q:"Why could you not obtain protection from the authorities in your country?",required:true},
     {key:"asylum.internal_relocation",q:"Could you safely relocate to another part of your country? Explain.",required:true},
     {key:"asylum.other_country",q:"Did you seek protection or refugee status in another country or pass through another country where protection was available? Explain.",required:true},
-    {key:"asylum.evidence",q:"What evidence supports your account?",required:true}
+    {key:"asylum.evidence",q:"What evidence supports your account?",required:true},
+    {key:"asylum.transit_document",q:"Did you have an asylum transit visa or another South African visa when you entered? If not, explain the circumstances.",required:true},
+    {key:"asylum.reporting_delay",q:"When did you first seek asylum or report to the relevant authorities, and was there any delay? Give the factual timeline without leaving anything out.",required:true},
+    {key:"asylum.family_dependants",q:"Are any spouse, children or dependants claiming protection with you or relying on your status? Provide their details.",required:true}
   ],
   section_24_refugee_status:[
     {key:"refugee.file_number",q:"What is your asylum seeker file/reference number?",required:true},
     {key:"refugee.decision",q:"What decision was made on your asylum application?",required:true},
     {key:"refugee.decision_date",q:"When was the decision made?",required:true},
-    {key:"refugee.current_permit",q:"What Section 22 or other refugee document do you currently hold?",required:true}
+    {key:"refugee.current_permit",q:"What Section 22 or other refugee document do you currently hold?",required:true},
+    {key:"refugee.status_basis",q:"What facts and evidence were relied on in the asylum application that led to the Section 24/refugee status decision?",required:true},
+    {key:"refugee.dependants",q:"Which family members or dependants are linked to your refugee status?",required:true}
   ],
   refugee_appeal:[
     {key:"appeal.decision_document",q:"Please upload the refusal/decision document.",required:true},
@@ -188,6 +193,14 @@ export default class ImmigrationInterviewEngine {
 
   buildQuestionPlan(){
     const c=this.completeness();
-    return {caseType:this.caseType,nextQuestions:this.getNextQuestions(8),missing:c.missing,conflicts:this.conflicts(),ready:c.ready};
+    const legalFlags=[];
+    if(this.caseType==="section_22_asylum" || this.caseType==="refugee_appeal"){
+      legalFlags.push({
+        code:"ZACC30_2026",
+        level:"CURRENT_LAW_REVIEW",
+        message:"Apply the 7 July 2026 Constitutional Court judgment [2026] ZACC 30 and verify the current operational DHA procedure before finalising an asylum matter."
+      });
+    }
+    return {caseType:this.caseType,nextQuestions:this.getNextQuestions(8),missing:c.missing,conflicts:this.conflicts(),ready:c.ready,legalFlags};
   }
 }
