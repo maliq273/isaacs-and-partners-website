@@ -1,0 +1,115 @@
+name: Ingest Immigration PDFs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "immigrations_docs/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PDF tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends poppler-utils ocrmypdf
+
+      - name: Extract every immigration PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p app/knowledgebase/immigration_docs/text
+          mkdir -p app/knowledgebase/immigration_docs/bbox
+          mkdir -p app/knowledgebase/immigration_docs/ocr
+          python3 <<'PY'
+          import hashlib, json, re, subprocess
+          from pathlib import Path
+          from datetime import datetime
+
+          root=Path("immigrations_docs")
+          out=Path("app/knowledgebase/immigration_docs")
+          records=[]
+          hits=[]
+          for pdf in sorted(root.glob("*.pdf")):
+              raw=pdf.read_bytes()
+              sha=hashlib.sha256(raw).hexdigest()
+              base=pdf.stem
+              txt=out/"text"/f"{base}.txt"
+              bbox=out/"bbox"/f"{base}.html"
+              subprocess.run(["pdftotext","-layout",str(pdf),str(txt)],check=False)
+              subprocess.run(["pdftotext","-bbox-layout",str(pdf),str(bbox)],check=False)
+              text=txt.read_text(errors="ignore") if txt.exists() else ""
+              ocr_required=len(re.sub(r"\\s+","",text)) < 500
+              ocr_txt=None
+              if ocr_required:
+                  ocr_pdf=out/"ocr"/f"{base}.pdf"
+                  ocr_sidecar=out/"ocr"/f"{base}.txt"
+                  proc=subprocess.run(["ocrmypdf","--skip-text","--deskew","--clean","--sidecar",str(ocr_sidecar),str(pdf),str(ocr_pdf)],capture_output=True,text=True)
+                  if proc.returncode==0 and ocr_sidecar.exists():
+                      ocr_txt=ocr_sidecar.read_text(errors="ignore")
+                      if len(ocr_txt.strip())>len(text.strip()):
+                          text=ocr_txt
+                          txt.write_text(text)
+              matches=[]
+              for m in re.finditer(r"e[\\s-]*billable|ebillable|billable",text,re.I):
+                  matches.append({"term":m.group(0),"context":text[max(0,m.start()-100):m.end()+160].replace("\n"," ")})
+              if matches:
+                  hits.append({"file":pdf.name,"matches":matches})
+              info=subprocess.run(["pdfinfo",str(pdf)],capture_output=True,text=True)
+              pages=None
+              for line in info.stdout.splitlines():
+                  if line.startswith("Pages:"):
+                      try: pages=int(line.split(":",1)[1].strip())
+                      except: pass
+              records.append({
+                  "file":pdf.name,
+                  "repository_path":str(pdf),
+                  "sha256":sha,
+                  "bytes":len(raw),
+                  "pages":pages,
+                  "text_characters":len(text),
+                  "ocr_required":ocr_required,
+                  "ocr_succeeded":bool(ocr_txt),
+                  "text_path":str(txt),
+                  "bbox_path":str(bbox),
+                  "status":"INGESTED_TEXT" if len(text.strip()) else "NO_TEXT_EXTRACTED"
+              })
+          (out/"manifest.json").write_text(json.dumps({
+              "generated_at":datetime.utcnow().isoformat()+"Z",
+              "source_directory":"immigrations_docs",
+              "documents":records,
+              "billable_search_hits":hits
+          },indent=2))
+          report=["# Immigration PDF scan report","",f"Documents scanned: {len(records)}",""]
+          report += [f"- {r['file']}: {r['status']}, pages={r['pages']}, text={r['text_characters']} chars, OCR={'yes' if r['ocr_succeeded'] else 'no'}" for r in records]
+          report += ["","## e-billable / billable search hits"]
+          if hits:
+              for h in hits:
+                  report.append(f"- {h['file']}")
+                  for m in h["matches"]:
+                      report.append(f"  - {m['term']}: {m['context']}")
+          else:
+              report.append("- No e-billable/billable match found in extracted text.")
+          (out/"SCAN-REPORT.md").write_text("\n".join(report)+"\n")
+          PY
+
+      - name: Commit generated knowledge
+        shell: bash
+        run: |
+          git config user.name "Isaacs & Partners Immigration Knowledge Engine"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/knowledgebase/immigration_docs
+          if git diff --cached --quiet; then
+            echo "No generated changes."
+          else
+            git commit -m "Ingest immigration PDF knowledge"
+            git push
+          fi
