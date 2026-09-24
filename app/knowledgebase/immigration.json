@@ -2,7 +2,7 @@
   "knowledgeBase": {
     "id": "immigration",
     "name": "South African Immigration, Refugee & Administrative Law",
-    "version": "1.0.0",
+    "version": "2026-09-25.2",
     "status": "active",
     "jurisdiction": "South Africa",
     "legalDomains": [
@@ -161,7 +161,7 @@
         "SAFLII",
         "DEPARTMENT_OF_JUSTICE"
       ],
-      "lastVerified": "2026-08-09",
+      "lastVerified": "2026-09-25",
       "currentLawCheckRequired": true,
       "historicalLawSupported": true,
       "effectiveDateMatchingRequired": true
@@ -175,6 +175,31 @@
       "articles": "INSERT_IMMIGRATION_LAW_ARTICLES_HERE",
       "handbooks": "INSERT_DHA_AND_PROFESSIONAL_HANDBOOKS_HERE",
       "internalCaseStudies": "INSERT_INTERNAL_IMMIGRATION_CASES_HERE"
-    }
+    },
+    "currentLegalAlerts": [
+      {
+        "id": "ZACC30-2026-SCALABRINI",
+        "title": "Scalabrini Centre of Cape Town v Minister of Home Affairs",
+        "citation": "[2026] ZACC 30",
+        "date": "2026-07-07",
+        "authority": "CONSTITUTIONAL_COURT_OF_SOUTH_AFRICA",
+        "status": "CURRENT_LEGAL_ALERT",
+        "source": "https://www.concourt.org.za/index.php/judgement/650-scalabrini-centre-of-cape-town-and-another-v-minister-of-home-affairs-and-others-cct126-25",
+        "rule": "The Constitutional Court confirmed invalidity of sections 4(1)(f), 4(1)(h), 4(1)(i) and 21(1B) of the Refugees Act 130 of 1998. The judgment held that procedural barriers could not prevent merits-based assessment of asylum claims in the manner challenged.",
+        "operationalInstruction": "Anthony must flag Section 22/asylum matters involving irregular entry, delayed reporting or missing transit documentation for current-law review. Do not present the superseded threshold provisions as current law.",
+        "confidence": "PRIMARY_AUTHORITY"
+      },
+      {
+        "id": "DHA-WHITE-PAPER-2026",
+        "title": "Final Revised White Paper on Citizenship, Immigration and Refugee Protection",
+        "date": "2026-03-26",
+        "authority": "DEPARTMENT_OF_HOME_AFFAIRS",
+        "status": "POLICY_PROPOSAL_NOT_AUTOMATICALLY_LAW",
+        "source": "https://www.dha.gov.za/images/White-Paper-on-CIRP-26March2026.pdf",
+        "rule": "Policy proposals must be distinguished from enacted legislation, regulations or binding judgments.",
+        "operationalInstruction": "Anthony may use the White Paper as policy context but must never state a proposal as an enacted requirement without a current authoritative legal source.",
+        "confidence": "OFFICIAL_POLICY"
+      }
+    ]
   }
 }
