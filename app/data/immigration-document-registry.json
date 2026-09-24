@@ -1,0 +1,28 @@
+{
+  "version":"2026-09-25.1",
+  "sourceDirectory":"immigrations_docs",
+  "sourcePolicy":"PRESERVE_ORIGINAL_GOVERNMENT_TEMPLATES",
+  "documents":[
+    {"file":"BI-947.pdf","kind":"FORM","form":"BI-947","route":["permanent_residence"]},
+    {"file":"FORM-DHA-1738_e-version.pdf","kind":"FORM","form":"DHA-1738","route":["temporary_residence","work_visa","critical_skills","general_work","intra_company_transfer","business_visa","relative_visa","study_visa","retirement_visa","medical_treatment_visa"]},
+    {"file":"Temporary-Residence-Form-DHA-1738-Form-8-June-19-2014.pdf","kind":"FORM","form":"DHA-1738","route":["temporary_residence"]},
+    {"file":"Visitor-Visa-Application-Form-DHA-84-Form-11-June-19-2014.pdf","kind":"FORM","form":"DHA-84","route":["visitor_visa"]},
+    {"file":"dha84-form11.pdf","kind":"FORM","form":"DHA-84","route":["visitor_visa"]},
+    {"file":"Spousal-RelationshipBI-1712A-Form-12-1.pdf","kind":"FORM","form":"BI-1712A","route":["spousal_relationship"]},
+    {"file":"Confirmation-of-Capital-and-Financial-Contribution.pdf","kind":"SUPPORTING_FORM","route":["business_visa"]},
+    {"file":"42932rg11024gon1707.pdf","kind":"REGULATIONS","route":["section_22_asylum","section_24_refugee_status","refugee_appeal"]},
+    {"file":"final_Immigration_Regulations_2014_1 (1).pdf","kind":"REGULATIONS","route":["temporary_residence","visitor_visa","permanent_residence"]},
+    {"file":"DHA-DIRECTIVES-19-14-ICT-ext-in-country-moha.pdf","kind":"DIRECTIVE","route":["intra_company_transfer"]},
+    {"file":"Immigration-Directive-22.pdf","kind":"DIRECTIVE","route":["immigration_appeal","waiver","review"]},
+    {"file":"List-of-Critical-Skils-or-Qualifications.pdf","kind":"REFERENCE_LIST","route":["critical_skills"]},
+    {"file":"List-of-Businesses-Qualifying-for-Reduction-or-Waiver.pdf","kind":"REFERENCE_LIST","route":["business_visa","waiver"]},
+    {"file":"List-of-Undesirable-Business-Undertakings.pdf","kind":"REFERENCE_LIST","route":["business_visa"]},
+    {"file":"Concession_of_30_March_2026.pdf","kind":"POLICY","route":["immigration_appeal","waiver","review"]},
+    {"file":"Travelling-with-minors-info-DHA-latest-version.pdf","kind":"GUIDANCE","route":["visitor_visa"]},
+    {"file":"37335gen97.pdf","kind":"REFERENCE","route":[]},
+    {"file":"53853-12-12-HomeAffairs.pdf","kind":"REFERENCE","route":[]},
+    {"file":"53853gon6947.pdf","kind":"REFERENCE","route":[]},
+    {"file":"55016gon7714.pdf","kind":"REFERENCE","route":[]},
+    {"file":"55209rg12036gon7834.pdf","kind":"REFERENCE","route":[]}
+  ]
+}
