@@ -4,8 +4,10 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { PDFDocument } from "npm:pdf-lib@1.17.1";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SECRET_KEYS") || "";
-const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
+const secretKeys = (()=>{ try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS")||"{}"); } catch { return {}; } })();
+const publishableKeys = (()=>{ try { return JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS")||"{}"); } catch { return {}; } })();
+const SERVICE_KEY = secretKeys.default || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const ANON_KEY = publishableKeys.default || Deno.env.get("SUPABASE_ANON_KEY") || "";
 const INTERNAL = Deno.env.get("OPENWA_WORKER_TOKEN") || Deno.env.get("AI_INTERNAL_WORKER_TOKEN") || "";
 const REPO_RAW = "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/";
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth:{persistSession:false,autoRefreshToken:false} });
