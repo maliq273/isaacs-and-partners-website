@@ -124,20 +124,31 @@ def sha(path):
  return h.hexdigest()
 
 def bbox_lines(pdf):
- xml_path=Path("/tmp/bbox.xml")
- subprocess.run(["pdftotext","-bbox-layout",str(pdf),str(xml_path)],check=True,stdout=subprocess.DEVNULL)
- root=ET.parse(xml_path).getroot()
+ info=subprocess.check_output(["pdfinfo",str(pdf)],text=True)
+ pages_n=int(re.search(r"^Pages:\\s+(\\d+)",info,re.M).group(1))
+ page_size=re.search(r"^Page size:\\s+([0-9.]+) x ([0-9.]+) points",info,re.M)
+ pw,ph=float(page_size.group(1)),float(page_size.group(2))
+ work=Path("/tmp/ocr-pages"); work.mkdir(parents=True,exist_ok=True)
  pages=[]
- for pi,p in enumerate(list(root.iter()),1):
-  if p.tag.split("}")[-1] != "page":
-   continue
+ for pn in range(1,pages_n+1):
+  stem=work/f"p{pn}"
+  img=Path(str(stem)+".png")
+  subprocess.run(["pdftoppm","-png","-r","150","-f",str(pn),"-singlefile",str(pdf),str(stem)],check=True,stdout=subprocess.DEVNULL)
+  tsv=Path(str(stem)+".tsv")
+  subprocess.run(["tesseract",str(img),str(stem),"--psm","6","tsv"],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
   words=[]
-  for w in p.iter():
-   if w.tag.split("}")[-1] != "word":
-    continue
-   txt="".join(w.itertext()).strip()
-   if not txt: continue
-   words.append({"text":txt,"x1":float(w.attrib["xMin"]),"y1":float(w.attrib["yMin"]),"x2":float(w.attrib["xMax"]),"y2":float(w.attrib["yMax"])})
-  pages.append({"page":len(pages)+1,"width":float(p.attrib["width"]),"height":float(p.attrib["height"]),"words":words})
+  lines=tsv.read_text(encoding="utf-8",errors="ignore").splitlines()
+  for row in lines[1:]:
+   cols=row.split("\\t")
+   if len(cols)<12 or not cols[11].strip(): continue
+   try:
+    left,top,width,height=map(int,cols[6:10]); txt=cols[11].strip()
+   except: continue
+   # Convert image pixels (150 dpi, top-left) to PDF points (bottom-left).
+   scale=72/150
+   x1=left*scale; x2=(left+width)*scale
+   y2=ph-top*scale; y1=ph-(top+height)*scale
+   words.append({"text":txt,"x1":x1,"y1":y1,"x2":x2,"y2":y2,"conf":float(cols[10]) if cols[10] else -1})
+  pages.append({"page":pn,"width":pw,"height":ph,"words":words})
  return pages
 
