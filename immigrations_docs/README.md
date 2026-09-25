@@ -32,3 +32,5 @@ Generated knowledge lives under app/knowledgebase/immigration_docs/ and never re
 <!-- BeautifulSoup bbox trigger: 2026-09-25T22:00Z -->
 
 <!-- Tesseract coordinate trigger: 2026-09-25T22:20Z -->
+
+<!-- Final coordinate source trigger: 2026-09-25T22:30Z -->
