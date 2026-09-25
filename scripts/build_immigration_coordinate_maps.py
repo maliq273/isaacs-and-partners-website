@@ -124,38 +124,20 @@ def sha(path):
  return h.hexdigest()
 
 def bbox_lines(pdf):
- from bs4 import BeautifulSoup
- from pypdf import PdfReader
- import csv, io
- reader=PdfReader(str(pdf)); pages=[]
- stored=Path("app/knowledgebase/immigration_docs/bbox")/(pdf.stem+".html")
- if stored.exists() and pdf.stem!="dha84-form11":
-  soup=BeautifulSoup(stored.read_text(encoding="utf-8",errors="ignore"),"html.parser")
-  page_nodes=soup.find_all("page")
-  for pi,p in enumerate(page_nodes,1):
-   pdfpage=reader.pages[pi-1]; pw=float(pdfpage.mediabox.width); ph=float(pdfpage.mediabox.height); rotation=int(pdfpage.get("/Rotate",0) or 0)%360
-   words=[]
-   for w in p.find_all("word"):
-    txt=w.get_text(" ",strip=True)
-    if not txt: continue
-    words.append({"text":txt,"x1":float(w.get("xmin",0)),"y1":float(w.get("ymin",0)),"x2":float(w.get("xmax",0)),"y2":float(w.get("ymax",0))})
-   pages.append({"page":pi,"width":pw,"height":ph,"rotation":rotation,"words":words})
-  return pages
- render_dir=Path("/tmp/ocr-pages"); render_dir.mkdir(parents=True,exist_ok=True)
- for pi,page in enumerate(reader.pages,1):
-  pw=float(page.mediabox.width); ph=float(page.mediabox.height)
-  prefix=render_dir/(pdf.stem+"-"+str(pi))
-  subprocess.run(["pdftoppm","-png","-r","150","-f",str(pi),"-singlefile",str(pdf),str(prefix)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-  img=Path(str(prefix)+".png")
-  tsv=subprocess.run(["tesseract",str(img),"stdout","--psm","6","tsv"],check=True,capture_output=True,text=True).stdout
+ xml_path=Path("/tmp/bbox.xml")
+ subprocess.run(["pdftotext","-bbox-layout",str(pdf),str(xml_path)],check=True,stdout=subprocess.DEVNULL)
+ root=ET.parse(xml_path).getroot()
+ pages=[]
+ for pi,p in enumerate(list(root.iter()),1):
+  if p.tag.split("}")[-1] != "page":
+   continue
   words=[]
-  for row in csv.DictReader(io.StringIO(tsv),delimiter="\\t"):
-   txt=(row.get("text") or "").strip()
+  for w in p.iter():
+   if w.tag.split("}")[-1] != "word":
+    continue
+   txt="".join(w.itertext()).strip()
    if not txt: continue
-   try: x=float(row["left"]); y=float(row["top"]); w=float(row["width"]); h=float(row["height"])
-   except: continue
-   scale=72.0/150.0
-   words.append({"text":txt,"x1":x*scale,"y1":y*scale,"x2":(x+w)*scale,"y2":(y+h)*scale})
-  pages.append({"page":pi,"width":pw,"height":ph,"rotation":0,"words":words})
+   words.append({"text":txt,"x1":float(w.attrib["xMin"]),"y1":float(w.attrib["yMin"]),"x2":float(w.attrib["xMax"]),"y2":float(w.attrib["yMax"])})
+  pages.append({"page":len(pages)+1,"width":float(p.attrib["width"]),"height":float(p.attrib["height"]),"words":words})
  return pages
 
