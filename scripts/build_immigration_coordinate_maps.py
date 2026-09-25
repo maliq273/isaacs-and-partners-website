@@ -130,10 +130,10 @@ def bbox_lines(pdf):
  pages=[]
  for pi,m in enumerate(re.finditer(r"<page\\b([^>]*)>(.*?)</page>",html,re.S|re.I),1):
   attrs=m.group(1); block=m.group(2)
-  wm=re.search(r'width=["\\']([^"\\']+)["\\']',attrs,re.I); hm=re.search(r'height=["\\']([^"\\']+)["\\']',attrs,re.I)
+  wm=re.search(r"width=[\"']([^\"']+)[\"']",attrs,re.I); hm=re.search(r"height=[\"']([^\"']+)[\"']",attrs,re.I)
   if not wm or not hm: continue
   words=[]
-  for w in re.finditer(r'<word\\s+xMin=["\\']([^"\\']+)["\\']\\s+yMin=["\\']([^"\\']+)["\\']\\s+xMax=["\\']([^"\\']+)["\\']\\s+yMax=["\\']([^"\\']+)["\\'][^>]*>(.*?)</word>',block,re.S|re.I):
+  for w in re.finditer(r"<word\\s+xMin=[\"']([^\"']+)[\"']\\s+yMin=[\"']([^\"']+)[\"']\\s+xMax=[\"']([^\"']+)[\"']\\s+yMax=[\"']([^\"']+)[\"'][^>]*>(.*?)</word>",block,re.S|re.I):
    txt=re.sub(r"<[^>]+>","",w.group(5)).strip()
    if txt:
     words.append({"text":txt,"x1":float(w.group(1)),"y1":float(w.group(2)),"x2":float(w.group(3)),"y2":float(w.group(4))})
