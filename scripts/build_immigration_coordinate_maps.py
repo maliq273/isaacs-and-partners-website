@@ -124,56 +124,16 @@ def sha(path):
  return h.hexdigest()
 
 def bbox_lines(pdf):
- xml_path=Path("/tmp/bbox.xml")
- subprocess.run(["pdftotext","-bbox-layout",str(pdf),str(xml_path)],check=True,stdout=subprocess.DEVNULL)
- root=ET.parse(xml_path).getroot()
- pages=[]
- for pi,p in enumerate(root.findall(".//page"),1):
+ html_path=Path("/tmp/bbox.html")
+ subprocess.run(["pdftotext","-bbox",str(pdf),str(html_path)],check=True,stdout=subprocess.DEVNULL)
+ html=html_path.read_text(encoding="utf-8",errors="ignore")
+ pages=[]; page_blocks=re.findall(r"<page[^>]*?width=" + r'"([^"]+)"' + r"[^>]*?height=" + r'"([^"]+)"' + r"[^>]*>(.*?)</page>",html,re.S|re.I)
+ for pi,(w,h,block) in enumerate(page_blocks,1):
   words=[]
-  for line in p.findall(".//line"):
-   for w in line.findall("word"):
-    txt="".join(w.itertext()).strip()
-    if not txt: continue
-    words.append({"text":txt,"x1":float(w.attrib["xMin"]),"y1":float(w.attrib["yMin"]),"x2":float(w.attrib["xMax"]),"y2":float(w.attrib["yMax"])})
-  pages.append({"page":pi,"width":float(p.attrib["width"]),"height":float(p.attrib["height"]),"words":words})
+  for m in re.finditer(r'<word xMin="([^"]+)" yMin="([^"]+)" xMax="([^"]+)" yMax="([^"]+)"[^>]*>(.*?)</word>',block,re.S|re.I):
+   txt=re.sub(r"<[^>]+>","",m.group(5)).strip()
+   if txt:
+    words.append({"text":txt,"x1":float(m.group(1)),"y1":float(m.group(2)),"x2":float(m.group(3)),"y2":float(m.group(4))})
+  pages.append({"page":pi,"width":float(w),"height":float(h),"words":words})
  return pages
 
-def norm(s): return re.sub(r"[^a-z0-9]+","",s.lower())
-
-def locate(pages,label):
- target=norm(label)
- best=None
- for p in pages:
-  ws=p["words"]
-  for i,w in enumerate(ws):
-   for n in range(1,min(12,len(ws)-i)+1):
-    phrase=" ".join(x["text"] for x in ws[i:i+n])
-    if target in norm(phrase) or norm(phrase) in target:
-     score=abs(len(norm(phrase))-len(target))
-     cand=(score,p["page"],i,n)
-     if best is None or cand<best: best=cand
- if best is None: return None
- _,page,i,n=best
- part=pages[page-1]["words"][i:i+n]
- return {"page":page,"anchor":" ".join(x["text"] for x in part),"bbox":[min(x["x1"] for x in part),min(x["y1"] for x in part),max(x["x2"] for x in part),max(x["y2"] for x in part)]}
-
-def build(key,meta):
- pdf=ROOT/meta["file"]; pages=bbox_lines(pdf); fields=[]; unresolved=[]
- for fid,label,path in meta["fields"]:
-  loc=locate(pages,label)
-  if not loc:
-   unresolved.append({"id":fid,"label":label})
-   continue
-  x1,y1,x2,y2=loc["bbox"]; pw=pages[loc["page"]-1]["width"]; ph=pages[loc["page"]-1]["height"]
-  # Conservative write rectangle immediately after the anchor. For labels embedded in
-  # a row, width is capped to the remaining printable area. Multi-line answers can use
-  # height 24; callers may override width/height per field after visual review.
-  wx=min(x2+4,pw-12); wy=ph-y2-1
-  ww=max(30,min(220,pw-wx-8)); wh=16
-  fields.append({"id":fid,"label":label,"answerPath":path,"page":loc["page"],"anchor":loc["anchor"],"anchorBBox":loc["bbox"],"writeRect":[round(wx,2),round(wy,2),round(ww,2),wh],"confidence":"anchor-derived","verification":"anchor-present-and-rectangle-in-page"})
- return {"form":key,"source":f"immigrations_docs/{meta['file']}","sha256":sha(pdf),"pages":len(pages),"purpose":meta["purpose"],"sourceNotes":meta["source_notes"],"coordinateSystem":"PDF points, origin bottom-left","fields":fields,"unresolved":unresolved,"verification":{"anchorsResolved":len(fields),"anchorsUnresolved":len(unresolved),"allRectsInsidePage":all(0<=f["writeRect"][0] and f["writeRect"][0]+f["writeRect"][2]<=pages[f["page"]-1]["width"] and 0<=f["writeRect"][1] and f["writeRect"][1]+f["writeRect"][3]<=pages[f["page"]-1]["height"] for f in fields),"method":"pdftotext bbox anchor resolution against original PDF; no recreated form"}}
-
-for key,meta in FORMS.items():
- data=build(key,meta)
- (OUT/(key+".json")).write_text(json.dumps(data,indent=2,ensure_ascii=False)+"\n")
-(OUT/"manifest.json").write_text(json.dumps({k:{"file":v["file"],"purpose":v["purpose"]} for k,v in FORMS.items()},indent=2)+"\n")
