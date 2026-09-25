@@ -129,9 +129,9 @@ def bbox_lines(pdf):
   subprocess.run(["pdftohtml","-xml","-i","-stdout",str(pdf)],check=True,stdout=out,stderr=subprocess.DEVNULL)
  root=ET.parse(xml_path).getroot()
  pages=[]
- for pi,p in enumerate(root.findall(".//page"),1):
+ for pi,p in enumerate([e for e in root.iter() if e.tag.split("}")[-1]=="page"],1):
   width=float(p.attrib.get("width","0")); height=float(p.attrib.get("height","0")); words=[]
-  for t in p.findall(".//text"):
+  for t in [e for e in p.iter() if e.tag.split("}")[-1]=="text"]:
    txt="".join(t.itertext()).strip()
    if not txt: continue
    x=float(t.attrib.get("left","0")); y=float(t.attrib.get("top","0")); w=float(t.attrib.get("width","0")); h=float(t.attrib.get("height","0"))
