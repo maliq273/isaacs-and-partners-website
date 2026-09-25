@@ -124,19 +124,18 @@ def sha(path):
  return h.hexdigest()
 
 def bbox_lines(pdf):
- html_path=Path("/tmp/bbox.html")
- subprocess.run(["pdftotext","-bbox",str(pdf),str(html_path)],check=True,stdout=subprocess.DEVNULL)
- html=html_path.read_text(encoding="utf-8",errors="ignore")
+ xml_path=Path("/tmp/pdftohtml.xml")
+ with xml_path.open("w",encoding="utf-8") as out:
+  subprocess.run(["pdftohtml","-xml","-i","-stdout",str(pdf)],check=True,stdout=out,stderr=subprocess.DEVNULL)
+ root=ET.parse(xml_path).getroot()
  pages=[]
- for pi,m in enumerate(re.finditer(r"<page\\b([^>]*)>(.*?)</page>",html,re.S|re.I),1):
-  attrs=m.group(1); block=m.group(2)
-  wm=re.search(r"width=[\"']([^\"']+)[\"']",attrs,re.I); hm=re.search(r"height=[\"']([^\"']+)[\"']",attrs,re.I)
-  if not wm or not hm: continue
-  words=[]
-  for w in re.finditer(r"<word\\s+xMin=[\"']([^\"']+)[\"']\\s+yMin=[\"']([^\"']+)[\"']\\s+xMax=[\"']([^\"']+)[\"']\\s+yMax=[\"']([^\"']+)[\"'][^>]*>(.*?)</word>",block,re.S|re.I):
-   txt=re.sub(r"<[^>]+>","",w.group(5)).strip()
-   if txt:
-    words.append({"text":txt,"x1":float(w.group(1)),"y1":float(w.group(2)),"x2":float(w.group(3)),"y2":float(w.group(4))})
-  pages.append({"page":pi,"width":float(wm.group(1)),"height":float(hm.group(1)),"words":words})
+ for pi,p in enumerate(root.findall(".//page"),1):
+  width=float(p.attrib.get("width","0")); height=float(p.attrib.get("height","0")); words=[]
+  for t in p.findall(".//text"):
+   txt="".join(t.itertext()).strip()
+   if not txt: continue
+   x=float(t.attrib.get("left","0")); y=float(t.attrib.get("top","0")); w=float(t.attrib.get("width","0")); h=float(t.attrib.get("height","0"))
+   words.append({"text":txt,"x1":x,"y1":y,"x2":x+w,"y2":y+h})
+  pages.append({"page":pi,"width":width,"height":height,"words":words})
  return pages
 
