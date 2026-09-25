@@ -127,13 +127,16 @@ def bbox_lines(pdf):
  html_path=Path("/tmp/bbox.html")
  subprocess.run(["pdftotext","-bbox",str(pdf),str(html_path)],check=True,stdout=subprocess.DEVNULL)
  html=html_path.read_text(encoding="utf-8",errors="ignore")
- pages=[]; page_blocks=re.findall(r"<page[^>]*?width=" + r'"([^"]+)"' + r"[^>]*?height=" + r'"([^"]+)"' + r"[^>]*>(.*?)</page>",html,re.S|re.I)
- for pi,(w,h,block) in enumerate(page_blocks,1):
+ pages=[]
+ for pi,m in enumerate(re.finditer(r"<page\\b([^>]*)>(.*?)</page>",html,re.S|re.I),1):
+  attrs=m.group(1); block=m.group(2)
+  wm=re.search(r'width=["\\']([^"\\']+)["\\']',attrs,re.I); hm=re.search(r'height=["\\']([^"\\']+)["\\']',attrs,re.I)
+  if not wm or not hm: continue
   words=[]
-  for m in re.finditer(r'<word xMin="([^"]+)" yMin="([^"]+)" xMax="([^"]+)" yMax="([^"]+)"[^>]*>(.*?)</word>',block,re.S|re.I):
-   txt=re.sub(r"<[^>]+>","",m.group(5)).strip()
+  for w in re.finditer(r'<word\\s+xMin=["\\']([^"\\']+)["\\']\\s+yMin=["\\']([^"\\']+)["\\']\\s+xMax=["\\']([^"\\']+)["\\']\\s+yMax=["\\']([^"\\']+)["\\'][^>]*>(.*?)</word>',block,re.S|re.I):
+   txt=re.sub(r"<[^>]+>","",w.group(5)).strip()
    if txt:
-    words.append({"text":txt,"x1":float(m.group(1)),"y1":float(m.group(2)),"x2":float(m.group(3)),"y2":float(m.group(4))})
-  pages.append({"page":pi,"width":float(w),"height":float(h),"words":words})
+    words.append({"text":txt,"x1":float(w.group(1)),"y1":float(w.group(2)),"x2":float(w.group(3)),"y2":float(w.group(4))})
+  pages.append({"page":pi,"width":float(wm.group(1)),"height":float(hm.group(1)),"words":words})
  return pages
 
