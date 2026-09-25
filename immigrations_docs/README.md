@@ -34,3 +34,5 @@ Generated knowledge lives under app/knowledgebase/immigration_docs/ and never re
 <!-- Tesseract coordinate trigger: 2026-09-25T22:20Z -->
 
 <!-- Final coordinate source trigger: 2026-09-25T22:30Z -->
+
+<!-- Coordinate map rebuild trigger: 2026-09-25T21:20Z -->
