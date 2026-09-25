@@ -156,6 +156,6 @@ def bbox_lines(pdf):
    except: continue
    scale=72.0/150.0
    words.append({"text":txt,"x1":x*scale,"y1":y*scale,"x2":(x+w)*scale,"y2":(y+h)*scale})
-  pages.append({"page":pi,"width":pw,"height":ph,"rotation":int(page.get("/Rotate",0) or 0)%360,"words":words})
+  pages.append({"page":pi,"width":pw,"height":ph,"rotation":0,"words":words})
  return pages
 
