@@ -38,3 +38,5 @@ Generated knowledge lives under app/knowledgebase/immigration_docs/ and never re
 <!-- Coordinate map rebuild trigger: 2026-09-25T21:20Z -->
 
 <!-- OCR coordinate map trigger: 2026-09-25T21:35Z -->
+
+<!-- Final OCR coordinate parser trigger: 2026-09-25T21:50Z -->
