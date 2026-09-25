@@ -24,7 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install pypdf==6.16.1 beautifulsoup4
           sudo apt-get update
-          sudo apt-get install -y poppler-utils
+          sudo apt-get install -y poppler-utils tesseract-ocr
 
       - name: Build field maps from original PDFs
         run: python scripts/build_immigration_field_maps.py
