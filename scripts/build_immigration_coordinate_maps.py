@@ -171,7 +171,7 @@ def build(key,meta):
   wx=min(x2+4,pw-12); wy=ph-y2-1
   ww=max(30,min(220,pw-wx-8)); wh=16
   fields.append({"id":fid,"label":label,"answerPath":path,"page":loc["page"],"anchor":loc["anchor"],"anchorBBox":loc["bbox"],"writeRect":[round(wx,2),round(wy,2),round(ww,2),wh],"confidence":"anchor-derived","verification":"anchor-present-and-rectangle-in-page"})
- return {"form":key,"source":f"immigrations_docs/{meta['file']}","sha256":sha(pdf),"pages":len(pages),"purpose":meta["purpose"],"sourceNotes":meta["source_notes"],"coordinateSystem":"PDF points, origin bottom-left","fields":fields,"unresolved":unresolved,"verification":{"anchorsResolved":len(fields),"anchorsUnresolved":len(unresolved),"allRectsInsidePage":all(0<=f["writeRect"][0] and f["writeRect"][0]+f["writeRect"][2]<=pages[f["page"]-1]["width"] and 0<=f["writeRect"][1] and f["writeRect"][1]+f["writeRect"][3]<=pages[f["page"]-1]["height"] for f in fields),"method":"pdftotext bbox anchor resolution against original PDF; no recreated form"}}}
+ return {"form":key,"source":f"immigrations_docs/{meta['file']}","sha256":sha(pdf),"pages":len(pages),"purpose":meta["purpose"],"sourceNotes":meta["source_notes"],"coordinateSystem":"PDF points, origin bottom-left","fields":fields,"unresolved":unresolved,"verification":{"anchorsResolved":len(fields),"anchorsUnresolved":len(unresolved),"allRectsInsidePage":all(0<=f["writeRect"][0] and f["writeRect"][0]+f["writeRect"][2]<=pages[f["page"]-1]["width"] and 0<=f["writeRect"][1] and f["writeRect"][1]+f["writeRect"][3]<=pages[f["page"]-1]["height"] for f in fields),"method":"pdftotext bbox anchor resolution against original PDF; no recreated form"}}
 
 for key,meta in FORMS.items():
  data=build(key,meta)
