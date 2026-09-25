@@ -18,3 +18,5 @@ Generated knowledge lives under app/knowledgebase/immigration_docs/ and never re
 <!-- Coordinate map fix trigger: 2026-09-25T20:45Z -->
 
 <!-- Coordinate map commit trigger: 2026-09-25T20:55Z -->
+
+<!-- Coordinate bbox parser trigger: 2026-09-25T21:05Z -->
