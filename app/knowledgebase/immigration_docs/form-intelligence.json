@@ -1,0 +1,36 @@
+{
+  "version":"2026-09-25.1",
+  "forms":{
+    "DHA-84":{
+      "purpose":"Form 11 — application for a port of entry visa or transit visa.",
+      "useWhen":["short-stay/port-of-entry visa routes","transit visa routes"],
+      "doNotUseFor":["temporary residence visa applications over 90 days","permanent residence","spousal permanent relationship affidavit"],
+      "questions":["identity and previous names","date/country/gender/nationality and nationality acquisition","passport/travel-document number, issuer, type and expiry","normal residence, contact details and period resident","occupation/employer or self-employment","marital status and spouse particulars where applicable","arrival date/place, purpose, duration and entries","South African residential address and host/hotel","South African host identity/PR number where applicable","organisations/persons to be contacted","prior settlement applications, refusals, deportation/removal, convictions, pending criminal action, insolvency, infectious disease/physical or mental deficiency, judicial incompetence, and relevant organisation/security questions","affirmative-answer particulars","transit destination, travel mode, departure details and destination visa where applicable","official/declaration/signature information"],
+      "supportingEvidence":["passport/travel document","proof of sufficient financial means","return/onward ticket or equivalent arrangements","documents showing purpose/duration of visit or host invitation","event/activity confirmation where applicable","child consent/custody documents where applicable"],
+      "sourceRefs":["DHA-84 Form 11 in Immigration Regulations","2024 Government Gazette No. 50675 Form 11"]
+    },
+    "DHA-1738":{
+      "purpose":"Form 8 — application for a temporary residence visa.",
+      "useWhen":["temporary residence visa applications"],
+      "doNotUseFor":["port-of-entry/transit visitor applications handled by DHA-84","permanent residence handled by DHA-947"],
+      "questions":["route-specific visa category and purpose","applicant identity, citizenship, passport and contact information","current immigration status and previous South African visas/permits","South African address and contact details","spouse/children/dependants where relevant","employment/business/study/medical/retirement/relative/other route-specific facts","financial support and undertaking information","security, criminal, health and prior immigration history","supporting-document completeness and validity dates"],
+      "note":"This repository PDF is interactive and contains an actual AcroForm field structure; its exact field names and widget rectangles are recorded in the generated field map."
+    },
+    "BI-947":{
+      "purpose":"Form 18 — application for a permanent residence permit.",
+      "useWhen":["permanent residence applications under the applicable category/ground"],
+      "doNotUseFor":["temporary residence visa applications","short-stay port-of-entry/transit visa"],
+      "questions":["principal applicant title, names, former names, date/country of birth, nationality, passport and marital/spousal status","marriage/relationship history, divorce/separation and custody/maintenance history","current and postal addresses, contact details, occupation and temporary permit history","parents' particulars","spouse particulars and spouse's parents where applicable","all biological/adopted children and which children will apply","relatives/friends in South Africa","full employment record","present/last duties and intended occupation in South Africa","funds to be transferred, pension/private income and assets","language proficiency","family remaining in country of origin","criminal convictions, insolvency, civil actions, debts, pending enquiries, previous PR/refusals/removals/deportations, previous South African residence, health-related questions, other spousal relationships and asylum applications elsewhere","South African contact and spouse employment details","signatures and dates"],
+      "supportingEvidence":["passport photographs","valid passport/identity document","birth record","name-change/adoption evidence where applicable","medical and radiological reports where applicable","police certificates where applicable","marriage/spousal/divorce/custody documents where applicable","qualification/work evidence where applicable","category-specific evidence listed in the form"],
+      "sourceRefs":["DHA BI-947 official form","Immigration Regulations Form 18 / DHA-947"]
+    },
+    "BI-1712A":{
+      "purpose":"Form 12 — affidavit in respect of parties to a permanent spousal relationship.",
+      "useWhen":["initial permanent spousal relationship application (Part A)","two-year continuation affidavit (Part B)"],
+      "doNotUseFor":["ordinary marriage certificate applications","unrelated temporary residence routes"],
+      "partAQuestions":["citizen/permanent-resident/foreigner partner identity, gender, address, ID/passport, nationality, birth date, first entry, permit and expiry","foreign partner identity, address, passport, birth/place of birth, nationality, first entry, visa/permit and expiry","relationship duration and intention of permanence/exclusivity","cohabitation and reciprocal emotional/financial support","whether either person has another marriage/spousal relationship","evidence proving cohabitation and shared financial responsibilities","children of the relationship","signatures and Commissioner of Oaths details"],
+      "partBQuestions":["same partner particulars","date of the prior affidavit","confirmation that the spousal relationship still subsists","children of the relationship","signatures and Commissioner of Oaths details"],
+      "sourceRefs":["2014 Government Gazette / DHA-1712A Form 12","South African High Commission downloadable forms"]
+    }
+  }
+}
