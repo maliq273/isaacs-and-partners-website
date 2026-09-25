@@ -1,0 +1,290 @@
+{
+  "form": "BI-947",
+  "source": "immigrations_docs/BI-947.pdf",
+  "sha256": "3cc26008554a2ab48262fd5d738223e494d856177929e07cb3672c5ddbab91bf",
+  "pages": 0,
+  "purpose": "Application for a Permanent Residence Permit (Form 18). Used for permanent residence applications under the categories/grounds set out in the form and accompanying requirements.",
+  "sourceNotes": "The DHA form states that pages 13-18 contain category-specific document requirements, that applicants are interviewed, and that the completed form must be accompanied by the applicable documents.",
+  "coordinateSystem": "PDF points, origin bottom-left",
+  "fields": [],
+  "unresolved": [
+    {
+      "id": "title",
+      "label": "1.1 Title"
+    },
+    {
+      "id": "surname",
+      "label": "1.2 Surname"
+    },
+    {
+      "id": "first_names",
+      "label": "1.3 First name(s)"
+    },
+    {
+      "id": "maiden_name",
+      "label": "1.4 Maiden name"
+    },
+    {
+      "id": "former_surnames",
+      "label": "1.5 Other former surnames"
+    },
+    {
+      "id": "dob",
+      "label": "1.6 Date of birth"
+    },
+    {
+      "id": "birth_country",
+      "label": "1.7 Country of birth"
+    },
+    {
+      "id": "nationality_birth",
+      "label": "1.8 Nationality at birth"
+    },
+    {
+      "id": "nationality_current",
+      "label": "1.9 Present nationality"
+    },
+    {
+      "id": "passport",
+      "label": "1.10 Passport No."
+    },
+    {
+      "id": "passport_expiry",
+      "label": "Expiry date"
+    },
+    {
+      "id": "passport_issued_by",
+      "label": "1.11 Issued by (country)"
+    },
+    {
+      "id": "marital_status",
+      "label": "1.11 Marital status"
+    },
+    {
+      "id": "relationship_type",
+      "label": "1.12 Type of marriage/relationship"
+    },
+    {
+      "id": "marriage_date",
+      "label": "1.13 Date of marriage/notarial contract concluded"
+    },
+    {
+      "id": "previous_relationships",
+      "label": "1.14 Details of previous marriage(s) or permanent spousal relationship(s)"
+    },
+    {
+      "id": "marriage_place",
+      "label": "Date and place of marriage/commencement of spousal relationship"
+    },
+    {
+      "id": "divorce_place",
+      "label": "Date and place of divorce/separation"
+    },
+    {
+      "id": "custody_maintenance",
+      "label": "Details about custody/maintenance of children"
+    },
+    {
+      "id": "residential_address",
+      "label": "1.15 Present residential address"
+    },
+    {
+      "id": "suburb_city",
+      "label": "Suburb/City/Town"
+    },
+    {
+      "id": "residence_since",
+      "label": "Since"
+    },
+    {
+      "id": "postal_address",
+      "label": "1.16 Postal address"
+    },
+    {
+      "id": "postal_suburb",
+      "label": "Suburb"
+    },
+    {
+      "id": "postal_city",
+      "label": "City"
+    },
+    {
+      "id": "postal_code",
+      "label": "Code"
+    },
+    {
+      "id": "home_phone",
+      "label": "1.17 Tel. No. Home"
+    },
+    {
+      "id": "work_phone",
+      "label": "Work"
+    },
+    {
+      "id": "email",
+      "label": "E-mail address"
+    },
+    {
+      "id": "occupation",
+      "label": "1.18 Occupation"
+    },
+    {
+      "id": "temp_permit",
+      "label": "1.19 Type of temporary residence permit held"
+    },
+    {
+      "id": "permit_valid_until",
+      "label": "1.20 Valid until"
+    },
+    {
+      "id": "permit_office",
+      "label": "Issuing office"
+    },
+    {
+      "id": "father",
+      "label": "2.1 Father"
+    },
+    {
+      "id": "mother",
+      "label": "2.2 Mother"
+    },
+    {
+      "id": "spouse",
+      "label": "3. Details of applicant's spouse"
+    },
+    {
+      "id": "spouse_parents",
+      "label": "4. Details of spouse's parents"
+    },
+    {
+      "id": "children",
+      "label": "5. Details of biological or legally adopted children"
+    },
+    {
+      "id": "children_not_applying",
+      "label": "6. Children not applying and reasons"
+    },
+    {
+      "id": "adult_dependants",
+      "label": "7. Children over 21 dependent and reasons"
+    },
+    {
+      "id": "sa_relatives",
+      "label": "8. Relatives/friends resident in South Africa"
+    },
+    {
+      "id": "employment_record",
+      "label": "9. Employment record"
+    },
+    {
+      "id": "current_duties",
+      "label": "Present/last duties"
+    },
+    {
+      "id": "spouse_duties",
+      "label": "Spouse's present/last duties"
+    },
+    {
+      "id": "intended_occupation",
+      "label": "Occupation intended following in South Africa"
+    },
+    {
+      "id": "funds_transfer",
+      "label": "Amount of money to transfer to South Africa"
+    },
+    {
+      "id": "pension_income",
+      "label": "Pension/private income"
+    },
+    {
+      "id": "assets",
+      "label": "Other assets"
+    },
+    {
+      "id": "mother_tongue",
+      "label": "10. Mother tongue"
+    },
+    {
+      "id": "language_proficiency",
+      "label": "Proficiency in other languages"
+    },
+    {
+      "id": "family_origin",
+      "label": "11. Family members remaining in country of origin"
+    },
+    {
+      "id": "residence_history",
+      "label": "12. Previous/current residence history"
+    },
+    {
+      "id": "criminal",
+      "label": "13(a)(i) Criminal conviction"
+    },
+    {
+      "id": "insolvent",
+      "label": "13(a)(ii) Insolvency"
+    },
+    {
+      "id": "civil_action",
+      "label": "13(a)(iii) Civil action"
+    },
+    {
+      "id": "outstanding_debts",
+      "label": "13(b) Outstanding debts"
+    },
+    {
+      "id": "pending_enquiry",
+      "label": "13(c) Pending civil/criminal enquiry"
+    },
+    {
+      "id": "previous_pr",
+      "label": "13(d) Previous permanent residence application"
+    },
+    {
+      "id": "refused_removed",
+      "label": "13(e) Refused entry/PR/removed/deported"
+    },
+    {
+      "id": "previous_sa",
+      "label": "13(f) Previously in South Africa"
+    },
+    {
+      "id": "health",
+      "label": "13(g) Infectious/physical/mental condition"
+    },
+    {
+      "id": "other_relationship",
+      "label": "13(h) Other spousal relationship"
+    },
+    {
+      "id": "asylum_elsewhere",
+      "label": "13(i) Asylum applications elsewhere"
+    },
+    {
+      "id": "contact_sa",
+      "label": "14. Contact address/telephone in South Africa"
+    },
+    {
+      "id": "spouse_employment",
+      "label": "Employment details of spouse if SA citizen/PR"
+    },
+    {
+      "id": "signature_applicant",
+      "label": "Signature of applicant"
+    },
+    {
+      "id": "signature_spouse",
+      "label": "Signature of legal spouse"
+    },
+    {
+      "id": "signature_date",
+      "label": "Date"
+    }
+  ],
+  "verification": {
+    "anchorsResolved": 0,
+    "anchorsUnresolved": 68,
+    "allRectsInsidePage": true,
+    "method": "pdftotext bbox anchor resolution against original PDF; no recreated form"
+  }
+}

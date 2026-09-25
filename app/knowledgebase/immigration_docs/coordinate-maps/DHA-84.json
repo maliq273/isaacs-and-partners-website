@@ -1,0 +1,234 @@
+{
+  "form": "DHA-84",
+  "source": "immigrations_docs/dha84-form11.pdf",
+  "sha256": "1fbbd287e4fedb6ced6a0896c0c9efbd1795eb3386db2b123b7f4fea0c8c12a7",
+  "pages": 0,
+  "purpose": "Port of Entry Visa or Transit Visa (Form 11). Used to collect the traveller's identity, travel document, residence/contact information, South Africa visit details, host/contact details, admissibility/security declarations and transit information where applicable.",
+  "sourceNotes": "Official government/consular copies identify DHA-84 as Form 11 and require a separate form for each accompanying family member. The current repository copy is the source template used for rendering.",
+  "coordinateSystem": "PDF points, origin bottom-left",
+  "fields": [],
+  "unresolved": [
+    {
+      "id": "surname",
+      "label": "Surname"
+    },
+    {
+      "id": "first_names",
+      "label": "First names (in full)"
+    },
+    {
+      "id": "maiden_name",
+      "label": "Maiden name"
+    },
+    {
+      "id": "previous_surnames",
+      "label": "Previous surname(s)"
+    },
+    {
+      "id": "date_of_birth",
+      "label": "Date of birth"
+    },
+    {
+      "id": "country_of_birth",
+      "label": "Country of birth"
+    },
+    {
+      "id": "gender",
+      "label": "Gender"
+    },
+    {
+      "id": "nationality",
+      "label": "Nationality"
+    },
+    {
+      "id": "original_nationality",
+      "label": "original nationality"
+    },
+    {
+      "id": "nationality_acquired",
+      "label": "Where and when was present nationality obtained"
+    },
+    {
+      "id": "passport_number",
+      "label": "Passport/Travel Document Number"
+    },
+    {
+      "id": "issuing_authority",
+      "label": "Issuing authority"
+    },
+    {
+      "id": "passport_expiry",
+      "label": "Date of expiry"
+    },
+    {
+      "id": "document_type",
+      "label": "Type of document"
+    },
+    {
+      "id": "permanent_address",
+      "label": "Permanent residential address"
+    },
+    {
+      "id": "address_period",
+      "label": "Period resident at this address"
+    },
+    {
+      "id": "permanent_residence_country",
+      "label": "Country of permanent residence"
+    },
+    {
+      "id": "telephone",
+      "label": "Telephone number"
+    },
+    {
+      "id": "home_phone",
+      "label": "Home telephone No"
+    },
+    {
+      "id": "cell_phone",
+      "label": "Cellphone No"
+    },
+    {
+      "id": "email",
+      "label": "E-mail address"
+    },
+    {
+      "id": "country_residence_period",
+      "label": "Period resident in that country"
+    },
+    {
+      "id": "occupation",
+      "label": "Occupation or profession"
+    },
+    {
+      "id": "employer",
+      "label": "Name of Employer, University Organisation"
+    },
+    {
+      "id": "employer_address",
+      "label": "Address"
+    },
+    {
+      "id": "employer_phone",
+      "label": "Telephone No"
+    },
+    {
+      "id": "employer_fax",
+      "label": "Fax No"
+    },
+    {
+      "id": "self_employed_business",
+      "label": "Name of business"
+    },
+    {
+      "id": "self_employed_address",
+      "label": "Address"
+    },
+    {
+      "id": "self_employed_phone",
+      "label": "Telephone No"
+    },
+    {
+      "id": "self_employed_fax",
+      "label": "Fax No"
+    },
+    {
+      "id": "marital_status",
+      "label": "Marital status"
+    },
+    {
+      "id": "spouse_first_names",
+      "label": "First name(s) of spouse"
+    },
+    {
+      "id": "spouse_maiden_name",
+      "label": "Maiden name"
+    },
+    {
+      "id": "marriage_date_place",
+      "label": "Date and place of marriage"
+    },
+    {
+      "id": "spouse_dob",
+      "label": "Date of birth of spouse"
+    },
+    {
+      "id": "spouse_nationality",
+      "label": "Nationality"
+    },
+    {
+      "id": "arrival_date",
+      "label": "Expected date of arrival in the Republic"
+    },
+    {
+      "id": "arrival_place",
+      "label": "Place of arrival"
+    },
+    {
+      "id": "purpose",
+      "label": "Purpose of visit"
+    },
+    {
+      "id": "duration",
+      "label": "Duration of stay"
+    },
+    {
+      "id": "entries",
+      "label": "Number of entries required"
+    },
+    {
+      "id": "sa_address",
+      "label": "Residential (physical) Address in the Republic"
+    },
+    {
+      "id": "host",
+      "label": "Name of Host or Hotel"
+    },
+    {
+      "id": "host_phone",
+      "label": "Telephone of Host or Hotel"
+    },
+    {
+      "id": "contacts",
+      "label": "Names of Organisations or persons you will be contacting"
+    },
+    {
+      "id": "sa_host_id",
+      "label": "Identity document number or permanent residence permit number of South African host"
+    },
+    {
+      "id": "affirmative_details",
+      "label": "Give particulars if reply to any of the questions above is in the affirmative"
+    },
+    {
+      "id": "transit_destination",
+      "label": "Destination after leaving the Republic"
+    },
+    {
+      "id": "transit_mode",
+      "label": "Mode of travel to destination"
+    },
+    {
+      "id": "transit_departure",
+      "label": "Intended date and port of departure from the Republic to that destination"
+    },
+    {
+      "id": "transit_visa",
+      "label": "Visa or permit for destination country"
+    },
+    {
+      "id": "applicant_signature",
+      "label": "Signature of applicant"
+    },
+    {
+      "id": "declaration_date",
+      "label": "Date"
+    }
+  ],
+  "verification": {
+    "anchorsResolved": 0,
+    "anchorsUnresolved": 54,
+    "allRectsInsidePage": true,
+    "method": "pdftotext bbox anchor resolution against original PDF; no recreated form"
+  }
+}

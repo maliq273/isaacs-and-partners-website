@@ -1,0 +1,274 @@
+{
+  "form": "BI-1712A",
+  "source": "immigrations_docs/Spousal-RelationshipBI-1712A-Form-12-1.pdf",
+  "sha256": "53ae6e489bce0cdace7df68812a72d928f32e71f9cdfcfdb817cc34647413cea",
+  "pages": 0,
+  "purpose": "Affidavit in respect of parties to a permanent spousal relationship (Form 12). Part A is for the initial application; Part B is for demonstrating the relationship continues two years after issuance of the visa/permit.",
+  "sourceNotes": "Official Gazette/consular copies identify Part A as the initial application and Part B as the two-year continuation affidavit. The form covers the citizen/permanent resident/foreigner and foreigner particulars, relationship history, children, signatures and Commissioner of Oaths.",
+  "coordinateSystem": "PDF points, origin bottom-left",
+  "fields": [],
+  "unresolved": [
+    {
+      "id": "a_surname",
+      "label": "Part A citizen/PR/foreigner surname"
+    },
+    {
+      "id": "a_gender",
+      "label": "Part A gender"
+    },
+    {
+      "id": "a_first_names",
+      "label": "Part A first names"
+    },
+    {
+      "id": "a_address",
+      "label": "Part A residential address"
+    },
+    {
+      "id": "a_id",
+      "label": "Part A Identity No."
+    },
+    {
+      "id": "a_passport",
+      "label": "Part A Passport No."
+    },
+    {
+      "id": "a_nationality",
+      "label": "Part A nationality"
+    },
+    {
+      "id": "a_dob",
+      "label": "Part A date of birth"
+    },
+    {
+      "id": "a_first_entry",
+      "label": "Part A date of first entry"
+    },
+    {
+      "id": "a_permit",
+      "label": "Part A type of permit"
+    },
+    {
+      "id": "a_expiry",
+      "label": "Part A permit expiry"
+    },
+    {
+      "id": "a_foreigner_surname",
+      "label": "Part A foreigner surname"
+    },
+    {
+      "id": "a_foreigner_gender",
+      "label": "Part A foreigner gender"
+    },
+    {
+      "id": "a_foreigner_first_names",
+      "label": "Part A foreigner first names"
+    },
+    {
+      "id": "a_foreigner_address",
+      "label": "Part A foreigner residential address"
+    },
+    {
+      "id": "a_foreigner_passport",
+      "label": "Part A foreigner passport"
+    },
+    {
+      "id": "a_foreigner_dob",
+      "label": "Part A foreigner date of birth"
+    },
+    {
+      "id": "a_foreigner_birthplace",
+      "label": "Part A foreigner place of birth"
+    },
+    {
+      "id": "a_foreigner_nationality",
+      "label": "Part A foreigner nationality"
+    },
+    {
+      "id": "a_foreigner_first_entry",
+      "label": "Part A foreigner first entry"
+    },
+    {
+      "id": "a_foreigner_visa",
+      "label": "Part A foreigner visa/permit"
+    },
+    {
+      "id": "a_foreigner_expiry",
+      "label": "Part A foreigner expiry"
+    },
+    {
+      "id": "a_relationship_duration",
+      "label": "Part A relationship duration"
+    },
+    {
+      "id": "a_relationship_status",
+      "label": "Part A relationship status/intent"
+    },
+    {
+      "id": "a_cohabitation",
+      "label": "Part A cohabitation and reciprocal support"
+    },
+    {
+      "id": "a_exclusivity",
+      "label": "Part A exclusivity/no other relationship"
+    },
+    {
+      "id": "a_evidence",
+      "label": "Part A evidence of cohabitation/shared finances"
+    },
+    {
+      "id": "a_children",
+      "label": "Part A children"
+    },
+    {
+      "id": "a_signature_1",
+      "label": "Part A sponsor signature"
+    },
+    {
+      "id": "a_signature_2",
+      "label": "Part A foreign spouse signature"
+    },
+    {
+      "id": "a_oath_date",
+      "label": "Part A oath date"
+    },
+    {
+      "id": "a_commissioner_first",
+      "label": "Commissioner first names"
+    },
+    {
+      "id": "a_commissioner_surname",
+      "label": "Commissioner surname"
+    },
+    {
+      "id": "a_commissioner_capacity",
+      "label": "Commissioner capacity"
+    },
+    {
+      "id": "a_commissioner_place",
+      "label": "Commissioner place"
+    },
+    {
+      "id": "b_surname",
+      "label": "Part B citizen/PR/foreigner surname"
+    },
+    {
+      "id": "b_gender",
+      "label": "Part B gender"
+    },
+    {
+      "id": "b_first_names",
+      "label": "Part B first names"
+    },
+    {
+      "id": "b_address",
+      "label": "Part B residential address"
+    },
+    {
+      "id": "b_id",
+      "label": "Part B Identity No."
+    },
+    {
+      "id": "b_passport",
+      "label": "Part B Passport No."
+    },
+    {
+      "id": "b_nationality",
+      "label": "Part B nationality"
+    },
+    {
+      "id": "b_dob",
+      "label": "Part B date of birth"
+    },
+    {
+      "id": "b_first_entry",
+      "label": "Part B first entry"
+    },
+    {
+      "id": "b_permit",
+      "label": "Part B permit"
+    },
+    {
+      "id": "b_expiry",
+      "label": "Part B expiry"
+    },
+    {
+      "id": "b_foreigner_surname",
+      "label": "Part B foreigner surname"
+    },
+    {
+      "id": "b_foreigner_gender",
+      "label": "Part B foreigner gender"
+    },
+    {
+      "id": "b_foreigner_first_names",
+      "label": "Part B foreigner first names"
+    },
+    {
+      "id": "b_foreigner_address",
+      "label": "Part B foreigner address"
+    },
+    {
+      "id": "b_foreigner_passport",
+      "label": "Part B foreigner passport"
+    },
+    {
+      "id": "b_foreigner_dob",
+      "label": "Part B foreigner date of birth"
+    },
+    {
+      "id": "b_foreigner_birthplace",
+      "label": "Part B foreigner place of birth"
+    },
+    {
+      "id": "b_foreigner_nationality",
+      "label": "Part B foreigner nationality"
+    },
+    {
+      "id": "b_foreigner_first_entry",
+      "label": "Part B foreigner first entry"
+    },
+    {
+      "id": "b_foreigner_visa",
+      "label": "Part B foreigner visa/permit"
+    },
+    {
+      "id": "b_foreigner_expiry",
+      "label": "Part B foreigner expiry"
+    },
+    {
+      "id": "b_prior_affidavit_date",
+      "label": "Part B date prior affidavit deposed"
+    },
+    {
+      "id": "b_relationship_continues",
+      "label": "Part B relationship still subsists"
+    },
+    {
+      "id": "b_children",
+      "label": "Part B children"
+    },
+    {
+      "id": "b_signature_1",
+      "label": "Part B spouse signature"
+    },
+    {
+      "id": "b_signature_2",
+      "label": "Part B spouse signature"
+    },
+    {
+      "id": "b_oath_date",
+      "label": "Part B oath date"
+    },
+    {
+      "id": "b_commissioner",
+      "label": "Part B Commissioner of Oaths"
+    }
+  ],
+  "verification": {
+    "anchorsResolved": 0,
+    "anchorsUnresolved": 64,
+    "allRectsInsidePage": true,
+    "method": "pdftotext bbox anchor resolution against original PDF; no recreated form"
+  }
+}

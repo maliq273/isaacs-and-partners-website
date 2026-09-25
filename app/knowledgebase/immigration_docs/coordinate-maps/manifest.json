@@ -1,0 +1,14 @@
+{
+  "DHA-84": {
+    "file": "dha84-form11.pdf",
+    "purpose": "Port of Entry Visa or Transit Visa (Form 11). Used to collect the traveller's identity, travel document, residence/contact information, South Africa visit details, host/contact details, admissibility/security declarations and transit information where applicable."
+  },
+  "BI-947": {
+    "file": "BI-947.pdf",
+    "purpose": "Application for a Permanent Residence Permit (Form 18). Used for permanent residence applications under the categories/grounds set out in the form and accompanying requirements."
+  },
+  "BI-1712A": {
+    "file": "Spousal-RelationshipBI-1712A-Form-12-1.pdf",
+    "purpose": "Affidavit in respect of parties to a permanent spousal relationship (Form 12). Part A is for the initial application; Part B is for demonstrating the relationship continues two years after issuance of the visa/permit."
+  }
+}
