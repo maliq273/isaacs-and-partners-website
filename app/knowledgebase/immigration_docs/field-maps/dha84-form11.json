@@ -1,0 +1,63 @@
+{
+  "source": "immigrations_docs/dha84-form11.pdf",
+  "sha256": "1fbbd287e4fedb6ced6a0896c0c9efbd1795eb3386db2b123b7f4fea0c8c12a7",
+  "pages": 10,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 2,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 3,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 4,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 5,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 6,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 7,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 8,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 9,
+      "width": 595.2,
+      "height": 841.67999
+    },
+    {
+      "page": 10,
+      "width": 595.2,
+      "height": 841.67999
+    }
+  ],
+  "fields": []
+}

@@ -1,0 +1,18 @@
+{
+  "source": "immigrations_docs/DHA-DIRECTIVES-19-14-ICT-ext-in-country-moha.pdf",
+  "sha256": "77720aa1b6b5831c9883fb27c2fa8a3099e245ae2e9eab716e3c18ac6c4bd67d",
+  "pages": 1,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 596.0,
+      "height": 837.0
+    }
+  ],
+  "fields": []
+}

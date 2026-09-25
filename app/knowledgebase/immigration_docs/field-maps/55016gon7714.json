@@ -1,0 +1,18 @@
+{
+  "source": "immigrations_docs/55016gon7714.pdf",
+  "sha256": "43cb27775473c8bbf7f34c591a2274a5b00a1467ce652377207ea3ff8a4c27ed",
+  "pages": 1,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.276,
+      "height": 841.89
+    }
+  ],
+  "fields": []
+}

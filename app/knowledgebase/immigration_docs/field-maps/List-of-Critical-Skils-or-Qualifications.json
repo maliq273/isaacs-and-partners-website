@@ -1,0 +1,83 @@
+{
+  "source": "immigrations_docs/List-of-Critical-Skils-or-Qualifications.pdf",
+  "sha256": "af18fc72cc0ed6008a36fe542623eaae4454d73fadd2c64d8c7fdee7896d7712",
+  "pages": 14,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 2,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 3,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 4,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 5,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 6,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 7,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 8,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 9,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 10,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 11,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 12,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 13,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 14,
+      "width": 595.0,
+      "height": 842.0
+    }
+  ],
+  "fields": []
+}

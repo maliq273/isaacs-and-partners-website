@@ -1,0 +1,103 @@
+{
+  "source": "immigrations_docs/BI-947.pdf",
+  "sha256": "3cc26008554a2ab48262fd5d738223e494d856177929e07cb3672c5ddbab91bf",
+  "pages": 18,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 2,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 3,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 4,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 5,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 6,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 7,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 8,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 9,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 10,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 11,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 12,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 13,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 14,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 15,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 16,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 17,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 18,
+      "width": 595.0,
+      "height": 842.0
+    }
+  ],
+  "fields": []
+}

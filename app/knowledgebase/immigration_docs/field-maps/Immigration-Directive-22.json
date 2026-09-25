@@ -1,0 +1,18 @@
+{
+  "source": "immigrations_docs/Immigration-Directive-22.pdf",
+  "sha256": "5d8101cb0d9bb2487c374b2d872b08d3cb96388ca6ca5571769279c75196aedc",
+  "pages": 1,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 615.0,
+      "height": 1008.0
+    }
+  ],
+  "fields": []
+}

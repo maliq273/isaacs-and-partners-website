@@ -1,0 +1,33 @@
+{
+  "source": "immigrations_docs/Concession_of_30_March_2026.pdf",
+  "sha256": "4932659e6695857bed4db58b4cce527741fb09750136a8298b0216cf46158ec6",
+  "pages": 4,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.25,
+      "height": 842.0
+    },
+    {
+      "page": 2,
+      "width": 595.25,
+      "height": 842.0
+    },
+    {
+      "page": 3,
+      "width": 595.25,
+      "height": 842.0
+    },
+    {
+      "page": 4,
+      "width": 595.25,
+      "height": 842.0
+    }
+  ],
+  "fields": []
+}

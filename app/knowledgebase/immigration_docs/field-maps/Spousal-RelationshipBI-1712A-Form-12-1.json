@@ -1,0 +1,43 @@
+{
+  "source": "immigrations_docs/Spousal-RelationshipBI-1712A-Form-12-1.pdf",
+  "sha256": "53ae6e489bce0cdace7df68812a72d928f32e71f9cdfcfdb817cc34647413cea",
+  "pages": 6,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.22,
+      "height": 842.0
+    },
+    {
+      "page": 2,
+      "width": 595.22,
+      "height": 842.0
+    },
+    {
+      "page": 3,
+      "width": 595.22,
+      "height": 842.0
+    },
+    {
+      "page": 4,
+      "width": 595.22,
+      "height": 842.0
+    },
+    {
+      "page": 5,
+      "width": 595.22,
+      "height": 842.0
+    },
+    {
+      "page": 6,
+      "width": 595.22,
+      "height": 842.0
+    }
+  ],
+  "fields": []
+}

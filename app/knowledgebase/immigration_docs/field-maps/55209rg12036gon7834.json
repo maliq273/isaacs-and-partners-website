@@ -1,0 +1,28 @@
+{
+  "source": "immigrations_docs/55209rg12036gon7834.pdf",
+  "sha256": "1ec5e2079d4ed4273ca9d2efe06962b2a5ac6567215c28a4c0d2e5771c887dc8",
+  "pages": 3,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.276,
+      "height": 841.89
+    },
+    {
+      "page": 2,
+      "width": 595.276,
+      "height": 841.89
+    },
+    {
+      "page": 3,
+      "width": 595.276,
+      "height": 841.89
+    }
+  ],
+  "fields": []
+}

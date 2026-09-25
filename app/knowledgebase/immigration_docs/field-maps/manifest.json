@@ -1,0 +1,237 @@
+{
+  "generatedBy": "scripts/build_immigration_field_maps.py",
+  "documentCount": 21,
+  "documents": [
+    {
+      "file": "immigrations_docs/37335gen97.pdf",
+      "sha256": "490497e9af161dbeeffb7f0ca4912e8ade283742a17e22be97b5cc761d013b3c",
+      "pages": 242,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/37335gen97.json"
+    },
+    {
+      "file": "immigrations_docs/42932rg11024gon1707.pdf",
+      "sha256": "a841b597938cfe6e712206353d55ec84ba345e96dda9c523b2b79567440be97e",
+      "pages": 59,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/42932rg11024gon1707.json"
+    },
+    {
+      "file": "immigrations_docs/53853-12-12-HomeAffairs.pdf",
+      "sha256": "31e0db4404fa92a6807d05679cd896c69b63d4cfc0c56585b25f83ac188a40a3",
+      "pages": 64,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/53853-12-12-HomeAffairs.json"
+    },
+    {
+      "file": "immigrations_docs/53853gon6947.pdf",
+      "sha256": "5e5a53bf5e6bbcbc042f2debda53c2b366f25dfbaed6916414fdf3f92f86e8d7",
+      "pages": 59,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/53853gon6947.json"
+    },
+    {
+      "file": "immigrations_docs/55016gon7714.pdf",
+      "sha256": "43cb27775473c8bbf7f34c591a2274a5b00a1467ce652377207ea3ff8a4c27ed",
+      "pages": 1,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/55016gon7714.json"
+    },
+    {
+      "file": "immigrations_docs/55209rg12036gon7834.pdf",
+      "sha256": "1ec5e2079d4ed4273ca9d2efe06962b2a5ac6567215c28a4c0d2e5771c887dc8",
+      "pages": 3,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/55209rg12036gon7834.json"
+    },
+    {
+      "file": "immigrations_docs/BI-947.pdf",
+      "sha256": "3cc26008554a2ab48262fd5d738223e494d856177929e07cb3672c5ddbab91bf",
+      "pages": 18,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/BI-947.json"
+    },
+    {
+      "file": "immigrations_docs/Concession_of_30_March_2026.pdf",
+      "sha256": "4932659e6695857bed4db58b4cce527741fb09750136a8298b0216cf46158ec6",
+      "pages": 4,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/Concession_of_30_March_2026.json"
+    },
+    {
+      "file": "immigrations_docs/Confirmation-of-Capital-and-Financial-Contribution.pdf",
+      "sha256": "63223de873b706c9d1bdda7627df8b2bf1dd92b3407845ab345d69c0aa585af0",
+      "pages": 1,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/Confirmation-of-Capital-and-Financial-Contribution.json"
+    },
+    {
+      "file": "immigrations_docs/DHA-DIRECTIVES-19-14-ICT-ext-in-country-moha.pdf",
+      "sha256": "77720aa1b6b5831c9883fb27c2fa8a3099e245ae2e9eab716e3c18ac6c4bd67d",
+      "pages": 1,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/DHA-DIRECTIVES-19-14-ICT-ext-in-country-moha.json"
+    },
+    {
+      "file": "immigrations_docs/FORM-DHA-1738_e-version.pdf",
+      "sha256": "dd692c36a9c18bfd7b89782ea22ce6905c99feecbfe64115c4edb1a4fafab220",
+      "pages": 20,
+      "interactiveFieldCount": 312,
+      "flattened": false,
+      "requiresCoordinateMap": false,
+      "mappedFieldCount": 3,
+      "unmappedFieldCount": 309,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/FORM-DHA-1738_e-version.json"
+    },
+    {
+      "file": "immigrations_docs/Immigration-Directive-22.pdf",
+      "sha256": "5d8101cb0d9bb2487c374b2d872b08d3cb96388ca6ca5571769279c75196aedc",
+      "pages": 1,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/Immigration-Directive-22.json"
+    },
+    {
+      "file": "immigrations_docs/List-of-Businesses-Qualifying-for-Reduction-or-Waiver.pdf",
+      "sha256": "f3ad4e88057011ac3a03289fa7682437d2ad740ee7da171c60717861c15ddaaf",
+      "pages": 5,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/List-of-Businesses-Qualifying-for-Reduction-or-Waiver.json"
+    },
+    {
+      "file": "immigrations_docs/List-of-Critical-Skils-or-Qualifications.pdf",
+      "sha256": "af18fc72cc0ed6008a36fe542623eaae4454d73fadd2c64d8c7fdee7896d7712",
+      "pages": 14,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/List-of-Critical-Skils-or-Qualifications.json"
+    },
+    {
+      "file": "immigrations_docs/List-of-Undesirable-Business-Undertakings.pdf",
+      "sha256": "1d05d8e7db4339f982f54579a6a320d2c184997a36092c0cdce5616665678a3b",
+      "pages": 1,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/List-of-Undesirable-Business-Undertakings.json"
+    },
+    {
+      "file": "immigrations_docs/Spousal-RelationshipBI-1712A-Form-12-1.pdf",
+      "sha256": "53ae6e489bce0cdace7df68812a72d928f32e71f9cdfcfdb817cc34647413cea",
+      "pages": 6,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/Spousal-RelationshipBI-1712A-Form-12-1.json"
+    },
+    {
+      "file": "immigrations_docs/Temporary-Residence-Form-DHA-1738-Form-8-June-19-2014.pdf",
+      "sha256": "8d967ccbd2e6e3f3f1f565a342508f6224e5c5330814d3174a6f4c8dddddd960",
+      "pages": 20,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/Temporary-Residence-Form-DHA-1738-Form-8-June-19-2014.json"
+    },
+    {
+      "file": "immigrations_docs/Travelling-with-minors-info-DHA-latest-version.pdf",
+      "sha256": "5d434824ea73a063d14a4cfcb7312360d1aaa661dd4002be3fbe66d27cb3e78a",
+      "pages": 10,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/Travelling-with-minors-info-DHA-latest-version.json"
+    },
+    {
+      "file": "immigrations_docs/Visitor-Visa-Application-Form-DHA-84-Form-11-June-19-2014.pdf",
+      "sha256": "dd30e6b861291d4ae7d305b6e3c42d901ec657521e115e9d3f68588fc52d2891",
+      "pages": 10,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/Visitor-Visa-Application-Form-DHA-84-Form-11-June-19-2014.json"
+    },
+    {
+      "file": "immigrations_docs/dha84-form11.pdf",
+      "sha256": "1fbbd287e4fedb6ced6a0896c0c9efbd1795eb3386db2b123b7f4fea0c8c12a7",
+      "pages": 10,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/dha84-form11.json"
+    },
+    {
+      "file": "immigrations_docs/final_Immigration_Regulations_2014_1 (1).pdf",
+      "sha256": "bb610a1865c1fd62850cd8186c4e4feaa4baafa44eea1c313b2d71944723f6c9",
+      "pages": 272,
+      "interactiveFieldCount": 0,
+      "flattened": true,
+      "requiresCoordinateMap": true,
+      "mappedFieldCount": 0,
+      "unmappedFieldCount": 0,
+      "fieldMapFile": "app/knowledgebase/immigration_docs/field-maps/final_Immigration_Regulations_2014_1 (1).json"
+    }
+  ]
+}

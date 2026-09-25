@@ -1,0 +1,63 @@
+{
+  "source": "immigrations_docs/Travelling-with-minors-info-DHA-latest-version.pdf",
+  "sha256": "5d434824ea73a063d14a4cfcb7312360d1aaa661dd4002be3fbe66d27cb3e78a",
+  "pages": 10,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 2,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 3,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 4,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 5,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 6,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 7,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 8,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 9,
+      "width": 595.32,
+      "height": 841.92
+    },
+    {
+      "page": 10,
+      "width": 595.32,
+      "height": 841.92
+    }
+  ],
+  "fields": []
+}

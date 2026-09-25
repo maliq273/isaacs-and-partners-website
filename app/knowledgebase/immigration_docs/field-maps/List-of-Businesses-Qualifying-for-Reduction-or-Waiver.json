@@ -1,0 +1,38 @@
+{
+  "source": "immigrations_docs/List-of-Businesses-Qualifying-for-Reduction-or-Waiver.pdf",
+  "sha256": "f3ad4e88057011ac3a03289fa7682437d2ad740ee7da171c60717861c15ddaaf",
+  "pages": 5,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 2,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 3,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 4,
+      "width": 595.0,
+      "height": 842.0
+    },
+    {
+      "page": 5,
+      "width": 595.0,
+      "height": 842.0
+    }
+  ],
+  "fields": []
+}

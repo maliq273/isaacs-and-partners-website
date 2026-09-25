@@ -1,0 +1,18 @@
+{
+  "source": "immigrations_docs/List-of-Undesirable-Business-Undertakings.pdf",
+  "sha256": "1d05d8e7db4339f982f54579a6a320d2c184997a36092c0cdce5616665678a3b",
+  "pages": 1,
+  "interactiveFieldCount": 0,
+  "flattened": true,
+  "requiresCoordinateMap": true,
+  "fieldMap": {},
+  "unmappedFields": [],
+  "pageSizes": [
+    {
+      "page": 1,
+      "width": 595.0,
+      "height": 842.0
+    }
+  ],
+  "fields": []
+}
