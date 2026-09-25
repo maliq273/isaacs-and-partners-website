@@ -6,6 +6,7 @@ on:
       - "immigrations_docs/**"
       - ".github/workflows/build-immigration-field-maps.yml"
       - "scripts/build_immigration_field_maps.py"
+      - "scripts/build_immigration_coordinate_maps.py"
   workflow_dispatch:
 
 permissions:
@@ -27,6 +28,9 @@ jobs:
 
       - name: Build field maps from original PDFs
         run: python scripts/build_immigration_field_maps.py
+
+      - name: Build coordinate maps for flattened government forms
+        run: python scripts/build_immigration_coordinate_maps.py
 
       - name: Commit generated field maps
         run: |
