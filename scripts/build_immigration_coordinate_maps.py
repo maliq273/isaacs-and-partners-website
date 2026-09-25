@@ -125,8 +125,8 @@ def sha(path):
 
 def bbox_lines(pdf):
  info=subprocess.check_output(["pdfinfo",str(pdf)],text=True)
- pages_n=int(re.search(r"^Pages:\\s+(\\d+)",info,re.M).group(1))
- page_size=re.search(r"^Page size:\\s+([0-9.]+) x ([0-9.]+) points",info,re.M)
+ pages_n=int(re.search(r"^Pages:\s+(\d+)",info,re.M).group(1))
+ page_size=re.search(r"^Page size:\s+([0-9.]+) x ([0-9.]+) points",info,re.M)
  pw,ph=float(page_size.group(1)),float(page_size.group(2))
  work=Path("/tmp/ocr-pages"); work.mkdir(parents=True,exist_ok=True)
  pages=[]
@@ -139,7 +139,7 @@ def bbox_lines(pdf):
   words=[]
   lines=tsv.read_text(encoding="utf-8",errors="ignore").splitlines()
   for row in lines[1:]:
-   cols=row.split("\\t")
+   cols=row.split("\t")
    if len(cols)<12 or not cols[11].strip(): continue
    try:
     left,top,width,height=map(int,cols[6:10]); txt=cols[11].strip()
