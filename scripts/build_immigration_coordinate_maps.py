@@ -124,12 +124,26 @@ def sha(path):
  return h.hexdigest()
 
 def bbox_lines(pdf):
+ from bs4 import BeautifulSoup
  from pypdf import PdfReader
  import csv, io
  reader=PdfReader(str(pdf)); pages=[]
+ stored=Path("app/knowledgebase/immigration_docs/bbox")/(pdf.stem+".html")
+ if stored.exists() and pdf.stem!="dha84-form11":
+  soup=BeautifulSoup(stored.read_text(encoding="utf-8",errors="ignore"),"html.parser")
+  page_nodes=soup.find_all("page")
+  for pi,p in enumerate(page_nodes,1):
+   pdfpage=reader.pages[pi-1]; pw=float(pdfpage.mediabox.width); ph=float(pdfpage.mediabox.height); rotation=int(pdfpage.get("/Rotate",0) or 0)%360
+   words=[]
+   for w in p.find_all("word"):
+    txt=w.get_text(" ",strip=True)
+    if not txt: continue
+    words.append({"text":txt,"x1":float(w.get("xmin",0)),"y1":float(w.get("ymin",0)),"x2":float(w.get("xmax",0)),"y2":float(w.get("ymax",0))})
+   pages.append({"page":pi,"width":pw,"height":ph,"rotation":rotation,"words":words})
+  return pages
  render_dir=Path("/tmp/ocr-pages"); render_dir.mkdir(parents=True,exist_ok=True)
  for pi,page in enumerate(reader.pages,1):
-  media=page.mediabox; pw=float(media.width); ph=float(media.height)
+  pw=float(page.mediabox.width); ph=float(page.mediabox.height)
   prefix=render_dir/(pdf.stem+"-"+str(pi))
   subprocess.run(["pdftoppm","-png","-r","150","-f",str(pi),"-singlefile",str(pdf),str(prefix)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
   img=Path(str(prefix)+".png")
@@ -138,14 +152,10 @@ def bbox_lines(pdf):
   for row in csv.DictReader(io.StringIO(tsv),delimiter="\\t"):
    txt=(row.get("text") or "").strip()
    if not txt: continue
-   try:
-    x=float(row["left"]); y=float(row["top"]); w=float(row["width"]); h=float(row["height"])
+   try: x=float(row["left"]); y=float(row["top"]); w=float(row["width"]); h=float(row["height"])
    except: continue
-   # OCR image coordinates are top-left origin. Convert to PDF points.
-   with img.open("rb") as fh: pass
-   # pdftoppm at 150 dpi gives 150 pixels/inch; PDF points are 72/inch.
    scale=72.0/150.0
    words.append({"text":txt,"x1":x*scale,"y1":y*scale,"x2":(x+w)*scale,"y2":(y+h)*scale})
-  pages.append({"page":pi,"width":pw,"height":ph,"words":words})
+  pages.append({"page":pi,"width":pw,"height":ph,"rotation":int(page.get("/Rotate",0) or 0)%360,"words":words})
  return pages
 
