@@ -124,18 +124,16 @@ def sha(path):
  return h.hexdigest()
 
 def bbox_lines(pdf):
- xml_path=Path("/tmp/pdftohtml.xml")
- with xml_path.open("w",encoding="utf-8") as out:
-  subprocess.run(["pdftohtml","-xml","-i","-stdout",str(pdf)],check=True,stdout=out,stderr=subprocess.DEVNULL)
- root=ET.parse(xml_path).getroot()
+ from bs4 import BeautifulSoup
+ html=subprocess.run(["pdftotext","-bbox-layout",str(pdf),"-"],check=True,capture_output=True,text=True).stdout
+ soup=BeautifulSoup(html,"html.parser")
  pages=[]
- for pi,p in enumerate([e for e in root.iter() if e.tag.split("}")[-1]=="page"],1):
-  width=float(p.attrib.get("width","0")); height=float(p.attrib.get("height","0")); words=[]
-  for t in [e for e in p.iter() if e.tag.split("}")[-1]=="text"]:
-   txt="".join(t.itertext()).strip()
+ for pi,p in enumerate(soup.find_all("page"),1):
+  width=float(p.get("width","0")); height=float(p.get("height","0")); words=[]
+  for w in p.find_all("word"):
+   txt=w.get_text(" ",strip=True)
    if not txt: continue
-   x=float(t.attrib.get("left","0")); y=float(t.attrib.get("top","0")); w=float(t.attrib.get("width","0")); h=float(t.attrib.get("height","0"))
-   words.append({"text":txt,"x1":x,"y1":y,"x2":x+w,"y2":y+h})
+   words.append({"text":txt,"x1":float(w.get("xmin",0)),"y1":float(w.get("ymin",0)),"x2":float(w.get("xmax",0)),"y2":float(w.get("ymax",0))})
   pages.append({"page":pi,"width":width,"height":height,"words":words})
  return pages
 
