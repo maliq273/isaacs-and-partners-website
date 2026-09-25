@@ -12,3 +12,5 @@ The GitHub Actions workflow .github/workflows/ingest-immigration-pdfs.yml extrac
 Generated knowledge lives under app/knowledgebase/immigration_docs/ and never replaces the original PDFs.
 \n\n<!-- Field-map rebuild trigger: 2026-09-25 / render-verify-2 -->\n
 <!-- Coordinate-map verification trigger: 2026-09-25T20:20Z -->
+
+<!-- Coordinate map build trigger: 2026-09-25T20:35Z -->
