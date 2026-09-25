@@ -36,3 +36,5 @@ Generated knowledge lives under app/knowledgebase/immigration_docs/ and never re
 <!-- Final coordinate source trigger: 2026-09-25T22:30Z -->
 
 <!-- Coordinate map rebuild trigger: 2026-09-25T21:20Z -->
+
+<!-- OCR coordinate map trigger: 2026-09-25T21:35Z -->
