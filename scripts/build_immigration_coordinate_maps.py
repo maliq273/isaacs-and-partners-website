@@ -124,16 +124,28 @@ def sha(path):
  return h.hexdigest()
 
 def bbox_lines(pdf):
- from bs4 import BeautifulSoup
- html=subprocess.run(["pdftotext","-bbox-layout",str(pdf),"-"],check=True,capture_output=True,text=True).stdout
- soup=BeautifulSoup(html,"html.parser")
- pages=[]
- for pi,p in enumerate(soup.find_all("page"),1):
-  width=float(p.get("width","0")); height=float(p.get("height","0")); words=[]
-  for w in p.find_all("word"):
-   txt=w.get_text(" ",strip=True)
+ from pypdf import PdfReader
+ import csv, io
+ reader=PdfReader(str(pdf)); pages=[]
+ render_dir=Path("/tmp/ocr-pages"); render_dir.mkdir(parents=True,exist_ok=True)
+ for pi,page in enumerate(reader.pages,1):
+  media=page.mediabox; pw=float(media.width); ph=float(media.height)
+  prefix=render_dir/(pdf.stem+"-"+str(pi))
+  subprocess.run(["pdftoppm","-png","-r","150","-f",str(pi),"-singlefile",str(pdf),str(prefix)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+  img=Path(str(prefix)+".png")
+  tsv=subprocess.run(["tesseract",str(img),"stdout","--psm","6","tsv"],check=True,capture_output=True,text=True).stdout
+  words=[]
+  for row in csv.DictReader(io.StringIO(tsv),delimiter="\\t"):
+   txt=(row.get("text") or "").strip()
    if not txt: continue
-   words.append({"text":txt,"x1":float(w.get("xmin",0)),"y1":float(w.get("ymin",0)),"x2":float(w.get("xmax",0)),"y2":float(w.get("ymax",0))})
-  pages.append({"page":pi,"width":width,"height":height,"words":words})
+   try:
+    x=float(row["left"]); y=float(row["top"]); w=float(row["width"]); h=float(row["height"])
+   except: continue
+   # OCR image coordinates are top-left origin. Convert to PDF points.
+   with img.open("rb") as fh: pass
+   # pdftoppm at 150 dpi gives 150 pixels/inch; PDF points are 72/inch.
+   scale=72.0/150.0
+   words.append({"text":txt,"x1":x*scale,"y1":y*scale,"x2":(x+w)*scale,"y2":(y+h)*scale})
+  pages.append({"page":pi,"width":pw,"height":ph,"words":words})
  return pages
 
