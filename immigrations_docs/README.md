@@ -26,3 +26,5 @@ Generated knowledge lives under app/knowledgebase/immigration_docs/ and never re
 <!-- Coordinate regex fix trigger: 2026-09-25T21:25Z -->
 
 <!-- pdftohtml coordinate trigger: 2026-09-25T21:40Z -->
+
+<!-- Namespace parser trigger: 2026-09-25T21:50Z -->
