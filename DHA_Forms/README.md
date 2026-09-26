@@ -1,38 +1,71 @@
 # DHA Forms Library
 
-This directory contains the semantic immigration-form specifications used to build the Isaacs & Partners immigration-document engine.
+This folder is the immigration-document-engine's DHA form source and semantic registry.
 
-## Current state
+## Canonical structure
 
-The latest reviewed repository commit is `fca7fa2879fdd4eeb9c889737e4feec056adfacc` (2026-09-26 09:11:54 UTC), which added the comprehensive `DHA_Forms/forms` Annexures 17–56 schema.
+- `DHA_Forms/official/` — canonical Form 1–21 semantic records plus Form 50.
+- `DHA_Forms/official/index.json` — authoritative inventory used to determine whether a form exists in the library.
+- `DHA_Forms/forms` — legacy aggregate schema covering Annexures 17–56; retained as reference.
+- `DHA_Forms/second_ammendments` — legacy 2024 amendment/reference schema; retained as reference.
+- `DHA_Forms/DHA-1740` — legacy aggregate containing Forms 1–4; retained for compatibility. It is **not** the standalone Form 9 schema.
 
-### Generation status
+## Official Form 1–21 coverage
 
-| Form | Current state | PDF generation |
-|---|---|---|
-| DHA-84 / Form 11 | Certified in `app/knowledgebase` | Enabled |
-| DHA-1738 / Form 8 | Semantic schema constructed | Pending coordinate certification |
-| DHA-1739 / Form 10 | Semantic schema constructed | Pending coordinate certification |
-| DHA-1712A / Form 12 | Semantic schema constructed | Pending coordinate certification |
-| BI-947 / Permanent Residence | Semantic schema constructed | Pending coordinate certification |
-| Forms 1–4 aggregate | Present in `DHA-1740` | Not generation-authorised |
-| Annexures 17–56 aggregate | Present in `forms` | Reference schema only |
+All Form 1 through Form 21 records are now present under `official/`, including:
 
-## Safety rule
+1. DHA-1756
+2. DHA-1714A
+3. DHA-26
+4. DHA-TC-01
+5. DHA-1565
+6. DHA-1746
+7A. Form 7A
+7B. Form 7B
+7C. Form 7C
+8. DHA-1738
+9. DHA-1740
+10. DHA-1739
+11. DHA-84
+12. DHA-1712A
+13. DHA-1743
+14. DHA-1718
+15. DHA-1733
+16. DHA-1758
+17. DHA-1732
+18. DHA-947
+19. DHA-46
+20. DHA-1759
+21. DHA-1684
 
-A semantic schema does **not** authorise PDF generation.
+Form 50 (Change of Address) is also present because it is required for the immigration workflow and is explicitly provided for under Regulation 40.
 
-A form becomes generation-ready only after:
+## Status model
 
-1. the exact source PDF is identified and hashed;
-2. the semantic field map is reconciled against that source;
-3. every required coordinate is physically verified against the exact PDF;
-4. rendering is tested;
-5. output is validated against the source layout; and
-6. the form is explicitly marked generation-capable in the engine registry.
+A form being present does **not** mean PDF generation is enabled.
 
-Do not create a second independent coordinate-map source when a canonical verified map already exists under `app/knowledgebase/immigration_docs/coordinate-maps`.
+- **certified** — exact source PDF, semantic mapping, coordinate map and rendering validation have passed.
+- **constructed** — semantic field model exists; coordinate certification is still required.
+- **semantic_skeleton** — official form identity/source is established, but field-level construction remains to be completed.
+- **generationAuthorised: false** — the document engine must not write to the PDF.
 
-## Naming warning
+Currently DHA-84/Form 11 is the generation-certified form. The other records are deliberately gated.
 
-`DHA_Forms/DHA-1740` is currently a misnamed aggregate file. Its content describes Forms 1–4 (DHA-1756, DHA-1714A, DHA-26 and DHA-TC-01), not a standalone DHA-1740 application. It should be normalised in a later controlled cleanup rather than silently overwritten.
+## Safety gates
+
+Before enabling generation for any form:
+
+1. identify the exact source PDF;
+2. hash the source PDF;
+3. reconcile the semantic schema against that exact source;
+4. physically verify every coordinate;
+5. render a populated candidate;
+6. compare the candidate to the source;
+7. run negative/overflow/field-isolation tests;
+8. only then mark the form generation-capable in the engine registry.
+
+Do not create duplicate coordinate maps when a canonical map already exists under `app/knowledgebase/immigration_docs/coordinate-maps`.
+
+## Source authority
+
+The official DHA Immigration Regulations PDF identifies the Annexure A form inventory and distinguishes Forms 1–21, including Form 9 (DHA-1740), Form 11 (DHA-84), Form 18 (DHA-947), and Form 50 (Change of Address). The repository records should still be revalidated against the exact source PDF before generation is authorised.
