@@ -55,21 +55,21 @@
       "path": "DHA_Forms/official/Form-06_DHA-1746.json"
     },
     {
-      "formNumber": "Form 07A",
+      "formNumber": "Form 7A",
       "id": "DHA-",
       "title": "Return of illegal foreigner — attestation relating to lost or destroyed travel documents",
       "status": "semantic_skeleton",
       "path": "DHA_Forms/official/Form-07A.json"
     },
     {
-      "formNumber": "Form 07B",
+      "formNumber": "Form 7B",
       "id": "DHA-",
       "title": "Letter relating to fraudulent, falsified or counterfeit travel documents or genuine documents presented by imposters",
       "status": "semantic_skeleton",
       "path": "DHA_Forms/official/Form-07B.json"
     },
     {
-      "formNumber": "Form 07C",
+      "formNumber": "Form 7C",
       "id": "DHA-",
       "title": "Referral letter for detention or prosecution relating to fraudulent, falsified or counterfeit travel documents or genuine documents presented by imposters or suspected illegal foreigners",
       "status": "semantic_skeleton",
@@ -368,15 +368,15 @@
       "title": "Notice of appeal",
       "status": "semantic_skeleton",
       "path": "DHA_Forms/official/Form-49_DHA-unassigned.json"
+    },
+    {
+      "formNumber": "Form 50",
+      "id": "DHA-50",
+      "title": "Change of Address",
+      "status": "constructed",
+      "path": "DHA_Forms/official/Form-50_Change-of-Address.json"
     }
   ],
-  "additionalAdministrativeForm": {
-    "formNumber": "Form 50",
-    "id": "DHA-50",
-    "title": "Change of Address",
-    "path": "DHA_Forms/official/Form-50_Change-of-Address.json",
-    "status": "constructed"
-  },
   "legacySources": [
     "DHA_Forms/forms",
     "DHA_Forms/second_ammendments",
