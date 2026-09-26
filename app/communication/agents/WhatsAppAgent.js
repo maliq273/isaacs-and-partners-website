@@ -153,7 +153,7 @@ export default class WhatsAppAgent {
         // When the AI query has been fully processed (reply generated),
         // determine if it is pending human review (for quotes/pricing: must compile price and ask approval before sending to client)
         const pendingReview = Boolean(
-            isPricingInquiry ||
+            (isPricingInquiry && compiledQuote?.status !== "PRICE_AVAILABLE") ||
             compiledQuote?.requiresApproval ||
             compiledQuote?.status === "PRICING_REQUIRED_FROM_SUPER_ADMIN" ||
             assessment?.humanRequired ||
