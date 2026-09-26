@@ -156,7 +156,7 @@ class SuperAdminControlPlaneService {
         await this.ensureAdmin();
 
         const response = await fetch(
-            `${this.functionsUrl ? this.baseUrl.replace("/rest/v1", "/rest/v1/rpc") : ""}/void_invoice_payment`,
+            `${this.baseUrl}/rpc/void_invoice_payment`,
             {
                 method: "POST",
                 headers: this.headers(false),
