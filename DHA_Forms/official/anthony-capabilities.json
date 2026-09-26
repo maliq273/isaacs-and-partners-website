@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "assistant": "Anthony Isaacs",
+  "library": "DHA Forms",
+  "policy": "Presence in this registry does not authorise PDF generation.",
+  "capabilities": {
+    "DHA-1756": {
+      "semantic": true,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1714A": {
+      "semantic": true,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-26": {
+      "semantic": true,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-TC-01": {
+      "semantic": true,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1565": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1746": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-7A": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-7B": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-7C": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1738": {
+      "semantic": true,
+      "pdfTemplate": true,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1740": {
+      "semantic": true,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1739": {
+      "semantic": true,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-84": {
+      "semantic": true,
+      "pdfTemplate": true,
+      "coordinateMap": true,
+      "generation": true
+    },
+    "DHA-1712A": {
+      "semantic": true,
+      "pdfTemplate": true,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1743": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1718": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1733": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1758": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1732": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-947": {
+      "semantic": true,
+      "pdfTemplate": true,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-46": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1759": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1684": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-50": {
+      "semantic": true,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    }
+  },
+  "generationRule": "Only records with semantic=true, pdfTemplate=true, coordinateMap=true and generation=true may be passed to official PDF generation."
+}
