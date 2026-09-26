@@ -117,7 +117,7 @@
     }
   ],
   "notes": [
-    "All official Form 1–21 records are now present under DHA_Forms/official.",
+    "All official Form 1–50 records are now present under DHA_Forms/official.",
     "Form 50 Change of Address is also present under DHA_Forms/official.",
     "DHA-84/Form 11 remains the only generation-certified form.",
     "Constructed or semantic-skeleton records must not be used for PDF generation until the exact source PDF, hash, coordinate map and render validation are certified.",
@@ -125,5 +125,5 @@
   ],
   "canonicalDirectory": "DHA_Forms/official",
   "canonicalIndex": "DHA_Forms/official/index.json",
-  "formInventory": "Forms 1-21 plus Form 50"
+  "formInventory": "Forms 1–50 (Annexure A), including Form 50 Change of Address"
 }
