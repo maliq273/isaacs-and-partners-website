@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Form 4 (DHA-TC-01) Traveller Card",
+  "type": "object",
+  "properties": {
+    "conveyanceIdentifier": {
+      "type": "string",
+      "description": "Flight No. / Ship No. / Vehicle Reg No."
+    },
+    "passportNumber": {
+      "type": "string"
+    },
+    "reasonForVisit": {
+      "type": "string",
+      "enum": [
+        "Resident",
+        "Immigrant",
+        "Study",
+        "Business",
+        "Holiday",
+        "Transit",
+        "Diplomat",
+        "Employment",
+        "Crew",
+        "Other"
+      ]
+    },
+    "occupation": {
+      "type": "string",
+      "enum": [
+        "Civil Service",
+        "Diplomat",
+        "Military/Police",
+        "Media",
+        "Artist",
+        "Charity",
+        "Student",
+        "Education",
+        "Professional",
+        "Trade/Business",
+        "Other"
+      ]
+    },
+    "customsDeclarations": {
+      "type": "object",
+      "properties": {
+        "prohibitedOrRestrictedGoods": {
+          "type": "boolean"
+        },
+        "goodsInExcessOfDFA": {
+          "type": "boolean"
+        },
+        "goodsIntendedForTrade": {
+          "type": "boolean"
+        },
+        "currencyExceedingLimits": {
+          "type": "boolean"
+        },
+        "valuableGoodsForTempImportExport": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "prohibitedOrRestrictedGoods",
+        "goodsInExcessOfDFA",
+        "goodsIntendedForTrade",
+        "currencyExceedingLimits",
+        "valuableGoodsForTempImportExport"
+      ]
+    },
+    "currencyAmountBringing": {
+      "type": "number",
+      "description": "Amount in ZAR/USD"
+    },
+    "physicalAddressInRSA": {
+      "type": "object",
+      "properties": {
+        "unitNo": {
+          "type": "string"
+        },
+        "complex": {
+          "type": "string"
+        },
+        "streetNo": {
+          "type": "string"
+        },
+        "streetOrFarmName": {
+          "type": "string"
+        },
+        "suburbDistrict": {
+          "type": "string"
+        },
+        "cityTown": {
+          "type": "string"
+        },
+        "postalCode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cityTown",
+        "streetOrFarmName"
+      ]
+    },
+    "intendedDepartureDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "contactPersonInRSA": {
+      "type": "string"
+    },
+    "contactNoInRSA": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "passportNumber",
+    "reasonForVisit",
+    "customsDeclarations",
+    "physicalAddressInRSA"
+  ]
+}
