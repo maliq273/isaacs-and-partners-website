@@ -1,0 +1,301 @@
+{
+  "form_metadata": {
+    "title": "APPLICATION FOR VISA TO TEMPORARILY SOJOURN IN THE REPUBLIC",
+    "form_number": "(DHA-1738) Form 8",
+    "issuing_authority": "DEPARTMENT OF HOME AFFAIRS, REPUBLIC OF SOUTH AFRICA",
+    "legal_reference": "Section 10(2)(c) to (k); Regulation 9(1)"
+  },
+  "category_of_visa": {
+    "label": "CATEGORY OF PERMIT BEING APPLIED FOR",
+    "type": "single_select",
+    "options": [
+      "Visitor's visa",
+      "Study Visa (> 3 months)",
+      "Business Visa",
+      "Exchange Visa",
+      "Treaty Visa",
+      "Work Visa: Critical Skills",
+      "Relative's Visa",
+      "Work Visa: General",
+      "Medical Treatment Visa",
+      "Work Visa: Intra-company transfer",
+      "Retired Person's Visa"
+    ]
+  },
+  "sections": [
+    {
+      "section_id": "1_personal_details",
+      "section_title": "1. PERSONAL DETAILS",
+      "fields": [
+        { "id": "title", "label": "Title", "type": "single_select", "options": ["Mr", "Ms", "Other"] },
+        { "id": "title_other_specify", "label": "Title: Other (specify)", "type": "string" },
+        { "id": "surname_family_name", "label": "Surname/Family name", "type": "string" },
+        { "id": "given_names", "label": "Given names", "type": "string" },
+        { "id": "maiden_name", "label": "Maiden name", "type": "string" },
+        { "id": "stage_name", "label": "Stage name", "type": "string" },
+        { "id": "previous_aliases", "label": "Previous/alternative name(s)/aliases, including details", "type": "string" },
+        { "id": "date_of_birth_year", "label": "Date of birth: Year", "type": "string" },
+        { "id": "date_of_birth_month", "label": "Date of birth: Month", "type": "string" },
+        { "id": "date_of_birth_day", "label": "Date of birth: Day", "type": "string" },
+        { "id": "place_of_birth_city", "label": "Place of birth: Town/City", "type": "string" },
+        { "id": "place_of_birth_country", "label": "Place of birth: Country", "type": "string" },
+        {
+          "id": "marital_status",
+          "label": "Marital status",
+          "type": "single_select",
+          "options": ["Never married", "Separated", "Legally recognised spousal relationship", "Married", "Widowed", "Customary union", "Divorced"]
+        },
+        { "id": "divorce_proceedings_details", "label": "If separated state: Whether divorce proceedings have been instituted and when final decree is expected", "type": "text" },
+        { "id": "date_of_divorce", "label": "If divorced, provide Date of divorce", "type": "date" }
+      ]
+    },
+    {
+      "section_id": "2_citizenship_details",
+      "section_title": "2. CITIZENSHIP DETAILS",
+      "fields": [
+        { "id": "present_citizenship", "label": "Present country of citizenship", "type": "string" },
+        { "id": "citizenship_acquisition_details", "label": "If acquired other than by birth, date and conditions under which acquired", "type": "text" },
+        { "id": "other_citizenship_held", "label": "Do you hold any other citizenship?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "other_citizenship_details", "label": "If so, of which country, plus details", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "3_passport_details",
+      "section_title": "3. PASSPORT DETAILS",
+      "fields": [
+        { "id": "passport_number", "label": "Passport number", "type": "string" },
+        { "id": "passport_date_of_issue", "label": "Date of issue", "type": "date" },
+        { "id": "passport_country_of_issue", "label": "Country of issue", "type": "string" },
+        { "id": "passport_expiry_date", "label": "Expiry date", "type": "date" },
+        { "id": "other_travel_doc_type", "label": "Other document required by government: Type of document", "type": "string" },
+        { "id": "other_travel_doc_number", "label": "Other document: Number", "type": "string" },
+        { "id": "other_travel_doc_expiry_date", "label": "Other document: Expiry date", "type": "date" }
+      ]
+    },
+    {
+      "section_id": "4_addresses",
+      "section_title": "4. ADDRESSES",
+      "fields": [
+        { "id": "residential_address", "label": "Residential address", "type": "text" },
+        { "id": "residential_postal_code", "label": "Residential Postal code", "type": "string" },
+        { "id": "postal_address", "label": "Postal address", "type": "text" },
+        { "id": "postal_address_code", "label": "Postal code", "type": "string" },
+        { "id": "country_usual_residence", "label": "Country of usual residence if other than country of origin or above address", "type": "string" },
+        { "id": "telephone_work", "label": "Telephone No.: Work (incl. area code)", "type": "string" },
+        { "id": "telephone_home", "label": "Telephone No.: Home (incl. area code)", "type": "string" },
+        {
+          "id": "previous_addresses_10_years",
+          "label": "Other addresses where you have lived during the last ten years other than your current address",
+          "type": "array",
+          "items": { "address": "string", "period": "string", "country": "string" }
+        },
+        { "id": "reentry_right", "label": "Do you hold the right of re-entry into your country of origin and/or country of residence if this differs?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "reentry_right_details", "label": "If no, specify period and present status", "type": "text" },
+        { "id": "asylum_applied", "label": "Have you ever applied for asylum or refugee status in SA or any other country?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "asylum_country", "label": "If yes, specify the country", "type": "string" },
+        {
+          "id": "contact_person_details",
+          "label": "Contact person",
+          "subfields": [
+            { "id": "relationship", "type": "single_select", "options": ["Friend", "Business Associate", "Relative", "Other"] },
+            { "id": "name", "type": "string" },
+            { "id": "address", "type": "text" },
+            { "id": "telephone_work", "type": "string" },
+            { "id": "telephone_home", "type": "string" }
+          ]
+        },
+        {
+          "id": "relatives_friends_in_sa",
+          "label": "Details regarding relatives and/or friends in the Republic, if any",
+          "type": "array",
+          "items": { "name": "string", "address": "string", "relationship": "string", "identity_no": "string" }
+        }
+      ]
+    },
+    {
+      "section_id": "5_intentions",
+      "section_title": "5. INTENTIONS/PROPOSED DURATION OF STAY IN THE REPUBLIC",
+      "fields": [
+        { "id": "proposed_departure_date", "label": "Proposed date of departure for the Republic", "type": "date" },
+        { "id": "proposed_departure_place", "label": "Proposed place of departure for the Republic", "type": "string" },
+        { "id": "anticipated_arrival_date", "label": "Anticipated date of arrival in the Republic", "type": "date" },
+        { "id": "anticipated_arrival_place", "label": "Anticipated place of arrival in the Republic", "type": "string" },
+        { "id": "travel_mode", "label": "Travelling by", "type": "single_select", "options": ["Air", "Road", "Rail", "Sea"] },
+        { "id": "travel_carrier", "label": "Carrier", "type": "string" },
+        { "id": "duration_of_stay_value", "label": "Intended duration of stay: Value", "type": "string" },
+        { "id": "duration_of_stay_unit", "label": "Intended duration of stay: Unit", "type": "single_select", "options": ["Days/weeks/months", "Years"] },
+        { "id": "intended_departure_date", "label": "Intended date of departure", "type": "date" },
+        { "id": "proposed_activities", "label": "Outline your proposed activities whilst in the Republic", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "6_maintenance",
+      "section_title": "6. MAINTENANCE/DEPORTATION",
+      "fields": [
+        { "id": "available_funds_type", "label": "Available funds (foreign currency): Type", "type": "string" },
+        { "id": "available_funds_amount", "label": "Available funds (foreign currency): Amount", "type": "string" },
+        { "id": "rand_equivalent", "label": "South African Rand equivalent", "type": "string" },
+        { "id": "return_ticket_no", "label": "Valid return or onward ticket no", "type": "string" },
+        { "id": "return_ticket_expiry", "label": "Expiry date", "type": "date" },
+        { "id": "maintenance_other", "label": "Other maintenance details", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "7_dependants",
+      "section_title": "7. PARTICULARS OF ANY FAMILY/DEPENDANTS ACCOMPANYING YOU",
+      "fields": [
+        {
+          "id": "accompanying_dependants",
+          "label": "Accompanying family/dependants",
+          "type": "array",
+          "items": {
+            "full_names": "string",
+            "date_of_birth": "date",
+            "relationship": "string",
+            "passport_no": "string",
+            "expiry_date": "date",
+            "nationality": "string",
+            "occupation": "string"
+          }
+        },
+        { "id": "dependants_later_entry", "label": "If spouse/dependants not accompanying, do they intend to enter at a later stage?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "dependants_later_entry_date", "label": "On (date)", "type": "date" },
+        { "id": "dependants_later_entry_reasons", "label": "Details/reason(s)", "type": "text" },
+        { "id": "previously_refused_entry_or_deported", "label": "Have you ever been refused entry into or deported from the Republic? If so, details", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "8_security_health_questionnaire",
+      "section_title": "8. SECURITY/HEALTH QUESTIONNAIRE",
+      "fields": [
+        { "id": "convicted_of_crime", "question": "Have you or any of your dependants accompanying you ever been convicted of any crime in any country?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "case_pending", "question": "Is a criminal/civil case pending against you or any of your dependants accompanying you in any country?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "contagious_disease_or_deficiency", "question": "Are you or any of your dependants suffering from tuberculosis, any other infectious or contagious disease or any mental or physical deficiency?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "unrehabilitated_insolvent", "question": "Are you an unrehabilitated insolvent?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "judicially_declared_incompetent", "question": "Have you ever been judicially declared incompetent?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "social_violence_hatred_member", "question": "Are you a member of or adherent to an association or organisation advocating the practice of social violence, or racial hatred?", "type": "boolean", "options": ["Yes", "No"] },
+        { "id": "questionnaire_affirmative_details", "label": "Furnish full particulars if the reply to any of these questions is in the affirmative", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "9_additional_information",
+      "section_title": "9. ANY ADDITIONAL INFORMATION YOU WISH TO BRING TO THE DEPARTMENT'S ATTENTION",
+      "fields": [
+        { "id": "additional_information", "label": "Additional information", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "10_declaration",
+      "section_title": "10. DECLARATION BY APPLICANT",
+      "fields": [
+        { "id": "applicant_signature", "label": "Signature of applicant", "type": "signature" },
+        { "id": "declaration_date", "label": "Date", "type": "date" }
+      ]
+    },
+    {
+      "section_id": "supporting_documents_checklists",
+      "section_title": "SUPPORTING DOCUMENTS CHECKLISTS",
+      "description": "Indicate Yes/No for attachments according to the visa category applied for.",
+      "fields": [
+        { "id": "doc_valid_passport", "label": "Valid passport expiring no less than 30 days after intended departure", "type": "boolean" },
+        { "id": "doc_yellow_fever_cert", "label": "Yellow fever vaccination certificate, where applicable", "type": "boolean" },
+        { "id": "doc_medical_report", "label": "Medical report", "type": "boolean" },
+        { "id": "doc_radiological_report", "label": "Radiological report", "type": "boolean" },
+        { "id": "doc_marriage_cert_spousal_proof", "label": "Marriage certificate or proof of foreign spousal relationship", "type": "boolean" },
+        { "id": "doc_spousal_affidavit", "label": "Affidavit for spousal relationship to SA citizen/resident & cohabitation proof", "type": "boolean" },
+        { "id": "doc_divorce_decree", "label": "Divorce decree, where applicable", "type": "boolean" },
+        { "id": "doc_court_order_parental_rights", "label": "Court order granting parental responsibilities and rights, where applicable", "type": "boolean" },
+        { "id": "doc_death_certificate_spouse", "label": "Death certificate of late spouse, where applicable", "type": "boolean" },
+        { "id": "doc_parental_consent", "label": "Written consent from parents/legal guardians", "type": "boolean" },
+        { "id": "doc_proof_of_adoption", "label": "Proof of adoption, where applicable", "type": "boolean" },
+        { "id": "doc_legal_separation_order", "label": "Legal separation order, where applicable", "type": "boolean" },
+        { "id": "doc_police_clearance", "label": "Police clearance certificates (applicants 18+ for countries resided >= 1 year)", "type": "boolean" }
+      ]
+    },
+    {
+      "section_id": "official_use_only",
+      "section_title": "FOR OFFICIAL USE ONLY",
+      "fields": [
+        { "id": "office_of_application", "label": "Office of application", "type": "string" },
+        { "id": "date_received", "label": "Date received", "type": "date" },
+        { "id": "quality_checked_by_on", "label": "Application quality checked by/on", "type": "string" },
+        { "id": "passport_seen_returned_by_on", "label": "Passport seen/returned by/on", "type": "string" },
+        { "id": "fee_currency_amount", "label": "Fee: Currency and amount", "type": "string" },
+        { "id": "fee_received_by_on", "label": "Fee received by/on", "type": "string" },
+        { "id": "receipt_no", "label": "Receipt no", "type": "string" },
+        { "id": "track_trace_ref_no", "label": "Track & Trace Ref No", "type": "string" },
+        { "id": "date_forwarded_head_office", "label": "Date forwarded to Head Office", "type": "string" },
+        { "id": "date_received_head_office", "label": "Date received at Head Office", "type": "string" },
+        { "id": "decision_and_date", "label": "Decision and date", "type": "string" },
+        { "id": "conditions_or_reason_for_refusal", "label": "Conditions of permit / Reason for refusal", "type": "text" },
+        { "id": "remarks", "label": "Remarks", "type": "text" }
+      ]
+    }
+  ]
+}
+
+Complete Extracted Text and Field Map
+ Header Metadata:
+ Form Number: (DHA-1738) Form 8  
+ Document Title: APPLICATION FOR VISA TO TEMPORARILY SOJOURN IN THE REPUBLIC  
+ Issuing Authority: Department of Home Affairs, Republic of South Africa  
+ Legal Basis: Section 10(2)(c) to (k); Regulation 9(1)  
+ Category Selection (Checkboxes):
+ Visitor's visa, Study Visa (> 3 months), Business Visa, Exchange Visa, Treaty Visa, Work Visa: Critical Skills, Relative's Visa, Work Visa: General, Medical Treatment Visa, Work Visa: Intra-company transfer, Retired Person's Visa.  
+ Section 1: Personal Details:
+ Title (Mr, Ms, Other)  
+ Surname/Family name & Given names  
+ Maiden name & Stage name  
+ Previous/alternative name(s)/aliases  
+ Date of birth (Year, Month, Day) & Place of birth (Town/City, Country)  
+ Marital status: Never married, Separated, Legally recognised spousal relationship, Married, Widowed, Customary union, Divorced  
+ If separated: Divorce proceedings instituted & expected decree date  
+ If divorced: Date of divorce (divorce order attachment required)  
+ Section 2: Citizenship Details:
+ Present country of citizenship  
+ Non-birth acquisition date and conditions  
+ Other citizenship held (Yes/No) and country details  
+ Section 3: Passport Details:
+ Passport number, Date of issue, Country of issue, Expiry date  
+ Other government-required document: Type, Number, Expiry date  
+ Section 4: Addresses & Contacts:
+ Residential address & Postal code  
+ Postal address & Postal code  
+ Country of usual residence if different  
+ Telephone Nos. (Work, Home)  
+ 10-year residency history: Address, Period, Country  
+ Right of re-entry into country of origin/residence (Yes/No, details)  
+ Asylum/refugee status history (Yes/No, country)  
+ Local contact person: Relationship (Friend, Business Associate, Relative, Other), Name, Address, Work/Home Phone  
+ Relatives/friends in South Africa: Name, Address, Relationship, Identity No  
+ Section 5: Intentions / Proposed Stay:
+ Departure for SA: Proposed date and place  
+ Arrival in SA: Anticipated date and place  
+ Travel mode (Air, Road, Rail, Sea) & Carrier  
+ Intended duration of stay (Days/weeks/months/years) & Intended departure date  
+ Proposed activities outline  
+ Section 6: Maintenance / Deportation:
+ Available funds: Foreign currency type, amount, ZAR equivalent  
+ Onward/return ticket number & Expiry date  
+ Other financial arrangements  
+ Section 7: Family / Dependants:
+ Accompanying dependants table: Full names, Date of birth, Relationship, Passport No., Expiry date, Nationality, Occupation  
+ Non-accompanying dependants entering later (Yes/No, date, reasons)  
+ Prior refusal of entry or deportation details  
+ Section 8: Security / Health Questionnaire (Yes/No):
+ Criminal convictions  
+ Pending criminal/civil cases  
+ Tuberculosis or contagious disease / physical or mental deficiency  
+ Unrehabilitated insolvent  
+ Judicially declared incompetent  
+ Member/adherent of organization practicing social violence or racial hatred  
+ Affirmative details field  
+ Sections 9 & 10: Additional Information & Declaration:
+ Additional information field  
+ Applicant signature & Date  
+ Supporting Document Checklists:
+ Standard checklist (Passport, Yellow fever, Medical, Radiological, Marital/Spousal, Divorce, Parental rights, Police clearances)  
+ Category-specific checklists: Study Visa, Treaty Visa, Business Visa (new/existing), Medical Treatment Visa, Relative's Visa, General Work Visa, Critical Skills Work Visa, Intra-company Transfer Work Visa, Retired Person Visa, Exchange Visa.  
+ For Official Use Only:
+ Office of application, Date received, Quality check details, Passport handling, Fee/Receipt details, Track & Trace Ref No, Head office routing, Final decision and conditions/refusal reasons.
+
