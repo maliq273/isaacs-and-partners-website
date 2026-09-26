@@ -1,0 +1,421 @@
+{
+  "form_metadata": {
+    "title": "APPLICATION FOR A PERMANENT RESIDENCE PERMIT",
+    "form_number": "BI-947 (G.P.-S. 017-0113)",
+    "issuing_authority": "DEPARTMENT OF HOME AFFAIRS, REPUBLIC OF SOUTH AFRICA",
+    "legal_reference": "Sections 26 and 27 of Act No. 13 of 2002: Regulation 33"
+  },
+  "sections": [
+    {
+      "section_id": "1_details_of_principal_applicant",
+      "section_title": "1. DETAILS OF PRINCIPAL APPLICANT",
+      "fields": [
+        { "id": "title", "label": "Title", "type": "string" },
+        { "id": "surname", "label": "Surname", "type": "string" },
+        { "id": "first_names", "label": "First name(s)", "type": "string" },
+        { "id": "maiden_name", "label": "Maiden name", "type": "string" },
+        { "id": "other_former_surnames", "label": "Other former surnames", "type": "string" },
+        { "id": "date_of_birth_year", "label": "Date of birth: Year", "type": "string" },
+        { "id": "date_of_birth_month", "label": "Date of birth: Month", "type": "string" },
+        { "id": "date_of_birth_day", "label": "Date of birth: Day", "type": "string" },
+        { "id": "country_of_birth", "label": "Country of birth", "type": "string" },
+        { "id": "nationality_at_birth", "label": "Nationality at birth", "type": "string" },
+        { "id": "present_nationality", "label": "Present nationality", "type": "string" },
+        { "id": "passport_no", "label": "Passport No.", "type": "string" },
+        { "id": "passport_issued_by", "label": "Issued by (country)", "type": "string" },
+        { "id": "passport_expiry_date", "label": "Expiry date", "type": "date" },
+        {
+          "id": "marital_status",
+          "label": "Marital status",
+          "type": "single_select",
+          "options": ["Never married", "Married", "Permanent spousal relationship", "Divorced", "Widowed", "Legally separated"]
+        },
+        {
+          "id": "type_of_marriage_relationship",
+          "label": "Type of marriage/relationship",
+          "type": "single_select",
+          "options": ["Civil marriage", "Customary marriage", "Notarial contract"]
+        },
+        { "id": "date_marriage_concluded", "label": "Date of marriage/notarial contract concluded", "type": "date" },
+        {
+          "id": "previous_marriages_details",
+          "label": "Details of previous marriage(s) or permanent spousal relationship(s)",
+          "subfields": [
+            { "id": "date_place_commencement", "label": "Date and place of marriage/commencement", "type": "string" },
+            { "id": "date_place_divorce", "label": "Date and place of divorce/separation", "type": "string" },
+            { "id": "custody_maintenance_details", "label": "Details about custody/maintenance of children", "type": "text" }
+          ]
+        },
+        { "id": "residential_address", "label": "Present residential address", "type": "text" },
+        { "id": "residential_suburb_city", "label": "Suburb/City/Town", "type": "string" },
+        { "id": "residential_country", "label": "Country", "type": "string" },
+        { "id": "residential_since_date", "label": "Since (Date)", "type": "date" },
+        { "id": "postal_address", "label": "Postal address", "type": "text" },
+        { "id": "postal_suburb", "label": "Suburb", "type": "string" },
+        { "id": "postal_city", "label": "City", "type": "string" },
+        { "id": "postal_code", "label": "Code", "type": "string" },
+        { "id": "tel_home", "label": "Tel. No. Home", "type": "string" },
+        { "id": "tel_work", "label": "Tel. No. Work", "type": "string" },
+        { "id": "email_address", "label": "E-mail address", "type": "string" },
+        { "id": "occupation", "label": "Occupation", "type": "string" },
+        { "id": "temporary_residence_permit_type", "label": "Type of temporary residence permit held", "type": "string" },
+        { "id": "temporary_residence_permit_valid_until", "label": "Valid until", "type": "date" },
+        { "id": "temporary_residence_permit_issuing_office", "label": "Issuing office", "type": "string" }
+      ]
+    },
+    {
+      "section_id": "2_details_of_principal_applicant_parents",
+      "section_title": "2. DETAILS OF PRINCIPAL APPLICANT'S PARENTS",
+      "fields": [
+        {
+          "id": "father_details",
+          "label": "Father's Details",
+          "subfields": [
+            { "id": "surname", "type": "string" },
+            { "id": "first_names", "type": "string" },
+            { "id": "birth_place_city", "type": "string" },
+            { "id": "birth_place_state", "type": "string" },
+            { "id": "birth_place_country", "type": "string" },
+            { "id": "date_of_birth", "type": "date" },
+            { "id": "nationality_at_birth", "type": "string" }
+          ]
+        },
+        {
+          "id": "mother_details",
+          "label": "Mother's Details",
+          "subfields": [
+            { "id": "surname", "type": "string" },
+            { "id": "first_names", "type": "string" },
+            { "id": "maiden_name", "type": "string" },
+            { "id": "birth_place_city", "type": "string" },
+            { "id": "birth_place_state", "type": "string" },
+            { "id": "birth_place_country", "type": "string" },
+            { "id": "date_of_birth", "type": "date" },
+            { "id": "nationality_at_birth", "type": "string" }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "3_details_of_applicant_spouse",
+      "section_title": "3. DETAILS OF APPLICANT'S SPOUSE (IF APPLICABLE)",
+      "fields": [
+        { "id": "title", "label": "Title", "type": "string" },
+        { "id": "surname", "label": "Surname", "type": "string" },
+        { "id": "first_names", "label": "First name(s)", "type": "string" },
+        { "id": "other_former_surnames", "label": "Other former surnames", "type": "string" },
+        { "id": "date_of_birth", "label": "Date of birth", "type": "date" },
+        { "id": "previous_marriage_details", "label": "Details of previous marriage(s) or permanent spousal relationship(s)", "type": "text" },
+        { "id": "birth_place_city", "label": "Birth place City/Town", "type": "string" },
+        { "id": "birth_place_state", "label": "State/Province", "type": "string" },
+        { "id": "country_of_birth", "label": "Country of birth", "type": "string" },
+        { "id": "nationality_at_birth", "label": "Nationality at birth", "type": "string" },
+        { "id": "present_nationality", "label": "Present nationality", "type": "string" },
+        { "id": "passport_or_id_no", "label": "Passport No./SA Identity No.", "type": "string" },
+        { "id": "passport_issued_by", "label": "Issued by (country)", "type": "string" },
+        { "id": "passport_expiry_date", "label": "Expiry date", "type": "date" },
+        { "id": "residential_address", "label": "Present residential address", "type": "text" },
+        { "id": "residential_since_date", "label": "Since (Date)", "type": "date" },
+        { "id": "postal_address", "label": "Postal address", "type": "text" },
+        { "id": "postal_code", "label": "Code", "type": "string" },
+        { "id": "tel_home", "label": "Tel. No. Home", "type": "string" },
+        { "id": "tel_work", "label": "Tel. No. Work", "type": "string" },
+        { "id": "email_address", "label": "E-mail address", "type": "string" },
+        { "id": "occupation", "label": "Occupation", "type": "string" },
+        { "id": "temporary_residence_permit_type", "label": "Type of temporary residence permit held", "type": "string" },
+        { "id": "temporary_residence_permit_valid_until", "label": "Valid until", "type": "date" },
+        { "id": "temporary_residence_permit_issuing_office", "label": "Issuing office", "type": "string" }
+      ]
+    },
+    {
+      "section_id": "4_details_of_spouse_parents",
+      "section_title": "4. DETAILS OF SPOUSE'S PARENTS (IF SPOUSE IS PARTY TO THIS APPLICATION)",
+      "fields": [
+        {
+          "id": "spouse_father_details",
+          "label": "Spouse's Father's Details",
+          "subfields": [
+            { "id": "surname", "type": "string" },
+            { "id": "first_names", "type": "string" },
+            { "id": "birth_place_city", "type": "string" },
+            { "id": "birth_place_state", "type": "string" },
+            { "id": "birth_place_country", "type": "string" },
+            { "id": "date_of_birth", "type": "date" },
+            { "id": "nationality_at_birth", "type": "string" }
+          ]
+        },
+        {
+          "id": "spouse_mother_details",
+          "label": "Spouse's Mother's Details",
+          "subfields": [
+            { "id": "surname", "type": "string" },
+            { "id": "first_names", "type": "string" },
+            { "id": "maiden_name", "type": "string" },
+            { "id": "birth_place_city", "type": "string" },
+            { "id": "birth_place_state", "type": "string" },
+            { "id": "birth_place_country", "type": "string" },
+            { "id": "date_of_birth", "type": "date" },
+            { "id": "nationality_at_birth", "type": "string" }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "5_children_details",
+      "section_title": "5. DETAILS OF BIOLOGICAL OR LEGALLY ADOPTED CHILDREN",
+      "fields": [
+        {
+          "id": "children",
+          "type": "array",
+          "items": {
+            "surname": "string",
+            "forenames": "string",
+            "date_of_birth": "date",
+            "relationship": "string",
+            "place_of_birth": "string",
+            "present_nationality": "string",
+            "occupation": "string"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "6_unmarried_children_not_applying",
+      "section_title": "6. UNMARRIED CHILDREN NOT APPLYING FOR PERMANENT RESIDENCE",
+      "fields": [
+        { "id": "non_applying_children_reasons", "label": "Names of unmarried children under 21 not applying and reasons therefor", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "7_dependent_children_over_21",
+      "section_title": "7. DEPENDENT CHILDREN OVER THE AGE OF 21",
+      "fields": [
+        { "id": "dependent_children_over_21_reasons", "label": "Names of children over 21 who are still dependent and reasons for dependency", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "8_relatives_friends_in_sa",
+      "section_title": "8. DETAILS REGARDING RELATIVES AND/OR FRIENDS RESIDENT IN SOUTH AFRICA",
+      "fields": [
+        {
+          "id": "sa_contacts",
+          "type": "array",
+          "items": {
+            "name": "string",
+            "address": "string",
+            "tel_number": "string",
+            "relationship": "string",
+            "id_no": "string",
+            "residence_permit_no": "string"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "9_employment_record_and_financials",
+      "section_title": "9. EMPLOYMENT RECORD AND FINANCIAL DETAILS",
+      "fields": [
+        {
+          "id": "employment_record",
+          "type": "array",
+          "items": {
+            "employer_name": "string",
+            "address": "string",
+            "from_date": "date",
+            "to_date": "date",
+            "nature_of_work": "string"
+          }
+        },
+        { "id": "principal_present_duties", "label": "Principal applicant: Present/last duties", "type": "text" },
+        { "id": "spouse_present_duties", "label": "Spouse: Present/last duties", "type": "text" },
+        { "id": "principal_intended_occupation", "label": "Principal applicant: Intended occupation in SA", "type": "string" },
+        { "id": "spouse_intended_occupation", "label": "Spouse: Intended occupation in SA", "type": "string" },
+        { "id": "principal_transfer_funds", "label": "Principal applicant: Amount to transfer to SA", "type": "string" },
+        { "id": "spouse_transfer_funds", "label": "Spouse: Amount to transfer to SA", "type": "string" },
+        { "id": "principal_pension_income", "label": "Principal applicant: Pension or private income details", "type": "text" },
+        { "id": "spouse_pension_income", "label": "Spouse: Pension or private income details", "type": "text" },
+        { "id": "principal_other_assets", "label": "Principal applicant: Other assets details", "type": "text" },
+        { "id": "spouse_other_assets", "label": "Spouse: Other assets details", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "10_language_proficiency",
+      "section_title": "10. LANGUAGE PROFICIENCY",
+      "fields": [
+        { "id": "mother_tongue", "label": "Mother tongue", "type": "string" },
+        { "id": "english_speak", "label": "English: Speak", "type": "boolean" },
+        { "id": "english_read", "label": "English: Read", "type": "boolean" },
+        { "id": "english_write", "label": "English: Write", "type": "boolean" },
+        { "id": "other_language_name", "label": "Other language: Name", "type": "string" },
+        { "id": "other_speak", "label": "Other language: Speak", "type": "boolean" },
+        { "id": "other_read", "label": "Other language: Read", "type": "boolean" },
+        { "id": "other_write", "label": "Other language: Write", "type": "boolean" }
+      ]
+    },
+    {
+      "section_id": "11_family_remaining_in_origin",
+      "section_title": "11. FAMILY MEMBERS REMAINING IN COUNTRY OF ORIGIN",
+      "fields": [
+        { "id": "has_family_in_origin", "label": "Do you have family members remaining in country of origin?", "type": "boolean", "options": ["Yes", "No"] },
+        {
+          "id": "remaining_family_members",
+          "type": "array",
+          "items": { "name": "string", "address": "string", "relationship": "string" }
+        }
+      ]
+    },
+    {
+      "section_id": "12_previous_residence_history",
+      "section_title": "12. FULL DETAILS OF PREVIOUS AND CURRENT RESIDENCE",
+      "fields": [
+        {
+          "id": "residence_history",
+          "type": "array",
+          "items": {
+            "person_type": "string",
+            "from_date": "string",
+            "to_date": "string",
+            "street_address": "string",
+            "city": "string",
+            "country": "string"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "13_questionnaire",
+      "section_title": "13. DETAILS REGARDING APPLICANT AND SPOUSE/CHILDREN (SECURITY & HEALTH)",
+      "fields": [
+        { "id": "convicted_crime", "question": "Convicted of a criminal offence?", "type": "boolean" },
+        { "id": "declared_insolvent", "question": "Declared insolvent?", "type": "boolean" },
+        { "id": "civil_action_maintenance", "question": "Subject of civil action (including maintenance)?", "type": "boolean" },
+        { "id": "outstanding_debts", "question": "Will leave outstanding debts behind?", "type": "boolean" },
+        { "id": "pending_enquiry", "question": "Civil or criminal enquiry pending?", "type": "boolean" },
+        { "id": "prior_pr_application", "question": "Previously applied for permanent residence?", "type": "boolean" },
+        { "id": "prior_refusal_deportation", "question": "Refused entry/PR or deported?", "type": "boolean" },
+        { "id": "prior_sa_residence", "question": "Previously in South Africa?", "type": "boolean" },
+        { "id": "infectious_disease_condition", "question": "Suffer from infectious disease or physical/mental condition?", "type": "boolean" },
+        { "id": "other_spousal_relationship", "question": "Married or in spousal relationship with any other person?", "type": "boolean" },
+        { "id": "asylum_applied", "question": "Applied for asylum in another country?", "type": "boolean" },
+        { "id": "questionnaire_details", "label": "Full details if reply to any question is YES", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "14_general_info_declaration",
+      "section_title": "14. GENERAL INFORMATION AND DECLARATION",
+      "fields": [
+        { "id": "sa_contact_address_tel", "label": "Postal address and telephone number in SA", "type": "text" },
+        { "id": "sa_spouse_employment", "label": "Employment details of spouse if SA citizen/resident", "type": "text" },
+        { "id": "applicant_signature", "label": "Signature of applicant", "type": "signature" },
+        { "id": "spouse_signature", "label": "Signature of legal spouse", "type": "signature" },
+        { "id": "declaration_date", "label": "Date", "type": "date" }
+      ]
+    },
+    {
+      "section_id": "15_supporting_documents",
+      "section_title": "15. SUPPORTING DOCUMENTS CHECKLISTS",
+      "fields": [
+        { "id": "doc_passport_photos", "label": "2 Passport photographs", "type": "boolean" },
+        { "id": "doc_passport_or_id", "label": "Valid passport or Identity Document", "type": "boolean" },
+        { "id": "doc_birth_certificate", "label": "Full birth certificate or extract", "type": "boolean" },
+        { "id": "doc_name_change", "label": "Change of name document", "type": "boolean" },
+        { "id": "doc_medical_report", "label": "Medical report", "type": "boolean" },
+        { "id": "doc_radiological_report", "label": "Radiological report", "type": "boolean" },
+        { "id": "doc_police_certificates", "label": "Police certificate(s)", "type": "boolean" },
+        { "id": "doc_marriage_certificate", "label": "Marriage certificate/spousal affidavit", "type": "boolean" },
+        { "id": "doc_divorce_decree", "label": "Final divorce decree/separation orders", "type": "boolean" },
+        { "id": "doc_parental_consent", "label": "Written consent of both parents for minor children", "type": "boolean" },
+        { "id": "doc_spouse_death_cert", "label": "Death certificate of late spouse", "type": "boolean" },
+        { "id": "doc_qualification_eval", "label": "Highest educational/trade certificates evaluated by SAQA", "type": "boolean" },
+        { "id": "doc_work_references", "label": "Work references covering at least 5 years", "type": "boolean" }
+      ]
+    }
+  ]
+}
+
+Complete Extracted Text and Field Map
+ Header Metadata:
+ Form Number: BI-947 (G.P.-S. 017-0113)  
+ Title: APPLICATION FOR A PERMANENT RESIDENCE PERMIT  
+ Issuing Authority: Department of Home Affairs, Republic of South Africa  
+ Legal Basis: Sections 26 and 27 of Act No. 13 of 2002: Regulation 33  
+ For Official Use Only:
+ List of applicants table: Ref No, Surname, Forenames, Date of birth, Gender, Relationship, Applicable section of Act, Permit number  
+ Persons interviewed checkboxes: Applicant, Spouse, Other  
+ Interview metadata: Place, Date of interview/capturing, Users BBS No., Rank, Interviewing officer, Persal No.  
+ Application processing: Presented by officer, Considered by, Date of consideration, Approved/Rejected, Reasons for rejection, Conditions, Signature, Date, Rank, Office Stamp  
+ Section 1: Details of Principal Applicant:
+ 1.1 Title  
+ 1.2 Surname  
+ 1.3 First name(s)  
+ 1.4 Maiden name  
+ 1.5 Other former surnames  
+ 1.6 Date of birth (Year, Month, Day)  
+ 1.7 Country of birth  
+ 1.8 Nationality at birth  
+ 1.9 Present nationality  
+ 1.10 Passport No., Issued by (country), Expiry date  
+ 1.11 Marital status: Never married, Married, Permanent spousal relationship, Divorced, Widowed, Legally separated  
+ 1.12 Type of marriage/relationship: Civil marriage, Customary marriage, Notarial contract  
+ 1.13 Date of marriage/notarial contract concluded (Year, Month, Day)  
+ 1.14 Details of previous marriage(s)/spousal relationship(s): Commencement date/place, Divorce date/place, Custody/maintenance details  
+ 1.15 Present residential address, Suburb/City/Town, Country, Since date  
+ 1.16 Postal address, Suburb, City, Code  
+ 1.17 Contact: Tel. No. Home, Tel. No. Work, E-mail address  
+ 1.18 Occupation  
+ 1.19 Type of temporary residence permit held  
+ 1.20 Valid until, Issuing office  
+ Section 2: Details of Principal Applicant's Parents:
+ 2.1 Father: Surname, First name(s), Birth place (City/Town, State/Province, Country), Date of birth, Nationality at birth  
+ 2.2 Mother: Surname, First name(s), Maiden name, Birth place (City/Town, State/Province, Country), Date of birth, Nationality at birth  
+ Section 3: Details of Applicant's Spouse (If Applicable):
+ 3.1-3.5 Title, Surname, First name(s), Other former surnames, Date of birth  
+ 3.6 Previous marriage/relationship details & child custody/maintenance payments  
+ 3.7-3.11 Birth place, State/Province, Country of birth, Nationality at birth, Present nationality  
+ 3.12 Passport No./SA Identity No., Issued by, Expiry date  
+ 3.13-3.15 Present residential address, Since date, Postal address, Suburb, Code  
+ 3.16-3.19 Tel Home/Work, E-mail, Occupation, Temporary residence permit type, Issuing office, Expiry date  
+ Section 4: Details of Spouse's Parents:
+ 4.1 Father: Surname, First name(s), Birth place, Country, Date of birth, Nationality at birth  
+ 4.2 Mother: Surname, First name(s), Maiden name, Birth place, Country, Date of birth, Nationality at birth  
+ Section 5: Details of Biological or Legally Adopted Children:
+ Table capturing: Surname, Forename(s), Date of birth, Relationship to applicant/spouse, Country and place of birth, Present nationality, Occupation  
+ Sections 6 & 7: Non-Applying / Dependent Children:
+ Section 6: Names of unmarried children under 21 who do not wish to apply and reasons  
+ Section 7: Names of children over 21 who are still dependent and reasons for dependency  
+ Section 8: Relatives and/or Friends Resident in South Africa:
+ Table capturing: Name, Address, Tel number, Relationship/Acquaintanceship, ID No., Permanent/Temporary Residence No  
+ Section 9: Employment Record & Financial Details:
+ Employment record table: Name of employer, Address, From/To dates, Nature of work  
+ Present/last duties (Principal applicant, Spouse)  
+ Intended occupation in SA (Principal applicant, Spouse)  
+ Amount of money to transfer to SA (Principal applicant, Spouse)  
+ Pension or private income details (Principal applicant, Spouse)  
+ Other assets (property/investments) details (Principal applicant, Spouse)  
+ Section 10: Language Proficiency:
+ Mother tongue  
+ Proficiency grid (English & Other): Speak (Yes/No), Read (Yes/No), Write (Yes/No)  
+ Section 11: Family Members Remaining in Country of Origin:
+ Yes/No indicator and table: Name, Address, Relationship/Acquaintanceship  
+ Section 12: Previous and Current Residence (Since 18th Birthday / Last 10 Years):
+ Multi-entry table for Principal Applicant, Spouse, and Children: From date, To date, Number and street, City/Town, Country  
+ Section 13: Security & Health Questionnaire:
+ Questions (a) to (i) covering: Criminal convictions, Insolvency, Civil action/maintenance, Outstanding debts, Pending enquiries, Previous PR applications, Refusals/deportations, Previous SA stays, Infectious diseases/mental conditions, Other spousal relationships, Asylum applications  
+ Full particulars text box for affirmative replies  
+ Section 14: General Information & Declaration:
+ Contact address and telephone in SA  
+ Employment details of spouse if SA citizen/permanent resident  
+ Legal declaration and signatures: Applicant signature, Spouse signature, Date  
+ Section 15: Supporting Documents Checklists:
+ 15.1 General requirements: Photographs, Passport/ID, Birth cert, Name change cert, Medical report, Radiological report, Police certs, Marriage/divorce/death certs, Parental consent, SAQA evaluated qualifications, 5-year work references  
+ 15.2 Section 26(a): 5-year work permit holder documentation  
+ 15.3 Section 26(b): Spouse of SA citizen/resident documentation  
+ 15.4 Section 26(c): Child under 21 of citizen/resident documentation  
+ 15.5 Section 26(d): Child 21 or older of citizen documentation  
+ 15.6 Section 27(a): Offer of permanent employment documentation  
+ 15.7 Section 27(b): Extraordinary skills/qualifications documentation  
+ 15.8 Section 27(c): Business establishment/investment documentation (CA certifications, R2.5m proof)  
+ 15.9 Section 27(d): Refugee status documentation  
+ 15.10 Section 27(e): Retirement documentation (R20,000/month or R12m net worth)  
+ 15.11 Section 27(f): Minimum net worth documentation (R20m net worth & R100,000 fee)  
+ 15.12 Section 27(g): Relative within first step of kinship documentation
