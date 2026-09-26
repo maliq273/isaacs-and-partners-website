@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Form 3 (DHA-26) Application for Exemption to Enter or Depart at Place Other Than Port of Entry",
+  "type": "object",
+  "properties": {
+    "surname": {
+      "type": "string"
+    },
+    "firstNames": {
+      "type": "string"
+    },
+    "nationality": {
+      "type": "string"
+    },
+    "passportNumber": {
+      "type": "string"
+    },
+    "dateOfBirth": {
+      "type": "string",
+      "format": "date"
+    },
+    "countryOfNormalResidence": {
+      "type": "string"
+    },
+    "permanentResidencePermitNo": {
+      "type": "string"
+    },
+    "temporarySojournVisa": {
+      "type": "object",
+      "properties": {
+        "purpose": {
+          "type": "string"
+        },
+        "validUntil": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "exemptionDetails": {
+      "type": "object",
+      "properties": {
+        "actionType": {
+          "type": "string",
+          "enum": [
+            "Enter",
+            "Exit",
+            "Both"
+          ]
+        },
+        "locationRequired": {
+          "type": "string"
+        },
+        "motivation": {
+          "type": "string"
+        },
+        "periodFrom": {
+          "type": "string",
+          "format": "date"
+        },
+        "periodTo": {
+          "type": "string",
+          "format": "date"
+        },
+        "purpose": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actionType",
+        "locationRequired",
+        "motivation",
+        "periodFrom",
+        "periodTo",
+        "purpose"
+      ]
+    }
+  },
+  "required": [
+    "surname",
+    "firstNames",
+    "nationality",
+    "passportNumber",
+    "dateOfBirth",
+    "exemptionDetails"
+  ]
+}
