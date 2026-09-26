@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "form": {
+    "id": "DHA-1751",
+    "formNumber": "Form 44",
+    "title": "Notice of administrative fine incurred by owner or person in charge of conveyance",
+    "issuingAuthority": "Department of Home Affairs, Republic of South Africa"
+  },
+  "source": {
+    "authority": "DHA",
+    "sourceDocument": "Immigration Regulations, 2014 as amended by GN R1328 in GG 42071 (29 November 2018)",
+    "sourceVerified": true
+  },
+  "construction": {
+    "status": "semantic_skeleton",
+    "generationAuthorised": false
+  },
+  "fields": [],
+  "coordinateMap": {
+    "status": "pending",
+    "path": null
+  },
+  "validation": {
+    "renderTestPassed": false,
+    "sourcePdfHash": null
+  }
+}
