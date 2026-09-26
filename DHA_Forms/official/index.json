@@ -13,42 +13,42 @@
   },
   "forms": [
     {
-      "formNumber": "Form 01",
+      "formNumber": "Form 1",
       "id": "DHA-1756",
       "title": "Notification regarding right to request review by Minister",
       "status": "certified_metadata_schema",
       "path": "DHA_Forms/official/Form-01_DHA-1756.json"
     },
     {
-      "formNumber": "Form 02",
+      "formNumber": "Form 2",
       "id": "DHA-1714A",
       "title": "Notice of decision adversely affecting right of person",
       "status": "certified_metadata_schema",
       "path": "DHA_Forms/official/Form-02_DHA-1714A.json"
     },
     {
-      "formNumber": "Form 03",
+      "formNumber": "Form 3",
       "id": "DHA-26",
       "title": "Application for exemption to enter or depart at place other than port of entry",
       "status": "certified_metadata_schema",
       "path": "DHA_Forms/official/Form-03_DHA-26.json"
     },
     {
-      "formNumber": "Form 04",
+      "formNumber": "Form 4",
       "id": "DHA-CTC-01",
       "title": "Traveller card",
       "status": "certified_metadata_schema",
       "path": "DHA_Forms/official/Form-04_DHA-CTC-01.json"
     },
     {
-      "formNumber": "Form 05",
+      "formNumber": "Form 5",
       "id": "DHA-1565",
       "title": "Declaration by foreigner seeking admission",
       "status": "semantic_skeleton",
       "path": "DHA_Forms/official/Form-05_DHA-1565.json"
     },
     {
-      "formNumber": "Form 06",
+      "formNumber": "Form 6",
       "id": "DHA-1746",
       "title": "Interview by immigration officer of person not having satisfied Immigration Officer that he or she is not illegal foreigner",
       "status": "semantic_skeleton",
@@ -76,14 +76,14 @@
       "path": "DHA_Forms/official/Form-07C.json"
     },
     {
-      "formNumber": "Form 08",
+      "formNumber": "Form 8",
       "id": "DHA-1738",
       "title": "Application for visa to temporarily sojourn in the Republic",
       "status": "constructed",
       "path": "DHA_Forms/official/Form-08_DHA-1738.json"
     },
     {
-      "formNumber": "Form 09",
+      "formNumber": "Form 9",
       "id": "DHA-1740",
       "title": "Application for change of conditions on existing visa or change of status",
       "status": "constructed",
