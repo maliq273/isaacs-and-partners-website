@@ -65,7 +65,11 @@ if (sensitiveResult.action !== 'APPROVAL_NEEDED' || sensitiveResult.approval_nee
 // Verify CostingModelService and Pricing Approval Workflow (compile price and ask approval before sending)
 const { default: CostingModelService } = await import('../app/ai/CostingModelService.js');
 const costing = new CostingModelService();
-const quote = costing.compilePriceQuote({ domain: 'IMMIGRATION', message: 'How much for work visa?' });
+const quote = costing.compilePriceQuote({
+  domain: 'IMMIGRATION',
+  message: 'How much for work visa?',
+  costingCentre: { approved: true, fixedPrice: 6500, currency: 'ZAR' }
+});
 if (!quote || !quote.estimatedTotal || !quote.depositAmount || !quote.actionButtons || quote.actionButtons.length !== 2) {
   console.error('CostingModelService failed: compiled quote must contain pricing breakdown and interactive action buttons.');
   process.exit(1);
