@@ -104,7 +104,7 @@ export default class WhatsAppAgent {
         const lead = this.leads.qualify({ message: body, user, service: servicePlan.service, facts: context.facts });
         context.lastIntent = intent.intent; context.lastService = servicePlan.service; this.conversations.mergeFacts(context, lead.facts);
         if (context.state === "HUMAN_ACTIVE") return { handled: true, action: "ROUTE_TO_HUMAN", context, intent, lead, servicePlan };
-        const sales = this.sales.buildState({ servicePlan, lead });
+        const sales = this.sales.buildState({ servicePlan, lead, quote: matter?.quote || null, invoice: matter?.invoice || null, payment: matter?.payment || null, applicationComplete: Boolean(matter?.applicationComplete) });
 
         // Compile price quote from the costing model if query asks for quotes/pricing
         const isPricingInquiry = this.costingModel.isPricingOrQuoteInquiry(body, intent?.intent, servicePlan);
@@ -116,13 +116,27 @@ export default class WhatsAppAgent {
                 serviceName: servicePlan.service?.name || null,
                 message: body,
                 facts: context.facts,
-                clientType: user?.user_metadata?.account_type || "INDIVIDUAL"
+                clientType: user?.user_metadata?.account_type || "INDIVIDUAL",
+                // Costing Centre data must be supplied by the trusted operational
+                // context. Without an approved record Anthony must escalate rather
+                // than use a hard-coded fallback price.
+                costingCentre: operationalContext?.costingCentre ?? {}
             });
         }
 
         let replyResult = null;
         let reply = "";
-        if (isPricingInquiry && compiledQuote) {
+        if (isPricingInquiry && compiledQuote?.status === "PRICING_REQUIRED_FROM_SUPER_ADMIN") {
+            reply = "I have confirmed the service you are enquiring about. I do not have an approved price in our Costing Centre yet, so I will obtain the applicable fee from our Super Admin before giving you a quotation.";
+            replyResult = {
+                text: reply,
+                provider: "COSTING_CENTRE",
+                model: "AnthonyCommercialWorkflow",
+                requiresApproval: true,
+                approval_needed: true,
+                pricingRequiredFromSuperAdmin: true
+            };
+        } else if (isPricingInquiry && compiledQuote) {
             reply = compiledQuote.clientQuoteText;
             replyResult = {
                 text: reply,
@@ -140,7 +154,8 @@ export default class WhatsAppAgent {
         // determine if it is pending human review (for quotes/pricing: must compile price and ask approval before sending to client)
         const pendingReview = Boolean(
             isPricingInquiry ||
-            compiledQuote ||
+            compiledQuote?.requiresApproval ||
+            compiledQuote?.status === "PRICING_REQUIRED_FROM_SUPER_ADMIN" ||
             assessment?.humanRequired ||
             operationalContext?.requiresApproval ||
             operationalContext?.pendingReview ||
