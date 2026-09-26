@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "library": "DHA Official Form Library",
+  "scope": "Official Annexure A Forms 1–21 plus Form 50 Change of Address",
+  "sourceAuthority": "Department of Home Affairs, Republic of South Africa",
+  "source": "Immigration Regulations, 2014 as amended by GN R1328 in GG 42071 (29 November 2018)",
+  "sourceVerifiedAt": "2026-09-26",
+  "generationPolicy": {
+    "semanticSchemaDoesNotAuthoriseGeneration": true,
+    "generationRequiresExactSourcePdfHash": true,
+    "generationRequiresVerifiedCoordinates": true,
+    "generationRequiresRenderValidation": true
+  },
+  "forms": [
+    {
+      "formNumber": "Form 01",
+      "id": "DHA-1756",
+      "title": "Notification regarding right to request review by Minister",
+      "status": "certified_metadata_schema",
+      "path": "DHA_Forms/official/Form-01_DHA-1756.json"
+    },
+    {
+      "formNumber": "Form 02",
+      "id": "DHA-1714A",
+      "title": "Notice of decision adversely affecting right of person",
+      "status": "certified_metadata_schema",
+      "path": "DHA_Forms/official/Form-02_DHA-1714A.json"
+    },
+    {
+      "formNumber": "Form 03",
+      "id": "DHA-26",
+      "title": "Application for exemption to enter or depart at place other than port of entry",
+      "status": "certified_metadata_schema",
+      "path": "DHA_Forms/official/Form-03_DHA-26.json"
+    },
+    {
+      "formNumber": "Form 04",
+      "id": "DHA-CTC-01",
+      "title": "Traveller card",
+      "status": "certified_metadata_schema",
+      "path": "DHA_Forms/official/Form-04_DHA-CTC-01.json"
+    },
+    {
+      "formNumber": "Form 05",
+      "id": "DHA-1565",
+      "title": "Declaration by foreigner seeking admission",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-05_DHA-1565.json"
+    },
+    {
+      "formNumber": "Form 06",
+      "id": "DHA-1746",
+      "title": "Interview by immigration officer of person not having satisfied Immigration Officer that he or she is not illegal foreigner",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-06_DHA-1746.json"
+    },
+    {
+      "formNumber": "Form 07A",
+      "id": "DHA-",
+      "title": "Return of illegal foreigner — attestation relating to lost or destroyed travel documents",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-07A.json"
+    },
+    {
+      "formNumber": "Form 07B",
+      "id": "DHA-",
+      "title": "Letter relating to fraudulent, falsified or counterfeit travel documents or genuine documents presented by imposters",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-07B.json"
+    },
+    {
+      "formNumber": "Form 07C",
+      "id": "DHA-",
+      "title": "Referral letter for detention or prosecution relating to fraudulent, falsified or counterfeit travel documents or genuine documents presented by imposters or suspected illegal foreigners",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-07C.json"
+    },
+    {
+      "formNumber": "Form 08",
+      "id": "DHA-1738",
+      "title": "Application for visa to temporarily sojourn in the Republic",
+      "status": "constructed",
+      "path": "DHA_Forms/official/Form-08_DHA-1738.json"
+    },
+    {
+      "formNumber": "Form 09",
+      "id": "DHA-1740",
+      "title": "Application for change of conditions on existing visa or change of status",
+      "status": "constructed",
+      "path": "DHA_Forms/official/Form-09_DHA-1740.json"
+    },
+    {
+      "formNumber": "Form 10",
+      "id": "DHA-1739",
+      "title": "Application for renewal of existing visa",
+      "status": "constructed",
+      "path": "DHA_Forms/official/Form-10_DHA-1739.json"
+    },
+    {
+      "formNumber": "Form 11",
+      "id": "DHA-84",
+      "title": "Application for port of entry visa or transit visa",
+      "status": "certified",
+      "path": "DHA_Forms/official/Form-11_DHA-84.json"
+    },
+    {
+      "formNumber": "Form 12",
+      "id": "DHA-1712A",
+      "title": "Affidavit in respect of parties to permanent homosexual or heterosexual relationship",
+      "status": "constructed",
+      "path": "DHA_Forms/official/Form-12_DHA-1712A.json"
+    },
+    {
+      "formNumber": "Form 13",
+      "id": "DHA-1743",
+      "title": "Application for corporate visa",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-13_DHA-1743.json"
+    },
+    {
+      "formNumber": "Form 14",
+      "id": "DHA-1718",
+      "title": "Corporate visa",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-14_DHA-1718.json"
+    },
+    {
+      "formNumber": "Form 15",
+      "id": "DHA-1733",
+      "title": "Corporate worker authorisation certificate",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-15_DHA-1733.json"
+    },
+    {
+      "formNumber": "Form 16",
+      "id": "DHA-1758",
+      "title": "Progress report by organ of state or learning institution regarding exchange programme",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-16_DHA-1758.json"
+    },
+    {
+      "formNumber": "Form 17",
+      "id": "DHA-1732",
+      "title": "Asylum transit visa",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-17_DHA-1732.json"
+    },
+    {
+      "formNumber": "Form 18",
+      "id": "DHA-947",
+      "title": "Application for permanent residence permit",
+      "status": "constructed",
+      "path": "DHA_Forms/official/Form-18_DHA-947.json"
+    },
+    {
+      "formNumber": "Form 19",
+      "id": "DHA-46",
+      "title": "Declaration of foreigner as undesirable person",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-19_DHA-46.json"
+    },
+    {
+      "formNumber": "Form 20",
+      "id": "DHA-1759",
+      "title": "Authorisation for illegal foreigner to remain in Republic pending application for status",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-20_DHA-1759.json"
+    },
+    {
+      "formNumber": "Form 21",
+      "id": "DHA-1684",
+      "title": "Order to illegal foreigner to depart from Republic",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-21_DHA-1684.json"
+    }
+  ],
+  "additionalAdministrativeForm": {
+    "formNumber": "Form 50",
+    "id": "DHA-50",
+    "title": "Change of Address",
+    "path": "DHA_Forms/official/Form-50_Change-of-Address.json",
+    "status": "constructed"
+  },
+  "legacySources": [
+    "DHA_Forms/forms",
+    "DHA_Forms/second_ammendments",
+    "DHA_Forms/DHA-1740"
+  ],
+  "canonicalRule": "The official directory is the canonical semantic registry. Legacy aggregate files remain reference sources until individually reconciled.",
+  "nextGenerationWork": [
+    "DHA-84 already certified",
+    "DHA-1738 coordinate certification",
+    "DHA-947 coordinate certification",
+    "DHA-1739 coordinate certification",
+    "DHA-1712A coordinate certification",
+    "DHA-1740 coordinate certification",
+    "Form 50 coordinate certification"
+  ]
+}
