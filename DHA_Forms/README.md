@@ -10,9 +10,9 @@ This folder is the immigration-document-engine's DHA form source and semantic re
 - `DHA_Forms/second_ammendments` — legacy 2024 amendment/reference schema; retained as reference.
 - `DHA_Forms/DHA-1740` — legacy aggregate containing Forms 1–4; retained for compatibility. It is **not** the standalone Form 9 schema.
 
-## Official Form 1–21 coverage
+## Official Form 1–50 coverage
 
-All Form 1 through Form 21 records are now present under `official/`, including:
+All Form 1 through Form 50 records are now present under `official/`, including the administrative, enforcement, maritime, fine, exemption, waiver and appeal forms.
 
 1. DHA-1756
 2. DHA-1714A
@@ -38,7 +38,11 @@ All Form 1 through Form 21 records are now present under `official/`, including:
 20. DHA-1759
 21. DHA-1684
 
-Form 50 (Change of Address) is also present because it is required for the immigration workflow and is explicitly provided for under Regulation 40.
+Form 50 (Change of Address) is explicitly included under Regulation 40.
+
+### Complete inventory
+
+Forms 1–50 are represented in `DHA_Forms/official/index.json`. The official DHA source identifies these as Annexure A forms; some later forms are enforcement, detention, maritime, fine, exemption, waiver or appeal instruments rather than ordinary client application forms.
 
 ## Status model
 
