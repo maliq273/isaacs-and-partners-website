@@ -1,0 +1,2185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SouthAfricanImmigrationGazetteForms",
+  "description": "JSON Schema representing form field specifications for South African Immigration Regulations Gazette Forms (Annexures 17 to 56)",
+  "type": "object",
+  "properties": {
+    "annexure_17_extension_renewal_permit": {
+      "type": "object",
+      "description": "Extension/Renewal of Permit (Section 11, Regulation 18)",
+      "properties": {
+        "temporary_residence_permit_no": { "type": "string" },
+        "page_number": { "type": "string" },
+        "extended_until_date": { "type": "string", "format": "date" },
+        "substituted_conditions": { "type": "string" },
+        "issued_at": { "type": "string" },
+        "issued_date": { "type": "string", "format": "date" },
+        "issued_by": { "type": "string" },
+        "regional_director_representative": { "type": "string" }
+      },
+      "required": ["temporary_residence_permit_no", "extended_until_date", "issued_at", "issued_date"]
+    },
+    "annexure_18_temporary_residence_permit": {
+      "type": "object",
+      "description": "Temporary Residence Permit (Section 11, Regulation 19)",
+      "properties": {
+        "code_no": { "type": "string" },
+        "category": { 
+          "type": "string", 
+          "enum": ["Visitor's Permit", "Crew Permit"] 
+        },
+        "valid_until_date": { "type": "string", "format": "date" },
+        "purpose_of_issue": { "type": "string" },
+        "conditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "issued_by": { "type": "string" },
+        "bar_code": { "type": "string" }
+      },
+      "required": ["category", "valid_until_date", "purpose_of_issue"]
+    },
+    "annexure_19_visitor_permit_application_port_of_entry": {
+      "type": "object",
+      "description": "Application for a Visitor's Permit at Port of Entry (Section 34(8), Regulation 18)",
+      "properties": {
+        "applicant_details": {
+          "type": "object",
+          "properties": {
+            "surname": { "type": "string" },
+            "full_names": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "passport_number": { "type": "string" },
+            "nationality": { "type": "string" },
+            "passport_valid_until": { "type": "string", "format": "date" },
+            "country_of_residence": { "type": "string" },
+            "accompanied_by": { "type": "string" },
+            "occupation": { "type": "string" },
+            "employer_or_organisation": { "type": "string" },
+            "purpose_and_period_of_visit": { "type": "string" },
+            "contact_person_name": { "type": "string" },
+            "proposed_residential_address": { "type": "string" },
+            "reason_not_in_possession_of_visa": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          },
+          "required": ["surname", "full_names", "date_of_birth", "passport_number", "nationality"]
+        },
+        "official_use": {
+          "type": "object",
+          "properties": {
+            "time_received": { "type": "string" },
+            "official_name": { "type": "string" },
+            "port_of_entry": { "type": "string" },
+            "arrived_flight_no": { "type": "string" },
+            "arrived_from": { "type": "string" },
+            "arrived_to": { "type": "string" },
+            "arrived_on_date": { "type": "string", "format": "date" },
+            "arrived_at_time": { "type": "string" },
+            "departure_flight": { "type": "string" },
+            "blok_status": { "type": "boolean" },
+            "blok_code": { "type": "string" },
+            "funds_available": { "type": "boolean" },
+            "funds_amount_zar": { "type": "number" },
+            "return_air_ticket": { "type": "boolean" },
+            "application_fees_levied": { "type": "boolean" },
+            "conveyer_penalised": { "type": "boolean" },
+            "decision": { "type": "string" },
+            "decision_date": { "type": "string", "format": "date" },
+            "made_by": { "type": "string" },
+            "reference_no": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_20_periodic_certificate_student_performance": {
+      "type": "object",
+      "description": "Periodic Certificate on Performance or Curriculum of Study of Foreign Students (Section 13(1)(b)(v), Regulation 22(4))",
+      "properties": {
+        "institution_details": {
+          "type": "object",
+          "properties": {
+            "name_and_address": { "type": "string" },
+            "telephone_and_fax": { "type": "string" },
+            "contact_person": { "type": "string" },
+            "designation": { "type": "string" }
+          }
+        },
+        "student_details": {
+          "type": "object",
+          "properties": {
+            "name_and_surname": { "type": "string" },
+            "passport_number": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "date_of_admission": { "type": "string", "format": "date" }
+          }
+        },
+        "academic_certification": {
+          "type": "object",
+          "properties": {
+            "performance_satisfactory": { "type": "boolean" },
+            "last_semester_period": { "type": "string" },
+            "eligible_for_readmission": { "type": "boolean" },
+            "next_semester_period": { "type": "string" },
+            "complies_with_admission_conditions": { "type": "boolean" }
+          }
+        },
+        "authorization": {
+          "type": "object",
+          "properties": {
+            "representative_signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "stamp": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_20a_periodic_certification_medical_treatment": {
+      "type": "object",
+      "description": "Periodic Certification of Medical Treatment (Section 13(1)(b)(v), Regulation 22(4))",
+      "properties": {
+        "institution_details": {
+          "type": "object",
+          "properties": {
+            "name_and_address": { "type": "string" },
+            "telephone_and_fax": { "type": "string" },
+            "contact_person": { "type": "string" },
+            "designation": { "type": "string" }
+          }
+        },
+        "patient_details": {
+          "type": "object",
+          "properties": {
+            "name_and_surname": { "type": "string" },
+            "passport_number": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "date_of_admission": { "type": "string", "format": "date" }
+          }
+        },
+        "medical_certification": {
+          "type": "object",
+          "properties": {
+            "expected_treatment_duration_months": { "type": "integer" },
+            "capable_of_paying_costs": { "type": "boolean" },
+            "sufficient_means_of_support": { "type": "boolean" }
+          }
+        },
+        "authorization": {
+          "type": "object",
+          "properties": {
+            "representative_signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "stamp": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_21_application_for_corporate_permit": {
+      "type": "object",
+      "description": "Application for a Corporate Permit (Section 21, Regulation 30)",
+      "properties": {
+        "official_use": {
+          "type": "object",
+          "properties": {
+            "blok": { "type": "string" },
+            "date_received": { "type": "string", "format": "date" },
+            "file_no": { "type": "string" },
+            "application_checked_by": { "type": "string" },
+            "checked_on_date": { "type": "string", "format": "date" },
+            "application_fee_amount": { "type": "number" },
+            "receipt_no": { "type": "string" },
+            "training_fee_amount": { "type": "number" },
+            "no_of_appointment_certificates_issued": { "type": "integer" },
+            "processed_or_authorised_by": { "type": "string" }
+          }
+        },
+        "background_details": {
+          "type": "object",
+          "properties": {
+            "company_name": { "type": "string" },
+            "contact_person": { "type": "string" },
+            "email_address": { "type": "string", "format": "email" },
+            "physical_address": { "type": "string" },
+            "mailing_address": { "type": "string" },
+            "telephone_code": { "type": "string" },
+            "telephone_number": { "type": "string" },
+            "fax_code": { "type": "string" },
+            "fax_number": { "type": "string" },
+            "business_registration_number": { "type": "string" },
+            "tax_reference_number": { "type": "string" },
+            "principal_company_and_location": { "type": "string" },
+            "nature_of_business": { "type": "string" },
+            "total_workers_employed": { "type": "integer" }
+          }
+        },
+        "requested_positions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_of_position": { "type": "string" },
+              "number_of_workers": { "type": "integer" }
+            }
+          }
+        },
+        "requirements": {
+          "type": "object",
+          "properties": {
+            "representation_need_for_foreigners": { "type": "boolean" },
+            "independent_collaboration": { "type": "boolean" },
+            "ca_certificate_with_org_diagram": { "type": "boolean" },
+            "applicant_undertaking": { "type": "boolean" },
+            "removal_responsibility_undertaking": { "type": "boolean" },
+            "financial_guarantees": { "type": "boolean" },
+            "corroborate_representations": { "type": "boolean" },
+            "undertaking_reg_30_8": { "type": "boolean" }
+          }
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "payment_of_training_fee": { "type": "boolean" },
+            "training_programme": { "type": "boolean" },
+            "combination_fee_and_programme": { "type": "boolean" },
+            "seek_fee_reduction_or_waiver": { "type": "boolean" },
+            "agreement_with_foreign_state": { "type": "boolean" },
+            "seek_guarantee_reduction_or_waiver": { "type": "boolean" },
+            "seasonal_workers_longer_than_year": { "type": "boolean" }
+          }
+        },
+        "undertaking": {
+          "type": "object",
+          "properties": {
+            "full_name": { "type": "string" },
+            "capacity": { "type": "string" },
+            "id_number": { "type": "string" },
+            "company_name": { "type": "string" },
+            "signature": { "type": "string" },
+            "signed_at": { "type": "string" },
+            "signed_date": { "type": "string", "format": "date" },
+            "witness_signature": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_22_corporate_permit": {
+      "type": "object",
+      "description": "Corporate Permit (Section 21, Regulation 30)",
+      "properties": {
+        "holder_name": { "type": "string" },
+        "departmental_reference_no": { "type": "string" },
+        "physical_address": { "type": "string" },
+        "total_authorisation_certificates": { "type": "integer" },
+        "certificates_numbered_from": { "type": "string" },
+        "certificates_numbered_to": { "type": "string" },
+        "authorized_positions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_of_position": { "type": "string" },
+              "duration": { "type": "string" },
+              "number_of_workers": { "type": "integer" },
+              "location_of_employment": { "type": "string" }
+            }
+          }
+        },
+        "seasonal_worker_details": {
+          "type": "object",
+          "properties": {
+            "period_from": { "type": "string" },
+            "period_to": { "type": "string" },
+            "term_condition": { "type": "string" }
+          }
+        },
+        "foreign_state_agreement_citizenship": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "regional_director_signature": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "official_stamp": { "type": "string" }
+      }
+    },
+    "annexure_23_permit_to_report_to_refugee_reception_office": {
+      "type": "object",
+      "description": "Permit to Report to Refugee Reception Office (Section 23, Regulation 32)",
+      "properties": {
+        "code_no": { "type": "string" },
+        "valid_days": { "type": "integer", "default": 14 },
+        "refugee_reception_office_location": { "type": "string" },
+        "issued_by": { "type": "string" },
+        "persal_no": { "type": "string" },
+        "bar_code": { "type": "string" }
+      }
+    },
+    "annexure_24_application_permanent_residence_permit": {
+      "type": "object",
+      "description": "Application for a Permanent Residence Permit (Sections 26 & 27, Regulation 33)",
+      "properties": {
+        "official_use": {
+          "type": "object",
+          "properties": {
+            "reference_no": { "type": "string" },
+            "applicant_interviewed": { "type": "boolean" },
+            "spouse_interviewed": { "type": "boolean" },
+            "interview_date": { "type": "string", "format": "date" },
+            "interviewing_officer": { "type": "string" },
+            "rank": { "type": "string" },
+            "persal_no": { "type": "string" },
+            "decision": { "type": "string", "enum": ["Approved", "Rejected"] },
+            "reasons_for_rejection": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "applicant_details": {
+          "type": "object",
+          "properties": { "title": { "type": "string" }, "surname": { "type": "string" }, "first_names": { "type": "string" }, "maiden_name": { "type": "string" }, "former_surnames": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "country_of_birth": { "type": "string" }, "nationality_at_birth": { "type": "string" }, "present_nationality": { "type": "string" }, "passport_number": { "type": "string" }, "passport_expiry_date": { "type": "string", "format": "date" }, "passport_issued_by": { "type": "string" }, "marital_status": { "type": "string" }, "date_of_marriage": { "type": "string", "format": "date" }, "residential_address": { "type": "string" }, "postal_address": { "type": "string" }, "telephone_home": { "type": "string" }, "telephone_work": { "type": "string" }, "cellphone_no": { "type": "string" }, "occupation": { "type": "string" } }
+        },
+        "spouse_details": {
+          "type": "object",
+          "properties": { "type_of_spousal_relationship": { "type": "string" }, "title": { "type": "string" }, "surname": { "type": "string" }, "first_names": { "type": "string" }, "maiden_name": { "type": "string" }, "former_surnames": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "birth_place_city": { "type": "string" }, "state_province": { "type": "string" }, "country_of_birth": { "type": "string" }, "nationality_at_birth": { "type": "string" }, "present_nationality": { "type": "string" }, "passport_or_id_no": { "type": "string" }, "issued_by": { "type": "string" }, "expiry_date": { "type": "string", "format": "date" }, "residential_address": { "type": "string" }, "postal_address": { "type": "string" }, "tel_home": { "type": "string" }, "tel_work": { "type": "string" }, "cellphone_no": { "type": "string" }, "occupation": { "type": "string" } }
+        },
+        "unmarried_children_under_21": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "surname": { "type": "string" }, "forenames": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "relationship": { "type": "string" }, "place_of_birth": { "type": "string" }, "nationality": { "type": "string" }, "present_occupation": { "type": "string" } }
+          }
+        },
+        "background_declarations": {
+          "type": "object",
+          "properties": { "criminal_conviction": { "type": "boolean" }, "declared_insolvent": { "type": "boolean" }, "child_maintenance_action": { "type": "boolean" }, "outstanding_debts": { "type": "boolean" }, "pending_criminal_action": { "type": "boolean" }, "previous_immigration_application": { "type": "boolean" }, "refused_residence_or_deported": { "type": "boolean" }, "previously_in_south_africa": { "type": "boolean" }, "infectious_disease_or_mental_condition": { "type": "boolean" }, "asylum_applied_other_country": { "type": "boolean" }, "details_if_yes": { "type": "string" } }
+        }
+      }
+    },
+    "annexure_25_permanent_residence_permit": {
+      "type": "object",
+      "description": "Permanent Residence Permit Certificate (Sections 26 & 27, Regulation 33)",
+      "properties": {
+        "reference": { "type": "string" },
+        "act_section": { "type": "string", "enum": ["26", "27"] },
+        "category": { "type": "string" },
+        "holder_fullname": { "type": "string" },
+        "date_of_birth": { "type": "string", "format": "date" },
+        "gender": { "type": "string" },
+        "occupation_or_capacity": { "type": "string" },
+        "permit_number": { "type": "string" },
+        "date_of_issue": { "type": "string", "format": "date" },
+        "issuing_officer": { "type": "string" },
+        "rank": { "type": "string" },
+        "control_no": { "type": "string" },
+        "endorsements_conditions": { "type": "string" }
+      }
+    },
+    "annexure_26_declaration_of_undesirable_person": {
+      "type": "object",
+      "description": "Declaration of a Foreigner as an Undesirable Person (Section 30, Regulation 35)",
+      "properties": {
+        "recipient_name": { "type": "string" },
+        "at_location": { "type": "string" },
+        "reason_code": { "type": "string", "enum": ["a", "b", "c"] },
+        "ordered_leave_time": { "type": "string" },
+        "ordered_leave_date": { "type": "string", "format": "date" },
+        "immigration_officer_name": { "type": "string" },
+        "place": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "appointment_no": { "type": "string" },
+        "acknowledgement_signature": { "type": "string" },
+        "representations_choice": { "type": "string", "enum": ["do_not_wish", "wish_to_make"] }
+      }
+    },
+    "annexure_27_notice_to_produce_evidence": {
+      "type": "object",
+      "description": "Notice to Person to Produce Evidence (Section 33(4)(b), Regulation 38(3))",
+      "properties": {
+        "to_full_names": { "type": "string" },
+        "identity_or_passport_number": { "type": "string" },
+        "residential_address": { "type": "string" },
+        "physical_work_address": { "type": "string" },
+        "immigration_officer_name": { "type": "string" },
+        "produce_at_address": { "type": "string" },
+        "produce_time": { "type": "string" },
+        "produce_date": { "type": "string", "format": "date" },
+        "articles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_description": { "type": "string" },
+              "number_of_articles": { "type": "integer" }
+            }
+          }
+        },
+        "reason_for_production": { "type": "string" },
+        "officer_signature": { "type": "string" },
+        "recipient_signature": { "type": "string" }
+      }
+    },
+    "annexure_28_notice_to_appear_before_immigration_officer": {
+      "type": "object",
+      "description": "Notice to Person to Appear Before Immigration Officer (Section 33(4)(c), Regulation 38(3))",
+      "properties": {
+        "to_full_names": { "type": "string" },
+        "identity_or_passport_number": { "type": "string" },
+        "residential_address": { "type": "string" },
+        "physical_work_address": { "type": "string" },
+        "immigration_officer_name": { "type": "string" },
+        "appear_at_address": { "type": "string" },
+        "appear_time": { "type": "string" },
+        "appear_date": { "type": "string", "format": "date" },
+        "reason_for_appearance": { "type": "string" },
+        "officer_signature": { "type": "string" },
+        "recipient_signature": { "type": "string" }
+      }
+    },
+    "annexure_29_entry_and_search_warrant": {
+      "type": "object",
+      "description": "Entry and Search Warrant (Section 33(5), Regulation 38(4))",
+      "properties": {
+        "to_immigration_officer": { "type": "string" },
+        "magisterial_district": { "type": "string" },
+        "premises_address": { "type": "string" },
+        "grounds_category": { "type": "string", "enum": ["illegal_foreigner", "violation_evidence"] },
+        "authorized_time": { "type": "string" },
+        "powers_authorized": {
+          "type": "object",
+          "properties": {
+            "interrogate_persons": { "type": "boolean" },
+            "examine_things": { "type": "boolean" },
+            "request_explanation_make_copies": { "type": "boolean" },
+            "apprehend_illegal_foreigner": { "type": "boolean" }
+          }
+        },
+        "given_at_place": { "type": "string" },
+        "given_date": { "type": "string", "format": "date" },
+        "judge_or_magistrate_signature": { "type": "string" },
+        "designation": { "type": "string" }
+      }
+    },
+    "annexure_30_seizure_receipt": {
+      "type": "object",
+      "description": "Receipt for Items Seized (Section 33(5)(c), Regulation 38(5))",
+      "properties": {
+        "officer_full_names": { "type": "string" },
+        "rank": { "type": "string" },
+        "appointment_number": { "type": "string" },
+        "office": { "type": "string" },
+        "seized_from_premises": { "type": "string" },
+        "district_of": { "type": "string" },
+        "seized_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_no": { "type": "string" },
+              "description": { "type": "string" },
+              "quantity": { "type": "integer" }
+            }
+          }
+        },
+        "total_no_of_items": { "type": "integer" },
+        "signed_at": { "type": "string" },
+        "signed_date": { "type": "string", "format": "date" },
+        "receipt_register_control_number": { "type": "string" },
+        "file_number": { "type": "string" }
+      }
+    },
+    "annexure_31_notice_of_deportation": {
+      "type": "object",
+      "description": "Notice of Deportation (Section 34(1)(a) & (b), Regulation 39(1))",
+      "properties": {
+        "to_name": { "type": "string" },
+        "country_of_origin": { "type": "string" },
+        "immigration_officer_name": { "type": "string" },
+        "appointment_number": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "detainee_decision": {
+          "type": "string",
+          "enum": [
+            "await_deportation_in_custody",
+            "appeal_decision",
+            "not_appeal",
+            "request_court_warrant_confirmation",
+            "not_request_court_warrant_confirmation",
+            "leave_rsa_within_14_days"
+          ]
+        },
+        "detainee_signature": { "type": "string" }
+      }
+    },
+    "annexure_32_warrant_of_detention_illegal_foreigner": {
+      "type": "object",
+      "description": "Warrant of Detention of an Illegal Foreigner (Sections 34(1), 34(5), Regulation 39(2))",
+      "properties": {
+        "to_target": { "type": "string", "enum": ["Station Commissioner", "Head of Prison"] },
+        "detainee_fullname": { "type": "string" },
+        "action_type": { "type": "string", "enum": ["deportation", "removal"] },
+        "section_applied": { "type": "string" },
+        "given_at_place": { "type": "string" },
+        "given_date": { "type": "string", "format": "date" },
+        "officer_signature": { "type": "string" },
+        "designation": { "type": "string" }
+      }
+    },
+    "annexure_33_notification_extension_of_detention": {
+      "type": "object",
+      "description": "Notification of Extension of Detention Whilst Awaiting Deportation (Section 34(1)(d), Regulation 39(5))",
+      "properties": {
+        "detainee_full_names": { "type": "string" },
+        "detention_facility_name": { "type": "string" },
+        "country_of_deportation": { "type": "string" },
+        "original_warrant_date": { "type": "string", "format": "date" },
+        "30_days_expiry_date": { "type": "string", "format": "date" },
+        "magistrate_court_location": { "type": "string" },
+        "submission_due_date": { "type": "string", "format": "date" },
+        "representations_due_date": { "type": "string", "format": "date" },
+        "officer_signature": { "type": "string" },
+        "appointment_number": { "type": "string" }
+      }
+    },
+    "annexure_34_cover_sheet_extension_detention": {
+      "type": "object",
+      "description": "Cover Sheet & Decision for Extension of Detention (Section 34(1)(d), Regulation 39(5))",
+      "properties": {
+        "clerk_of_court_location": { "type": "string" },
+        "detainee_full_names": { "type": "string" },
+        "detained_at": { "type": "string" },
+        "magistrate_decision": {
+          "type": "object",
+          "properties": {
+            "decision_type": { "type": "string", "enum": ["confirm_order", "set_aside_order", "additional_order"] },
+            "additional_order_details": { "type": "string" },
+            "given_at_place": { "type": "string" },
+            "given_date": { "type": "string", "format": "date" },
+            "magistrate_signature": { "type": "string" }
+          }
+        },
+        "officer_affidavit": {
+          "type": "object",
+          "properties": {
+            "deponent_full_names": { "type": "string" },
+            "stationed_at": { "type": "string" },
+            "reasons_delay_deportation": { "type": "string" },
+            "reasons_detention_necessary": { "type": "string" },
+            "estimated_extended_period": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_35_warrant_detention_person_not_entitled": {
+      "type": "object",
+      "description": "Warrant of Detention of a Person Not Entitled to be in Republic (Section 34(1)(e), Regulation 39(8))",
+      "properties": {
+        "to_target": { "type": "string" },
+        "detainee_full_names": { "type": "string" },
+        "officer_full_names": { "type": "string" },
+        "reasons_for_detention": { "type": "string" },
+        "handed_to_officer_at": { "type": "string" },
+        "handed_date": { "type": "string", "format": "date" },
+        "handed_time": { "type": "string" },
+        "court_signature": { "type": "string" },
+        "designation": { "type": "string" }
+      }
+    },
+    "annexure_36_order_deposit_expenses": {
+      "type": "object",
+      "description": "Order to Illegal Foreigner to Deposit Sum to Cover Expenses (Section 34(3), Regulation 39(9))",
+      "properties": {
+        "expenses_breakdown": {
+          "type": "object",
+          "properties": {
+            "deportation_costs": { "type": "number" },
+            "detention_costs": { "type": "number" },
+            "maintenance_costs": { "type": "number" },
+            "custody_costs": { "type": "number" },
+            "total_costs": { "type": "number" }
+          }
+        },
+        "deposit_amount": { "type": "number" },
+        "dha_office_address": { "type": "string" },
+        "due_date": { "type": "string", "format": "date" },
+        "district_court_name": { "type": "string" },
+        "court_judgement_record": {
+          "type": "object",
+          "properties": {
+            "entered_as_judgement_date": { "type": "string", "format": "date" },
+            "judgement_no": { "type": "string" },
+            "clerk_signature": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_37_warrant_for_removal": {
+      "type": "object",
+      "description": "Warrant for Removal / Release Pending Removal (Section 34(7), Regulation 38(12))",
+      "properties": {
+        "person_full_names": { "type": "string" },
+        "act_section": { "type": "string" },
+        "removal_via_port": { "type": "string" },
+        "minister_signature": { "type": "string" },
+        "removal_certification": {
+          "type": "object",
+          "properties": {
+            "removed_date": { "type": "string", "format": "date" },
+            "removed_to_country": { "type": "string" },
+            "removed_via_port": { "type": "string" },
+            "officer_signature": { "type": "string" },
+            "appointment_number": { "type": "string" },
+            "fingerprints_taken": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "annexure_38_warrant_of_release": {
+      "type": "object",
+      "description": "Warrant of Release (Section 34(7), Regulation 39(12))",
+      "properties": {
+        "to_facility_or_officer": { "type": "string" },
+        "released_foreigners_names": { "type": "string" },
+        "officer_signature": { "type": "string" },
+        "appointment_or_force_number": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" }
+      }
+    },
+    "annexure_39_notice_refusal_of_entry": {
+      "type": "object",
+      "description": "Notice of Refusal of Entry into the RSA (Section 34(8), Regulation 39(13))",
+      "properties": {
+        "to_fullname": { "type": "string" },
+        "refusal_reason_code": { "type": "string", "enum": ["a", "b", "c", "d"] },
+        "conveyor_name": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "immigration_officer": { "type": "string" },
+        "inadmissible_person_signature": { "type": "string" }
+      }
+    },
+    "annexure_40_declaration_to_master_of_ship": {
+      "type": "object",
+      "description": "Declaration to Master of Ship Regarding Prohibited Persons (Section 34(8)&(9))",
+      "properties": {
+        "master_of_ship_name": { "type": "string" },
+        "refusal_date": { "type": "string", "format": "date" },
+        "prohibited_persons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "surname": { "type": "string" },
+              "first_names": { "type": "string" },
+              "reasons_for_refusal": { "type": "string" }
+            }
+          }
+        },
+        "port": { "type": "string" },
+        "officer_signature": { "type": "string" },
+        "master_signature": { "type": "string" }
+      }
+    },
+    "annexure_41_clearance_certificate_customs": {
+      "type": "object",
+      "description": "Certificate for Obtaining Clearance Paper from Customs (Section 35(6), Regulation 39(16))",
+      "properties": {
+        "port": { "type": "string" },
+        "ship_name": { "type": "string" },
+        "compliance_date": { "type": "string", "format": "date" },
+        "officer_signature": { "type": "string" },
+        "appointment_or_force_no": { "type": "string" }
+      }
+    },
+    "annexure_42_order_to_leave_republic": {
+      "type": "object",
+      "description": "Order to Illegal Foreigner to Leave the Republic (Section 32(2), Regulation 39(17))",
+      "properties": {
+        "to_fullname": { "type": "string" },
+        "at_location": { "type": "string" },
+        "leave_by_hours": { "type": "string" },
+        "leave_by_date": { "type": "string", "format": "date" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "officer_appointment_no": { "type": "string" },
+        "illegal_foreigner_signature": { "type": "string" }
+      }
+    },
+    "annexure_43_list_of_passengers": {
+      "type": "object",
+      "description": "List of Passengers (Section 35(3)(a), Regulation 40)",
+      "properties": {
+        "ship_name": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "master_full_names": { "type": "string" },
+        "flight_no": { "type": "string" },
+        "date_of_entry": { "type": "string", "format": "date" },
+        "inbound_passengers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "surname": { "type": "string" },
+              "first_name": { "type": "string" },
+              "passport_no": { "type": "string" },
+              "travel_class": { "type": "string" },
+              "nationality": { "type": "string" },
+              "embarked_at": { "type": "string" },
+              "destination": { "type": "string" }
+            }
+          }
+        },
+        "transit_passengers": { "type": "array", "items": { "type": "object" } },
+        "outbound_refused_passengers": { "type": "array", "items": { "type": "object" } },
+        "master_signature": { "type": "string" },
+        "officer_signature": { "type": "string" }
+      }
+    },
+    "annexure_44_list_of_stowaways": {
+      "type": "object",
+      "description": "List of Stowaways (Section 35(3)(b), Regulation 44)",
+      "properties": {
+        "ship_name": { "type": "string" },
+        "master_full_names": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "entry_date": { "type": "string", "format": "date" },
+        "stowaways": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "surname": { "type": "string" },
+              "first_name": { "type": "string" },
+              "passport_doc_no": { "type": "string" },
+              "travel_doc_particulars": { "type": "string" },
+              "nationality": { "type": "string" },
+              "country_of_origin": { "type": "string" }
+            }
+          }
+        },
+        "master_signature": { "type": "string" },
+        "officer_signature": { "type": "string" }
+      }
+    },
+    "annexure_45_list_of_crew": {
+      "type": "object",
+      "description": "List of Crew / Persons Employed (Section 35(3)(c), Regulation 40)",
+      "properties": {
+        "ship_name": { "type": "string" },
+        "master_full_names": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "entry_date": { "type": "string", "format": "date" },
+        "final_departure_port": { "type": "string" },
+        "final_departure_date": { "type": "string", "format": "date" },
+        "crew_members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rank_grading": { "type": "string" },
+              "name_in_passport": { "type": "string" },
+              "nationality": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "seaman_identity_no": { "type": "string" },
+              "passport_expiry_date": { "type": "string", "format": "date" }
+            }
+          }
+        }
+      }
+    },
+    "annexure_46_return_of_master": {
+      "type": "object",
+      "description": "Return of Master regarding Illness/Birth/Death (Section 35(3)(d), Regulation 40)",
+      "properties": {
+        "ship_name": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "illness_cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "crew_or_passenger": { "type": "string" },
+              "nature_of_illness": { "type": "string" },
+              "remarks": { "type": "string" }
+            }
+          }
+        },
+        "birth_or_death_cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "crew_or_passenger": { "type": "string" },
+              "event_type_and_date": { "type": "string" },
+              "remarks": { "type": "string" }
+            }
+          }
+        },
+        "certified_by_signature": { "type": "string" }
+      }
+    },
+    "annexure_47_accommodation_identification_report": {
+      "type": "object",
+      "description": "Report on Customers Who Failed to Identify Themselves (Accommodation) (Section 40(1), Regulation 42)",
+      "properties": {
+        "business_name": { "type": "string" },
+        "business_address": { "type": "string" },
+        "telephone": { "type": "string" },
+        "unidentified_customers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "first_names": { "type": "string" },
+              "surname": { "type": "string" },
+              "nationality": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "booked_in_date": { "type": "string", "format": "date" },
+              "departure_date": { "type": "string", "format": "date" }
+            }
+          }
+        },
+        "manager_signature": { "type": "string" }
+      }
+    },
+    "annexure_48_organs_of_state_service_report": {
+      "type": "object",
+      "description": "Report on Persons Receiving Services Who Failed to Identify Themselves to Organs of State (Section 44, Regulation 45)",
+      "properties": {
+        "organ_of_state_name": { "type": "string" },
+        "business_address": { "type": "string" },
+        "unidentified_service_recipients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "first_names": { "type": "string" },
+              "surname": { "type": "string" },
+              "nationality": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "current_residential_address": { "type": "string" }
+            }
+          }
+        },
+        "official_signature": { "type": "string" }
+      }
+    },
+    "annexure_49_overstay_administrative_fine": {
+      "type": "object",
+      "description": "Notice of Administrative Fine Incurred for Overstay (Section 50(1), Regulation 48)",
+      "properties": {
+        "to_name": { "type": "string" },
+        "fine_amount_zar": { "type": "number" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "overstayer_signature": { "type": "string" },
+        "officer_signature": { "type": "string" }
+      }
+    },
+    "annexure_50_incorrect_certification_fine": {
+      "type": "object",
+      "description": "Notice of Administrative Fine for Incorrect Certification (Section 50(2), Regulation 48)",
+      "properties": {
+        "to_name": { "type": "string" },
+        "fine_amount_zar": { "type": "number", "default": 7000 },
+        "incorrect_certification_in_respect_of": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "inspectorate_signature": { "type": "string" },
+        "recipient_signature": { "type": "string" }
+      }
+    },
+    "annexure_51_conveyance_fine": {
+      "type": "object",
+      "description": "Notice of Administrative Fine Incurred by Owner/Master/Charterer of Conveyance (Section 50(3), Regulation 45)",
+      "properties": {
+        "to_target": { "type": "string" },
+        "fine_amount_zar": { "type": "number", "default": 10000 },
+        "passenger_name": { "type": "string" },
+        "flight_or_ship": { "type": "string" },
+        "bound_for": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "conveyance_master_signature": { "type": "string" },
+        "officer_signature": { "type": "string" }
+      }
+    },
+    "annexure_52_refugee_reception_report_permit_application": {
+      "type": "object",
+      "description": "Application for a Permit to Report to a Refugee Reception Office (Section 23, Regulation 32)",
+      "properties": {
+        "surname": { "type": "string" },
+        "first_names": { "type": "string" },
+        "date_of_birth": { "type": "string", "format": "date" },
+        "gender": { "type": "string" },
+        "country_of_residence": { "type": "string" },
+        "previous_address": { "type": "string" },
+        "nationality": { "type": "string" },
+        "identification_proof": {
+          "type": "object",
+          "properties": {
+            "passport_no": { "type": "string" },
+            "id_doc_no": { "type": "string" },
+            "travel_doc_no": { "type": "string" },
+            "birth_certificate": { "type": "string" },
+            "drivers_licence_no": { "type": "string" },
+            "other_proof": { "type": "string" }
+          }
+        },
+        "reasons_seeking_asylum": { "type": "string" },
+        "transit_countries_crossed": { "type": "string" },
+        "reasons_asylum_not_requested_in_transit": { "type": "string" },
+        "applicant_signature": { "type": "string" },
+        "commissioner_of_oaths": {
+          "type": "object",
+          "properties": {
+            "full_names": { "type": "string" },
+            "capacity": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "place": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_53_corporate_permit_authorisation_certificate": {
+      "type": "object",
+      "description": "Corporate Permit Authorisation Certificate (Section 21)",
+      "properties": {
+        "certificate_number": { "type": "string" },
+        "work_permit_validity_period": { "type": "string" },
+        "corporate_employer_name": { "type": "string" },
+        "corporate_worker": {
+          "type": "object",
+          "properties": {
+            "surname": { "type": "string" },
+            "name": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "passport_number": { "type": "string" },
+            "nationality": { "type": "string" },
+            "occupation": { "type": "string" }
+          }
+        },
+        "employer_contact_person": {
+          "type": "object",
+          "properties": {
+            "position": { "type": "string" },
+            "division": { "type": "string" },
+            "name": { "type": "string" },
+            "telephone": { "type": "string" }
+          }
+        },
+        "regional_director_signature": { "type": "string" }
+      }
+    },
+    "annexure_54_immigration_practitioner_registration": {
+      "type": "object",
+      "description": "Application for Registration as an Immigration Practitioner (Section 46, Regulation 46)",
+      "properties": {
+        "association_name": { "type": "string" },
+        "applicants_personal_details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "full_names_surname": { "type": "string" },
+              "identity_number": { "type": "string" },
+              "residential_address": { "type": "string" },
+              "postal_code": { "type": "string" },
+              "telephone_number": { "type": "string" }
+            }
+          }
+        },
+        "business_details": {
+          "type": "object",
+          "properties": {
+            "business_and_trade_name": { "type": "string" },
+            "abbreviated_trade_name": { "type": "string" },
+            "operating_address": { "type": "string" },
+            "postal_address": { "type": "string" },
+            "telephone_numbers": { "type": "string" },
+            "facsimile_numbers": { "type": "string" }
+          }
+        },
+        "checklist": {
+          "type": "object",
+          "properties": {
+            "copy_id_attached": { "type": "boolean" },
+            "letterhead_attached": { "type": "boolean" },
+            "cv_attached": { "type": "boolean" },
+            "police_clearance_attached": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "annexure_55_practitioner_certificate_of_registration": {
+      "type": "object",
+      "description": "Certificate of Registration as Immigration Practitioner (Section 46, Regulation 46)",
+      "properties": {
+        "practitioner_fullname": { "type": "string" },
+        "identity_number": { "type": "string" },
+        "residential_address": { "type": "string" },
+        "tel_no": { "type": "string" },
+        "cell_no": { "type": "string" },
+        "business_name": { "type": "string" },
+        "business_address": { "type": "string" },
+        "registration_number": { "type": "string" },
+        "signed_date": { "type": "string", "format": "date" }
+      }
+    },
+    "annexure_56_power_of_attorney": {
+      "type": "object",
+      "description": "Power of Attorney for Residence Permit Applications (Section 46, Regulation 46)",
+      "properties": {
+        "part_a_power_of_attorney": {
+          "type": "object",
+          "properties": {
+            "grantor_fullname": { "type": "string" },
+            "grantor_address": { "type": "string" },
+            "practitioner_fullname": { "type": "string" },
+            "practitioner_address": { "type": "string" },
+            "practitioner_registration_no": { "type": "string" },
+            "grantor_signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "part_b_practitioner_declaration": {
+          "type": "object",
+          "properties": {
+            "practitioner_fullname": { "type": "string" },
+            "address": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "part_c_interpreter_certificate": {
+          "type": "object",
+          "properties": {
+            "interpreter_fullname": { "type": "string" },
+            "interpreter_address": { "type": "string" },
+            "language_mastered": { "type": "string" },
+            "applicant_fullname": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SouthAfricanImmigrationGazetteForms",
+  "description": "JSON Schema representing form field specifications for South African Immigration Regulations Gazette Forms (Annexures 17 to 56)",
+  "type": "object",
+  "properties": {
+    "annexure_17_extension_renewal_permit": {
+      "type": "object",
+      "description": "Extension/Renewal of Permit (Section 11, Regulation 18)",
+      "properties": {
+        "temporary_residence_permit_no": { "type": "string" },
+        "page_number": { "type": "string" },
+        "extended_until_date": { "type": "string", "format": "date" },
+        "substituted_conditions": { "type": "string" },
+        "issued_at": { "type": "string" },
+        "issued_date": { "type": "string", "format": "date" },
+        "issued_by": { "type": "string" },
+        "regional_director_representative": { "type": "string" }
+      },
+      "required": ["temporary_residence_permit_no", "extended_until_date", "issued_at", "issued_date"]
+    },
+    "annexure_18_temporary_residence_permit": {
+      "type": "object",
+      "description": "Temporary Residence Permit (Section 11, Regulation 19)",
+      "properties": {
+        "code_no": { "type": "string" },
+        "category": { 
+          "type": "string", 
+          "enum": ["Visitor's Permit", "Crew Permit"] 
+        },
+        "valid_until_date": { "type": "string", "format": "date" },
+        "purpose_of_issue": { "type": "string" },
+        "conditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "issued_by": { "type": "string" },
+        "bar_code": { "type": "string" }
+      },
+      "required": ["category", "valid_until_date", "purpose_of_issue"]
+    },
+    "annexure_19_visitor_permit_application_port_of_entry": {
+      "type": "object",
+      "description": "Application for a Visitor's Permit at Port of Entry (Section 34(8), Regulation 18)",
+      "properties": {
+        "applicant_details": {
+          "type": "object",
+          "properties": {
+            "surname": { "type": "string" },
+            "full_names": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "passport_number": { "type": "string" },
+            "nationality": { "type": "string" },
+            "passport_valid_until": { "type": "string", "format": "date" },
+            "country_of_residence": { "type": "string" },
+            "accompanied_by": { "type": "string" },
+            "occupation": { "type": "string" },
+            "employer_or_organisation": { "type": "string" },
+            "purpose_and_period_of_visit": { "type": "string" },
+            "contact_person_name": { "type": "string" },
+            "proposed_residential_address": { "type": "string" },
+            "reason_not_in_possession_of_visa": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          },
+          "required": ["surname", "full_names", "date_of_birth", "passport_number", "nationality"]
+        },
+        "official_use": {
+          "type": "object",
+          "properties": {
+            "time_received": { "type": "string" },
+            "official_name": { "type": "string" },
+            "port_of_entry": { "type": "string" },
+            "arrived_flight_no": { "type": "string" },
+            "arrived_from": { "type": "string" },
+            "arrived_to": { "type": "string" },
+            "arrived_on_date": { "type": "string", "format": "date" },
+            "arrived_at_time": { "type": "string" },
+            "departure_flight": { "type": "string" },
+            "blok_status": { "type": "boolean" },
+            "blok_code": { "type": "string" },
+            "funds_available": { "type": "boolean" },
+            "funds_amount_zar": { "type": "number" },
+            "return_air_ticket": { "type": "boolean" },
+            "application_fees_levied": { "type": "boolean" },
+            "conveyer_penalised": { "type": "boolean" },
+            "decision": { "type": "string" },
+            "decision_date": { "type": "string", "format": "date" },
+            "made_by": { "type": "string" },
+            "reference_no": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_20_periodic_certificate_student_performance": {
+      "type": "object",
+      "description": "Periodic Certificate on Performance or Curriculum of Study of Foreign Students (Section 13(1)(b)(v), Regulation 22(4))",
+      "properties": {
+        "institution_details": {
+          "type": "object",
+          "properties": {
+            "name_and_address": { "type": "string" },
+            "telephone_and_fax": { "type": "string" },
+            "contact_person": { "type": "string" },
+            "designation": { "type": "string" }
+          }
+        },
+        "student_details": {
+          "type": "object",
+          "properties": {
+            "name_and_surname": { "type": "string" },
+            "passport_number": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "date_of_admission": { "type": "string", "format": "date" }
+          }
+        },
+        "academic_certification": {
+          "type": "object",
+          "properties": {
+            "performance_satisfactory": { "type": "boolean" },
+            "last_semester_period": { "type": "string" },
+            "eligible_for_readmission": { "type": "boolean" },
+            "next_semester_period": { "type": "string" },
+            "complies_with_admission_conditions": { "type": "boolean" }
+          }
+        },
+        "authorization": {
+          "type": "object",
+          "properties": {
+            "representative_signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "stamp": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_20a_periodic_certification_medical_treatment": {
+      "type": "object",
+      "description": "Periodic Certification of Medical Treatment (Section 13(1)(b)(v), Regulation 22(4))",
+      "properties": {
+        "institution_details": {
+          "type": "object",
+          "properties": {
+            "name_and_address": { "type": "string" },
+            "telephone_and_fax": { "type": "string" },
+            "contact_person": { "type": "string" },
+            "designation": { "type": "string" }
+          }
+        },
+        "patient_details": {
+          "type": "object",
+          "properties": {
+            "name_and_surname": { "type": "string" },
+            "passport_number": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "date_of_admission": { "type": "string", "format": "date" }
+          }
+        },
+        "medical_certification": {
+          "type": "object",
+          "properties": {
+            "expected_treatment_duration_months": { "type": "integer" },
+            "capable_of_paying_costs": { "type": "boolean" },
+            "sufficient_means_of_support": { "type": "boolean" }
+          }
+        },
+        "authorization": {
+          "type": "object",
+          "properties": {
+            "representative_signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "stamp": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_21_application_for_corporate_permit": {
+      "type": "object",
+      "description": "Application for a Corporate Permit (Section 21, Regulation 30)",
+      "properties": {
+        "official_use": {
+          "type": "object",
+          "properties": {
+            "blok": { "type": "string" },
+            "date_received": { "type": "string", "format": "date" },
+            "file_no": { "type": "string" },
+            "application_checked_by": { "type": "string" },
+            "checked_on_date": { "type": "string", "format": "date" },
+            "application_fee_amount": { "type": "number" },
+            "receipt_no": { "type": "string" },
+            "training_fee_amount": { "type": "number" },
+            "no_of_appointment_certificates_issued": { "type": "integer" },
+            "processed_or_authorised_by": { "type": "string" }
+          }
+        },
+        "background_details": {
+          "type": "object",
+          "properties": {
+            "company_name": { "type": "string" },
+            "contact_person": { "type": "string" },
+            "email_address": { "type": "string", "format": "email" },
+            "physical_address": { "type": "string" },
+            "mailing_address": { "type": "string" },
+            "telephone_code": { "type": "string" },
+            "telephone_number": { "type": "string" },
+            "fax_code": { "type": "string" },
+            "fax_number": { "type": "string" },
+            "business_registration_number": { "type": "string" },
+            "tax_reference_number": { "type": "string" },
+            "principal_company_and_location": { "type": "string" },
+            "nature_of_business": { "type": "string" },
+            "total_workers_employed": { "type": "integer" }
+          }
+        },
+        "requested_positions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_of_position": { "type": "string" },
+              "number_of_workers": { "type": "integer" }
+            }
+          }
+        },
+        "requirements": {
+          "type": "object",
+          "properties": {
+            "representation_need_for_foreigners": { "type": "boolean" },
+            "independent_collaboration": { "type": "boolean" },
+            "ca_certificate_with_org_diagram": { "type": "boolean" },
+            "applicant_undertaking": { "type": "boolean" },
+            "removal_responsibility_undertaking": { "type": "boolean" },
+            "financial_guarantees": { "type": "boolean" },
+            "corroborate_representations": { "type": "boolean" },
+            "undertaking_reg_30_8": { "type": "boolean" }
+          }
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "payment_of_training_fee": { "type": "boolean" },
+            "training_programme": { "type": "boolean" },
+            "combination_fee_and_programme": { "type": "boolean" },
+            "seek_fee_reduction_or_waiver": { "type": "boolean" },
+            "agreement_with_foreign_state": { "type": "boolean" },
+            "seek_guarantee_reduction_or_waiver": { "type": "boolean" },
+            "seasonal_workers_longer_than_year": { "type": "boolean" }
+          }
+        },
+        "undertaking": {
+          "type": "object",
+          "properties": {
+            "full_name": { "type": "string" },
+            "capacity": { "type": "string" },
+            "id_number": { "type": "string" },
+            "company_name": { "type": "string" },
+            "signature": { "type": "string" },
+            "signed_at": { "type": "string" },
+            "signed_date": { "type": "string", "format": "date" },
+            "witness_signature": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_22_corporate_permit": {
+      "type": "object",
+      "description": "Corporate Permit (Section 21, Regulation 30)",
+      "properties": {
+        "holder_name": { "type": "string" },
+        "departmental_reference_no": { "type": "string" },
+        "physical_address": { "type": "string" },
+        "total_authorisation_certificates": { "type": "integer" },
+        "certificates_numbered_from": { "type": "string" },
+        "certificates_numbered_to": { "type": "string" },
+        "authorized_positions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_of_position": { "type": "string" },
+              "duration": { "type": "string" },
+              "number_of_workers": { "type": "integer" },
+              "location_of_employment": { "type": "string" }
+            }
+          }
+        },
+        "seasonal_worker_details": {
+          "type": "object",
+          "properties": {
+            "period_from": { "type": "string" },
+            "period_to": { "type": "string" },
+            "term_condition": { "type": "string" }
+          }
+        },
+        "foreign_state_agreement_citizenship": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "regional_director_signature": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "official_stamp": { "type": "string" }
+      }
+    },
+    "annexure_23_permit_to_report_to_refugee_reception_office": {
+      "type": "object",
+      "description": "Permit to Report to Refugee Reception Office (Section 23, Regulation 32)",
+      "properties": {
+        "code_no": { "type": "string" },
+        "valid_days": { "type": "integer", "default": 14 },
+        "refugee_reception_office_location": { "type": "string" },
+        "issued_by": { "type": "string" },
+        "persal_no": { "type": "string" },
+        "bar_code": { "type": "string" }
+      }
+    },
+    "annexure_24_application_permanent_residence_permit": {
+      "type": "object",
+      "description": "Application for a Permanent Residence Permit (Sections 26 & 27, Regulation 33)",
+      "properties": {
+        "official_use": {
+          "type": "object",
+          "properties": {
+            "reference_no": { "type": "string" },
+            "applicant_interviewed": { "type": "boolean" },
+            "spouse_interviewed": { "type": "boolean" },
+            "interview_date": { "type": "string", "format": "date" },
+            "interviewing_officer": { "type": "string" },
+            "rank": { "type": "string" },
+            "persal_no": { "type": "string" },
+            "decision": { "type": "string", "enum": ["Approved", "Rejected"] },
+            "reasons_for_rejection": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "applicant_details": {
+          "type": "object",
+          "properties": { "title": { "type": "string" }, "surname": { "type": "string" }, "first_names": { "type": "string" }, "maiden_name": { "type": "string" }, "former_surnames": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "country_of_birth": { "type": "string" }, "nationality_at_birth": { "type": "string" }, "present_nationality": { "type": "string" }, "passport_number": { "type": "string" }, "passport_expiry_date": { "type": "string", "format": "date" }, "passport_issued_by": { "type": "string" }, "marital_status": { "type": "string" }, "date_of_marriage": { "type": "string", "format": "date" }, "residential_address": { "type": "string" }, "postal_address": { "type": "string" }, "telephone_home": { "type": "string" }, "telephone_work": { "type": "string" }, "cellphone_no": { "type": "string" }, "occupation": { "type": "string" } }
+        },
+        "spouse_details": {
+          "type": "object",
+          "properties": { "type_of_spousal_relationship": { "type": "string" }, "title": { "type": "string" }, "surname": { "type": "string" }, "first_names": { "type": "string" }, "maiden_name": { "type": "string" }, "former_surnames": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "birth_place_city": { "type": "string" }, "state_province": { "type": "string" }, "country_of_birth": { "type": "string" }, "nationality_at_birth": { "type": "string" }, "present_nationality": { "type": "string" }, "passport_or_id_no": { "type": "string" }, "issued_by": { "type": "string" }, "expiry_date": { "type": "string", "format": "date" }, "residential_address": { "type": "string" }, "postal_address": { "type": "string" }, "tel_home": { "type": "string" }, "tel_work": { "type": "string" }, "cellphone_no": { "type": "string" }, "occupation": { "type": "string" } }
+        },
+        "unmarried_children_under_21": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "surname": { "type": "string" }, "forenames": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "relationship": { "type": "string" }, "place_of_birth": { "type": "string" }, "nationality": { "type": "string" }, "present_occupation": { "type": "string" } }
+          }
+        },
+        "background_declarations": {
+          "type": "object",
+          "properties": { "criminal_conviction": { "type": "boolean" }, "declared_insolvent": { "type": "boolean" }, "child_maintenance_action": { "type": "boolean" }, "outstanding_debts": { "type": "boolean" }, "pending_criminal_action": { "type": "boolean" }, "previous_immigration_application": { "type": "boolean" }, "refused_residence_or_deported": { "type": "boolean" }, "previously_in_south_africa": { "type": "boolean" }, "infectious_disease_or_mental_condition": { "type": "boolean" }, "asylum_applied_other_country": { "type": "boolean" }, "details_if_yes": { "type": "string" } }
+        }
+      }
+    },
+    "annexure_25_permanent_residence_permit": {
+      "type": "object",
+      "description": "Permanent Residence Permit Certificate (Sections 26 & 27, Regulation 33)",
+      "properties": {
+        "reference": { "type": "string" },
+        "act_section": { "type": "string", "enum": ["26", "27"] },
+        "category": { "type": "string" },
+        "holder_fullname": { "type": "string" },
+        "date_of_birth": { "type": "string", "format": "date" },
+        "gender": { "type": "string" },
+        "occupation_or_capacity": { "type": "string" },
+        "permit_number": { "type": "string" },
+        "date_of_issue": { "type": "string", "format": "date" },
+        "issuing_officer": { "type": "string" },
+        "rank": { "type": "string" },
+        "control_no": { "type": "string" },
+        "endorsements_conditions": { "type": "string" }
+      }
+    },
+    "annexure_26_declaration_of_undesirable_person": {
+      "type": "object",
+      "description": "Declaration of a Foreigner as an Undesirable Person (Section 30, Regulation 35)",
+      "properties": {
+        "recipient_name": { "type": "string" },
+        "at_location": { "type": "string" },
+        "reason_code": { "type": "string", "enum": ["a", "b", "c"] },
+        "ordered_leave_time": { "type": "string" },
+        "ordered_leave_date": { "type": "string", "format": "date" },
+        "immigration_officer_name": { "type": "string" },
+        "place": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "appointment_no": { "type": "string" },
+        "acknowledgement_signature": { "type": "string" },
+        "representations_choice": { "type": "string", "enum": ["do_not_wish", "wish_to_make"] }
+      }
+    },
+    "annexure_27_notice_to_produce_evidence": {
+      "type": "object",
+      "description": "Notice to Person to Produce Evidence (Section 33(4)(b), Regulation 38(3))",
+      "properties": {
+        "to_full_names": { "type": "string" },
+        "identity_or_passport_number": { "type": "string" },
+        "residential_address": { "type": "string" },
+        "physical_work_address": { "type": "string" },
+        "immigration_officer_name": { "type": "string" },
+        "produce_at_address": { "type": "string" },
+        "produce_time": { "type": "string" },
+        "produce_date": { "type": "string", "format": "date" },
+        "articles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_description": { "type": "string" },
+              "number_of_articles": { "type": "integer" }
+            }
+          }
+        },
+        "reason_for_production": { "type": "string" },
+        "officer_signature": { "type": "string" },
+        "recipient_signature": { "type": "string" }
+      }
+    },
+    "annexure_28_notice_to_appear_before_immigration_officer": {
+      "type": "object",
+      "description": "Notice to Person to Appear Before Immigration Officer (Section 33(4)(c), Regulation 38(3))",
+      "properties": {
+        "to_full_names": { "type": "string" },
+        "identity_or_passport_number": { "type": "string" },
+        "residential_address": { "type": "string" },
+        "physical_work_address": { "type": "string" },
+        "immigration_officer_name": { "type": "string" },
+        "appear_at_address": { "type": "string" },
+        "appear_time": { "type": "string" },
+        "appear_date": { "type": "string", "format": "date" },
+        "reason_for_appearance": { "type": "string" },
+        "officer_signature": { "type": "string" },
+        "recipient_signature": { "type": "string" }
+      }
+    },
+    "annexure_29_entry_and_search_warrant": {
+      "type": "object",
+      "description": "Entry and Search Warrant (Section 33(5), Regulation 38(4))",
+      "properties": {
+        "to_immigration_officer": { "type": "string" },
+        "magisterial_district": { "type": "string" },
+        "premises_address": { "type": "string" },
+        "grounds_category": { "type": "string", "enum": ["illegal_foreigner", "violation_evidence"] },
+        "authorized_time": { "type": "string" },
+        "powers_authorized": {
+          "type": "object",
+          "properties": {
+            "interrogate_persons": { "type": "boolean" },
+            "examine_things": { "type": "boolean" },
+            "request_explanation_make_copies": { "type": "boolean" },
+            "apprehend_illegal_foreigner": { "type": "boolean" }
+          }
+        },
+        "given_at_place": { "type": "string" },
+        "given_date": { "type": "string", "format": "date" },
+        "judge_or_magistrate_signature": { "type": "string" },
+        "designation": { "type": "string" }
+      }
+    },
+    "annexure_30_seizure_receipt": {
+      "type": "object",
+      "description": "Receipt for Items Seized (Section 33(5)(c), Regulation 38(5))",
+      "properties": {
+        "officer_full_names": { "type": "string" },
+        "rank": { "type": "string" },
+        "appointment_number": { "type": "string" },
+        "office": { "type": "string" },
+        "seized_from_premises": { "type": "string" },
+        "district_of": { "type": "string" },
+        "seized_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_no": { "type": "string" },
+              "description": { "type": "string" },
+              "quantity": { "type": "integer" }
+            }
+          }
+        },
+        "total_no_of_items": { "type": "integer" },
+        "signed_at": { "type": "string" },
+        "signed_date": { "type": "string", "format": "date" },
+        "receipt_register_control_number": { "type": "string" },
+        "file_number": { "type": "string" }
+      }
+    },
+    "annexure_31_notice_of_deportation": {
+      "type": "object",
+      "description": "Notice of Deportation (Section 34(1)(a) & (b), Regulation 39(1))",
+      "properties": {
+        "to_name": { "type": "string" },
+        "country_of_origin": { "type": "string" },
+        "immigration_officer_name": { "type": "string" },
+        "appointment_number": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "detainee_decision": {
+          "type": "string",
+          "enum": [
+            "await_deportation_in_custody",
+            "appeal_decision",
+            "not_appeal",
+            "request_court_warrant_confirmation",
+            "not_request_court_warrant_confirmation",
+            "leave_rsa_within_14_days"
+          ]
+        },
+        "detainee_signature": { "type": "string" }
+      }
+    },
+    "annexure_32_warrant_of_detention_illegal_foreigner": {
+      "type": "object",
+      "description": "Warrant of Detention of an Illegal Foreigner (Sections 34(1), 34(5), Regulation 39(2))",
+      "properties": {
+        "to_target": { "type": "string", "enum": ["Station Commissioner", "Head of Prison"] },
+        "detainee_fullname": { "type": "string" },
+        "action_type": { "type": "string", "enum": ["deportation", "removal"] },
+        "section_applied": { "type": "string" },
+        "given_at_place": { "type": "string" },
+        "given_date": { "type": "string", "format": "date" },
+        "officer_signature": { "type": "string" },
+        "designation": { "type": "string" }
+      }
+    },
+    "annexure_33_notification_extension_of_detention": {
+      "type": "object",
+      "description": "Notification of Extension of Detention Whilst Awaiting Deportation (Section 34(1)(d), Regulation 39(5))",
+      "properties": {
+        "detainee_full_names": { "type": "string" },
+        "detention_facility_name": { "type": "string" },
+        "country_of_deportation": { "type": "string" },
+        "original_warrant_date": { "type": "string", "format": "date" },
+        "30_days_expiry_date": { "type": "string", "format": "date" },
+        "magistrate_court_location": { "type": "string" },
+        "submission_due_date": { "type": "string", "format": "date" },
+        "representations_due_date": { "type": "string", "format": "date" },
+        "officer_signature": { "type": "string" },
+        "appointment_number": { "type": "string" }
+      }
+    },
+    "annexure_34_cover_sheet_extension_detention": {
+      "type": "object",
+      "description": "Cover Sheet & Decision for Extension of Detention (Section 34(1)(d), Regulation 39(5))",
+      "properties": {
+        "clerk_of_court_location": { "type": "string" },
+        "detainee_full_names": { "type": "string" },
+        "detained_at": { "type": "string" },
+        "magistrate_decision": {
+          "type": "object",
+          "properties": {
+            "decision_type": { "type": "string", "enum": ["confirm_order", "set_aside_order", "additional_order"] },
+            "additional_order_details": { "type": "string" },
+            "given_at_place": { "type": "string" },
+            "given_date": { "type": "string", "format": "date" },
+            "magistrate_signature": { "type": "string" }
+          }
+        },
+        "officer_affidavit": {
+          "type": "object",
+          "properties": {
+            "deponent_full_names": { "type": "string" },
+            "stationed_at": { "type": "string" },
+            "reasons_delay_deportation": { "type": "string" },
+            "reasons_detention_necessary": { "type": "string" },
+            "estimated_extended_period": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_35_warrant_detention_person_not_entitled": {
+      "type": "object",
+      "description": "Warrant of Detention of a Person Not Entitled to be in Republic (Section 34(1)(e), Regulation 39(8))",
+      "properties": {
+        "to_target": { "type": "string" },
+        "detainee_full_names": { "type": "string" },
+        "officer_full_names": { "type": "string" },
+        "reasons_for_detention": { "type": "string" },
+        "handed_to_officer_at": { "type": "string" },
+        "handed_date": { "type": "string", "format": "date" },
+        "handed_time": { "type": "string" },
+        "court_signature": { "type": "string" },
+        "designation": { "type": "string" }
+      }
+    },
+    "annexure_36_order_deposit_expenses": {
+      "type": "object",
+      "description": "Order to Illegal Foreigner to Deposit Sum to Cover Expenses (Section 34(3), Regulation 39(9))",
+      "properties": {
+        "expenses_breakdown": {
+          "type": "object",
+          "properties": {
+            "deportation_costs": { "type": "number" },
+            "detention_costs": { "type": "number" },
+            "maintenance_costs": { "type": "number" },
+            "custody_costs": { "type": "number" },
+            "total_costs": { "type": "number" }
+          }
+        },
+        "deposit_amount": { "type": "number" },
+        "dha_office_address": { "type": "string" },
+        "due_date": { "type": "string", "format": "date" },
+        "district_court_name": { "type": "string" },
+        "court_judgement_record": {
+          "type": "object",
+          "properties": {
+            "entered_as_judgement_date": { "type": "string", "format": "date" },
+            "judgement_no": { "type": "string" },
+            "clerk_signature": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_37_warrant_for_removal": {
+      "type": "object",
+      "description": "Warrant for Removal / Release Pending Removal (Section 34(7), Regulation 38(12))",
+      "properties": {
+        "person_full_names": { "type": "string" },
+        "act_section": { "type": "string" },
+        "removal_via_port": { "type": "string" },
+        "minister_signature": { "type": "string" },
+        "removal_certification": {
+          "type": "object",
+          "properties": {
+            "removed_date": { "type": "string", "format": "date" },
+            "removed_to_country": { "type": "string" },
+            "removed_via_port": { "type": "string" },
+            "officer_signature": { "type": "string" },
+            "appointment_number": { "type": "string" },
+            "fingerprints_taken": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "annexure_38_warrant_of_release": {
+      "type": "object",
+      "description": "Warrant of Release (Section 34(7), Regulation 39(12))",
+      "properties": {
+        "to_facility_or_officer": { "type": "string" },
+        "released_foreigners_names": { "type": "string" },
+        "officer_signature": { "type": "string" },
+        "appointment_or_force_number": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" }
+      }
+    },
+    "annexure_39_notice_refusal_of_entry": {
+      "type": "object",
+      "description": "Notice of Refusal of Entry into the RSA (Section 34(8), Regulation 39(13))",
+      "properties": {
+        "to_fullname": { "type": "string" },
+        "refusal_reason_code": { "type": "string", "enum": ["a", "b", "c", "d"] },
+        "conveyor_name": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "immigration_officer": { "type": "string" },
+        "inadmissible_person_signature": { "type": "string" }
+      }
+    },
+    "annexure_40_declaration_to_master_of_ship": {
+      "type": "object",
+      "description": "Declaration to Master of Ship Regarding Prohibited Persons (Section 34(8)&(9))",
+      "properties": {
+        "master_of_ship_name": { "type": "string" },
+        "refusal_date": { "type": "string", "format": "date" },
+        "prohibited_persons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "surname": { "type": "string" },
+              "first_names": { "type": "string" },
+              "reasons_for_refusal": { "type": "string" }
+            }
+          }
+        },
+        "port": { "type": "string" },
+        "officer_signature": { "type": "string" },
+        "master_signature": { "type": "string" }
+      }
+    },
+    "annexure_41_clearance_certificate_customs": {
+      "type": "object",
+      "description": "Certificate for Obtaining Clearance Paper from Customs (Section 35(6), Regulation 39(16))",
+      "properties": {
+        "port": { "type": "string" },
+        "ship_name": { "type": "string" },
+        "compliance_date": { "type": "string", "format": "date" },
+        "officer_signature": { "type": "string" },
+        "appointment_or_force_no": { "type": "string" }
+      }
+    },
+    "annexure_42_order_to_leave_republic": {
+      "type": "object",
+      "description": "Order to Illegal Foreigner to Leave the Republic (Section 32(2), Regulation 39(17))",
+      "properties": {
+        "to_fullname": { "type": "string" },
+        "at_location": { "type": "string" },
+        "leave_by_hours": { "type": "string" },
+        "leave_by_date": { "type": "string", "format": "date" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "officer_appointment_no": { "type": "string" },
+        "illegal_foreigner_signature": { "type": "string" }
+      }
+    },
+    "annexure_43_list_of_passengers": {
+      "type": "object",
+      "description": "List of Passengers (Section 35(3)(a), Regulation 40)",
+      "properties": {
+        "ship_name": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "master_full_names": { "type": "string" },
+        "flight_no": { "type": "string" },
+        "date_of_entry": { "type": "string", "format": "date" },
+        "inbound_passengers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "surname": { "type": "string" },
+              "first_name": { "type": "string" },
+              "passport_no": { "type": "string" },
+              "travel_class": { "type": "string" },
+              "nationality": { "type": "string" },
+              "embarked_at": { "type": "string" },
+              "destination": { "type": "string" }
+            }
+          }
+        },
+        "transit_passengers": { "type": "array", "items": { "type": "object" } },
+        "outbound_refused_passengers": { "type": "array", "items": { "type": "object" } },
+        "master_signature": { "type": "string" },
+        "officer_signature": { "type": "string" }
+      }
+    },
+    "annexure_44_list_of_stowaways": {
+      "type": "object",
+      "description": "List of Stowaways (Section 35(3)(b), Regulation 44)",
+      "properties": {
+        "ship_name": { "type": "string" },
+        "master_full_names": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "entry_date": { "type": "string", "format": "date" },
+        "stowaways": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "surname": { "type": "string" },
+              "first_name": { "type": "string" },
+              "passport_doc_no": { "type": "string" },
+              "travel_doc_particulars": { "type": "string" },
+              "nationality": { "type": "string" },
+              "country_of_origin": { "type": "string" }
+            }
+          }
+        },
+        "master_signature": { "type": "string" },
+        "officer_signature": { "type": "string" }
+      }
+    },
+    "annexure_45_list_of_crew": {
+      "type": "object",
+      "description": "List of Crew / Persons Employed (Section 35(3)(c), Regulation 40)",
+      "properties": {
+        "ship_name": { "type": "string" },
+        "master_full_names": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "entry_date": { "type": "string", "format": "date" },
+        "final_departure_port": { "type": "string" },
+        "final_departure_date": { "type": "string", "format": "date" },
+        "crew_members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rank_grading": { "type": "string" },
+              "name_in_passport": { "type": "string" },
+              "nationality": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "seaman_identity_no": { "type": "string" },
+              "passport_expiry_date": { "type": "string", "format": "date" }
+            }
+          }
+        }
+      }
+    },
+    "annexure_46_return_of_master": {
+      "type": "object",
+      "description": "Return of Master regarding Illness/Birth/Death (Section 35(3)(d), Regulation 40)",
+      "properties": {
+        "ship_name": { "type": "string" },
+        "port_of_entry": { "type": "string" },
+        "illness_cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "crew_or_passenger": { "type": "string" },
+              "nature_of_illness": { "type": "string" },
+              "remarks": { "type": "string" }
+            }
+          }
+        },
+        "birth_or_death_cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "crew_or_passenger": { "type": "string" },
+              "event_type_and_date": { "type": "string" },
+              "remarks": { "type": "string" }
+            }
+          }
+        },
+        "certified_by_signature": { "type": "string" }
+      }
+    },
+    "annexure_47_accommodation_identification_report": {
+      "type": "object",
+      "description": "Report on Customers Who Failed to Identify Themselves (Accommodation) (Section 40(1), Regulation 42)",
+      "properties": {
+        "business_name": { "type": "string" },
+        "business_address": { "type": "string" },
+        "telephone": { "type": "string" },
+        "unidentified_customers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "first_names": { "type": "string" },
+              "surname": { "type": "string" },
+              "nationality": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "booked_in_date": { "type": "string", "format": "date" },
+              "departure_date": { "type": "string", "format": "date" }
+            }
+          }
+        },
+        "manager_signature": { "type": "string" }
+      }
+    },
+    "annexure_48_organs_of_state_service_report": {
+      "type": "object",
+      "description": "Report on Persons Receiving Services Who Failed to Identify Themselves to Organs of State (Section 44, Regulation 45)",
+      "properties": {
+        "organ_of_state_name": { "type": "string" },
+        "business_address": { "type": "string" },
+        "unidentified_service_recipients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "first_names": { "type": "string" },
+              "surname": { "type": "string" },
+              "nationality": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "current_residential_address": { "type": "string" }
+            }
+          }
+        },
+        "official_signature": { "type": "string" }
+      }
+    },
+    "annexure_49_overstay_administrative_fine": {
+      "type": "object",
+      "description": "Notice of Administrative Fine Incurred for Overstay (Section 50(1), Regulation 48)",
+      "properties": {
+        "to_name": { "type": "string" },
+        "fine_amount_zar": { "type": "number" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "overstayer_signature": { "type": "string" },
+        "officer_signature": { "type": "string" }
+      }
+    },
+    "annexure_50_incorrect_certification_fine": {
+      "type": "object",
+      "description": "Notice of Administrative Fine for Incorrect Certification (Section 50(2), Regulation 48)",
+      "properties": {
+        "to_name": { "type": "string" },
+        "fine_amount_zar": { "type": "number", "default": 7000 },
+        "incorrect_certification_in_respect_of": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "inspectorate_signature": { "type": "string" },
+        "recipient_signature": { "type": "string" }
+      }
+    },
+    "annexure_51_conveyance_fine": {
+      "type": "object",
+      "description": "Notice of Administrative Fine Incurred by Owner/Master/Charterer of Conveyance (Section 50(3), Regulation 45)",
+      "properties": {
+        "to_target": { "type": "string" },
+        "fine_amount_zar": { "type": "number", "default": 10000 },
+        "passenger_name": { "type": "string" },
+        "flight_or_ship": { "type": "string" },
+        "bound_for": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "place": { "type": "string" },
+        "conveyance_master_signature": { "type": "string" },
+        "officer_signature": { "type": "string" }
+      }
+    },
+    "annexure_52_refugee_reception_report_permit_application": {
+      "type": "object",
+      "description": "Application for a Permit to Report to a Refugee Reception Office (Section 23, Regulation 32)",
+      "properties": {
+        "surname": { "type": "string" },
+        "first_names": { "type": "string" },
+        "date_of_birth": { "type": "string", "format": "date" },
+        "gender": { "type": "string" },
+        "country_of_residence": { "type": "string" },
+        "previous_address": { "type": "string" },
+        "nationality": { "type": "string" },
+        "identification_proof": {
+          "type": "object",
+          "properties": {
+            "passport_no": { "type": "string" },
+            "id_doc_no": { "type": "string" },
+            "travel_doc_no": { "type": "string" },
+            "birth_certificate": { "type": "string" },
+            "drivers_licence_no": { "type": "string" },
+            "other_proof": { "type": "string" }
+          }
+        },
+        "reasons_seeking_asylum": { "type": "string" },
+        "transit_countries_crossed": { "type": "string" },
+        "reasons_asylum_not_requested_in_transit": { "type": "string" },
+        "applicant_signature": { "type": "string" },
+        "commissioner_of_oaths": {
+          "type": "object",
+          "properties": {
+            "full_names": { "type": "string" },
+            "capacity": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "place": { "type": "string" }
+          }
+        }
+      }
+    },
+    "annexure_53_corporate_permit_authorisation_certificate": {
+      "type": "object",
+      "description": "Corporate Permit Authorisation Certificate (Section 21)",
+      "properties": {
+        "certificate_number": { "type": "string" },
+        "work_permit_validity_period": { "type": "string" },
+        "corporate_employer_name": { "type": "string" },
+        "corporate_worker": {
+          "type": "object",
+          "properties": {
+            "surname": { "type": "string" },
+            "name": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "passport_number": { "type": "string" },
+            "nationality": { "type": "string" },
+            "occupation": { "type": "string" }
+          }
+        },
+        "employer_contact_person": {
+          "type": "object",
+          "properties": {
+            "position": { "type": "string" },
+            "division": { "type": "string" },
+            "name": { "type": "string" },
+            "telephone": { "type": "string" }
+          }
+        },
+        "regional_director_signature": { "type": "string" }
+      }
+    },
+    "annexure_54_immigration_practitioner_registration": {
+      "type": "object",
+      "description": "Application for Registration as an Immigration Practitioner (Section 46, Regulation 46)",
+      "properties": {
+        "association_name": { "type": "string" },
+        "applicants_personal_details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "full_names_surname": { "type": "string" },
+              "identity_number": { "type": "string" },
+              "residential_address": { "type": "string" },
+              "postal_code": { "type": "string" },
+              "telephone_number": { "type": "string" }
+            }
+          }
+        },
+        "business_details": {
+          "type": "object",
+          "properties": {
+            "business_and_trade_name": { "type": "string" },
+            "abbreviated_trade_name": { "type": "string" },
+            "operating_address": { "type": "string" },
+            "postal_address": { "type": "string" },
+            "telephone_numbers": { "type": "string" },
+            "facsimile_numbers": { "type": "string" }
+          }
+        },
+        "checklist": {
+          "type": "object",
+          "properties": {
+            "copy_id_attached": { "type": "boolean" },
+            "letterhead_attached": { "type": "boolean" },
+            "cv_attached": { "type": "boolean" },
+            "police_clearance_attached": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "annexure_55_practitioner_certificate_of_registration": {
+      "type": "object",
+      "description": "Certificate of Registration as Immigration Practitioner (Section 46, Regulation 46)",
+      "properties": {
+        "practitioner_fullname": { "type": "string" },
+        "identity_number": { "type": "string" },
+        "residential_address": { "type": "string" },
+        "tel_no": { "type": "string" },
+        "cell_no": { "type": "string" },
+        "business_name": { "type": "string" },
+        "business_address": { "type": "string" },
+        "registration_number": { "type": "string" },
+        "signed_date": { "type": "string", "format": "date" }
+      }
+    },
+    "annexure_56_power_of_attorney": {
+      "type": "object",
+      "description": "Power of Attorney for Residence Permit Applications (Section 46, Regulation 46)",
+      "properties": {
+        "part_a_power_of_attorney": {
+          "type": "object",
+          "properties": {
+            "grantor_fullname": { "type": "string" },
+            "grantor_address": { "type": "string" },
+            "practitioner_fullname": { "type": "string" },
+            "practitioner_address": { "type": "string" },
+            "practitioner_registration_no": { "type": "string" },
+            "grantor_signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "part_b_practitioner_declaration": {
+          "type": "object",
+          "properties": {
+            "practitioner_fullname": { "type": "string" },
+            "address": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "part_c_interpreter_certificate": {
+          "type": "object",
+          "properties": {
+            "interpreter_fullname": { "type": "string" },
+            "interpreter_address": { "type": "string" },
+            "language_mastered": { "type": "string" },
+            "applicant_fullname": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        }
+      }
+    }
+  }
+}
+
+Extracted Text & Field Mapping Guide
+| Annexure / Section | Form Title & Statutory Reference | Field Label / Key Variable | Data Type / Format | Mandatory / Notes |
+|---|---|---|---|---|
+| Annexure 17 | Extension/Renewal of Permit [Sec 11, Reg 18] | Temporary residence permit no. | Text | Required |
+|  |  | Extended/renewed until | Date (YYYY-MM-DD) | Required |
+|  |  | Substituted conditions | Free Text / Multi-line | Optional |
+|  |  | Issued at / Date / Issued by | Text / Date / Text | Required |
+| Annexure 18 | Temporary Residence Permit [Sec 11, Reg 19] | Category (Visitor's / Crew) | Checkbox / Selection | Required |
+|  |  | Valid until / Purpose of issue | Date / Free Text | Required |
+|  |  | Conditions (1), (2), (3) | Text Array | Auto-generated / Custom |
+| Annexure 19 | Application for Visitor's Permit at Port of Entry [Sec 34(8), Reg 18] | 1–12: Personal & Visit Details (Surname, Names, Passport, Purpose, Contact) | Text / Date / Phone | Required |
+|  |  | Official Use: Flight details, BLOK, Funds, Decision | Booleans / Amounts / Text | Departmental Use Only |
+| Annexure 20 | Periodic Certificate on Study Performance [Sec 13(1)(b)(v), Reg 22(4)] | Institution Name, Address, Contact Person | Text | Required |
+|  |  | Student Name, Passport No, Admission Date | Text / Date | Required |
+|  |  | Performance status & Re-admission eligibility | Boolean / Text | Required |
+| Annexure 20A | Periodic Certification of Medical Treatment [Sec 13(1)(b)(v), Reg 22(4)] | Institution & Patient details | Text / Date | Required |
+|  |  | Expected treatment duration | Integer (Months) | Required |
+| Annexure 21 | Application for Corporate Permit [Sec 21, Reg 30] | 1. Background Details (Reg No, Tax Ref, Nature of Business, Employee Count) | Text / Integer | Required |
+|  |  | 2. Job Positions Requested | Table Array (Position, Count) | Required |
+|  |  | 3–6. Requirements, Options, Consultation, Checklist | Boolean (Yes/No) + Comments | Required |
+|  |  | 7. Employer Undertaking & Signatures | Text / Date / Signature | Required |
+| Annexure 22 | Corporate Permit [Sec 21, Reg 30] | Corporate Holder Name, DHA Ref, Address | Text | Issued by DHA |
+|  |  | Authorized positions table | Table Array (Position, Duration, Workers, Location) | Required |
+| Annexure 23 | Permit to Report to Refugee Reception Office [Sec 23, Reg 32] | Office Location, Validity (14 days) | Text / Integer | Issued by Officer |
+| Annexure 24 | Application for Permanent Residence Permit [Sec 26 & 27, Reg 33] | 1–4. Personal, Spouse, Parents Details | Detailed Text / Dates | Required |
+|  |  | 5–9. Children, Relatives, Previous Marriages | Table / Multi-entry Text | If applicable |
+|  |  | 10–13. Education, Employment, Financials, Residence | Text / Tables / Dates | Required |
+|  |  | 14. Criminal / Debt / Health Declarations | Boolean (Yes/No) | Required |
+| Annexure 25 | Permanent Residence Permit Certificate [Sec 26 & 27, Reg 33] | Permit No, Holder Name, Category, Issue Date | Text / Date | Certificate Output |
+| Annexure 26 | Declaration of Undesirable Person [Sec 30, Reg 35] | Reason Codes, Order to Leave Date/Time | Enum / Date / Time | Legal Notice |
+|  |  | Written Representations Election | Boolean / Selection | Recipient Execution |
+| Annexures 27–28 | Notice to Produce Evidence / Appear [Sec 33(4), Reg 38(3)] | Person Details, Location, Date, Time, Reason, Articles List | Text / Date / Time / Table | Official Notice |
+| Annexure 29 | Entry and Search Warrant [Sec 33(5), Reg 38(4)] | Premises Address, Magisterial District, Powers Granted | Text / Boolean List | Judicial Authority |
+| Annexure 30 | Receipt for Items Seized [Sec 33(5)(c), Reg 38(5)] | Item No., Description, Quantity, Total Items | Table Array / Integer | Official Receipt |
+| Annexure 31 | Notice of Deportation [Sec 34(1), Reg 39(1)] | Detainee Choice (Deport, Appeal, Court Warrant, Voluntarily Leave) | Single Choice Enum | Legal Rights Selection |
+| Annexures 32–35 | Warrants & Extension of Detention [Sec 34, Reg 39] | Station Commissioner/Prison Head, Detainee Details, Reasons, Court Decision | Text / Date / Magistrate Sign | Detention Control |
+| Annexure 36 | Order to Deposit Sum for Costs [Sec 34(3), Reg 39(9)] | Costs Breakdown (Deportation, Detention, Custody, Total) | Currency Amounts | Civil Judgment Effect |
+| Annexures 37–38 | Warrant for Removal / Release & Fingerprint Form [Sec 34(7)] | Fingerprint Impressions (10 fingers), Removal Port, Certification | Image / Text / Date | Biometric / Release |
+| Annexure 39 | Refusal of Entry [Sec 34(8), Reg 39(13)] | Refusal Grounds, Carrier Name, Appeal Deadline (20 Days) | Enum / Text | Inadmissible Notice |
+| Annexures 40–42 | Master Declarations & Clearance [Sec 35, Reg 39] | Vessel Name, Prohibited Persons List, Compliance Certification | Text / Table | Customs/Port Control |
+| Annexures 43–46 | Passenger, Stowaway, Crew Lists & Return of Master [Sec 35, Reg 40/44] | Inbound, Transit, Stowaway, Crew Tables, Illness/Birth/Death Logs | Multi-column Tables | Maritime Entry |
+| Annexures 47–48 | Accommodation & Organ of State Failure to Identify Reports [Sec 40/44] | Customer / Recipient Details (Name, Nationality, DOB, Address) | Table Array | Compliance Reporting |
+| Annexures 49–51 | Administrative Fine Notices [Sec 50, Reg 45/48] | Fine Amounts (Overstay, R7,000 Certification, R10,000 Carrier) | Currency / Text | Administrative Fines |
+| Annexure 52 | Application for Permit to Report to Refugee Office [Sec 23, Reg 32] | Asylum Reasons, Route Details, Oath, Thumb Print, Photo | Multi-line Text / Images | Refugee Application |
+| Annexure 53 | Corporate Permit Authorisation Certificate [Sec 21] | Worker & Employer Details, Expiry Conditions, Exchange Request | Text / Date | Corporate Transfer |
+| Annexures 54–56 | Practitioner Registration, Certificate & Power of Attorney [Sec 46, Reg 46] | Personal, Business, Revenue Stamp (R2.00), Declaration, Interpreter | Text / Dates / Checklists | Legal Representation |
+
