@@ -96,7 +96,25 @@ export default class CostingModelService {
     /**
      * Compiles an exact quote based on the costing model.
      */
-    compilePriceQuote({ domain = null, serviceId = null, serviceName = null, message = "", facts = {}, clientType = "INDIVIDUAL" } = {}) {
+    compilePriceQuote({ domain = null, serviceId = null, serviceName = null, message = "", facts = {}, clientType = "INDIVIDUAL", costingCentre = null } = {}) {
+        // Supabase Costing Centre is authoritative when supplied. Anthony must
+        // never invent a price when no approved costing record exists.
+        if (costingCentre !== null) {
+            const approvedTotal = Number(costingCentre?.approvedTotal ?? costingCentre?.fixedPrice ?? costingCentre?.total);
+            if (!Number.isFinite(approvedTotal) || approvedTotal <= 0 || costingCentre?.approved !== true) {
+                return {
+                    status: "PRICING_REQUIRED_FROM_SUPER_ADMIN",
+                    requiresSuperAdmin: true,
+                    pricingFound: false,
+                    currency: costingCentre?.currency || DEFAULT_CURRENCY,
+                    serviceId: serviceId || null,
+                    serviceName: serviceName || this.inferServiceName(message, this.normaliseDomain(domain)) || null,
+                    reason: "No approved price exists in the Costing Centre. Anthony must request pricing from Super Admin.",
+                    breakdown: [],
+                    action: "CREATE_SUPER_ADMIN_PRICING_REQUEST"
+                };
+            }
+        }
         const normDomain = this.normaliseDomain(domain);
         const resolvedService = this.findService(serviceId, serviceName, normDomain);
 
