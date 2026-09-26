@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "form": {
+    "id": "DHA-1758",
+    "formNumber": "Form 16",
+    "title": "Progress report by organ of state or learning institution regarding exchange programme",
+    "issuingAuthority": "Department of Home Affairs, Republic of South Africa"
+  },
+  "source": {
+    "authority": "DHA",
+    "sourceDocument": "Immigration Regulations, 2014 as amended by GN R1328 in GG 42071 (29 November 2018)",
+    "sourceVerified": true,
+    "fieldExtractionVerified": false
+  },
+  "construction": {
+    "status": "semantic_skeleton",
+    "generationAuthorised": false,
+    "reason": "source_pdf_verified_metadata_only"
+  },
+  "fields": [],
+  "coordinateMap": {
+    "status": "pending",
+    "path": null
+  },
+  "validation": {
+    "renderTestPassed": false,
+    "sourcePdfHash": null
+  },
+  "notes": [
+    "This record deliberately does not invent field coordinates or field-level structure. The exact source PDF must be mapped before Anthony or the document engine may generate it."
+  ]
+}
