@@ -1,0 +1,1246 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SouthAfricaImmigrationRegulations2014SecondAmendmentGazette",
+  "description": "Comprehensive schema capturing all administrative details, amendments, and forms (Form 8, Form 10, Form 11, Form 18) for Government Gazette No. 50675.",
+  "type": "object",
+  "properties": {
+    "gazette_metadata": {
+      "type": "object",
+      "properties": {
+        "gazette_number": { "type": "string", "example": "50675" },
+        "volume": { "type": "string", "example": "707" },
+        "publication_date": { "type": "string", "format": "date", "example": "2024-05-20" },
+        "regulation_gazette_number": { "type": "string", "example": "11704" },
+        "notice_number": { "type": "string", "example": "R. 4847" },
+        "department": { "type": "string", "example": "Department of Home Affairs" },
+        "act": { "type": "string", "example": "Immigration Act 13 of 2002" },
+        "title": { "type": "string", "example": "Second Amendment of the Immigration Regulations, 2014" },
+        "minister_signature": {
+          "type": "object",
+          "properties": { "name": { "type": "string" }, "title": { "type": "string" }, "date": { "type": "string", "format": "date" } }
+        }
+      }
+    },
+    "form_8_dha_1738": {
+      "type": "object",
+      "title": "Application for Temporary Residence Visa (Form 8)",
+      "properties": {
+        "official_use_only": {
+          "type": "object",
+          "properties": {
+            "office_of_application": { "type": "string" },
+            "track_and_trace_ref_no": { "type": "string" },
+            "date_received": { "type": "string", "format": "date" },
+            "date_forwarded_to_head_office": { "type": "string", "format": "date" },
+            "application_quality_checked_by_on": { "type": "string" },
+            "date_received_at_head_office": { "type": "string", "format": "date" },
+            "passport_seen_returned_by_on": { "type": "string" },
+            "decision_and_date": { "type": "string" },
+            "fee_currency_and_amount": { "type": "string" },
+            "fee_received_by_on": { "type": "string" },
+            "receipt_no": { "type": "string" },
+            "conditions_of_permit_reason_for_refusal": { "type": "string" }
+          }
+        },
+        "category_of_visa_applied_for": {
+          "type": "string",
+          "enum": [
+            "Visitor's Visa", "Study Visa (> 3 months)", "Treaty Visa", "Relative's Visa",
+            "Medical Treatment Visa (> 3 months)", "Intra-company Transfer", "Exchange Visa",
+            "Business Visa", "Work Visa: Critical Skills", "Work Visa: General",
+            "Work Visa: Intra-company transfer", "Retired Person's Visa", "Corporate Worker Certificate"
+          ]
+        },
+        "section_1_personal_details": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string", "enum": ["Mr", "Mrs", "Ms", "Other"] },
+            "title_other_specify": { "type": "string" },
+            "surname_family_name": { "type": "string" },
+            "given_names": { "type": "string" },
+            "maiden_name": { "type": "string" },
+            "stage_name": { "type": "string" },
+            "previous_alternative_names_aliases": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "place_of_birth_town_city": { "type": "string" },
+            "place_of_birth_country": { "type": "string" },
+            "marital_status": {
+              "type": "string",
+              "enum": ["Never married", "Married", "Separated", "Widow/Widower", "Legally recognised spousal relationship", "Divorced"]
+            },
+            "separated_details": { "type": "string" },
+            "divorced_details": {
+              "type": "object",
+              "properties": { "date_of_divorce": { "type": "string", "format": "date" }, "divorce_order_attached": { "type": "boolean" } }
+            }
+          }
+        },
+        "section_2_citizenship_details": {
+          "type": "object",
+          "properties": {
+            "present_country_of_citizenship": { "type": "string" },
+            "acquisition_details_if_not_by_birth": { "type": "string" },
+            "holds_other_citizenship": { "type": "boolean" },
+            "other_citizenship_country_details": { "type": "string" }
+          }
+        },
+        "section_3_passport_details": {
+          "type": "object",
+          "properties": {
+            "passport_number": { "type": "string" },
+            "country_of_issue": { "type": "string" },
+            "date_of_issue": { "type": "string", "format": "date" },
+            "expiry_date": { "type": "string", "format": "date" },
+            "other_travel_document_type": { "type": "string" },
+            "other_travel_document_number": { "type": "string" },
+            "other_travel_document_expiry_date": { "type": "string", "format": "date" }
+          }
+        },
+        "section_4_addresses": {
+          "type": "object",
+          "properties": {
+            "residential_address": { "type": "string" },
+            "residential_postal_code": { "type": "string" },
+            "postal_address": { "type": "string" },
+            "postal_code": { "type": "string" },
+            "country_of_ordinary_residence": { "type": "string" },
+            "telephone_work": { "type": "string" },
+            "telephone_home": { "type": "string" },
+            "cellphone_number": { "type": "string" },
+            "email_address": { "type": "string" },
+            "previous_addresses_last_10_years": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": { "address": { "type": "string" }, "period": { "type": "string" }, "country": { "type": "string" } }
+              }
+            },
+            "right_of_reentry_country_of_origin": { "type": "boolean" },
+            "right_of_reentry_period_status_if_no": { "type": "string" },
+            "applied_for_asylum_or_refugee_status": { "type": "boolean" },
+            "asylum_country_specify": { "type": "string" },
+            "contact_person_in_sa": {
+              "type": "object",
+              "properties": {
+                "relationship": { "type": "string", "enum": ["Friend", "Business Associate", "Relative", "Other"] },
+                "name": { "type": "string" },
+                "address": { "type": "string" },
+                "telephone_work": { "type": "string" },
+                "telephone_home": { "type": "string" },
+                "cellphone_number": { "type": "string" },
+                "email_address": { "type": "string" }
+              }
+            },
+            "relatives_friends_in_republic": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "address": { "type": "string" },
+                  "relationship": { "type": "string" },
+                  "identity_no": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "section_5_intentions_proposed_duration": {
+          "type": "object",
+          "properties": {
+            "proposed_date_place_departure_from_republic": { "type": "string" },
+            "anticipated_date_place_arrival_in_republic": { "type": "string" },
+            "travelling_by": { "type": "string", "enum": ["Air", "Road", "Rail", "Sea"] },
+            "carrier": { "type": "string" },
+            "intended_duration_of_stay": { "type": "string" },
+            "intended_date_of_departure": { "type": "string", "format": "date" },
+            "proposed_activities_outline": { "type": "string" },
+            "details_of_intended_stay": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name_of_place": { "type": "string" },
+                  "address": { "type": "string" },
+                  "period_of_stay": { "type": "string" },
+                  "date_of_departure": { "type": "string", "format": "date" }
+                }
+              }
+            }
+          }
+        },
+        "section_6_maintenance_deportation": {
+          "type": "object",
+          "properties": {
+            "available_funds_type": { "type": "string" },
+            "available_funds_amount": { "type": "number" },
+            "south_african_rand_equivalent": { "type": "number" },
+            "return_or_onward_ticket_no": { "type": "string" },
+            "ticket_expiry_date": { "type": "string", "format": "date" },
+            "other_arrangements": { "type": "string" }
+          }
+        },
+        "section_7_accompanying_family_dependants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "full_names": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "relationship": { "type": "string" },
+              "passport_no": { "type": "string" },
+              "expiry_date": { "type": "string", "format": "date" },
+              "nationality": { "type": "string" },
+              "occupation": { "type": "string" }
+            }
+          }
+        },
+        "section_8_security_health_questionnaire": {
+          "type": "object",
+          "properties": {
+            "convicted_of_crime": { "type": "boolean" },
+            "criminal_civil_case_pending": { "type": "boolean" },
+            "suffering_tb_or_contagious_disease_mental_physical_deficiency": { "type": "boolean" },
+            "unrehabilitated_insolvent": { "type": "boolean" },
+            "judicially_declared_incompetent": { "type": "boolean" },
+            "member_of_organisation_advocating_social_violence_hatred": { "type": "boolean" },
+            "declared_undesirable_by_dg": { "type": "boolean" },
+            "refused_entry_or_deported": { "type": "boolean" },
+            "affirmative_full_particulars": { "type": "string" }
+          }
+        },
+        "section_9_additional_information": { "type": "string" },
+        "section_10_declaration_by_applicant": {
+          "type": "object",
+          "properties": {
+            "signature_of_applicant": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "checklist_attached_documents": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "form_10_dha_1739": {
+      "type": "object",
+      "title": "Application for Renewal of Existing Visa (Form 10)",
+      "properties": {
+        "official_use_only": {
+          "type": "object",
+          "properties": {
+            "office_of_application": { "type": "string" },
+            "date_received": { "type": "string", "format": "date" },
+            "submission_quality_checked_by": { "type": "string" },
+            "passport_checked_and_returned_by": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "persal_number": { "type": "string" },
+            "receipt_no_for_fee_paid": { "type": "string" },
+            "track_and_trace_ref_no": { "type": "string" },
+            "file_no": { "type": "string" },
+            "date_forwarded_to_head_office": { "type": "string", "format": "date" },
+            "date_received_at_head_office": { "type": "string", "format": "date" },
+            "decision": { "type": "string" },
+            "conditions_of_visa_reasons_for_refusal": { "type": "string" }
+          }
+        },
+        "particulars_of_applicant": {
+          "type": "object",
+          "properties": {
+            "surname_family_name": { "type": "string" },
+            "first_names": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "residential_address_in_republic": { "type": "string" },
+            "telephone_no": { "type": "string" },
+            "work_telephone_no": { "type": "string" },
+            "cellphone_no": { "type": "string" },
+            "email_address": { "type": "string" }
+          }
+        },
+        "passport_details": {
+          "type": "object",
+          "properties": {
+            "passport_number": { "type": "string" },
+            "issuing_country": { "type": "string" },
+            "date_of_issue": { "type": "string", "format": "date" },
+            "valid_until": { "type": "string", "format": "date" },
+            "other_identity_document": {
+              "type": "object",
+              "properties": { "type": { "type": "string" }, "number": { "type": "string" }, "date_of_issue": { "type": "string", "format": "date" }, "expiry_date": { "type": "string", "format": "date" } }
+            }
+          }
+        },
+        "original_visa_details": {
+          "type": "object",
+          "properties": {
+            "date_of_entry": { "type": "string", "format": "date" },
+            "place_of_entry": { "type": "string" },
+            "purpose_of_entry": { "type": "string" },
+            "visa_no": { "type": "string" },
+            "date_of_expiry": { "type": "string", "format": "date" },
+            "type_of_visa": { "type": "string" }
+          }
+        },
+        "subsequent_visa_or_renewal_details": {
+          "type": "object",
+          "properties": {
+            "type_of_visa": { "type": "string" },
+            "date_of_issue_renewal": { "type": "string", "format": "date" },
+            "issued_at": { "type": "string" },
+            "date_of_expiry": { "type": "string", "format": "date" },
+            "visa_required_until_date": { "type": "string", "format": "date" },
+            "reason_for_request": { "type": "string" }
+          }
+        },
+        "declaration_by_applicant": {
+          "type": "object",
+          "properties": {
+            "signature": { "type": "string" },
+            "signed_at": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "checklist_attached_documents": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "form_11_dha_84": {
+      "type": "object",
+      "title": "Application for Port of Entry Visa or Transit Visa (Form 11)",
+      "properties": {
+        "personal_particulars": {
+          "type": "object",
+          "properties": {
+            "surname": { "type": "string" },
+            "first_names_in_full": { "type": "string" },
+            "maiden_name": { "type": "string" },
+            "previous_surnames": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "country_of_birth": { "type": "string" },
+            "gender": { "type": "string" },
+            "nationality": { "type": "string" },
+            "nationality_obtained_where_and_when": { "type": "string" },
+            "original_nationality_if_naturalised": { "type": "string" },
+            "passport_travel_document_number": { "type": "string" },
+            "issuing_authority": { "type": "string" },
+            "date_of_expiry": { "type": "string", "format": "date" },
+            "type_of_document": { "type": "string" }
+          }
+        },
+        "address_employer_marital_particulars": {
+          "type": "object",
+          "properties": {
+            "permanent_residential_address": { "type": "string" },
+            "period_resident_at_address": { "type": "string" },
+            "country_of_permanent_residence": { "type": "string" },
+            "period_resident_in_country": { "type": "string" },
+            "occupation_or_profession": { "type": "string" },
+            "employer_university_org_name": { "type": "string" },
+            "employer_address": { "type": "string" },
+            "telephone_number": { "type": "string" },
+            "home_telephone_no": { "type": "string" },
+            "cellphone_no": { "type": "string" },
+            "email_address": { "type": "string" },
+            "self_employed_business_details": { "type": "string" },
+            "marital_status": { "type": "string", "enum": ["Never married", "Married", "Widowed", "Separated", "Divorced"] },
+            "spouse_first_names": { "type": "string" },
+            "spouse_maiden_name": { "type": "string" },
+            "marriage_date_and_place": { "type": "string" },
+            "spouse_date_of_birth": { "type": "string", "format": "date" },
+            "spouse_nationality": { "type": "string" }
+          }
+        },
+        "visit_to_south_africa": {
+          "type": "object",
+          "properties": {
+            "expected_date_of_arrival": { "type": "string", "format": "date" },
+            "place_of_arrival": { "type": "string" },
+            "purpose_of_visit": { "type": "string" },
+            "duration_of_stay": { "type": "string" },
+            "number_of_entries_required": { "type": "string", "enum": ["Single", "Two", "Multiple"] },
+            "proposed_residential_address_in_sa": { "type": "string" },
+            "name_of_host_or_hotel": { "type": "string" },
+            "telephone_of_host_or_hotel": { "type": "string" },
+            "organisations_or_persons_contacting": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": { "name": { "type": "string" }, "address": { "type": "string" }, "relationship": { "type": "string" } }
+              }
+            },
+            "sa_host_id_or_pr_permit_number": { "type": "string" }
+          }
+        },
+        "questionnaire": {
+          "type": "object",
+          "properties": {
+            "applied_for_permanent_settlement": { "type": "boolean" },
+            "refused_entry_into_republic": { "type": "boolean" },
+            "deported_or_ordered_to_leave": { "type": "boolean" },
+            "convicted_of_crime": { "type": "boolean" },
+            "criminal_action_pending": { "type": "boolean" },
+            "unrehabilitated_insolvent": { "type": "boolean" },
+            "suffering_tb_contagious_disease_deficiency": { "type": "boolean" },
+            "judicially_declared_incompetent": { "type": "boolean" },
+            "member_of_organisation_advocating_violence_terrorism": { "type": "boolean" },
+            "affirmative_particulars": { "type": "string" }
+          }
+        },
+        "transit_passengers_only": {
+          "type": "object",
+          "properties": {
+            "destination_after_leaving": { "type": "string" },
+            "mode_of_travel": { "type": "string" },
+            "intended_date_and_port_of_departure": { "type": "string" },
+            "holds_destination_visa_permit": { "type": "boolean" }
+          }
+        },
+        "declaration_and_signature": {
+          "type": "object",
+          "properties": {
+            "applicant_name": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "official_use_decision": {
+          "type": "object",
+          "properties": {
+            "approved_not_approved_by": { "type": "string" },
+            "date_on": { "type": "string", "format": "date" },
+            "type_of_visa": { "type": "string" },
+            "reasons_for_decision": { "type": "string" }
+          }
+        },
+        "checklist_attached_documents": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "form_18_dha_947": {
+      "type": "object",
+      "title": "Application for Permanent Residence Permit (Form 18)",
+      "properties": {
+        "declaration_and_principal_applicant": {
+          "type": "object",
+          "properties": {
+            "main_applicant_name": { "type": "string" },
+            "passport_number": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "list_of_applicants": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "surname": { "type": "string" },
+                  "first_names": { "type": "string" },
+                  "date_of_birth": { "type": "string", "format": "date" },
+                  "gender": { "type": "string" },
+                  "relationship": { "type": "string" },
+                  "applicable_section_of_act": { "type": "string" },
+                  "reference_number": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "official_use_only": {
+          "type": "object",
+          "properties": {
+            "reference_no": { "type": "string" },
+            "office": { "type": "string" },
+            "application_processed_by": { "type": "string" },
+            "decision": { "type": "string", "enum": ["Approved", "Rejected"] },
+            "reasons_for_decision": { "type": "string" },
+            "conditional_approval_conditions": { "type": "string" },
+            "signature": { "type": "string" },
+            "rank": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "details_of_principal_applicant": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "surname": { "type": "string" },
+            "first_name": { "type": "string" },
+            "maiden_name": { "type": "string" },
+            "other_former_surnames": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "country_of_birth": { "type": "string" },
+            "nationality_of_birth": { "type": "string" },
+            "present_nationality": { "type": "string" },
+            "passport_no": { "type": "string" },
+            "passport_expiry_date": { "type": "string", "format": "date" },
+            "issuing_authority": { "type": "string" },
+            "marital_status": { "type": "string" },
+            "type_of_marriage_spousal_relationship": { "type": "string" },
+            "date_of_marriage_spousal_relationship": { "type": "string", "format": "date" },
+            "previous_marriage_spousal_relationship_details": { "type": "string" },
+            "parental_rights_responsibilities_children_details": { "type": "string" },
+            "present_residential_address": { "type": "string" },
+            "residential_since_date": { "type": "string" },
+            "postal_address": { "type": "string" },
+            "telephone_numbers": { "type": "object", "properties": { "home": { "type": "string" }, "work": { "type": "string" }, "cellphone": { "type": "string" } } },
+            "email_address": { "type": "string" },
+            "occupation": { "type": "string" },
+            "type_of_temporary_residence_visa_held": { "type": "string" },
+            "visa_valid_until": { "type": "string", "format": "date" },
+            "issuing_office": { "type": "string" },
+            "parents_father_details": { "type": "object", "properties": { "surname": { "type": "string" }, "first_name": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "place_of_birth": { "type": "string" }, "country": { "type": "string" } } },
+            "parents_mother_details": { "type": "object", "properties": { "surname": { "type": "string" }, "first_name": { "type": "string" }, "maiden_name": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "place_of_birth": { "type": "string" }, "country": { "type": "string" } } }
+          }
+        },
+        "details_of_applicant_spouse": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "surname": { "type": "string" },
+            "first_names": { "type": "string" },
+            "maiden_name": { "type": "string" },
+            "former_surnames": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "place_of_birth": { "type": "string" },
+            "country_of_birth": { "type": "string" },
+            "nationality_at_birth": { "type": "string" },
+            "present_nationality": { "type": "string" },
+            "passport_no": { "type": "string" },
+            "expiry_date": { "type": "string", "format": "date" },
+            "issuing_authority": { "type": "string" },
+            "spouse_parents_details": { "type": "object" },
+            "occupation": { "type": "string" },
+            "temporary_residence_visa_held": { "type": "string" }
+          }
+        },
+        "children_relatives_employment_financial_details": {
+          "type": "object",
+          "properties": {
+            "children_not_included": { "type": "array", "items": { "type": "object" } },
+            "relatives_friends_in_sa": { "type": "array", "items": { "type": "object" } },
+            "employment_record_principal_applicant": { "type": "array", "items": { "type": "object" } },
+            "occupations_to_be_followed_in_sa": { "type": "object", "properties": { "principal_applicant": { "type": "string" }, "spouse": { "type": "string" } } },
+            "funds_to_be_transferred": { "type": "object", "properties": { "principal_applicant": { "type": "string" }, "spouse": { "type": "string" } } },
+            "pension_or_private_income": { "type": "object", "properties": { "principal_applicant": { "type": "string" }, "spouse": { "type": "string" } } },
+            "other_assets": { "type": "object", "properties": { "principal_applicant": { "type": "string" }, "spouse": { "type": "string" } } },
+            "family_remaining_in_country_of_origin": { "type": "array", "items": { "type": "object" } },
+            "address_history_last_10_years": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "questionnaire_and_general_info": {
+          "type": "object",
+          "properties": {
+            "convicted_of_criminal_offence": { "type": "boolean" },
+            "declared_insolvent": { "type": "boolean" },
+            "rehabilitated_if_insolvent": { "type": "boolean" },
+            "subject_of_civil_action": { "type": "boolean" },
+            "civil_or_criminal_enquiry_pending": { "type": "boolean" },
+            "refused_entry_removed_deported": { "type": "boolean" },
+            "affirmative_full_details": { "type": "string" },
+            "sa_contact_address_and_phone": { "type": "string" },
+            "spouse_sa_employment_details": { "type": "string" }
+          }
+        },
+        "declarations_and_signatures": {
+          "type": "object",
+          "properties": {
+            "signature_applicant": { "type": "string" },
+            "date_applicant": { "type": "string", "format": "date" },
+            "signature_spouse": { "type": "string" },
+            "date_spouse": { "type": "string", "format": "date" }
+          }
+        },
+        "checklist_attached_documents": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SouthAfricaImmigrationRegulations2014SecondAmendmentGazette",
+  "description": "Comprehensive schema capturing all administrative details, amendments, and forms (Form 8, Form 10, Form 11, Form 18) for Government Gazette No. 50675.",
+  "type": "object",
+  "properties": {
+    "gazette_metadata": {
+      "type": "object",
+      "properties": {
+        "gazette_number": { "type": "string", "example": "50675" },
+        "volume": { "type": "string", "example": "707" },
+        "publication_date": { "type": "string", "format": "date", "example": "2024-05-20" },
+        "regulation_gazette_number": { "type": "string", "example": "11704" },
+        "notice_number": { "type": "string", "example": "R. 4847" },
+        "department": { "type": "string", "example": "Department of Home Affairs" },
+        "act": { "type": "string", "example": "Immigration Act 13 of 2002" },
+        "title": { "type": "string", "example": "Second Amendment of the Immigration Regulations, 2014" },
+        "minister_signature": {
+          "type": "object",
+          "properties": { "name": { "type": "string" }, "title": { "type": "string" }, "date": { "type": "string", "format": "date" } }
+        }
+      }
+    },
+    "form_8_dha_1738": {
+      "type": "object",
+      "title": "Application for Temporary Residence Visa (Form 8)",
+      "properties": {
+        "official_use_only": {
+          "type": "object",
+          "properties": {
+            "office_of_application": { "type": "string" },
+            "track_and_trace_ref_no": { "type": "string" },
+            "date_received": { "type": "string", "format": "date" },
+            "date_forwarded_to_head_office": { "type": "string", "format": "date" },
+            "application_quality_checked_by_on": { "type": "string" },
+            "date_received_at_head_office": { "type": "string", "format": "date" },
+            "passport_seen_returned_by_on": { "type": "string" },
+            "decision_and_date": { "type": "string" },
+            "fee_currency_and_amount": { "type": "string" },
+            "fee_received_by_on": { "type": "string" },
+            "receipt_no": { "type": "string" },
+            "conditions_of_permit_reason_for_refusal": { "type": "string" }
+          }
+        },
+        "category_of_visa_applied_for": {
+          "type": "string",
+          "enum": [
+            "Visitor's Visa", "Study Visa (> 3 months)", "Treaty Visa", "Relative's Visa",
+            "Medical Treatment Visa (> 3 months)", "Intra-company Transfer", "Exchange Visa",
+            "Business Visa", "Work Visa: Critical Skills", "Work Visa: General",
+            "Work Visa: Intra-company transfer", "Retired Person's Visa", "Corporate Worker Certificate"
+          ]
+        },
+        "section_1_personal_details": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string", "enum": ["Mr", "Mrs", "Ms", "Other"] },
+            "title_other_specify": { "type": "string" },
+            "surname_family_name": { "type": "string" },
+            "given_names": { "type": "string" },
+            "maiden_name": { "type": "string" },
+            "stage_name": { "type": "string" },
+            "previous_alternative_names_aliases": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "place_of_birth_town_city": { "type": "string" },
+            "place_of_birth_country": { "type": "string" },
+            "marital_status": {
+              "type": "string",
+              "enum": ["Never married", "Married", "Separated", "Widow/Widower", "Legally recognised spousal relationship", "Divorced"]
+            },
+            "separated_details": { "type": "string" },
+            "divorced_details": {
+              "type": "object",
+              "properties": { "date_of_divorce": { "type": "string", "format": "date" }, "divorce_order_attached": { "type": "boolean" } }
+            }
+          }
+        },
+        "section_2_citizenship_details": {
+          "type": "object",
+          "properties": {
+            "present_country_of_citizenship": { "type": "string" },
+            "acquisition_details_if_not_by_birth": { "type": "string" },
+            "holds_other_citizenship": { "type": "boolean" },
+            "other_citizenship_country_details": { "type": "string" }
+          }
+        },
+        "section_3_passport_details": {
+          "type": "object",
+          "properties": {
+            "passport_number": { "type": "string" },
+            "country_of_issue": { "type": "string" },
+            "date_of_issue": { "type": "string", "format": "date" },
+            "expiry_date": { "type": "string", "format": "date" },
+            "other_travel_document_type": { "type": "string" },
+            "other_travel_document_number": { "type": "string" },
+            "other_travel_document_expiry_date": { "type": "string", "format": "date" }
+          }
+        },
+        "section_4_addresses": {
+          "type": "object",
+          "properties": {
+            "residential_address": { "type": "string" },
+            "residential_postal_code": { "type": "string" },
+            "postal_address": { "type": "string" },
+            "postal_code": { "type": "string" },
+            "country_of_ordinary_residence": { "type": "string" },
+            "telephone_work": { "type": "string" },
+            "telephone_home": { "type": "string" },
+            "cellphone_number": { "type": "string" },
+            "email_address": { "type": "string" },
+            "previous_addresses_last_10_years": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": { "address": { "type": "string" }, "period": { "type": "string" }, "country": { "type": "string" } }
+              }
+            },
+            "right_of_reentry_country_of_origin": { "type": "boolean" },
+            "right_of_reentry_period_status_if_no": { "type": "string" },
+            "applied_for_asylum_or_refugee_status": { "type": "boolean" },
+            "asylum_country_specify": { "type": "string" },
+            "contact_person_in_sa": {
+              "type": "object",
+              "properties": {
+                "relationship": { "type": "string", "enum": ["Friend", "Business Associate", "Relative", "Other"] },
+                "name": { "type": "string" },
+                "address": { "type": "string" },
+                "telephone_work": { "type": "string" },
+                "telephone_home": { "type": "string" },
+                "cellphone_number": { "type": "string" },
+                "email_address": { "type": "string" }
+              }
+            },
+            "relatives_friends_in_republic": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "address": { "type": "string" },
+                  "relationship": { "type": "string" },
+                  "identity_no": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "section_5_intentions_proposed_duration": {
+          "type": "object",
+          "properties": {
+            "proposed_date_place_departure_from_republic": { "type": "string" },
+            "anticipated_date_place_arrival_in_republic": { "type": "string" },
+            "travelling_by": { "type": "string", "enum": ["Air", "Road", "Rail", "Sea"] },
+            "carrier": { "type": "string" },
+            "intended_duration_of_stay": { "type": "string" },
+            "intended_date_of_departure": { "type": "string", "format": "date" },
+            "proposed_activities_outline": { "type": "string" },
+            "details_of_intended_stay": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name_of_place": { "type": "string" },
+                  "address": { "type": "string" },
+                  "period_of_stay": { "type": "string" },
+                  "date_of_departure": { "type": "string", "format": "date" }
+                }
+              }
+            }
+          }
+        },
+        "section_6_maintenance_deportation": {
+          "type": "object",
+          "properties": {
+            "available_funds_type": { "type": "string" },
+            "available_funds_amount": { "type": "number" },
+            "south_african_rand_equivalent": { "type": "number" },
+            "return_or_onward_ticket_no": { "type": "string" },
+            "ticket_expiry_date": { "type": "string", "format": "date" },
+            "other_arrangements": { "type": "string" }
+          }
+        },
+        "section_7_accompanying_family_dependants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "full_names": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "relationship": { "type": "string" },
+              "passport_no": { "type": "string" },
+              "expiry_date": { "type": "string", "format": "date" },
+              "nationality": { "type": "string" },
+              "occupation": { "type": "string" }
+            }
+          }
+        },
+        "section_8_security_health_questionnaire": {
+          "type": "object",
+          "properties": {
+            "convicted_of_crime": { "type": "boolean" },
+            "criminal_civil_case_pending": { "type": "boolean" },
+            "suffering_tb_or_contagious_disease_mental_physical_deficiency": { "type": "boolean" },
+            "unrehabilitated_insolvent": { "type": "boolean" },
+            "judicially_declared_incompetent": { "type": "boolean" },
+            "member_of_organisation_advocating_social_violence_hatred": { "type": "boolean" },
+            "declared_undesirable_by_dg": { "type": "boolean" },
+            "refused_entry_or_deported": { "type": "boolean" },
+            "affirmative_full_particulars": { "type": "string" }
+          }
+        },
+        "section_9_additional_information": { "type": "string" },
+        "section_10_declaration_by_applicant": {
+          "type": "object",
+          "properties": {
+            "signature_of_applicant": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "checklist_attached_documents": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "form_10_dha_1739": {
+      "type": "object",
+      "title": "Application for Renewal of Existing Visa (Form 10)",
+      "properties": {
+        "official_use_only": {
+          "type": "object",
+          "properties": {
+            "office_of_application": { "type": "string" },
+            "date_received": { "type": "string", "format": "date" },
+            "submission_quality_checked_by": { "type": "string" },
+            "passport_checked_and_returned_by": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "persal_number": { "type": "string" },
+            "receipt_no_for_fee_paid": { "type": "string" },
+            "track_and_trace_ref_no": { "type": "string" },
+            "file_no": { "type": "string" },
+            "date_forwarded_to_head_office": { "type": "string", "format": "date" },
+            "date_received_at_head_office": { "type": "string", "format": "date" },
+            "decision": { "type": "string" },
+            "conditions_of_visa_reasons_for_refusal": { "type": "string" }
+          }
+        },
+        "particulars_of_applicant": {
+          "type": "object",
+          "properties": {
+            "surname_family_name": { "type": "string" },
+            "first_names": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "residential_address_in_republic": { "type": "string" },
+            "telephone_no": { "type": "string" },
+            "work_telephone_no": { "type": "string" },
+            "cellphone_no": { "type": "string" },
+            "email_address": { "type": "string" }
+          }
+        },
+        "passport_details": {
+          "type": "object",
+          "properties": {
+            "passport_number": { "type": "string" },
+            "issuing_country": { "type": "string" },
+            "date_of_issue": { "type": "string", "format": "date" },
+            "valid_until": { "type": "string", "format": "date" },
+            "other_identity_document": {
+              "type": "object",
+              "properties": { "type": { "type": "string" }, "number": { "type": "string" }, "date_of_issue": { "type": "string", "format": "date" }, "expiry_date": { "type": "string", "format": "date" } }
+            }
+          }
+        },
+        "original_visa_details": {
+          "type": "object",
+          "properties": {
+            "date_of_entry": { "type": "string", "format": "date" },
+            "place_of_entry": { "type": "string" },
+            "purpose_of_entry": { "type": "string" },
+            "visa_no": { "type": "string" },
+            "date_of_expiry": { "type": "string", "format": "date" },
+            "type_of_visa": { "type": "string" }
+          }
+        },
+        "subsequent_visa_or_renewal_details": {
+          "type": "object",
+          "properties": {
+            "type_of_visa": { "type": "string" },
+            "date_of_issue_renewal": { "type": "string", "format": "date" },
+            "issued_at": { "type": "string" },
+            "date_of_expiry": { "type": "string", "format": "date" },
+            "visa_required_until_date": { "type": "string", "format": "date" },
+            "reason_for_request": { "type": "string" }
+          }
+        },
+        "declaration_by_applicant": {
+          "type": "object",
+          "properties": {
+            "signature": { "type": "string" },
+            "signed_at": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "checklist_attached_documents": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "form_11_dha_84": {
+      "type": "object",
+      "title": "Application for Port of Entry Visa or Transit Visa (Form 11)",
+      "properties": {
+        "personal_particulars": {
+          "type": "object",
+          "properties": {
+            "surname": { "type": "string" },
+            "first_names_in_full": { "type": "string" },
+            "maiden_name": { "type": "string" },
+            "previous_surnames": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "country_of_birth": { "type": "string" },
+            "gender": { "type": "string" },
+            "nationality": { "type": "string" },
+            "nationality_obtained_where_and_when": { "type": "string" },
+            "original_nationality_if_naturalised": { "type": "string" },
+            "passport_travel_document_number": { "type": "string" },
+            "issuing_authority": { "type": "string" },
+            "date_of_expiry": { "type": "string", "format": "date" },
+            "type_of_document": { "type": "string" }
+          }
+        },
+        "address_employer_marital_particulars": {
+          "type": "object",
+          "properties": {
+            "permanent_residential_address": { "type": "string" },
+            "period_resident_at_address": { "type": "string" },
+            "country_of_permanent_residence": { "type": "string" },
+            "period_resident_in_country": { "type": "string" },
+            "occupation_or_profession": { "type": "string" },
+            "employer_university_org_name": { "type": "string" },
+            "employer_address": { "type": "string" },
+            "telephone_number": { "type": "string" },
+            "home_telephone_no": { "type": "string" },
+            "cellphone_no": { "type": "string" },
+            "email_address": { "type": "string" },
+            "self_employed_business_details": { "type": "string" },
+            "marital_status": { "type": "string", "enum": ["Never married", "Married", "Widowed", "Separated", "Divorced"] },
+            "spouse_first_names": { "type": "string" },
+            "spouse_maiden_name": { "type": "string" },
+            "marriage_date_and_place": { "type": "string" },
+            "spouse_date_of_birth": { "type": "string", "format": "date" },
+            "spouse_nationality": { "type": "string" }
+          }
+        },
+        "visit_to_south_africa": {
+          "type": "object",
+          "properties": {
+            "expected_date_of_arrival": { "type": "string", "format": "date" },
+            "place_of_arrival": { "type": "string" },
+            "purpose_of_visit": { "type": "string" },
+            "duration_of_stay": { "type": "string" },
+            "number_of_entries_required": { "type": "string", "enum": ["Single", "Two", "Multiple"] },
+            "proposed_residential_address_in_sa": { "type": "string" },
+            "name_of_host_or_hotel": { "type": "string" },
+            "telephone_of_host_or_hotel": { "type": "string" },
+            "organisations_or_persons_contacting": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": { "name": { "type": "string" }, "address": { "type": "string" }, "relationship": { "type": "string" } }
+              }
+            },
+            "sa_host_id_or_pr_permit_number": { "type": "string" }
+          }
+        },
+        "questionnaire": {
+          "type": "object",
+          "properties": {
+            "applied_for_permanent_settlement": { "type": "boolean" },
+            "refused_entry_into_republic": { "type": "boolean" },
+            "deported_or_ordered_to_leave": { "type": "boolean" },
+            "convicted_of_crime": { "type": "boolean" },
+            "criminal_action_pending": { "type": "boolean" },
+            "unrehabilitated_insolvent": { "type": "boolean" },
+            "suffering_tb_contagious_disease_deficiency": { "type": "boolean" },
+            "judicially_declared_incompetent": { "type": "boolean" },
+            "member_of_organisation_advocating_violence_terrorism": { "type": "boolean" },
+            "affirmative_particulars": { "type": "string" }
+          }
+        },
+        "transit_passengers_only": {
+          "type": "object",
+          "properties": {
+            "destination_after_leaving": { "type": "string" },
+            "mode_of_travel": { "type": "string" },
+            "intended_date_and_port_of_departure": { "type": "string" },
+            "holds_destination_visa_permit": { "type": "boolean" }
+          }
+        },
+        "declaration_and_signature": {
+          "type": "object",
+          "properties": {
+            "applicant_name": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "official_use_decision": {
+          "type": "object",
+          "properties": {
+            "approved_not_approved_by": { "type": "string" },
+            "date_on": { "type": "string", "format": "date" },
+            "type_of_visa": { "type": "string" },
+            "reasons_for_decision": { "type": "string" }
+          }
+        },
+        "checklist_attached_documents": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "form_18_dha_947": {
+      "type": "object",
+      "title": "Application for Permanent Residence Permit (Form 18)",
+      "properties": {
+        "declaration_and_principal_applicant": {
+          "type": "object",
+          "properties": {
+            "main_applicant_name": { "type": "string" },
+            "passport_number": { "type": "string" },
+            "signature": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "list_of_applicants": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "surname": { "type": "string" },
+                  "first_names": { "type": "string" },
+                  "date_of_birth": { "type": "string", "format": "date" },
+                  "gender": { "type": "string" },
+                  "relationship": { "type": "string" },
+                  "applicable_section_of_act": { "type": "string" },
+                  "reference_number": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "official_use_only": {
+          "type": "object",
+          "properties": {
+            "reference_no": { "type": "string" },
+            "office": { "type": "string" },
+            "application_processed_by": { "type": "string" },
+            "decision": { "type": "string", "enum": ["Approved", "Rejected"] },
+            "reasons_for_decision": { "type": "string" },
+            "conditional_approval_conditions": { "type": "string" },
+            "signature": { "type": "string" },
+            "rank": { "type": "string" },
+            "date": { "type": "string", "format": "date" }
+          }
+        },
+        "details_of_principal_applicant": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "surname": { "type": "string" },
+            "first_name": { "type": "string" },
+            "maiden_name": { "type": "string" },
+            "other_former_surnames": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "country_of_birth": { "type": "string" },
+            "nationality_of_birth": { "type": "string" },
+            "present_nationality": { "type": "string" },
+            "passport_no": { "type": "string" },
+            "passport_expiry_date": { "type": "string", "format": "date" },
+            "issuing_authority": { "type": "string" },
+            "marital_status": { "type": "string" },
+            "type_of_marriage_spousal_relationship": { "type": "string" },
+            "date_of_marriage_spousal_relationship": { "type": "string", "format": "date" },
+            "previous_marriage_spousal_relationship_details": { "type": "string" },
+            "parental_rights_responsibilities_children_details": { "type": "string" },
+            "present_residential_address": { "type": "string" },
+            "residential_since_date": { "type": "string" },
+            "postal_address": { "type": "string" },
+            "telephone_numbers": { "type": "object", "properties": { "home": { "type": "string" }, "work": { "type": "string" }, "cellphone": { "type": "string" } } },
+            "email_address": { "type": "string" },
+            "occupation": { "type": "string" },
+            "type_of_temporary_residence_visa_held": { "type": "string" },
+            "visa_valid_until": { "type": "string", "format": "date" },
+            "issuing_office": { "type": "string" },
+            "parents_father_details": { "type": "object", "properties": { "surname": { "type": "string" }, "first_name": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "place_of_birth": { "type": "string" }, "country": { "type": "string" } } },
+            "parents_mother_details": { "type": "object", "properties": { "surname": { "type": "string" }, "first_name": { "type": "string" }, "maiden_name": { "type": "string" }, "date_of_birth": { "type": "string", "format": "date" }, "place_of_birth": { "type": "string" }, "country": { "type": "string" } } }
+          }
+        },
+        "details_of_applicant_spouse": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "surname": { "type": "string" },
+            "first_names": { "type": "string" },
+            "maiden_name": { "type": "string" },
+            "former_surnames": { "type": "string" },
+            "date_of_birth": { "type": "string", "format": "date" },
+            "place_of_birth": { "type": "string" },
+            "country_of_birth": { "type": "string" },
+            "nationality_at_birth": { "type": "string" },
+            "present_nationality": { "type": "string" },
+            "passport_no": { "type": "string" },
+            "expiry_date": { "type": "string", "format": "date" },
+            "issuing_authority": { "type": "string" },
+            "spouse_parents_details": { "type": "object" },
+            "occupation": { "type": "string" },
+            "temporary_residence_visa_held": { "type": "string" }
+          }
+        },
+        "children_relatives_employment_financial_details": {
+          "type": "object",
+          "properties": {
+            "children_not_included": { "type": "array", "items": { "type": "object" } },
+            "relatives_friends_in_sa": { "type": "array", "items": { "type": "object" } },
+            "employment_record_principal_applicant": { "type": "array", "items": { "type": "object" } },
+            "occupations_to_be_followed_in_sa": { "type": "object", "properties": { "principal_applicant": { "type": "string" }, "spouse": { "type": "string" } } },
+            "funds_to_be_transferred": { "type": "object", "properties": { "principal_applicant": { "type": "string" }, "spouse": { "type": "string" } } },
+            "pension_or_private_income": { "type": "object", "properties": { "principal_applicant": { "type": "string" }, "spouse": { "type": "string" } } },
+            "other_assets": { "type": "object", "properties": { "principal_applicant": { "type": "string" }, "spouse": { "type": "string" } } },
+            "family_remaining_in_country_of_origin": { "type": "array", "items": { "type": "object" } },
+            "address_history_last_10_years": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "questionnaire_and_general_info": {
+          "type": "object",
+          "properties": {
+            "convicted_of_criminal_offence": { "type": "boolean" },
+            "declared_insolvent": { "type": "boolean" },
+            "rehabilitated_if_insolvent": { "type": "boolean" },
+            "subject_of_civil_action": { "type": "boolean" },
+            "civil_or_criminal_enquiry_pending": { "type": "boolean" },
+            "refused_entry_removed_deported": { "type": "boolean" },
+            "affirmative_full_details": { "type": "string" },
+            "sa_contact_address_and_phone": { "type": "string" },
+            "spouse_sa_employment_details": { "type": "string" }
+          }
+        },
+        "declarations_and_signatures": {
+          "type": "object",
+          "properties": {
+            "signature_applicant": { "type": "string" },
+            "date_applicant": { "type": "string", "format": "date" },
+            "signature_spouse": { "type": "string" },
+            "date_spouse": { "type": "string", "format": "date" }
+          }
+        },
+        "checklist_attached_documents": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
+
+Complete Extracted Text and Field Map
+Document Front Matter & Header (Pages 1–3)
+Extracted Text
+ * Header / Gazette Info:
+   * Government Gazette / Staatskoerant, Republic of South Africa / Republiek van Suid-Afrika
+   * Regulation Gazette No. 11704 / Regulasiekoerant
+   * Vol. 707, Pretoria, 20 May / Mei 2024, No. 50675
+   * ISSN 1682-5845
+   * AIDS HELPLINE: 0800-0123-22
+ * Important Notice:
+   * "The Government Printing Works will not be held responsible for any errors that might occur due to the submission of incomplete / incorrect / illegible copy."
+ * Contents Page:
+   * Government Notices / Goewermentskennisgewings
+   * Department of Home Affairs / Departement van Binnelandse Sake
+   * R. 4847: Immigration Act (13/2002): Second Amendment of the Immigration Regulations, 2014 (Gazette No. 50675, Page 3)
+ * Notice Header:
+   * NO. R. 4847 — 20 May 2024
+   * "The Minister of Home Affairs has, in terms of section 7(1) of the Immigration Act 13 of 2002 made the Regulations in the Schedule."
+   * Signed: DR P.A. MOTSOALEDI, MINISTER OF HOME AFFAIRS, DATE: 19/5/2024.
+Schedule: Amendment Regulations (Pages 4–9)
+Extracted Text & Field Mapping
+Section 1: Definition
+ * Text: In this Schedule, "the Regulations" means the Immigration Regulations, 2014, published under Government Notice No. R. 413 of 22 May 2014, as amended by Government Notice No. R. 1328 of 29 November 2018.
+Section 2: Amendment of regulation 1 of Regulations
+ * Text:
+   * (a) Substitution for definition of "police clearance certificate":
+     > "police clearance certificate" means a certificate issued, in respect of criminal records or the character of an applicant, by the police or competent authority in each country where an applicant, after having attained the age of 18 years, resided for 12 months or longer during the five years immediately preceding the date of application, which certificate shall not be older than six months at the time of submission: Provided that in the case of a renewal or extension of a visa, such a certificate shall be issued by the South African Police Service or competent authority of the Republic;
+     > 
+   * (b) Deletion of definition of "radiological report".
+Section 3: Amendment of regulation 9 of Regulations
+ * Text:
+   * (a) Subregulation (1)(c) substituted:
+     > "(c) a medical report in respect of each applicant, excluding applicants for the visa contemplated in section 11(1)(a) of the Act;"
+     > 
+   * (b) Subregulation (9)(a) addition of sub-paragraphs:
+     > "(iii) is the spouse or child of a South African citizen or permanent resident;"
+     > "(iv) is the parent of a citizen or permanent resident child;"
+     > 
+Section 4: Amendment of regulation 11 of Regulations
+ * Text: Subregulation (4) substituted:
+   * Activities contemplated in section 11(1)(b)(iv) of the Act:
+     * (a) Work conducted for foreign employer (international school teaching, film/advertising workers [actor, cameraman, hairstylist, makeup artist, lighting/sound engineer], foreign journalist seconded, visiting professor/lecturer/researcher, artist writing/painting/sculpting, entertainment industry worker in transit, tour leader/host, religious leader).
+     * (b) Remote work for foreign employer / foreign source income:
+       * (i) Gross income no less than equivalent of R1,000,000.00 per annum.
+       * (ii) Visa ≤ 6 months within 36-month period: may apply to SARS for tax registration exemption.
+       * (iii) Visa > 6 months within 36-month period: must register with SARS.
+       * (iv) Complies with SA employment legislation where applicable.
+     * (c) Accompanying visa holder (sections 11, 13, 14, 15, 17, 18, 19, 20 or 22) as spouse/child.
+     * (d) Testifying as state witness in criminal court case (initiated by Deputy Director of Public Prosecutions).
+Section 5: Amendment of regulation 18 of Regulations
+ * Text:
+   * (a) Subregulation (5)(b) substitution: Professional body registration proof SAQA recognized under NQF Act section 13(1)(i). Application proof = max 12 months visa; Certificate proof = full period under subregulation (6).
+   * (b) Insertion of subregulations (12) and (13):
+     * (12) Points-based system determined by Minister by notice in Gazette for section 19 work visas.
+     * (13) Factors considered: (a) age, (b) qualifications, (c) language skills, (d) work experience, (e) offer of employment, (f) salary, (g) any other relevant factor.
+Section 6: Amendment of regulation 20 of Regulations
+ * Text: Subregulation (9)(h) substituted: SAQA professional body registration proof for corporate visa.
+Section 7: Amendment of regulation 23 of Regulations
+ * Text: Subregulation (2)(f) substituted with "(f) a medical report;".
+Section 8: Amendment of regulation 24 of Regulations
+ * Text: Subregulations (5)(d) & (6)(c) substituted regarding SAQA professional body registration proof for business visa.
+Section 9: Amendment of Annexure A
+ * Text: Annexure A amended by substitution of Forms 8, 10, 11, and 18.
+Section 10: Short Title and Commencement
+ * Text: Second Amendment of the Immigration Regulations, 2014; comes into operation on date of publication (20 May 2024).
+Form 8 (DHA-1738): Application for Temporary Residence Visa (Pages 10–28)
+Form Field Map
+| Form Field / Section | Field Key / Identifier | Field Type | Data / Options Description |
+|---|---|---|---|
+| Visa Category Selection | category_of_visa_applied_for | Checkbox / Enum | Visitor's, Study (>3m), Treaty, Relative's, Medical Treatment (>3m), Intra-company transfer, Retired Person's, Exchange, Business, Critical Skills Work, General Work, Intra-company Work, Corporate Worker Certificate |
+| Official Use Header | official_use_only.* | Input fields | Office of application, Track & Trace Ref, Receipt No, Fee, Quality check info, Head office dates, Decision date, Conditions/Refusal reasons |
+| Section 1: Personal Details | title, surname, given_names, maiden_name, stage_name, aliases, dob, pob_city, pob_country, marital_status | Text / Date / Radio | Mr/Mrs/Ms/Other, Name strings, Date of Birth, Birth place, Marital status options, Separation/Divorce details, Marriage affidavit attachments |
+| Section 2: Citizenship Details | present_citizenship, acquisition_condition, other_citizenship_flag, other_citizenship_country | Text / Boolean | Current country, How acquired, Dual citizenship Yes/No + details |
+| Section 3: Passport Details | passport_number, country_of_issue, issue_date, expiry_date, other_travel_doc | Text / Date | Passport No, Issuing country, Issue & Expiry dates, Secondary document type/number |
+| Section 4: Addresses | residential_address, postal_address, country_ordinary_residence, phone_work, phone_home, cellphone, email, past_10yr_addresses, reentry_right, asylum_history, sa_contact_person, relatives_in_sa | Text / Table / Boolean | Full physical & postal address, Phone numbers, 10-year residence table, Asylum history Yes/No, Contact person in SA, Table of relatives in SA |
+| Section 5: Intentions / Duration | proposed_departure, anticipated_arrival, travel_mode, carrier, intended_duration, departure_date, proposed_activities, stay_address_details | Text / Date / Radio | Departure/Arrival dates/places, Mode (Air/Road/Rail/Sea), Duration (days/weeks/months/years), Accommodation details table |
+| Section 6: Maintenance / Deportation | available_funds_type, available_funds_amount, zar_equivalent, return_ticket_no, ticket_expiry | Text / Numeric / Date | Foreign funds type/amount, ZAR conversion value, Ticket number and expiry date |
+| Section 7: Accompanying Family | accompanying_dependants_table, future_entry_intent, future_entry_date_reasons | Table / Boolean / Text | Table: Full name, DOB, Relationship, Passport No, Expiry, Nationality, Occupation. Delayed entry details. |
+| Section 8: Security / Health Questionnaire | convicted_crime, pending_case, tb_contagious_disease, unrehabilitated_insolvent, judicially_incompetent, social_violence_hatred_org, undesirable_declared, deported_refused_entry, affirmative_particulars | Boolean (Yes/No) / Text | 8 Yes/No questions regarding criminal, civil, health, insolvency, desirability, and deportation history + text field for full details |
+| Section 9: Additional Info | additional_information | Long Text | Free text area for applicant's supplemental information |
+| Section 10: Declaration | applicant_signature, declaration_date | Signature / Date | Solemn declaration signature and submission date |
+| Checklist Section | checklist_documents.* | Checkbox (Yes/No) | Multi-category checklist (General, Study, Treaty, Business, Medical, Relative, General Work, Critical Skills, Intra-company, Corporate, Retired, Exchange) |
+Form 10 (DHA-1739): Application for Renewal of Existing Visa (Pages 29–34)
+Form Field Map
+| Form Field / Section | Field Key / Identifier | Field Type | Data / Options Description |
+|---|---|---|---|
+| Official Use Header | official_use_only.* | Input fields | Application office, Date received, Quality checker, Passport checker, Persal No, Receipt No, Track & Trace Ref, File No, Head Office dates, Decision |
+| Particulars of Applicant | surname, first_names, dob, residential_address_sa, tel, work_tel, cell, email | Text / Date | Basic demographic and local contact details of applicant |
+| Passport Details | passport_no, issuing_country, issue_date, valid_until, other_id_doc | Text / Date | Passport information and alternate ID documents |
+| Original Visa Details | date_of_entry, place_of_entry, purpose_of_entry, visa_no, date_of_expiry, type_of_visa | Text / Date | Initial entry visa specifications |
+| Subsequent Visa / Renewal | type_of_visa, issue_renewal_date, issued_at, date_of_expiry, visa_required_until_date, reason_for_request | Text / Date | Recent visa renewal info and requested extension date with justification |
+| Declaration by Applicant | signature, signed_at, date | Signature / Text / Date | Formal declaration signing details |
+| Checklist Section | checklist_renewal_documents.* | Checkbox (Yes/No) | Checklists grouped by visa type (Port of Entry, Visitor's ≤3m, Visitor's >3m, Study, Treaty, Business, Medical, Relative, General Work, Critical Skills, Retired) |
+Form 11 (DHA-84): Application for Port of Entry Visa or Transit Visa (Pages 35–43)
+Form Field Map
+| Form Field / Section | Field Key / Identifier | Field Type | Data / Options Description |
+|---|---|---|---|
+| Personal Particulars | surname, first_names, maiden_name, previous_surnames, dob, country_of_birth, gender, nationality, nationality_obtained_details, naturalisation_original_nationality, passport_no, issuing_authority, expiry_date, doc_type | Text / Date | Complete personal metadata, passport type (Diplomatic/Official/Ordinary/Other) |
+| Address, Employer & Marital | perm_res_address, period_at_address, perm_res_country, period_in_country, occupation, employer_name_address, tel, cell, email, self_employed_details, marital_status, spouse_names, spouse_dob, spouse_nationality | Text / Radio | Address/residence periods, employer contacts, marital status (Never married/Married/Widowed/Separated/Divorced), spouse details |
+| Visit to South Africa | expected_arrival_date, place_of_arrival, purpose_of_visit, duration_of_stay, entries_required, sa_proposed_address, host_hotel_name_tel, contact_organisations_table, host_sa_id_pr_no | Text / Date / Radio | Arrival dates, entries required (Single, Two, Multiple), host/hotel details, contacts list |
+| Security Questionnaire | applied_perm_settlement, refused_entry, deported, convicted_crime, pending_action, insolvent, tb_disease, incompetent, social_violence_terrorism, affirmative_particulars | Boolean (Yes/No) / Text | 9 Yes/No compliance questions and text box for details |
+| Transit Passengers Only | destination_after_sa, mode_of_travel, intended_departure_date_port, holds_destination_visa | Text / Date / Boolean | Destination country, travel mode, departure date/port, proof of destination visa |
+| Declaration & Signature | applicant_full_name, signature, date | Text / Signature / Date | Legal declaration acknowledging conditions (e.g., prohibition of purpose change, 30-day extension rule, undesirability on overstay) |
+| Official Use & Checklist | official_decision.*, checklist_form11.* | Input / Checkbox | Approval status, visa type, decision reasons, and document submission checklist (≤3m visitor, medical, study, short-term work, >3m visitor) |
+Form 18 (DHA-947): Application for Permanent Residence Permit (Pages 44–51)
+Form Field Map
+| Form Field / Section | Field Key / Identifier | Field Type | Data / Options Description |
+|---|---|---|---|
+| Applicant Declaration & List | main_applicant_name, passport_no, signature, date, list_of_applicants | Text / Table | Declaration of understanding; Applicant table (Surname, First names, DOB, Gender, Relationship, Act section, Ref No) |
+| Official Use Section | reference_no, office, processed_by, decision, reasons_or_conditions, official_signature_rank_date | Input fields | Processing office records, approval/rejection status, official stamp |
+| Principal Applicant Details | title, surname, first_name, maiden_name, former_surnames, dob, country_of_birth, nationality_birth, present_nationality, passport_no, expiry_date, issuing_auth, marital_status, marriage_type, marriage_date, prev_marriages, parental_rights_children, residential_address_since, postal_address, telephones, email, occupation, visa_held_valid_until, issuing_office, parents_father, parents_mother | Text / Date / Radio | Deep demographic, spousal, address history, current visa status, and biological parents' details |
+| Spouse Details | spouse_title, spouse_surname, spouse_first_names, spouse_maiden_name, spouse_former_surnames, spouse_dob, spouse_pob, spouse_country_birth, spouse_nationality_birth, spouse_present_nationality, spouse_passport_no, spouse_expiry, spouse_issuing_auth, spouse_prev_marriages, spouse_custody_details, spouse_address, spouse_occupation, spouse_visa_held, spouse_parents_father, spouse_parents_mother | Text / Date | Complete background details for spouse including spouse's parents |
+| Children, Relatives & Record | children_not_included_table, sa_relatives_friends_table, principal_employment_record, occupations_to_follow, funds_to_transfer, pension_income, other_assets, family_in_origin_country, 10yr_address_history_applicant, 10yr_address_history_spouse | Tables / Text | Children excluded from app, SA relatives, full employment history, financial assets/pensions to transfer, 10-year residence address history for both applicant and spouse |
+| Questionnaire & Info | convicted_offence, insolvent, rehabilitated, civil_action, pending_enquiry, deported_refused, affirmative_details, sa_contact_info, spouse_sa_employment | Boolean (Yes/No) / Text | Security and legal history questions + contact details in SA |
+| Declarations & Signatures | applicant_signature, applicant_date, spouse_signature, spouse_date | Signature / Date | Confirmation of photo representation, truthfulness of documents, and intent to permanently reside |
+| Supporting Documents Checklist | checklist_general_pr.*, checklist_section26.*, checklist_section27.* | Checkbox (Yes/No) | Required general documents and category-specific checklists for Direct Residence (Section 26(a)–(d)) and Residence on Other Grounds (Section 27(a)–(g)) |
