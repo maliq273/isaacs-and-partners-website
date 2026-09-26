@@ -4,7 +4,7 @@
   "purpose": "Canonical inventory for immigration form schemas used by Anthony Isaacs and the immigration-document-engine.",
   "repository": "maliq273/isaacs-and-partners-website",
   "lastReviewedCommit": "30d23a325c42aeeeb8a9348fe358f145ab9a11b2",
-  "lastReviewedAt": "2026-09-26T11:20:00+02:00",
+  "lastReviewedAt": "2026-09-26T12:00:00+02:00",
   "generationPolicy": {
     "semanticSchemaIsNotGenerationAuthorisation": true,
     "generationRequiresVerifiedSourcePdf": true,
@@ -117,10 +117,13 @@
     }
   ],
   "notes": [
-    "DHA_Forms/DHA-1740 is retained as a legacy aggregate for compatibility; its current content is Forms 1–4, not a standalone DHA-1740 Form 9.",
-    "Normalised standalone schemas for Forms 1–4 are now available as DHA_Forms/DHA-1756, DHA_Forms/DHA-1714A, DHA_Forms/DHA-26 and DHA_Forms/DHA-TC-01.",
-    "A true DHA-1740/Form 9 schema has not been created because the repository source reviewed in this pass did not contain an authoritative standalone Form 9 schema.",
-    "The individual constructed schemas are semantic field specifications and are not authorised for PDF generation until the exact source PDF and coordinate map are verified.",
-    "The canonical DHA-84 coordinate map remains under app/knowledgebase to avoid two independent coordinate-map sources drifting apart."
-  ]
+    "All official Form 1–21 records are now present under DHA_Forms/official.",
+    "Form 50 Change of Address is also present under DHA_Forms/official.",
+    "DHA-84/Form 11 remains the only generation-certified form.",
+    "Constructed or semantic-skeleton records must not be used for PDF generation until the exact source PDF, hash, coordinate map and render validation are certified.",
+    "DHA_Forms/DHA-1740 remains a legacy aggregate of Forms 1–4 and is not the canonical Form 9 schema."
+  ],
+  "canonicalDirectory": "DHA_Forms/official",
+  "canonicalIndex": "DHA_Forms/official/index.json",
+  "formInventory": "Forms 1-21 plus Form 50"
 }
