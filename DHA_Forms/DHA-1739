@@ -1,0 +1,159 @@
+{
+  "form_metadata": {
+    "title": "APPLICATION FOR RENEWAL OF EXISTING VISA",
+    "form_number": "(DHA-1739) Form 10",
+    "issuing_authority": "DEPARTMENT OF HOME AFFAIRS, REPUBLIC OF SOUTH AFRICA",
+    "legal_reference": "Section 10(7); Regulation 9(9)"
+  },
+  "sections": [
+    {
+      "section_id": "official_use_only",
+      "section_title": "For official use only",
+      "fields": [
+        { "id": "office_of_application", "label": "Office of application", "type": "string" },
+        { "id": "date_received", "label": "Date received", "type": "date" },
+        { "id": "submission_quality_checked_by", "label": "Submission quality checked by", "type": "string" },
+        { "id": "track_trace_ref_no", "label": "Track & Trace Ref No", "type": "string" },
+        { "id": "blok", "label": "BLOK", "type": "string" },
+        { "id": "file_no", "label": "File No", "type": "string" },
+        { "id": "date_forwarded_head_office", "label": "Date forwarded to Head Office", "type": "date" },
+        { "id": "date_received_head_office", "label": "Date received at Head Office", "type": "date" },
+        { "id": "passport_checked_returned_by", "label": "Passport checked and returned by", "type": "string" },
+        { "id": "decision", "label": "Decision", "type": "string" },
+        { "id": "persal_number", "label": "Persal number", "type": "string" },
+        { "id": "decision_date", "label": "Date", "type": "date" },
+        { "id": "receipt_no", "label": "Receipt no for fee paid", "type": "string" },
+        { "id": "remarks", "label": "Remarks", "type": "text" },
+        { "id": "conditions_or_refusal_reasons", "label": "Conditions of visa / reason(s) for refusal", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "particulars_of_applicant",
+      "section_title": "PARTICULARS OF APPLICANT",
+      "fields": [
+        { "id": "surname_family_name", "label": "Surname/Family name", "type": "string" },
+        { "id": "first_names", "label": "First name(s)", "type": "string" },
+        { "id": "residential_address_sa", "label": "Residential address in the Republic", "type": "text" },
+        { "id": "date_of_birth", "label": "Date of birth", "type": "date" },
+        { "id": "telephone_no", "label": "Telephone No.", "type": "string" },
+        { "id": "home_telephone_no", "label": "Home Telephone No.", "type": "string" },
+        { "id": "cellphone_no", "label": "Cellphone No.", "type": "string" },
+        { "id": "email_address", "label": "E-mail address", "type": "string" }
+      ]
+    },
+    {
+      "section_id": "passport_details",
+      "section_title": "PASSPORT DETAILS",
+      "fields": [
+        { "id": "passport_number", "label": "Passport number", "type": "string" },
+        { "id": "issuing_country", "label": "Issuing country", "type": "string" },
+        { "id": "date_of_issue", "label": "Date of issue", "type": "date" },
+        { "id": "valid_until", "label": "Valid until", "type": "date" },
+        {
+          "id": "other_identity_document",
+          "label": "Other identity document issued by government (if applicable)",
+          "subfields": [
+            { "id": "document_type", "label": "Type of document", "type": "string" },
+            { "id": "document_number", "label": "Number", "type": "string" },
+            { "id": "date_of_issue", "label": "Date of issue", "type": "date" },
+            { "id": "expiry_date", "label": "Expiry date", "type": "date" }
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "original_visa_details",
+      "section_title": "DETAILS OF ORIGINAL VISA, AS ISSUED TO YOU PRIOR TO OR ON ARRIVAL IN SOUTH AFRICA",
+      "fields": [
+        { "id": "date_of_entry", "label": "Date of entry", "type": "date" },
+        { "id": "place_of_entry", "label": "Place of entry", "type": "string" },
+        { "id": "visa_no", "label": "Visa No", "type": "string" },
+        { "id": "purpose_of_entry", "label": "Purpose of entry", "type": "string" },
+        { "id": "type_of_visa", "label": "Type of visa", "type": "string" },
+        { "id": "date_of_expiry", "label": "Date of expiry", "type": "date" }
+      ]
+    },
+    {
+      "section_id": "subsequent_visa_details",
+      "section_title": "DETAILS OF ANY SUBSEQUENT VISA ISSUED TO YOU, OR THE MOST RECENT RENEWAL THEREOF",
+      "fields": [
+        { "id": "type_of_visa", "label": "Type of visa", "type": "string" },
+        { "id": "date_of_issue_renewal", "label": "Date of issue/renewal", "type": "date" },
+        { "id": "issued_at", "label": "Issued at", "type": "string" },
+        { "id": "date_of_expiry", "label": "Date of expiry", "type": "date" },
+        { "id": "visa_required_until_date", "label": "A visa is required until (date)", "type": "date" },
+        { "id": "reason_for_request", "label": "For purposes of (state reason(s) for request)", "type": "text" }
+      ]
+    },
+    {
+      "section_id": "declaration_by_applicant",
+      "section_title": "DECLARATION BY APPLICANT",
+      "fields": [
+        { "id": "applicant_signature", "label": "Signature of applicant", "type": "signature" },
+        { "id": "signed_at_location", "label": "Signed at", "type": "string" },
+        { "id": "signed_day", "label": "Day", "type": "string" },
+        { "id": "signed_month", "label": "Month", "type": "string" },
+        { "id": "signed_year", "label": "Year", "type": "string" }
+      ]
+    },
+    {
+      "section_id": "supporting_documents_checklists",
+      "section_title": "THE FOLLOWING DOCUMENTS MUST ACCOMPANY AN APPLICATION FOR THE RENEWAL OF AN EXISTING VISA",
+      "fields": [
+        {
+          "id": "visa_category_checklists",
+          "label": "Category-Specific Required Documents",
+          "type": "array",
+          "items": {
+            "category_name": "string",
+            "requirement_description": "string",
+            "attached_yes_no": "boolean"
+          }
+        }
+      ]
+    }
+  ]
+}
+
+Complete Extracted Text and Field Map
+ Header Metadata:
+ Form Number: (DHA-1739) Form 10  
+ Document Title: APPLICATION FOR RENEWAL OF EXISTING VISA  
+ Issuing Authority: Department of Home Affairs, Republic of South Africa  
+ Legal Basis: Section 10(7); Regulation 9(9)  
+ Gazette Reference: Government Gazette, 22 May 2014, No. 37679, pp. 117–127  
+ For Official Use Only Section:
+ Office of application, Date received, Submission quality checked by, Track & Trace Ref No, BLOK, File No  
+ Date forwarded to Head Office, Date received at Head Office, Passport checked and returned by, Decision, Persal number, Date, Receipt no for fee paid, Remarks  
+ Conditions of visa / reason(s) for refusal text field  
+ Important Submission Instruction:
+ Mandatory rule: Application for renewal must be submitted in person at least 60 days prior to the expiry date of the existing visa.  
+ Particulars of Applicant:
+ Surname/Family name & First name(s)  
+ Residential address in the Republic  
+ Date of birth  
+ Telephone No., Home Telephone No., Cellphone No., E-mail address  
+ Passport Details:
+ Passport number, Issuing country, Date of issue, Valid until  
+ Other government identity document details (Type of document, Number, Date of issue, Expiry date)  
+ Original & Subsequent Visa Details:
+ Original Visa (Prior to/on arrival): Date of entry, Place of entry, Visa No, Purpose of entry, Type of visa, Date of expiry  
+ Subsequent Visa / Recent Renewal: Type of visa, Date of issue/renewal, Issued at, Date of expiry  
+ Extension Request: Required until date & Reason(s) for request  
+ Declaration by Applicant:
+ Solemn declaration of truth and correctness  
+ Signature of applicant, Location signed at, Date (day, month, year)  
+ Supporting Document Checklists by Visa Type:
+ Port of Entry Visa Renewal: Passport valid ≥30 days past intended departure, proof of financial means, return ticket/reservation, event organization letter (if applicable).  
+ Visitor's Visa (≤ 3 Months): Passport valid ≥30 days past intended departure, statement of purpose/duration, return ticket/reservation, proof of financial means.  
+ Visitor's Visa (> 3 Months):
+ General: Passport valid ≥30 days past intended departure, medical report, radiological report, flight ticket/reservation, proof of financial means, SA Police Clearance (if resident ≥12 months).  
+ Category-specific additions: Spouse/dependent child of visa holder (certified copy of visa + financial undertaking), international school teacher (employment contract + financial undertaking), film/ad production (production confirmation), foreign news journalist (secondment confirmation), visiting professor/lecturer (invitation letter), artists (portfolio), entertainment industry (host confirmation), tour leader (contract + financial undertaking), state witness (request signed by Deputy Director of Public Prosecutions).  
+ Study Visa Renewal: Official letter from Registrar/Principal confirming extension, Registrar undertakings (notify failure to register within 7 days, deregistration within 30 days, completion within 30 days), minor guardian details & parental consent (if applicable), foreign state financial undertaking (if applicable), registered medical scheme proof/undertaking, proof of financial means.  
+ Treaty Visa Renewal: Letter from organ of state attesting to program details, written undertaking by state organ accepting deportation costs.  
+ Business Visa Renewal: SAICA/SAIPA Chartered Accountant certificate (original investment retained, Department of Labour confirmation of 60% SA staff), SARS tax clearance certificate, UIF contribution proof, COIDA contribution proof, CIPC registration proof, SAQA professional body registration, DTI recommendation letter, previous year financial statements, 60% SA staff confirmation letter.  
+ Medical Treatment Visa Renewal: SA medical practitioner/institution letter (space availability, estimated costs, treatment schedule), confirmation/details of party responsible for medical expenses, details of accompanying persons, return flight ticket, proof of financial means.  
+ Relative's Visa Renewal: Proof of 2nd-degree kinship (unabridged birth certificate), gazetted monthly financial assurance (salary advice/certified bank statement ≤3 months old, except for dependent child), police clearance.  
+ General Work Visa Renewal: Employer deportation cost undertaking, employer passport validity undertaking, Department of Labour certificate (labour standards, contract, CIPC details), employer notification undertaking (non-compliance/termination/role change), SAQA professional body registration proof.  
+ Critical Skills Work Visa Renewal: Employer deportation cost undertaking, employer passport validity undertaking, copy of existing critical skills visa, SAQA professional body registration proof.  
+ Retired Person Visa Renewal: Proof of payment from pension/annuity/net worth/assets realizing minimum gazetted monthly amount.
