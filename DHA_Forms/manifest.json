@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "library": "Isaacs & Partners DHA Forms",
+  "purpose": "Canonical inventory for immigration form schemas used by Anthony Isaacs and the immigration-document-engine.",
+  "repository": "maliq273/isaacs-and-partners-website",
+  "lastReviewedCommit": "fca7fa2879fdd4eeb9c889737e4feec056adfacc",
+  "lastReviewedAt": "2026-09-26T09:11:54Z",
+  "generationPolicy": {
+    "semanticSchemaIsNotGenerationAuthorisation": true,
+    "generationRequiresVerifiedSourcePdf": true,
+    "generationRequiresVerifiedCoordinateMap": true,
+    "generationRequiresRenderValidation": true
+  },
+  "forms": [
+    {
+      "id": "DHA-84",
+      "formNumber": "Form 11",
+      "title": "Application for Port of Entry Visa or Transit Visa",
+      "schemaStatus": "certified_in_app_knowledgebase",
+      "schemaPath": "app/knowledgebase/immigration_docs/field-maps/Visitor-Visa-Application-Form-DHA-84-Form-11-June-19-2014.json",
+      "coordinateMapPath": "app/knowledgebase/immigration_docs/coordinate-maps/DHA-84.json",
+      "generationStatus": "certified"
+    },
+    {
+      "id": "DHA-1738",
+      "formNumber": "Form 8",
+      "title": "Application for Visa to Temporarily Sojourn in the Republic",
+      "schemaStatus": "constructed",
+      "schemaPath": "DHA_Forms/DHA-1738",
+      "coordinateMapPath": null,
+      "generationStatus": "mapping_pending"
+    },
+    {
+      "id": "DHA-1739",
+      "formNumber": "Form 10",
+      "title": "Application for Renewal of Existing Visa",
+      "schemaStatus": "constructed",
+      "schemaPath": "DHA_Forms/DHA-1739",
+      "coordinateMapPath": null,
+      "generationStatus": "mapping_pending"
+    },
+    {
+      "id": "DHA-1712A",
+      "formNumber": "Form 12",
+      "title": "Affidavit in Respect of Parties to Permanent Homosexual or Heterosexual Relationship",
+      "schemaStatus": "constructed",
+      "schemaPath": "DHA_Forms/DHA-1712A",
+      "coordinateMapPath": null,
+      "generationStatus": "mapping_pending"
+    },
+    {
+      "id": "BI-947",
+      "formNumber": "Permanent Residence Application",
+      "title": "Application for a Permanent Residence Permit",
+      "schemaStatus": "constructed",
+      "schemaPath": "DHA_Forms/DHA-947",
+      "coordinateMapPath": null,
+      "generationStatus": "mapping_pending"
+    }
+  ],
+  "aggregateSchemas": [
+    {
+      "path": "DHA_Forms/second_ammendments",
+      "scope": "2024 Second Amendment / Forms 8, 10, 11 and 18 field intelligence",
+      "status": "reference_schema"
+    },
+    {
+      "path": "DHA_Forms/forms",
+      "scope": "Annexures 17 through 56 semantic field specifications",
+      "status": "reference_schema"
+    },
+    {
+      "path": "DHA_Forms/DHA-1740",
+      "scope": "Contains schemas for Form 1 (DHA-1756), Form 2 (DHA-1714A), Form 3 (DHA-26) and Form 4 (DHA-TC-01)",
+      "status": "misnamed_aggregate_pending_normalisation"
+    }
+  ],
+  "notes": [
+    "DHA_Forms/DHA-1740 is not an authoritative DHA-1740 schema; its current content is an aggregate for Forms 1–4 and should not be treated as Form 9/DHA-1740.",
+    "The individual constructed schemas are semantic field specifications. They are not authorised for PDF generation until the exact source PDF and coordinate map are verified.",
+    "The canonical DHA-84 coordinate map remains under app/knowledgebase to avoid two independent coordinate-map sources drifting apart."
+  ]
+}
