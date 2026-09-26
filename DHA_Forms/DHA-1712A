@@ -1,0 +1,129 @@
+{
+  "form_metadata": {
+    "title": "AFFIDAVIT IN RESPECT OF PARTIES TO PERMANENT HOMOSEXUAL OR HETEROSEXUAL RELATIONSHIP",
+    "form_number": "(DHA-1712A) Form 12",
+    "issuing_authority": "DEPARTMENT OF HOME AFFAIRS, REPUBLIC OF SOUTH AFRICA",
+    "legal_reference": "Section 7(1)(g), read with sections 11(6) and 26(b); Regulations 3(2) and (4)"
+  },
+  "sections": [
+    {
+      "section_id": "part_a_initial_application",
+      "section_title": "PART A: TO BE COMPLETED IN THE CASE OF INITIAL APPLICATION",
+      "fields": [
+        {
+          "id": "particulars_citizen_permanent_resident_foreigner",
+          "label": "Particulars of citizen / permanent resident / foreigner",
+          "subfields": [
+            { "id": "surname", "label": "Surname", "type": "string" },
+            { "id": "first_names", "label": "First name(s)", "type": "string" },
+            { "id": "residential_address", "label": "Residential address", "type": "text" },
+            { "id": "identity_no", "label": "Identity No.", "type": "string" },
+            { "id": "passport_no", "label": "Passport No.", "type": "string" },
+            { "id": "gender", "label": "Gender", "type": "string" },
+            { "id": "nationality", "label": "Nationality", "type": "string" },
+            { "id": "date_of_birth", "label": "Date of birth", "type": "date" },
+            { "id": "permit_type", "label": "Type of permit", "type": "string" },
+            { "id": "date_first_entry_sa", "label": "Date of first entry into the Republic", "type": "date" },
+            { "id": "permit_expiry_date", "label": "Date of expiry of permit", "type": "date" }
+          ]
+        },
+        {
+          "id": "particulars_foreigner",
+          "label": "Particulars of foreigner",
+          "subfields": [
+            { "id": "surname", "label": "Surname", "type": "string" },
+            { "id": "first_names", "label": "First name(s)", "type": "string" },
+            { "id": "gender", "label": "Gender", "type": "string" },
+            { "id": "residential_address", "label": "Residential address", "type": "text" },
+            { "id": "passport_no", "label": "Passport No", "type": "string" },
+            { "id": "nationality", "label": "Nationality", "type": "string" },
+            { "id": "date_of_birth", "label": "Date of birth", "type": "date" },
+            { "id": "place_of_birth", "label": "Place of birth", "type": "string" },
+            { "id": "visa_permit_type_held", "label": "Type of visa / permit held", "type": "string" },
+            { "id": "date_first_entry_sa", "label": "Date of first entry into the Republic", "type": "date" },
+            { "id": "permit_expiry_date", "label": "Date of expiry", "type": "date" }
+          ]
+        },
+        {
+          "id": "relationship_declaration",
+          "label": "Declaration of Spousal Relationship",
+          "subfields": [
+            { "id": "declarant1_full_name", "label": "Declarant 1: First name(s) and surname", "type": "string" },
+            { "id": "declarant1_marital_status", "label": "Declarant 1: Marital Status", "type": "single_select", "options": ["unmarried", "divorced", "widowed"] },
+            { "id": "declarant2_full_name", "label": "Declarant 2: First name(s) and surname", "type": "string" },
+            { "id": "declarant2_marital_status", "label": "Declarant 2: Marital Status", "type": "single_select", "options": ["unmarried", "divorced", "widowed"] },
+            { "id": "declaration_mode", "label": "Oath Type", "type": "single_select", "options": ["make oath and say", "solemnly affirm"] },
+            { "id": "relationship_orientation", "label": "Relationship orientation", "type": "single_select", "options": ["homosexual", "heterosexual"] },
+            { "id": "relationship_duration_years", "label": "Duration: Years", "type": "integer" },
+            { "id": "relationship_duration_months", "label": "Duration: Months", "type": "integer" }
+          ]
+        },
+        {
+          "id": "children_particulars",
+          "label": "Particulars of Children",
+          "type": "array",
+          "items": {
+            "child_name": "string",
+            "date_of_birth": "date",
+            "mother_name": "string",
+            "father_name": "string"
+          }
+        },
+        {
+          "id": "signatures_and_commissioning",
+          "label": "Signatures and Commissioning of Oaths",
+          "subfields": [
+            { "id": "citizen_res_foreigner_signature", "label": "Signature of citizen/permanent resident or foreigner", "type": "signature" },
+            { "id": "foreign_spouse_signature", "label": "Signature of foreign spouse", "type": "signature" },
+            { "id": "sworn_affirm_date_day", "label": "Day", "type": "string" },
+            { "id": "sworn_affirm_date_month", "label": "Month", "type": "string" },
+            { "id": "sworn_affirm_date_year", "label": "Year", "type": "string" },
+            { "id": "commissioner_first_names", "label": "Commissioner: First name(s)", "type": "string" },
+            { "id": "commissioner_surname", "label": "Commissioner: Surname", "type": "string" },
+            { "id": "commissioner_capacity", "label": "Commissioner: Capacity", "type": "string" },
+            { "id": "commissioner_place", "label": "Commissioner: Place", "type": "string" }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+Complete Extracted Text and Field Map
+ Header Metadata:
+ Form Number: (DHA-1712A) Form 12  
+ Document Title: AFFIDAVIT IN RESPECT OF PARTIES TO PERMANENT HOMOSEXUAL OR HETEROSEXUAL RELATIONSHIP  
+ Issuing Authority: Department of Home Affairs, Republic of South Africa  
+ Legal Basis: Section 7(1)(g), read with sections 11(6) and 26(b); Regulations 3(2) and (4)  
+ Gazette Reference: Government Gazette, 22 May 2014, No. 37679  
+ PART A: To Be Completed in the Case of Initial Application:
+ Particulars of citizen / permanent resident / foreigner:
+ Surname & First name(s)  
+ Residential address  
+ Identity No. or Passport No.  
+ Gender, Nationality & Date of birth  
+ Type of permit, Date of first entry into the Republic & Date of expiry of permit  
+ Particulars of foreigner:
+ Surname & First name(s)  
+ Gender & Residential address  
+ Passport No, Nationality, Date of birth & Place of birth  
+ Type of visa / permit held, Date of first entry into the Republic & Date of expiry  
+ Relationship Declaration & Attestation:
+ First declarant name and marital status selection (⁠unmarried⁠, ⁠divorced⁠, ⁠widowed⁠)  
+ Second declarant name and marital status selection (⁠unmarried⁠, ⁠divorced⁠, ⁠widowed⁠)  
+ Declaration choice (⁠make oath and say⁠ / ⁠solemnly affirm⁠)  
+ Relationship type (⁠homosexual⁠ / ⁠heterosexual⁠)  
+ Duration of relationship (Years and Months)  
+ Undertaking of permanent relationship involving cohabitation, reciprocal financial/emotional support, and exclusion of any other spousal relationship  
+ Attachment requirement confirmation for cohabitation and financial responsibility documentation  
+ Children Particulars Table:
+ Array capturing: Name of child, Date of birth, Name of mother of child, Name of father of child  
+ Ongoing Undertakings & Signatures:
+ Agreement to submit a confirming affidavit after two years from visa/permit issue date  
+ Undertaking to inform the Director-General in writing if spousal relationship ceases  
+ Signature of citizen/permanent resident or foreigner  
+ Signature of foreign spouse  
+ Commissioning of Oaths:
+ Day, Month, and Year signed/sworn/solemnly affirmed  
+ Place of commissioning  
+ Commissioner of Oaths details: First name(s), Surname, Capacity, Office Stamp
