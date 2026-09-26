@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "form": {
+    "id": "DHA-50",
+    "formNumber": "Form 50",
+    "title": "Change of Address",
+    "issuingAuthority": "Department of Home Affairs, Republic of South Africa",
+    "legalReference": "Regulation 40"
+  },
+  "source": {
+    "authority": "DHA",
+    "sourceDocument": "Immigration Regulations, 2014 as amended by GN R1328 in GG 42071 (29 November 2018)",
+    "sourceVerified": true,
+    "sourcePages": [
+      34,
+      35
+    ]
+  },
+  "construction": {
+    "status": "semantic_constructed",
+    "generationAuthorised": false
+  },
+  "sections": [
+    {
+      "id": "applicant_details",
+      "title": "A. Applicant's details",
+      "fields": [
+        "passport_number",
+        "visa_or_permit_number",
+        "surname",
+        "forenames",
+        "place_of_birth",
+        "country_of_birth",
+        "current_residential_address",
+        "telephone_no",
+        "cellphone_no",
+        "email_address"
+      ]
+    },
+    {
+      "id": "new_address",
+      "title": "B. New address",
+      "fields": [
+        "new_street_1",
+        "new_street_2",
+        "new_town_village",
+        "new_province",
+        "new_code",
+        "period_of_intended_stay"
+      ]
+    },
+    {
+      "id": "new_contact_details",
+      "title": "C. New contact details",
+      "fields": [
+        "new_telephone_no",
+        "new_cellphone_no",
+        "new_email_address"
+      ]
+    },
+    {
+      "id": "declaration",
+      "title": "D. Declaration / oath / affirmation",
+      "fields": [
+        "informant_full_name",
+        "declaration_text",
+        "applicant_signature",
+        "declaration_date",
+        "official_signature"
+      ]
+    },
+    {
+      "id": "office_use",
+      "title": "E. Office use only",
+      "fields": [
+        "application_received_and_captured_by_surname",
+        "initials",
+        "persal_number",
+        "office_stamp"
+      ]
+    }
+  ],
+  "attachments": [
+    "passport_copy",
+    "visa_or_permit_copy"
+  ],
+  "coordinateMap": {
+    "status": "pending",
+    "path": null
+  },
+  "validation": {
+    "renderTestPassed": false,
+    "sourcePdfHash": null
+  }
+}
