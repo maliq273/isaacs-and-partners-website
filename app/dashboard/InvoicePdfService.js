@@ -37,29 +37,39 @@ class InvoicePdfService {
     }
 
     async download(id) {
-        const data = await this.load(id);
-        const html = this.documentHtml(data);
+        // Open synchronously before awaiting network calls so browser popup blockers allow the PDF window.
         const popup = window.open("", "_blank", "noopener,noreferrer,width=1100,height=900");
-        if (!popup) throw new Error("Please allow pop-ups to download the invoice PDF.");
-        popup.document.open(); popup.document.write(html); popup.document.close();
-        popup.focus();
-        await new Promise(resolve => setTimeout(resolve, 450));
-        const script = popup.document.createElement("script");
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-        script.onload = () => {
-            const target = popup.document.getElementById("invoice-pdf");
-            const filename = `Invoice-${data.invoice.invoice_number || data.invoice.id}.pdf`;
-            popup.html2pdf().set({
-                margin: 0.35,
-                filename,
-                image: { type:"jpeg", quality:0.98 },
-                html2canvas: { scale:2, useCORS:true, backgroundColor:"#ffffff" },
-                jsPDF: { unit:"in", format:"a4", orientation:"portrait" },
-                pagebreak: { mode:["css","legacy"] }
-            }).from(target).save().then(() => setTimeout(() => popup.close(), 500));
-        };
-        script.onerror = () => { popup.print(); };
-        popup.document.head.appendChild(script);
+        if (!popup) throw new Error("Please allow pop-ups for the invoice PDF window.");
+
+        try {
+            const data = await this.load(id);
+            const html = this.documentHtml(data);
+            popup.document.open();
+            popup.document.write(html);
+            popup.document.close();
+            popup.focus();
+            await new Promise(resolve => setTimeout(resolve, 450));
+
+            const script = popup.document.createElement("script");
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+            script.onload = () => {
+                const target = popup.document.getElementById("invoice-pdf");
+                const filename = `Invoice-${data.invoice.invoice_number || data.invoice.id}.pdf`;
+                popup.html2pdf().set({
+                    margin: 0.35,
+                    filename,
+                    image: { type:"jpeg", quality:0.98 },
+                    html2canvas: { scale:2, useCORS:true, backgroundColor:"#ffffff" },
+                    jsPDF: { unit:"in", format:"a4", orientation:"portrait" },
+                    pagebreak: { mode:["css","legacy"] }
+                }).from(target).save().then(() => setTimeout(() => popup.close(), 500));
+            };
+            script.onerror = () => { popup.print(); };
+            popup.document.head.appendChild(script);
+        } catch (error) {
+            try { popup.close(); } catch {}
+            throw error;
+        }
     }
 
     documentHtml({ invoice, items, customer, matter, logoUrl }) {
