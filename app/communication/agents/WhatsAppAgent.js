@@ -142,8 +142,8 @@ export default class WhatsAppAgent {
                 text: reply,
                 provider: "COSTING_MODEL",
                 model: "CostingModelService",
-                requiresApproval: true,
-                approval_needed: true
+                requiresApproval: false,
+                approval_needed: false
             };
         } else {
             replyResult = await this.generateReply({ context, body, intent, servicePlan, lead, sales, user, matter, operationalContext, historicalMemory });
