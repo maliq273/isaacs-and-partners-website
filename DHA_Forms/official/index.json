@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "library": "DHA Official Form Library",
-  "scope": "Official Annexure A Forms 1–21 plus Form 50 Change of Address",
+  "scope": "Official Annexure A Forms 1–50",
   "sourceAuthority": "Department of Home Affairs, Republic of South Africa",
   "source": "Immigration Regulations, 2014 as amended by GN R1328 in GG 42071 (29 November 2018)",
   "sourceVerifiedAt": "2026-09-26",
@@ -172,6 +172,202 @@
       "title": "Order to illegal foreigner to depart from Republic",
       "status": "semantic_skeleton",
       "path": "DHA_Forms/official/Form-21_DHA-1684.json"
+    },
+    {
+      "formNumber": "Form 22",
+      "id": "DHA-1720",
+      "title": "Notice by immigration Officer to person to produce any thing in his or her possession or custody or control",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-22_DHA-1720.json"
+    },
+    {
+      "formNumber": "Form 23",
+      "id": "DHA-1721",
+      "title": "Notice by immigration officer to person to appear before Director-General",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-23_DHA-1721.json"
+    },
+    {
+      "formNumber": "Form 24",
+      "id": "DHA-1722",
+      "title": "Entry and search warrant",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-24_DHA-1722.json"
+    },
+    {
+      "formNumber": "Form 25",
+      "id": "DHA-1760",
+      "title": "Warrant of arrest",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-25_DHA-1760.json"
+    },
+    {
+      "formNumber": "Form 26",
+      "id": "DHA-1723",
+      "title": "Receipt of items seized",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-26_DHA-1723.json"
+    },
+    {
+      "formNumber": "Form 27",
+      "id": "DHA-1761",
+      "title": "Warrant for seizure and removal",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-27_DHA-1761.json"
+    },
+    {
+      "formNumber": "Form 28",
+      "id": "DHA-1725",
+      "title": "Warrant of detention of illegal foreigner",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-28_DHA-1725.json"
+    },
+    {
+      "formNumber": "Form 29",
+      "id": "DHA-1724",
+      "title": "Notification of deportation",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-29_DHA-1724.json"
+    },
+    {
+      "formNumber": "Form 30",
+      "id": "DHA-1725",
+      "title": "Confirmation by court of detention for purposes of deportation",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-30_DHA-1725.json"
+    },
+    {
+      "formNumber": "Form 31",
+      "id": "DHA-1726",
+      "title": "Notice to a foreigner of the intention to apply to court for the extension of his or her detention",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-31_DHA-1726.json"
+    },
+    {
+      "formNumber": "Form 32",
+      "id": "DHA-1727",
+      "title": "Application to court for extension of detention and authorisation by court for that extension",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-32_DHA-1727.json"
+    },
+    {
+      "formNumber": "Form 33",
+      "id": "DHA-1710",
+      "title": "Warrant of detention of person suspected of being an illegal foreigner",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-33_DHA-1710.json"
+    },
+    {
+      "formNumber": "Form 34",
+      "id": "DHA-1728",
+      "title": "Order to illegal foreigner to deposit a sum to cover expenses relating to deportation, detention, maintenance and custody",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-34_DHA-1728.json"
+    },
+    {
+      "formNumber": "Form 35",
+      "id": "DHA-515",
+      "title": "Warrant for removal of detained illegal foreigner",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-35_DHA-515.json"
+    },
+    {
+      "formNumber": "Form 36",
+      "id": "DHA-557",
+      "title": "Warrant for release of detained illegal foreigner",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-36_DHA-557.json"
+    },
+    {
+      "formNumber": "Form 37",
+      "id": "DHA-1694",
+      "title": "Notification to a person at a port of entry that he or she is an illegal foreigner and is refused admission",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-37_DHA-1694.json"
+    },
+    {
+      "formNumber": "Form 38",
+      "id": "DHA-96",
+      "title": "Declaration to master of ship or person in charge of conveyance that person conveyed is illegal foreigner and notice to master regarding obligations where person is refused admission",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-38_DHA-96.json"
+    },
+    {
+      "formNumber": "Form 39",
+      "id": "DHA-128",
+      "title": "List of passengers and crew, medical return and coastal advice",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-39_DHA-128.json"
+    },
+    {
+      "formNumber": "Form 40",
+      "id": "DHA-1567",
+      "title": "List of stowaways",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-40_DHA-1567.json"
+    },
+    {
+      "formNumber": "Form 41",
+      "id": "DHA-86",
+      "title": "Application by master or owner of ship or agent representing master or owner for certificate to leave harbour",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-41_DHA-86.json"
+    },
+    {
+      "formNumber": "Form 42",
+      "id": "DHA-92",
+      "title": "Certificate of compliance to obtain clearance from customs",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-42_DHA-92.json"
+    },
+    {
+      "formNumber": "Form 43",
+      "id": "DHA-1747",
+      "title": "Notice of administrative fine incurred for incorrect certification",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-43_DHA-1747.json"
+    },
+    {
+      "formNumber": "Form 44",
+      "id": "DHA-1751",
+      "title": "Notice of administrative fine incurred by owner or person in charge of conveyance",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-44_DHA-1751.json"
+    },
+    {
+      "formNumber": "Form 45",
+      "id": "DHA-1775",
+      "title": "Notice of administrative fine incurred by owner or person in charge of conveyance",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-45_DHA-1775.json"
+    },
+    {
+      "formNumber": "Form 46",
+      "id": "DHA-",
+      "title": "Application for the issue of proof of permanent residence or exemption status",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-46_DHA-unassigned.json"
+    },
+    {
+      "formNumber": "Form 47",
+      "id": "DHA-",
+      "title": "Application for exemption",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-47_DHA-unassigned.json"
+    },
+    {
+      "formNumber": "Form 48",
+      "id": "DHA-",
+      "title": "Application for waiver of prescribed requirements",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-48_DHA-unassigned.json"
+    },
+    {
+      "formNumber": "Form 49",
+      "id": "DHA-",
+      "title": "Notice of appeal",
+      "status": "semantic_skeleton",
+      "path": "DHA_Forms/official/Form-49_DHA-unassigned.json"
     }
   ],
   "additionalAdministrativeForm": {
@@ -195,5 +391,11 @@
     "DHA-1712A coordinate certification",
     "DHA-1740 coordinate certification",
     "Form 50 coordinate certification"
+  ],
+  "notes": [
+    "All Form 1 through Form 50 records from Annexure A are now represented in DHA_Forms/official.",
+    "Forms with verified semantic construction are retained as constructed; unconstructed records remain semantic skeletons and cannot generate PDFs.",
+    "Form 50 is also explicitly identified as the Regulation 40 Change of Address form.",
+    "DHA-84/Form 11 is the only generation-certified form at this time."
   ]
 }
