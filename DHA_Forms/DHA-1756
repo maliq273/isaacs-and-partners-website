@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Form 1 (DHA-1756) Notification Regarding Right to Request Review by Minister",
+  "type": "object",
+  "properties": {
+    "partType": {
+      "type": "string",
+      "enum": [
+        "Part A",
+        "Part B"
+      ]
+    },
+    "personalDetails": {
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string"
+        },
+        "passportNumber": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "format": "date"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "age": {
+          "type": "integer"
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "Male",
+            "Female",
+            "Other"
+          ]
+        }
+      },
+      "required": [
+        "fullName",
+        "passportNumber",
+        "nationality"
+      ]
+    },
+    "conveyanceDetails": {
+      "type": "object",
+      "properties": {
+        "conveyorName": {
+          "type": "string"
+        },
+        "flightOrVesselNumber": {
+          "type": "string"
+        }
+      }
+    },
+    "acknowledgement": {
+      "type": "object",
+      "properties": {
+        "intentToRequestReview": {
+          "type": "boolean"
+        },
+        "writtenRequestSubmitted": {
+          "type": "boolean"
+        },
+        "signatureDate": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    }
+  },
+  "required": []
+}
