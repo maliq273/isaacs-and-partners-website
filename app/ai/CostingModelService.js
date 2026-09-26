@@ -258,6 +258,17 @@ export default class CostingModelService {
             breakdown = [{ item: `${targetServiceName} Professional Service`, amount: 2500 }];
         }
 
+        if (costingCentre !== null) {
+            const approvedTotal = Number(costingCentre?.approvedTotal ?? costingCentre?.fixedPrice ?? costingCentre?.total);
+            if (Number.isFinite(approvedTotal) && approvedTotal > 0 && costingCentre?.approved === true) {
+                estimatedTotal = approvedTotal;
+                breakdown = [{ item: `${targetServiceName} — Costing Centre Approved Professional Fee`, amount: approvedTotal }];
+                if (Number.isFinite(Number(costingCentre?.taxRate))) {
+                    authorityFeesExcluded = costingCentre?.authorityFeesExcluded !== false;
+                }
+            }
+        }
+
         const depositAmount = (estimatedTotal * depositPercent) / 100;
         const finalBalanceAmount = (estimatedTotal * finalBalancePercent) / 100;
 
