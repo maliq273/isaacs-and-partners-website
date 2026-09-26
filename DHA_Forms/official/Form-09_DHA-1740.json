@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "form": {
+    "id": "DHA-1740",
+    "formNumber": "Form 9",
+    "title": "Application for Change of Conditions on Existing Visa or Change of Status",
+    "issuingAuthority": "Department of Home Affairs, Republic of South Africa",
+    "legalReference": "Section 10(6); Regulation 9(6)"
+  },
+  "source": {
+    "authority": "DHA",
+    "sourceDocument": "Immigration Regulations, 2014 as amended by GN R1328 in GG 42071 (29 November 2018)",
+    "sourceVerified": true,
+    "sourcePages": [
+      61,
+      62,
+      63,
+      64
+    ]
+  },
+  "construction": {
+    "status": "semantic_constructed",
+    "generationAuthorised": false
+  },
+  "sections": [
+    {
+      "id": "declaration_to_apply",
+      "title": "Applicant understanding and declaration",
+      "fields": [
+        "applicant_full_name",
+        "passport_number",
+        "applicant_signature",
+        "declaration_date"
+      ]
+    },
+    {
+      "id": "official_use_only",
+      "title": "For official use only",
+      "fields": [
+        "blok",
+        "office_of_application",
+        "date_received",
+        "track_trace_ref_no",
+        "submission_quality_checked_by",
+        "regional_file_no",
+        "persal_number",
+        "passport_checked_returned_by",
+        "date_received_head_office",
+        "fee_received_by",
+        "approved_or_rejected_by",
+        "receipt_number",
+        "rank",
+        "decision_date",
+        "conditions_or_reason_for_rejection"
+      ]
+    },
+    {
+      "id": "applicant_particulars",
+      "title": "Particulars of applicant",
+      "fields": [
+        "surname_family_name",
+        "first_names",
+        "date_of_birth",
+        "residential_address_in_republic",
+        "home_telephone_no",
+        "work_telephone_no",
+        "cellphone_no",
+        "email_address"
+      ]
+    },
+    {
+      "id": "passport_details",
+      "title": "Passport details",
+      "fields": [
+        "passport_number",
+        "issuing_country",
+        "date_of_issue",
+        "valid_until",
+        "other_identity_document_type",
+        "other_identity_document_number",
+        "other_identity_document_date_of_issue",
+        "other_identity_document_expiry_date"
+      ]
+    },
+    {
+      "id": "original_visa",
+      "title": "Original visa issued prior to or on arrival in the Republic",
+      "fields": [
+        "date_of_entry",
+        "permit_number",
+        "place_of_entry",
+        "date_of_expiry",
+        "purpose_of_entry"
+      ]
+    },
+    {
+      "id": "subsequent_visa",
+      "title": "Subsequent visa or most recent renewal",
+      "fields": [
+        "visa_type",
+        "issued_at",
+        "reference_number",
+        "date_of_issue_or_renewal",
+        "date_of_expiry"
+      ]
+    },
+    {
+      "id": "requested_change",
+      "title": "Requested change",
+      "fields": [
+        "change_type",
+        "requested_status_or_visa_type",
+        "requested_condition_change",
+        "reasons_for_change"
+      ]
+    },
+    {
+      "id": "security_health_questionnaire",
+      "title": "Security/health questionnaire",
+      "fields": [
+        "convicted_of_crime",
+        "pending_criminal_or_civil_case",
+        "contagious_disease_or_deficiency",
+        "unrehabilitated_insolvent",
+        "judicially_declared_incompetent",
+        "social_violence_or_racial_hatred_association",
+        "affirmative_particulars",
+        "additional_matters"
+      ]
+    },
+    {
+      "id": "supporting_documents",
+      "title": "Supporting documents checklist",
+      "fields": [
+        "valid_passport",
+        "yellow_fever_certificate_if_applicable",
+        "medical_report",
+        "radiological_report",
+        "marriage_or_spousal_proof",
+        "spousal_affidavit_and_cohabitation_evidence",
+        "divorce_decree",
+        "parental_rights_court_order",
+        "death_certificate",
+        "parental_consent",
+        "proof_of_adoption",
+        "legal_separation_order",
+        "police_clearance_certificates"
+      ]
+    }
+  ],
+  "coordinateMap": {
+    "status": "pending",
+    "path": null
+  },
+  "validation": {
+    "renderTestPassed": false,
+    "sourcePdfHash": null
+  }
+}
