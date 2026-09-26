@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "form": {
+    "id": "DHA-1723",
+    "formNumber": "Form 26",
+    "title": "Receipt of items seized",
+    "issuingAuthority": "Department of Home Affairs, Republic of South Africa"
+  },
+  "source": {
+    "authority": "DHA",
+    "sourceDocument": "Immigration Regulations, 2014 as amended by GN R1328 in GG 42071 (29 November 2018)",
+    "sourceVerified": true
+  },
+  "construction": {
+    "status": "semantic_skeleton",
+    "generationAuthorised": false
+  },
+  "fields": [],
+  "coordinateMap": {
+    "status": "pending",
+    "path": null
+  },
+  "validation": {
+    "renderTestPassed": false,
+    "sourcePdfHash": null
+  },
+  "notes": [
+    "Canonical inventory record created. Exact source PDF field extraction and coordinate certification remain required before generation."
+  ]
+}
