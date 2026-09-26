@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "form": {
+    "id": "DHA-96",
+    "formNumber": "Form 38",
+    "title": "Declaration to master of ship or person in charge of conveyance that person conveyed is illegal foreigner and notice to master regarding obligations where person is refused admission",
+    "issuingAuthority": "Department of Home Affairs, Republic of South Africa"
+  },
+  "source": {
+    "authority": "DHA",
+    "sourceDocument": "Immigration Regulations, 2014 as amended by GN R1328 in GG 42071 (29 November 2018)",
+    "sourceVerified": true
+  },
+  "construction": {
+    "status": "semantic_skeleton",
+    "generationAuthorised": false
+  },
+  "fields": [],
+  "coordinateMap": {
+    "status": "pending",
+    "path": null
+  },
+  "validation": {
+    "renderTestPassed": false,
+    "sourcePdfHash": null
+  }
+}
