@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Form 2 (DHA-1714A) Notice of Decision Adversely Affecting Right of Person",
+  "type": "object",
+  "properties": {
+    "partType": {
+      "type": "string",
+      "enum": [
+        "Part A - Port of Entry",
+        "Part B - Permitting",
+        "Part C - Inspectorate"
+      ]
+    },
+    "recipient": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "passportNumber": {
+      "type": "string"
+    },
+    "visaNumber": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "string"
+    },
+    "reasonsForDecision": {
+      "type": "string"
+    },
+    "officerDetails": {
+      "type": "object",
+      "properties": {
+        "nameAndSurname": {
+          "type": "string"
+        },
+        "appointmentNumber": {
+          "type": "string"
+        },
+        "rankOrPosition": {
+          "type": "string"
+        },
+        "office": {
+          "type": "string"
+        },
+        "province": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": []
+}
