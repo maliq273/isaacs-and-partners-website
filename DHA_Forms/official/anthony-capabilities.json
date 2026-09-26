@@ -147,7 +147,176 @@
       "pdfTemplate": false,
       "coordinateMap": false,
       "generation": false
+    },
+    "DHA-1720": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1721": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1722": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1760": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1723": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1761": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1725_Form28": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1724": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1725_Form30": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1726": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1727": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1710": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1728": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-515": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-557": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1694": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-96": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-128": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1567": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-86": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-92": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1747": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1751": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-1775": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-Form46": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-Form47": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-Form48": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
+    },
+    "DHA-Form49": {
+      "semantic": false,
+      "pdfTemplate": false,
+      "coordinateMap": false,
+      "generation": false
     }
   },
-  "generationRule": "Only records with semantic=true, pdfTemplate=true, coordinateMap=true and generation=true may be passed to official PDF generation."
+  "generationRule": "Only records with semantic=true, pdfTemplate=true, coordinateMap=true and generation=true may be passed to official PDF generation.",
+  "libraryScope": "DHA Annexure A Forms 1-50"
 }
