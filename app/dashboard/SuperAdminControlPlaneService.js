@@ -135,8 +135,53 @@ class SuperAdminControlPlaneService {
 
     async delete(table, id) {
         if (!id) throw new Error("A record ID is required.");
+
+        // Financial records must never be hard-deleted from the browser.
+        // Payments are voided through the controlled RPC and invoices/quotes
+        // require their dedicated lifecycle operations.
+        if ([TABLES.payments, TABLES.invoices, TABLES.quotes].includes(table)) {
+            const error = new Error(
+                "Financial records cannot be hard-deleted. Use the controlled void/cancellation workflow."
+            );
+            error.code = "FINANCIAL_DELETE_BLOCKED";
+            throw error;
+        }
+
         const params = new URLSearchParams({ id: `eq.${id}` });
         return this.request(table, { method: "DELETE", query: params.toString() });
+    }
+
+    async voidPayment(paymentId, reason = "") {
+        if (!paymentId) throw new Error("A payment ID is required.");
+        await this.ensureAdmin();
+
+        const response = await fetch(
+            `${this.functionsUrl ? this.baseUrl.replace("/rest/v1", "/rest/v1/rpc") : ""}/void_invoice_payment`,
+            {
+                method: "POST",
+                headers: this.headers(false),
+                body: JSON.stringify({
+                    p_payment_id: paymentId,
+                    p_reason: reason || null
+                })
+            }
+        );
+
+        const raw = await response.text();
+        let data = [];
+        try { data = raw ? JSON.parse(raw) : []; } catch { data = raw; }
+
+        if (!response.ok) {
+            const error = new Error(
+                data?.message || data?.hint || data?.details || `Payment void failed (${response.status}).`
+            );
+            error.code = `PAYMENT_VOID_HTTP_${response.status}`;
+            error.status = response.status;
+            error.details = data;
+            throw error;
+        }
+
+        return Array.isArray(data) ? data[0] ?? null : data;
     }
 
     async provisionAccount(payload) {
