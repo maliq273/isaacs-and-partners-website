@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "form": {
+    "id": "DHA-84",
+    "formNumber": "Form 11",
+    "title": "Application for Port of Entry Visa or Transit Visa",
+    "issuingAuthority": "Department of Home Affairs, Republic of South Africa"
+  },
+  "source": {
+    "canonicalSemanticMap": "app/knowledgebase/immigration_docs/field-maps",
+    "canonicalCoordinateMap": "app/knowledgebase/immigration_docs/coordinate-maps",
+    "sourceVerified": true
+  },
+  "construction": {
+    "status": "certified",
+    "generationAuthorised": true
+  },
+  "coordinateMap": {
+    "status": "certified",
+    "path": "app/knowledgebase/immigration_docs/coordinate-maps/DHA-84.json"
+  },
+  "validation": {
+    "renderTestPassed": true
+  },
+  "notes": [
+    "Do not duplicate the DHA-84 coordinate map inside DHA_Forms. The app/knowledgebase coordinate map is canonical."
+  ]
+}
