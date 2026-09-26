@@ -1,0 +1,318 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "South African Department of Home Affairs - Immigration Forms Specification",
+  "type": "object",
+  "properties": {
+    "form1_DHA_1756": {
+      "type": "object",
+      "title": "Form 1 (DHA-1756) Notification Regarding Right to Request Review by Minister",
+      "properties": {
+        "partType": { "type": "string", "enum": ["Part A", "Part B"] },
+        "personalDetails": {
+          "type": "object",
+          "properties": {
+            "fullName": { "type": "string" },
+            "passportNumber": { "type": "string" },
+            "dateOfBirth": { "type": "string", "format": "date" },
+            "nationality": { "type": "string" },
+            "age": { "type": "integer" },
+            "gender": { "type": "string", "enum": ["Male", "Female", "Other"] }
+          },
+          "required": ["fullName", "passportNumber", "nationality"]
+        },
+        "conveyanceDetails": {
+          "type": "object",
+          "properties": {
+            "conveyorName": { "type": "string" },
+            "flightOrVesselNumber": { "type": "string" }
+          }
+        },
+        "acknowledgement": {
+          "type": "object",
+          "properties": {
+            "intentToRequestReview": { "type": "boolean" },
+            "writtenRequestSubmitted": { "type": "boolean" },
+            "signatureDate": { "type": "string", "format": "date" }
+          }
+        }
+      }
+    },
+    "form2_DHA_1714A": {
+      "type": "object",
+      "title": "Form 2 (DHA-1714A) Notice of Decision Adversely Affecting Right of Person",
+      "properties": {
+        "partType": { "type": "string", "enum": ["Part A - Port of Entry", "Part B - Permitting", "Part C - Inspectorate"] },
+        "recipient": { "type": "string" },
+        "location": { "type": "string" },
+        "passportNumber": { "type": "string" },
+        "visaNumber": { "type": "string" },
+        "decision": { "type": "string" },
+        "reasonsForDecision": { "type": "string" },
+        "officerDetails": {
+          "type": "object",
+          "properties": {
+            "nameAndSurname": { "type": "string" },
+            "appointmentNumber": { "type": "string" },
+            "rankOrPosition": { "type": "string" },
+            "office": { "type": "string" },
+            "province": { "type": "string" }
+          }
+        }
+      }
+    },
+    "form3_DHA_26": {
+      "type": "object",
+      "title": "Form 3 (DHA-26) Application for Exemption to Enter or Depart at Place Other Than Port of Entry",
+      "properties": {
+        "surname": { "type": "string" },
+        "firstNames": { "type": "string" },
+        "nationality": { "type": "string" },
+        "passportNumber": { "type": "string" },
+        "dateOfBirth": { "type": "string", "format": "date" },
+        "countryOfNormalResidence": { "type": "string" },
+        "permanentResidencePermitNo": { "type": "string" },
+        "temporarySojournVisa": {
+          "type": "object",
+          "properties": {
+            "purpose": { "type": "string" },
+            "validUntil": { "type": "string", "format": "date" }
+          }
+        },
+        "exemptionDetails": {
+          "type": "object",
+          "properties": {
+            "actionType": { "type": "string", "enum": ["Enter", "Exit", "Both"] },
+            "locationRequired": { "type": "string" },
+            "motivation": { "type": "string" },
+            "periodFrom": { "type": "string", "format": "date" },
+            "periodTo": { "type": "string", "format": "date" },
+            "purpose": { "type": "string" }
+          },
+          "required": ["actionType", "locationRequired", "motivation", "periodFrom", "periodTo", "purpose"]
+        }
+      },
+      "required": ["surname", "firstNames", "nationality", "passportNumber", "dateOfBirth", "exemptionDetails"]
+    },
+    "form4_DHA_TC_01": {
+      "type": "object",
+      "title": "Form 4 (DHA-TC-01) Traveller Card",
+      "properties": {
+        "conveyanceIdentifier": { "type": "string", "description": "Flight No. / Ship No. / Vehicle Reg No." },
+        "passportNumber": { "type": "string" },
+        "reasonForVisit": {
+          "type": "string",
+          "enum": ["Resident", "Immigrant", "Study", "Business", "Holiday", "Transit", "Diplomat", "Employment", "Crew", "Other"]
+        },
+        "occupation": {
+          "type": "string",
+          "enum": ["Civil Service", "Diplomat", "Military/Police", "Media", "Artist", "Charity", "Student", "Education", "Professional", "Trade/Business", "Other"]
+        },
+        "customsDeclarations": {
+          "type": "object",
+          "properties": { "prohibitedOrRestrictedGoods": { "type": "boolean" }, "goodsInExcessOfDFA": { "type": "boolean" }, "goodsIntendedForTrade": { "type": "boolean" }, "currencyExceedingLimits": { "type": "boolean" }, "valuableGoodsForTempImportExport": { "type": "boolean" } }, "required": ["prohibitedOrRestrictedGoods", "goodsInExcessOfDFA", "goodsIntendedForTrade", "currencyExceedingLimits", "valuableGoodsForTempImportExport"]
+        },
+        "currencyAmountBringing": { "type": "number", "description": "Amount in ZAR/USD" },
+        "physicalAddressInRSA": {
+          "type": "object",
+          "properties": {
+            "unitNo": { "type": "string" },
+            "complex": { "type": "string" },
+            "streetNo": { "type": "string" },
+            "streetOrFarmName": { "type": "string" },
+            "suburbDistrict": { "type": "string" },
+            "cityTown": { "type": "string" },
+            "postalCode": { "type": "string" }
+          },
+          "required": ["cityTown", "streetOrFarmName"]
+        },
+        "intendedDepartureDate": { "type": "string", "format": "date" },
+        "contactPersonInRSA": { "type": "string" },
+        "contactNoInRSA": { "type": "string" }
+      },
+      "required": ["passportNumber", "reasonForVisit", "customsDeclarations", "physicalAddressInRSA"]
+    }
+  }
+}
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "South African Department of Home Affairs - Immigration Forms Specification",
+  "type": "object",
+  "properties": {
+    "form1_DHA_1756": {
+      "type": "object",
+      "title": "Form 1 (DHA-1756) Notification Regarding Right to Request Review by Minister",
+      "properties": {
+        "partType": { "type": "string", "enum": ["Part A", "Part B"] },
+        "personalDetails": {
+          "type": "object",
+          "properties": {
+            "fullName": { "type": "string" },
+            "passportNumber": { "type": "string" },
+            "dateOfBirth": { "type": "string", "format": "date" },
+            "nationality": { "type": "string" },
+            "age": { "type": "integer" },
+            "gender": { "type": "string", "enum": ["Male", "Female", "Other"] }
+          },
+          "required": ["fullName", "passportNumber", "nationality"]
+        },
+        "conveyanceDetails": {
+          "type": "object",
+          "properties": {
+            "conveyorName": { "type": "string" },
+            "flightOrVesselNumber": { "type": "string" }
+          }
+        },
+        "acknowledgement": {
+          "type": "object",
+          "properties": {
+            "intentToRequestReview": { "type": "boolean" },
+            "writtenRequestSubmitted": { "type": "boolean" },
+            "signatureDate": { "type": "string", "format": "date" }
+          }
+        }
+      }
+    },
+    "form2_DHA_1714A": {
+      "type": "object",
+      "title": "Form 2 (DHA-1714A) Notice of Decision Adversely Affecting Right of Person",
+      "properties": {
+        "partType": { "type": "string", "enum": ["Part A - Port of Entry", "Part B - Permitting", "Part C - Inspectorate"] },
+        "recipient": { "type": "string" },
+        "location": { "type": "string" },
+        "passportNumber": { "type": "string" },
+        "visaNumber": { "type": "string" },
+        "decision": { "type": "string" },
+        "reasonsForDecision": { "type": "string" },
+        "officerDetails": {
+          "type": "object",
+          "properties": {
+            "nameAndSurname": { "type": "string" },
+            "appointmentNumber": { "type": "string" },
+            "rankOrPosition": { "type": "string" },
+            "office": { "type": "string" },
+            "province": { "type": "string" }
+          }
+        }
+      }
+    },
+    "form3_DHA_26": {
+      "type": "object",
+      "title": "Form 3 (DHA-26) Application for Exemption to Enter or Depart at Place Other Than Port of Entry",
+      "properties": {
+        "surname": { "type": "string" },
+        "firstNames": { "type": "string" },
+        "nationality": { "type": "string" },
+        "passportNumber": { "type": "string" },
+        "dateOfBirth": { "type": "string", "format": "date" },
+        "countryOfNormalResidence": { "type": "string" },
+        "permanentResidencePermitNo": { "type": "string" },
+        "temporarySojournVisa": {
+          "type": "object",
+          "properties": {
+            "purpose": { "type": "string" },
+            "validUntil": { "type": "string", "format": "date" }
+          }
+        },
+        "exemptionDetails": {
+          "type": "object",
+          "properties": {
+            "actionType": { "type": "string", "enum": ["Enter", "Exit", "Both"] },
+            "locationRequired": { "type": "string" },
+            "motivation": { "type": "string" },
+            "periodFrom": { "type": "string", "format": "date" },
+            "periodTo": { "type": "string", "format": "date" },
+            "purpose": { "type": "string" }
+          },
+          "required": ["actionType", "locationRequired", "motivation", "periodFrom", "periodTo", "purpose"]
+        }
+      },
+      "required": ["surname", "firstNames", "nationality", "passportNumber", "dateOfBirth", "exemptionDetails"]
+    },
+    "form4_DHA_TC_01": {
+      "type": "object",
+      "title": "Form 4 (DHA-TC-01) Traveller Card",
+      "properties": {
+        "conveyanceIdentifier": { "type": "string", "description": "Flight No. / Ship No. / Vehicle Reg No." },
+        "passportNumber": { "type": "string" },
+        "reasonForVisit": {
+          "type": "string",
+          "enum": ["Resident", "Immigrant", "Study", "Business", "Holiday", "Transit", "Diplomat", "Employment", "Crew", "Other"]
+        },
+        "occupation": {
+          "type": "string",
+          "enum": ["Civil Service", "Diplomat", "Military/Police", "Media", "Artist", "Charity", "Student", "Education", "Professional", "Trade/Business", "Other"]
+        },
+        "customsDeclarations": {
+          "type": "object",
+          "properties": { "prohibitedOrRestrictedGoods": { "type": "boolean" }, "goodsInExcessOfDFA": { "type": "boolean" }, "goodsIntendedForTrade": { "type": "boolean" }, "currencyExceedingLimits": { "type": "boolean" }, "valuableGoodsForTempImportExport": { "type": "boolean" } }, "required": ["prohibitedOrRestrictedGoods", "goodsInExcessOfDFA", "goodsIntendedForTrade", "currencyExceedingLimits", "valuableGoodsForTempImportExport"]
+        },
+        "currencyAmountBringing": { "type": "number", "description": "Amount in ZAR/USD" },
+        "physicalAddressInRSA": {
+          "type": "object",
+          "properties": {
+            "unitNo": { "type": "string" },
+            "complex": { "type": "string" },
+            "streetNo": { "type": "string" },
+            "streetOrFarmName": { "type": "string" },
+            "suburbDistrict": { "type": "string" },
+            "cityTown": { "type": "string" },
+            "postalCode": { "type": "string" }
+          },
+          "required": ["cityTown", "streetOrFarmName"]
+        },
+        "intendedDepartureDate": { "type": "string", "format": "date" },
+        "contactPersonInRSA": { "type": "string" },
+        "contactNoInRSA": { "type": "string" }
+      },
+      "required": ["passportNumber", "reasonForVisit", "customsDeclarations", "physicalAddressInRSA"]
+    }
+  }
+}
+
+Form Field Map
+| Form ID | Field Name | Data Type | Requirement | Description / Options |
+|---|---|---|---|---|
+| DHA-1756 (Form 1) | Part Type | String | Required | Part A (Refused admission) / Part B (Illegal foreigner) |
+|  | Full Name(s) & Surname | String | Required | Applicant full name |
+|  | Passport No. | String | Required | Document identifier |
+|  | Date of Birth | Date | Required | YYYY-MM-DD |
+|  | Nationality | String | Required | Country of citizenship |
+|  | Conveyor / Flight / Vessel No. | String | Conditional | Required for Part A |
+| DHA-1714A (Form 2) | Part Section | String | Required | Part A (Port of Entry), Part B (Permitting), Part C (Inspectorate) |
+|  | Passport No. / Visa No. | String | Required | Identification details |
+|  | Reason(s) for Decision | Long Text | Required | Official grounds for adverse decision |
+|  | Officer Details | Object | Required | Name, appointment number, rank, office, province |
+| DHA-26 (Form 3) | Surname & First Names | String | Required | Full applicant name |
+|  | Travel Document / Passport No. | String | Required | Passport number |
+|  | Date of Birth | Date | Required | Format: YYYY-MM-DD |
+|  | Exemption Type | String | Required | Enter / Exit at non-port of entry |
+|  | Location Required | String | Required | Specified border location |
+|  | Motivation & Purpose | Long Text | Required | Written justification and reason |
+|  | Period Required | Date Range | Required | From Date to To Date |
+| DHA-TC-01 (Form 4) | Flight / Ship / Vehicle Reg No. | String | Required | Conveyance identifier |
+|  | Reason for Visit | Checkbox/Enum | Required | Resident, Immigrant, Study, Business, Holiday, Transit, Diplomat, Employment, Crew, Other |
+|  | Occupation | Checkbox/Enum | Optional | Civil Service, Diplomat, Military/Police, Media, Artist, Charity, Student, Education, Professional, Trade/Business, Other |
+|  | Customs Declarations | Boolean (Y/N) | Required | 5 binary check questions (Prohibited goods, Duty Free allowance, Trade goods, Currency limits, Valuable goods) |
+|  | Currency Brought | Numeric | Optional | Cash amount in ZAR/USD |
+|  | Physical Address in RSA | Object | Required | Unit, Complex, Street No, Street/Farm, Suburb, City/Town, Postal Code |
+|  | Contact Person & No. in RSA | String | Optional | Local contact details |
+Extracted Form Field Summary
+Form 1 (DHA-1756) – Review Request Notification
+ * Header: Department of Home Affairs, Republic of South Africa.
+ * Part A (Refusal of Admission): Captures To (Name), Passport No., Date of Birth, Nationality, Conveyor/Flight/Vessel Details.
+ * Part B (Illegal Foreigner): Captures To (Name), Passport No., Date of Birth, Nationality, Age, Gender.
+ * Signatures & Audit: Immigration Officer details (Name, Appointment No., Rank), Recipient Acknowledgement, Interpreter Certification.
+Form 2 (DHA-1714A) – Adverse Decision Notice
+ * Variants: Part A (Port of Entry), Part B (Permitting), Part C (Inspectorate).
+ * Fields: Recipient Name, Location, Reference/Visa/Passport Number, Text of Decision, Reasons for Decision, Review/Representation Timeline Instructions (10 working days).
+ * Signatures & Audit: Officer Particulars, Supervisor Particulars (Part C), Acknowledgement of Receipt, Interpreter Certification.
+Form 3 (DHA-26) – Non-Port Entry/Exit Exemption
+ * Applicant Data: Surname, First Names, Nationality, Passport/Travel Doc No., Date of Birth, Country of Normal Residence, Permanent Residence Permit No., Temporary Sojourn Visa details.
+ * Application Data: Action (Enter/Exit), Requested Location, Motivation text, Requested Validity Period (From/To), Purpose.
+ * Official Use Block: Approval/Refusal Status, Valid Until date, File No., Section Granted under, Officer Details, Conditions text.
+Form 4 (DHA-TC-01) – Traveller Card
+ * Travel Details: Flight No./Ship No./Vehicle Reg No., Passport No., Intended Departure Date.
+ * Categorization: Reason for Visit (10 options), Occupation (11 options).
+ * Customs Questions: 5 Yes/No declaration flags, ZAR/USD Currency Amount.
+ * Location & Contacts: Comprehensive RSA Physical Address structure, Local Contact Person, Local Contact Number.
