@@ -30,7 +30,25 @@ export default class ImmigrationQualificationWorkflowService {
     if(!this.provider.isConfigured())return fallback();try{const result=await this.provider.generate({temperature:.2,maxOutputTokens:1100,system:"You are Anthony Isaacs, executive assistant and immigration portfolio coordinator at Isaacs & Partners. "+roleInstruction+" Use checkbox formatting. Never claim a payment exists unless the database result says seen=true. Never invent a document or fact. Be concise.",user:JSON.stringify({matter:matter?.reference_number,mode,checklist:checklist.slice(0,10),missing:missing.slice(0,10),complete,payment:{seen:payment.seen}})});return clean(result?.text)||fallback()}catch{return fallback()}}
   async process({identity,conversationId=null,matterId=null,body}={}){const workflow=await this.load({conversationId,matterId});if(!workflow||String(workflow.state||"").toUpperCase()!=="QUALIFICATION")return null;const matter=await this.matter(workflow.matter_id);const mode=modeFor(identity);const facts=JSON.parse(JSON.stringify(workflow.known_facts||{}));const caseType=matter?.service_type==="IMM-CRITICAL-SKILLS"?"critical_skills":matter?.service_type==="IMM-GENERAL"?"general_work":"temporary_residence";const engine=new ImmigrationInterviewEngine({caseType,answers:facts});const current=engine.getNextQuestions(1)[0]||null;const extracted=await this.extractAnswer({question:current?.q||"Internal document checklist",body,mode});let changed=false;
     for(const item of extracted?.answers||[]){if(item?.key&&item?.value){setPath(facts,item.key,item.value);changed=true}}
-    const checks={...(facts._document_checks||{})};for(const item of extracted?.documentChecks||[]){if(item?.document)checks[item.document]={present:Boolean(item.present),source:mode}}facts._document_checks=checks;facts._last_actor_mode=mode;
-    const updatedEngine=new ImmigrationInterviewEngine({caseType,answers:facts});const completeness=updatedEngine.completeness();const missing=updatedEngine.getNextQuestions(8).map(x=>({key:x.key,question:x.q,document:DOCUMENTS[x.key]||"Supporting evidence"}));const checklist=this.checklistFor({known_facts:facts,required_question_keys:workflow.required_question_keys});const complete=completeness.ready&&checklist.length===0;const payment=await this.paymentStatus(workflow.matter_id);const nextState=complete?"QUALIFICATION_COMPLETE":"QUALIFICATION";if(changed||JSON.stringify(workflow.known_facts||{})!==JSON.stringify(facts))await this.save(workflow,{known_facts:facts,state:nextState,application_completed_at:complete?new Date().toISOString():workflow.application_completed_at});const effectiveMissing=missing.length?missing:checklist;const reply=await this.phrase({mode,matter,checklist,missing:effectiveMissing,complete,payment});
+    const checks={...(facts._document_checks||{})};
+    const knownDocs=Object.values(DOCUMENTS);
+    for(const item of extracted?.documentChecks||[]){
+      if(!item?.document)continue;
+      const raw=String(item.document).toLowerCase();
+      const matched=knownDocs.find(d=>raw.includes(String(d).toLowerCase())||String(d).toLowerCase().includes(raw));
+      checks[matched||item.document]={present:Boolean(item.present),source:mode};
+    }
+    facts._document_checks=checks;facts._last_actor_mode=mode;
+    const updatedEngine=new ImmigrationInterviewEngine({caseType,answers:facts});
+    const completeness=updatedEngine.completeness();
+    const missing=updatedEngine.getNextQuestions(8).map(x=>({key:x.key,question:x.q,document:DOCUMENTS[x.key]||"Supporting evidence"}));
+    const requiredDocs=[...new Set((workflow.required_question_keys||[]).map(key=>DOCUMENTS[key]||"Supporting evidence"))];
+    const pendingFileChecks=requiredDocs.filter(document=>facts._document_checks?.[document]?.present!==true).map(document=>({document}));
+    const complete=completeness.ready;
+    const payment=await this.paymentStatus(workflow.matter_id);
+    const nextState=complete?"QUALIFICATION_COMPLETE":"QUALIFICATION";
+    if(changed||JSON.stringify(workflow.known_facts||{})!==JSON.stringify(facts))await this.save(workflow,{known_facts:facts,state:nextState,application_completed_at:complete?new Date().toISOString():workflow.application_completed_at});
+    const effectiveMissing=mode==="CLIENT_DOCUMENT_REQUEST"?missing:(pendingFileChecks.length?pendingFileChecks:missing);
+    const reply=await this.phrase({mode,matter,checklist:pendingFileChecks,missing:effectiveMissing,complete,payment});
     return {handled:true,action:"IMMIGRATION_QUALIFICATION",executed:true,mode,matter,workflow:{...workflow,state:nextState,known_facts:facts},completeness,checklist,missing:effectiveMissing,payment,complete,reply}}
 }
