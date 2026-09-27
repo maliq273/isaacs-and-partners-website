@@ -1,5 +1,6 @@
 const PERMISSIONS = Object.freeze({
   MANAGE_AUTHORITY: "manage_authority",
+  HANDLE_IMMIGRATION: "can_handle_immigration",
   MANAGE_STAFF: "manage_staff",
   MANAGE_SYSTEM: "manage_system"
 });
@@ -20,6 +21,8 @@ const CAPABILITY_PHRASES = Object.freeze({
   manage_system: /full\s+system\s+administration|manage\s+system|system\s+administration/i
 });
 const SUMMARY_WORDS = /\b(what|which|tell|show|list)\b.*\b(organisational|organizational|data|information|records|access|permissions?|capabilities|actions?|authority)\b/i;
+const IMMIGRATION_MATTER_REQUEST = /\b(?:create|load|open|start|register)\b[\s\S]{0,300}\b(?:immigration\s+matter|matter)\b[\s\S]{0,500}\b(?:critical\s+skills|general\s+work|work\s+visa|visitor\s+visa|visa|permit|residence)\b/i;
+const EXPLICIT_SYSTEM_ADMIN_REQUEST = /\b(?:manage|change|modify|update|rewrite|reset|configure|administer)\b[\s\S]{0,80}\b(?:system|security|configuration|permissions?|administration)\b/i;
 function clean(v, max = 4096) { return String(v ?? "").trim().slice(0, max); }
 function normalise(v) { return clean(v).toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, " ").trim(); }
 function phone(v) { const raw = clean(v, 64); if (!raw || /@lid/i.test(raw)) return null; return raw.replace(/\D/g, "") || null; }
@@ -42,12 +45,13 @@ export default class AuthorityActionService {
   classify(message) {
     const text = normalise(message);
     if (SUMMARY_WORDS.test(text) && /\b(allowed|permitted|authori[sz]ed|can|access|authority)\b/i.test(text)) return { action: "AUTHORITY_SUMMARY", permission: null, target: null };
+    if (IMMIGRATION_MATTER_REQUEST.test(text)) return { action: "CREATE_IMMIGRATION_MATTER", permission: PERMISSIONS.HANDLE_IMMIGRATION, target: null };
     if (!ACTION_WORDS.test(text)) return { action: null, permission: null, target: null };
     const capability = capabilityFromText(message);
     if (capability && /\b(grant|enable|allow|give|deny|remove|revoke|disable|set|change|update)\b/i.test(text)) return { action: "MANAGE_STAFF_PERMISSIONS", permission: PERMISSIONS.MANAGE_STAFF, target: extractTarget(message), capability, grant: /\b(grant|enable|allow|give)\b/i.test(text) };
     if (/\b(authority record|authority directory|authority)\b/i.test(text) || looksLikeAuthorityCreation(text)) { const action = /\b(deactivate|disable|remove|revoke)\b/i.test(text) ? "DEACTIVATE_AUTHORITY" : /\b(add|create|register)\b/i.test(text) ? "CREATE_AUTHORITY" : "UPDATE_AUTHORITY"; return { action, permission: PERMISSIONS.MANAGE_AUTHORITY, target: extractTarget(text) }; }
     if (/\b(permission|permissions|access|capability|capabilities)\b/i.test(text) && /\b(staff|employee|person|administrator|admin|authority)\b/i.test(text)) return { action: "MANAGE_STAFF_PERMISSIONS", permission: PERMISSIONS.MANAGE_STAFF, target: extractTarget(text), capability: null, grant: /\b(grant|enable|allow|give)\b/i.test(text) };
-    if (/\b(system|everything|anything|all security|security controls|rewrite anything|full authority)\b/i.test(text)) return { action: "MANAGE_SYSTEM", permission: PERMISSIONS.MANAGE_SYSTEM, target: null };
+    if (EXPLICIT_SYSTEM_ADMIN_REQUEST.test(text) && /\b(?:security|system|configuration|administration)\b/i.test(text)) return { action: "MANAGE_SYSTEM", permission: PERMISSIONS.MANAGE_SYSTEM, target: null };
     return { action: null, permission: null, target: null };
   }
   canExecute(identity, permission) {
@@ -108,6 +112,11 @@ export default class AuthorityActionService {
     };
     if (!this.canExecute(identity, classification.permission)) { await this.audit({ authorityId, actorId, actorPhone: identity?.sourcePhone, action: classification.action, targetType: "AUTHORITY", requestText: message, decision: "DENIED", reason: `Required permission is not granted: ${classification.permission}.`, metadata: { conversation_id: conversationId } }); return { handled: true, executed: false, action: classification.action, permission: classification.permission, reply: `I recognise you as ${String(identity.authorityRole || "AUTHORITY").replace(/_/g, " ")}, but I cannot execute that action because ${classification.permission} is not enabled for your authority record.` }; }
     if (classification.action === "MANAGE_SYSTEM") { await this.audit({ authorityId, actorId, actorPhone: identity?.sourcePhone, action: classification.action, targetType: "SYSTEM", requestText: message, decision: "DENIED", reason: "A broad request is not treated as permission to bypass security. It must resolve to a specific executable operation.", metadata: { conversation_id: conversationId } }); return { handled: true, executed: false, action: classification.action, permission: classification.permission, reply: "I can execute specific authorised system changes, but I will not interpret 'do anything' or 'rewrite everything' as permission to bypass security. Give me the exact change and I will check the required permission." }; }
+    if (classification.action === "CREATE_IMMIGRATION_MATTER") {
+      const { default: ImmigrationMatterAuthorityService } = await import("./ImmigrationMatterAuthorityService.js");
+      const immigration = new ImmigrationMatterAuthorityService({ db: this.db });
+      return immigration.createOrLoad({ identity, message, conversationId });
+    }
     if (classification.action === "MANAGE_STAFF_PERMISSIONS") return this.executePermissionMutation({ identity, classification, message, conversationId });
     return this.executeAuthorityMutation({ identity, classification, message, conversationId });
   }
