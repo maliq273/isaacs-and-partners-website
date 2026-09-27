@@ -9,7 +9,7 @@ import RelationshipOperationalIntelligenceEngine from "https://raw.githubusercon
 import AuthorityRoleIntelligenceEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AuthorityRoleIntelligenceEngine.js";
 import IdentityRelationshipResolutionEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/IdentityRelationshipResolutionEngine.js";
 import AnthonyAuthorizationEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AnthonyAuthorizationEngine.js";
-import AuthorityActionService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AuthorityActionService.js";
+import AuthorityActionService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AuthorityActionService.js?v=c519189c786688ba916193c9e43a9f69cdcb6820";
 import AuthorityInteractionEngine from "./AuthorityInteractionEngine.js";
 
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL");
