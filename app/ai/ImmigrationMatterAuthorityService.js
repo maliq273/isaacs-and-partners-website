@@ -227,7 +227,7 @@ export default class ImmigrationMatterAuthorityService {
         reason: "Official DHA document generation remains blocked until required application evidence is complete and an authorised template gate is satisfied."
       },
       reply: "I created the test client and immigration matter " + parsed.reference +
-        ". The matter is now in qualification. I have not generated or submitted any DHA/VFS document because the required application evidence is incomplete. I will ask only for the next required information."
+        ". The matter is now in qualification. I have not generated or submitted any DHA/VFS document because the required application evidence is incomplete.\\n\\nInternal file check — please confirm what is already held:\\n☐ Passport biodata page\\n☐ Offer of employment / employment contract\\n☐ Highest relevant qualification\\n☐ Professional registration, if applicable\\n☐ Current visa / permit or immigration status document\\n☐ Proof of residence\\n☐ Previous visa/refusal records, if any\\n\\nYou are not being asked to complete the client interview. Anthony will compile the file, then obtain the outstanding information/documents from the client and check payment before proceeding."
     };
   }
 }
