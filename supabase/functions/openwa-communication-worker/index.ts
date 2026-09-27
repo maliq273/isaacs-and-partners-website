@@ -440,6 +440,41 @@ async function invokeAi(payload: any) {
   return result;
 }
 
+async function persistInboundMessage(args: any) {
+  const { payload, data, chatId, phoneNumber, contact, body, idempotencyKey, sourceEvent } = args;
+  const customerUserId = contact?.user_id || null;
+  if (idempotencyKey) {
+    const existing = await supabase.from("communication_messages").select("id").eq("idempotency_key", idempotencyKey).maybeSingle();
+    if (existing.error && existing.error.code !== "PGRST116") throw existing.error;
+    if (existing.data) return existing.data;
+  }
+  const whatsappName = clean(data.pushName || data.notifyName || data.senderName || data.contactName || data.contact?.pushName || data.contact?.name || "", 255) || null;
+  const { data: inserted, error } = await supabase.from("communication_messages").insert({
+    customer_user_id: customerUserId, channel: "WHATSAPP", direction: "INBOUND", phone_number: phoneNumber, chat_id: chatId, body, status: "RECEIVED",
+    openwa_session_id: payload?.sessionId || OPENWA_SESSION_ID || null, openwa_message_id: data.id || null, idempotency_key: idempotencyKey, delivery_id: payload?.deliveryId || null,
+    metadata: { openwa_event: payload, whatsapp_name: whatsappName, phone_number_resolved: phoneNumber, anthony_owner_channel: phoneNumber === OWNER_PHONE, owner_transport_event: sourceEvent, transport_persisted_at: new Date().toISOString() },
+  }).select("id").single();
+  if (error) {
+    if (error.code === "23505" && idempotencyKey) {
+      const duplicate = await supabase.from("communication_messages").select("id").eq("idempotency_key", idempotencyKey).maybeSingle();
+      if (duplicate.error) throw duplicate.error;
+      if (duplicate.data) return duplicate.data;
+    }
+    throw error;
+  }
+  return inserted;
+}
+
+async function markInboundProcessingFailure(messageId: string, error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  await supabase.from("communication_messages").update({ metadata: { inbound_processing_failed: true, inbound_processing_error: message.slice(0, 2000), inbound_processing_failed_at: new Date().toISOString() }, updated_at: new Date().toISOString() }).eq("id", messageId);
+}
+
+async function processPersistedInbound(messageId: string, context: any) {
+  const ai = await invokeAi({ ...(context.contact?.user_id ? { userId: context.contact.user_id } : {}), contactId: context.contact?.id || null, channel: "WHATSAPP", chatId: context.chatId, phoneNumber: context.phoneNumber, whatsappName: clean(context.data.pushName || context.data.notifyName || context.data.senderName || context.data.contactName || context.data.contact?.pushName || context.data.contact?.name || "", 255) || null, body: context.body, messageId: context.data.id || messageId });
+  await supabase.from("communication_messages").update({ status: "HANDLED", metadata: { openwa_event: context.payload, ai_runtime_invoked: true, transport_persisted_at: new Date().toISOString() }, updated_at: new Date().toISOString() }).eq("id", messageId);
+  return await processOutbound(5);
+}
 async function handleInbound({
   payload,
   data,
@@ -620,15 +655,29 @@ async function processWebhook(req: Request) {
     const body = clean(data.selectedButtonId || data.selectedId || data.buttonResponse?.selectedButtonId || data.buttonOrListResponse?.id || data.body || data.text || data.message, 4096);
     if (!body) return json({ received: true, ignored: true, reason: "EMPTY_MESSAGE" });
 
+    const contact = await ensureInboundContact({
+      phoneNumber: fromPhone, chatId, messageId: data.id || null,
+    });
+    const persisted = await persistInboundMessage({
+      payload, data, chatId,
+      phoneNumber: fromPhone || normalisePhone(contact?.phone_number),
+      contact, body, idempotencyKey,
+      sourceEvent: event + ":" + resolvedSender.source,
+    });
     EdgeRuntime.waitUntil((async () => {
       try {
-        const contact = await ensureInboundContact({ phoneNumber: fromPhone, chatId, messageId: data.id || null });
-        await handleInbound({ payload, data, chatId, phoneNumber: fromPhone || normalisePhone(contact?.phone_number), contact, body, idempotencyKey, sourceEvent: `${event}:${resolvedSender.source}` });
+        await processPersistedInbound(persisted.id, {
+          payload, data, chatId,
+          phoneNumber: fromPhone || normalisePhone(contact?.phone_number),
+          contact, body, idempotencyKey,
+          sourceEvent: event + ":" + resolvedSender.source,
+        });
       } catch (error) {
-        console.error("OpenWA inbound processing failed", { event, messageId: data?.id || null, chatId, error });
+        console.error("OpenWA background inbound processing failed", { event, messageId: data?.id || persisted.id, chatId, error });
+        await markInboundProcessingFailure(persisted.id, error);
       }
     })());
-    return json({ received: true, queued: true }, 202);
+    return json({ received: true, queued: true, persisted: true }, 202);
   }
 
   if (event === "message.sent") {
