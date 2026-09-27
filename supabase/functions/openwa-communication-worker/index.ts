@@ -446,7 +446,7 @@ async function persistInboundMessage(args: any) {
   if (idempotencyKey) {
     const existing = await supabase.from("communication_messages").select("id").eq("idempotency_key", idempotencyKey).maybeSingle();
     if (existing.error && existing.error.code !== "PGRST116") throw existing.error;
-    if (existing.data) return existing.data;
+    if (existing.data) return { ...existing.data, duplicate: true };
   }
   const whatsappName = clean(data.pushName || data.notifyName || data.senderName || data.contactName || data.contact?.pushName || data.contact?.name || "", 255) || null;
   const { data: inserted, error } = await supabase.from("communication_messages").insert({
@@ -462,7 +462,7 @@ async function persistInboundMessage(args: any) {
     }
     throw error;
   }
-  return inserted;
+  return { ...inserted, duplicate: false };
 }
 
 async function markInboundProcessingFailure(messageId: string, error: unknown) {
@@ -664,7 +664,7 @@ async function processWebhook(req: Request) {
       contact, body, idempotencyKey,
       sourceEvent: event + ":" + resolvedSender.source,
     });
-    EdgeRuntime.waitUntil((async () => {
+    if (!persisted.duplicate) EdgeRuntime.waitUntil((async () => {
       try {
         await processPersistedInbound(persisted.id, {
           payload, data, chatId,
