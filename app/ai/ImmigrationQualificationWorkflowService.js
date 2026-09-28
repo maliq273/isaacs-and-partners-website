@@ -50,6 +50,6 @@ export default class ImmigrationQualificationWorkflowService {
     if(changed||JSON.stringify(workflow.known_facts||{})!==JSON.stringify(facts))await this.save(workflow,{known_facts:facts,state:nextState,application_completed_at:complete?new Date().toISOString():workflow.application_completed_at});
     const internalChecklist=[...new Map([...pendingFileChecks.map(x=>({...x,status:"OUTSTANDING"})),...requiredDocs.filter(document=>facts._document_checks?.[document]?.present===true).map(document=>({document,status:"ON_FILE"})),...requiredDocs.filter(document=>facts._document_checks?.[document]?.not_required===true).map(document=>({document,status:"NOT_REQUIRED"}))].map(x=>[x.document,x])).values()];
     const effectiveMissing=mode==="CLIENT_DOCUMENT_REQUEST"?missing:internalChecklist;
-    const reply=await this.phrase({mode,matter,checklist:pendingFileChecks,missing:effectiveMissing,complete,payment});
+    const reply=await this.phrase({mode,matter,checklist:internalChecklist,missing:effectiveMissing,complete,payment});
     return {handled:true,action:"IMMIGRATION_QUALIFICATION",executed:true,mode,matter,workflow:{...workflow,state:nextState,known_facts:facts},completeness,checklist:pendingFileChecks,missing:effectiveMissing,payment,complete,reply}}
 }
