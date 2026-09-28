@@ -74,13 +74,62 @@ function agent(){const p=new AIProviderService();const c=new CompanyTruthService
 const historicalRetriever=new HistoricalMemoryRetrievalService();const relationshipMemory=new CustomerRelationshipMemoryEngine();const roi=new RelationshipOperationalIntelligenceEngine({db:admin});const authorityEngine=new AuthorityRoleIntelligenceEngine({db:admin});const identityEngine=new IdentityRelationshipResolutionEngine({db:admin,authorityEngine});const authorisationEngine=new AnthonyAuthorizationEngine({db:admin});const actionService=new AuthorityActionService({db:admin});
 const immigrationQualification=new ImmigrationQualificationWorkflowService({db:admin});
 const authorityInteractionEngine=new AuthorityInteractionEngine({db:admin,companyTruth:new CompanyTruthService()});
+async function prepareImmigrationDraft({workflow,matter,actorUserId}:any){
+  const text=String(workflow?.requestBody||"");
+  if(!workflow?.internalAuthority||matter?.service_type!=="IMM-CRITICAL-SKILLS")return null;
+  if(!/\b(create|prepare|generate|draft)\b.{0,80}\b(visa|form|application|dha[- ]?1738|critical skills)\b/i.test(text))return null;
+  const facts=workflow?.workflow?.known_facts||{};
+  const v=(...keys:string[])=>{for(const k of keys){const x=k.split(".").reduce((o:any,p)=>o?.[p],facts);if(x&&typeof x==="object"&&"value" in x)return x.value;if(x!==undefined&&x!==null&&String(x)!=="")return x;}return "";};
+  const answers={
+    identity:{surname:v("identity.surname"),first_names:v("identity.first_names"),date_of_birth:v("identity.date_of_birth"),nationality:v("identity.nationality"),passportNumber:v("passport.number")},
+    employment:{occupation:v("employment.occupation"),employer:v("employment.employer"),job_title:v("employment.job_title"),salary:v("employment.salary"),work_location:v("employment.work_location")}
+  };
+  const fieldMap:any={
+    "SurnameFamily name":"identity.surname",
+    "Given names":"identity.first_names",
+    "Passport number":"identity.passportNumber",
+    "Date of birth":"identity.date_of_birth",
+    "Nationality":"identity.nationality",
+    "Occupation":"employment.occupation"
+  };
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/immigration-document-engine`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-ai-internal-worker-token":INTERNAL_WORKER_TOKEN||""},
+    body:JSON.stringify({
+      action:"GENERATE_FORM",
+      template:"DHA_1738",
+      answers,
+      fieldMap,
+      metadata:{caseType:"critical_skills",checklist:workflow.checklist||[],source:"Anthony Isaacs E2E"},
+      matter_id:matter.id,
+      client_user_id:matter.individual_user_id||null,
+      actor:actorUserId||"ANTHONY"
+    })
+  });
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(payload?.error||"DHA-1738 draft generation failed.");
+  return payload;
+}
 Deno.serve(async req=>{if(req.method==="OPTIONS")return new Response("ok",{status:200,headers:corsHeaders});if(req.method!=="POST")return json({error:"Method not allowed."},405);try{const p=await req.json();const{caller,user,internal}=await authenticate(req,p);const body=clean(p?.body);if(!body)return json({error:"Message body is required."},400);const channel=channelOf(p?.channel);if(internal&&channel!=="WHATSAPP")return json({error:"Internal worker requests are restricted to WhatsApp."},403);if(!internal&&channel!=="PORTAL")return json({error:"Browser AI requests are restricted to the client portal."},403);const chatId=nullable(p?.chatId,255)||(user?`portal:${user.id}`:"portal:unknown");const phone=nullable(p?.phoneNumber,64);const mid=nullable(p?.matterId,64);const msgId=nullable(p?.messageId,255);if(channel==="WHATSAPP"&&(!p?.chatId||!isDirectChat(chatId)))return json({error:"WhatsApp AI is restricted to direct contacts, not groups or broadcasts."},403);if(!internal&&chatId!==`portal:${user.id}`)return json({error:"Portal chat identity is server-controlled."},403);if(!internal){const a=await caller.rpc("client_portal_access_status");if(a.error)throw a.error;if(String(Array.isArray(a.data)?a.data[0]:a.data).toUpperCase()!=="APPROVED")return json({error:"Client portal access is not approved."},403)}
 const identity=channel==="WHATSAPP"?await identityEngine.resolveWhatsApp({phoneNumber:phone,chatId,whatsappName:nullable(p?.whatsappName,255)}):null;const authorityRole=identity?.authorityRole||null;const staffConversation=Boolean(identity?.verified&&["STAFF","SUPER_ADMIN","DIRECTOR","PARTNER","SHAREHOLDER","STAKEHOLDER"].includes(String(authorityRole||"").toUpperCase()));const uid=identity?.userId||user?.id||identity?.contact?.user_id||null;const contact=identity?.contact||null;const matter=await matterFor(uid,mid,identity);
 const resolvedMatter=matter||(identity?.matters||[]).find((x:any)=>!["CLOSED","COMPLETED","CANCELLED","ARCHIVED"].includes(String(x?.status||"").toUpperCase()))||null;const con=await conversation(uid,chatId,phone,channel,mid);const prior=await history(con.id);const authorityInteraction=await authorityInteractionEngine.resolve({identity,conversation:con,chatId,message:body});const authoritySession=authorityInteraction.session;if(authoritySession)await authorityInteractionEngine.persistSession(con.id,authoritySession);const authorization=authorisationEngine.evaluate({identity,message:body,intent:p?.intent,domain:p?.serviceDomain});const clientMsg=await append(con.id,identity?.identityType||"UNKNOWN","INBOUND",body,nullable(p?.intent,100),nullable(p?.serviceDomain,100),{source:"ai-liaison-runtime",transport:internal?"openwa":"portal",identity_type:identity?.identityType||"UNKNOWN",identity_status:identity?.identityStatus||"UNKNOWN",authority_id:identity?.authority?.authorityId||null,authority_role:authorityRole||null,phone_verified:Boolean(identity?.verified),relationship_count:identity?.relationships?.length||0,authorization_scope:authorization.scope.level,authorization_allowed:authorization.allowed,disclosure_rule:authorization.disclosureRule,...(msgId&&!staffConversation?{client_message_id:msgId}:{})});
 
 const immigrationWorkflow=await immigrationQualification.process({identity,conversationId:con.id,matterId:resolvedMatter?.id||mid||con.matter_id||null,body});
 if(immigrationWorkflow){
-  const reply=clean(immigrationWorkflow.reply,8192);
+  let draft=null;
+  try{
+    draft=await prepareImmigrationDraft({
+      workflow:{...immigrationWorkflow,requestBody:body,internalAuthority:staffConversation},
+      matter:immigrationWorkflow.matter,
+      actorUserId:uid
+    });
+  }catch(error){
+    console.error("Anthony DHA-1738 draft preparation failed",error);
+  }
+  const replyBase=clean(immigrationWorkflow.reply,8192);
+  const reply=draft?.ok
+    ? replyBase+"\n\nDHA-1738 draft created from the verified matter record. Document ID: "+draft.documentId+". Status: NEEDS_REVIEW. It is not submission-ready; the outstanding statutory evidence, payment and approval gates remain open."
+    : replyBase;
   const aiMsg=reply?await append(con.id,"AI","OUTBOUND",reply,"IMMIGRATION_QUALIFICATION",null,{source:"ai-liaison-runtime",runtime:"ImmigrationQualificationWorkflowService",assistant_name:"Anthony",qualification_mode:immigrationWorkflow.mode,qualification_state:immigrationWorkflow.workflow?.state||"QUALIFICATION",completeness:immigrationWorkflow.completeness||null,payment_seen:Boolean(immigrationWorkflow.payment?.seen)}):null;
   const out=reply&&channel==="WHATSAPP"?await queue(con,uid,reply,phone,immigrationWorkflow.matter?.id||mid,msgId):null;
   await admin.from("ai_conversations").update({matter_id:immigrationWorkflow.matter?.id||con.matter_id||mid||null,state:immigrationWorkflow.workflow?.state||"QUALIFICATION",facts:{...(con.facts||{}),immigrationQualification:{mode:immigrationWorkflow.mode,state:immigrationWorkflow.workflow?.state||"QUALIFICATION",complete:Boolean(immigrationWorkflow.complete),paymentSeen:Boolean(immigrationWorkflow.payment?.seen),missing:immigrationWorkflow.missing||[]}},updated_at:new Date().toISOString()}).eq("id",con.id);
