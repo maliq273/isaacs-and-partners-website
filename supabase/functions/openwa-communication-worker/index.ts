@@ -300,7 +300,21 @@ async function processOutbound(limit = 5) {
         );
         if (!response.ok) {
           const detail = await response.clone().json().catch(() => ({}));
-          throw new Error(`OpenWA document send failed: HTTP ${response.status}: ${JSON.stringify(detail).slice(0, 1500)}`);
+          // Delivery fallback: preserve the generated document and give the recipient its direct URL.
+          response = await openwaRequest(
+            `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-text`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                chatId,
+                text: `${message.body}\n\nPDF delivery fallback — open the generated document here:\n${documentUrl}`,
+              }),
+            },
+          );
+          if (!response.ok) {
+            const fallbackDetail = await response.clone().json().catch(() => ({}));
+            throw new Error(`OpenWA document and URL fallback failed. Document HTTP ${response.status}; fallback HTTP ${response.status}: ${JSON.stringify(fallbackDetail).slice(0, 1500)}`);
+          }
         }
       } else if (Array.isArray(actionButtons) && actionButtons.length > 0) {
         response = await openwaRequest(
@@ -662,7 +676,7 @@ async function processWebhook(req: Request) {
       contact, body, idempotencyKey,
       sourceEvent: event + ":" + resolvedSender.source,
     });
-    if (!persisted.duplicate) EdgeRuntime.waitUntil((async () => {
+    if (!persisted.duplicate) {
       try {
         await processPersistedInbound(persisted.id, {
           payload, data, chatId,
@@ -671,11 +685,12 @@ async function processWebhook(req: Request) {
           sourceEvent: event + ":" + resolvedSender.source,
         });
       } catch (error) {
-        console.error("OpenWA background inbound processing failed", { event, messageId: data?.id || persisted.id, chatId, error });
+        console.error("OpenWA inbound processing failed", { event, messageId: data?.id || persisted.id, chatId, error });
         await markInboundProcessingFailure(persisted.id, error);
+        // Keep the inbound message durable even if the AI/outbound path fails.
       }
-    })());
-    return json({ received: true, queued: true, persisted: true }, 202);
+    }
+    return json({ received: true, queued: true, persisted: true }, 200);
   }
 
   if (event === "message.sent") {
