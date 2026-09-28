@@ -299,10 +299,8 @@ async function processOutbound(limit = 5) {
           },
         );
         if (!response.ok) {
-          response = await openwaRequest(
-            `/api/sessions/${encodeURIComponent(OPENWA_SESSION_ID)}/messages/send-text`,
-            { method: "POST", body: JSON.stringify({ chatId, text: message.body }) },
-          );
+          const detail = await response.clone().json().catch(() => ({}));
+          throw new Error(`OpenWA document send failed: HTTP ${response.status}: ${JSON.stringify(detail).slice(0, 1500)}`);
         }
       } else if (Array.isArray(actionButtons) && actionButtons.length > 0) {
         response = await openwaRequest(
