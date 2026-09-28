@@ -80,17 +80,49 @@ async function prepareImmigrationDraft({workflow,matter,actorUserId}:any){
   if(!/\b(create|prepare|generate|draft)\b.{0,80}\b(visa|form|application|dha[- ]?1738|critical skills)\b/i.test(text))return null;
   const facts=workflow?.workflow?.known_facts||{};
   const v=(...keys:string[])=>{for(const k of keys){const x=k.split(".").reduce((o:any,p)=>o?.[p],facts);if(x&&typeof x==="object"&&"value" in x)return x.value;if(x!==undefined&&x!==null&&String(x)!=="")return x;}return "";};
+  const dob=String(v("identity.date_of_birth")||"").trim();
+  const dobMatch=dob.match(/^(\\d{1,2})\\s+([A-Za-z]+)\\s+(\\d{4})$/);
+  const dobDay=dobMatch?.[1]||"";
+  const dobMonthName=dobMatch?.[2]||"";
+  const dobYear=dobMatch?.[3]||"";
+  const monthNames:any={january:"01",february:"02",march:"03",april:"04",may:"05",june:"06",july:"07",august:"08",september:"09",october:"10",november:"11",december:"12"};
+  const dobMonth=monthNames[dobMonthName.toLowerCase()]||dobMonthName;
+  const employer=v("employment.employer");
+  const jobTitle=v("employment.job_title");
+  const occupation=v("employment.occupation");
+  const salary=v("employment.salary");
+  const workLocation=v("employment.work_location");
   const answers={
-    identity:{surname:v("identity.surname"),first_names:v("identity.first_names"),date_of_birth:v("identity.date_of_birth"),nationality:v("identity.nationality"),passportNumber:v("passport.number")},
-    employment:{occupation:v("employment.occupation"),employer:v("employment.employer"),job_title:v("employment.job_title"),salary:v("employment.salary"),work_location:v("employment.work_location")}
+    identity:{
+      surname:v("identity.surname"),
+      first_names:v("identity.first_names"),
+      date_of_birth:dob,
+      dob_year:dobYear,
+      dob_month:dobMonth,
+      dob_day:dobDay,
+      nationality:v("identity.nationality"),
+      passportNumber:v("passport.number")
+    },
+    contact:{
+      email:v("contact.email"),
+      phone:v("contact.phone")
+    },
+    employment:{occupation,employer,job_title:jobTitle,salary,work_location:workLocation},
+    visa:{critical_skills:true},
+    intent:{
+      proposed_activities:[employer,jobTitle,occupation,workLocation,salary].filter(Boolean).join(" — ")
+    }
   };
   const fieldMap:any={
+    "Check Box14":"visa.critical_skills",
     "SurnameFamily name":"identity.surname",
     "Given names":"identity.first_names",
+    "Year":"identity.dob_year",
+    "Month":"identity.dob_month",
+    "Day":"identity.dob_day",
+    "Text8":"identity.nationality",
     "Passport number":"identity.passportNumber",
-    "Date of birth":"identity.date_of_birth",
-    "Nationality":"identity.nationality",
-    "Occupation":"employment.occupation"
+    "Outline your proposed activities whilst in the Republic":"intent.proposed_activities"
   };
   const response=await fetch(`${SUPABASE_URL}/functions/v1/immigration-document-engine`,{
     method:"POST",
