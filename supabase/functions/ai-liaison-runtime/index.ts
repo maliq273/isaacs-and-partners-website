@@ -81,7 +81,7 @@ async function prepareImmigrationDraft({workflow,matter,actorUserId}:any){
   const facts=workflow?.workflow?.known_facts||{};
   const v=(...keys:string[])=>{for(const k of keys){const x=k.split(".").reduce((o:any,p)=>o?.[p],facts);if(x&&typeof x==="object"&&"value" in x)return x.value;if(x!==undefined&&x!==null&&String(x)!=="")return x;}return "";};
   const dob=String(v("identity.date_of_birth")||"").trim();
-  const dobMatch=dob.match(/^(\\d{1,2})\\s+([A-Za-z]+)\\s+(\\d{4})$/);
+  const dobMatch=dob.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
   const dobDay=dobMatch?.[1]||"";
   const dobMonthName=dobMatch?.[2]||"";
   const dobYear=dobMatch?.[3]||"";
