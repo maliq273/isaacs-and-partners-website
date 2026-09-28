@@ -50,5 +50,5 @@ export default class ImmigrationQualificationWorkflowService {
     if(changed||JSON.stringify(workflow.known_facts||{})!==JSON.stringify(facts))await this.save(workflow,{known_facts:facts,state:nextState,application_completed_at:complete?new Date().toISOString():workflow.application_completed_at});
     const effectiveMissing=mode==="CLIENT_DOCUMENT_REQUEST"?missing:(pendingFileChecks.length?pendingFileChecks:missing);
     const reply=await this.phrase({mode,matter,checklist:pendingFileChecks,missing:effectiveMissing,complete,payment});
-    return {handled:true,action:"IMMIGRATION_QUALIFICATION",executed:true,mode,matter,workflow:{...workflow,state:nextState,known_facts:facts},completeness,checklist,missing:effectiveMissing,payment,complete,reply}}
+    return {handled:true,action:"IMMIGRATION_QUALIFICATION",executed:true,mode,matter,workflow:{...workflow,state:nextState,known_facts:facts},completeness,checklist:pendingFileChecks,missing:effectiveMissing,payment,complete,reply}}
 }
