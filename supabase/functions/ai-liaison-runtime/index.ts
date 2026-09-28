@@ -11,7 +11,7 @@ import IdentityRelationshipResolutionEngine from "https://raw.githubusercontent.
 import AnthonyAuthorizationEngine from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AnthonyAuthorizationEngine.js";
 import AuthorityActionService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AuthorityActionService.js?v=c519189c786688ba916193c9e43a9f69cdcb6820";
 import AuthorityInteractionEngine from "./AuthorityInteractionEngine.js";
-import ImmigrationQualificationWorkflowService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/ImmigrationQualificationWorkflowService.js?v=c3a9057f9b139df74744e05ea881a1e9c6c43b89";
+import ImmigrationQualificationWorkflowService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/ImmigrationQualificationWorkflowService.js?v=d30c5bea7634fe7be6444a132eb0436a3f07cde8";
 
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL");
 const SERVICE_ROLE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
