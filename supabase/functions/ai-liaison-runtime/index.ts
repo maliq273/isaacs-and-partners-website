@@ -94,18 +94,58 @@ async function prepareImmigrationDraft({workflow,matter,actorUserId}:any){
   const workLocation=v("employment.work_location");
   const answers={
     identity:{
+      title:v("identity.title"),
       surname:v("identity.surname"),
       first_names:v("identity.first_names"),
+      maiden_name:v("identity.maiden_name"),
+      stage_name:v("identity.stage_name"),
+      previous_names:v("identity.previous_names"),
       date_of_birth:dob,
       dob_year:dobYear,
       dob_month:dobMonth,
       dob_day:dobDay,
-      nationality:v("identity.nationality"),
-      passportNumber:v("passport.number")
+      date_of_divorce:v("identity.date_of_divorce"),
+      nationality:v("identity.nationality")
+    },
+    citizenship:{
+      acquisition_details:v("citizenship.acquisition_details"),
+      other_citizenship_details:v("citizenship.other_citizenship_details")
+    },
+    passport:{
+      number:v("passport.number"),
+      issue_country:v("passport.issue_country"),
+      issue_date:v("passport.issue_date"),
+      expiry_date:v("passport.expiry_date"),
+      other_document_type:v("passport.other_document_type"),
+      other_document_number:v("passport.other_document_number")
     },
     contact:{
       email:v("contact.email"),
-      phone:v("contact.phone")
+      phone:v("contact.phone"),
+      work_phone:v("contact.work_phone")
+    },
+    residence:{
+      address:v("residence.address"),
+      postal_code:v("residence.postal_code"),
+      previous_period:v("residence.previous_period"),
+      previous_country:v("residence.previous_country")
+    },
+    immigration:{
+      current_status:v("immigration.current_status"),
+      asylum_country:v("immigration.asylum_country"),
+      refusal_details:v("immigration.refusal_details")
+    },
+    contact_person:{
+      name:v("contact_person.name"),
+      address:v("contact_person.address"),
+      work_phone:v("contact_person.work_phone"),
+      phone:v("contact_person.phone")
+    },
+    sa_relatives:{
+      name:v("sa_relatives.name"),
+      address:v("sa_relatives.address"),
+      relationship:v("sa_relatives.relationship"),
+      identity_number:v("sa_relatives.identity_number")
     },
     employment:{occupation,employer,job_title:jobTitle,salary,work_location:workLocation},
     visa:{critical_skills:true},
@@ -121,8 +161,35 @@ async function prepareImmigrationDraft({workflow,matter,actorUserId}:any){
     "Month":"identity.dob_month",
     "Day":"identity.dob_day",
     "Text8":"identity.nationality",
-    "Passport number":"identity.passportNumber",
-    "Outline your proposed activities whilst in the Republic":"intent.proposed_activities"
+    "Passport number":"passport.number",
+    "Outline your proposed activities whilst in the Republic":"intent.proposed_activities",
+    "Title I Mr I Ms I Other specify":"identity.title",
+    "Maiden name":"identity.maiden_name",
+    "Stage name":"identity.stage_name",
+    "Previousalternative namesaliases including details":"identity.previous_names",
+    "Date of divorce":"identity.date_of_divorce",
+    "If acquired other than by birth date and conditions under which acquired":"citizenship.acquisition_details",
+    "If so of which country plus details":"citizenship.other_citizenship_details",
+    "Country of issue":"passport.issue_country",
+    "Type of document":"passport.other_document_type",
+    "Number":"passport.other_document_number",
+    "Postal code                                   Postal code":"residence.postal_code",
+    "Telephone No Work incl area code":"contact.work_phone",
+    "Home incl area code":"contact.phone",
+    "Address":"residence.address",
+    "Period":"residence.previous_period",
+    "Country":"residence.previous_country",
+    "If no specify period and present status":"immigration.current_status",
+    "Yes D No D If yes specify the country":"immigration.asylum_country",
+    "Name":"contact_person.name",
+    "Address_2":"contact_person.address",
+    "Telephone No Work incl area code_2":"contact_person.work_phone",
+    "Home incl area code_2":"contact_person.phone",
+    "Name_2":"sa_relatives.name",
+    "Address_3":"sa_relatives.address",
+    "Relationship":"sa_relatives.relationship",
+    "Identity No":"sa_relatives.identity_number",
+    "Have you ever been refused entry into or deported from the Republic If so please provide details":"immigration.refusal_details"
   };
   const response=await fetch(`${SUPABASE_URL}/functions/v1/immigration-document-engine`,{
     method:"POST",
