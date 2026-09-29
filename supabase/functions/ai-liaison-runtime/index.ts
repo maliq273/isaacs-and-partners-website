@@ -159,10 +159,14 @@ if(immigrationWorkflow){
     console.error("Anthony DHA-1738 draft preparation failed",error);
   }
   const replyBase=clean(immigrationWorkflow.reply,8192);
+  const audit=draft?.fieldAudit||null;
+  const auditSummary=audit
+    ? "\n\nDHA-1738 field audit: "+audit.filledCount+" filled; "+audit.notAvailableCount+" not available; "+audit.unmappedCount+" unmapped. Form population complete: "+(audit.formPopulationComplete?"YES":"NO")+"."
+    : "";
   const reply=draft?.ok
-    ? replyBase+"\n\nDHA-1738 draft created from the verified matter record. Document ID: "+draft.documentId+". Status: NEEDS_REVIEW. It is not submission-ready; the outstanding statutory evidence, payment and approval gates remain open."
+    ? replyBase+"\n\nDHA-1738 draft created from the verified matter record. Document ID: "+draft.documentId+". Status: NEEDS_REVIEW. It is not submission-ready; the field audit and outstanding statutory evidence, payment and approval gates remain open."+auditSummary
     : replyBase;
-  const aiMsg=reply?await append(con.id,"AI","OUTBOUND",reply,"IMMIGRATION_QUALIFICATION",null,{source:"ai-liaison-runtime",runtime:"ImmigrationQualificationWorkflowService",assistant_name:"Anthony",qualification_mode:immigrationWorkflow.mode,qualification_state:immigrationWorkflow.workflow?.state||"QUALIFICATION",completeness:immigrationWorkflow.completeness||null,payment_seen:Boolean(immigrationWorkflow.payment?.seen)}):null;
+  const aiMsg=reply?await append(con.id,"AI","OUTBOUND",reply,"IMMIGRATION_QUALIFICATION",null,{source:"ai-liaison-runtime",runtime:"ImmigrationQualificationWorkflowService",assistant_name:"Anthony",qualification_mode:immigrationWorkflow.mode,qualification_state:immigrationWorkflow.workflow?.state||"QUALIFICATION",completeness:immigrationWorkflow.completeness||null,payment_seen:Boolean(immigrationWorkflow.payment?.seen),document_audit:audit}):null;
   const out=reply&&channel==="WHATSAPP"?await queue(con,uid,reply,phone,immigrationWorkflow.matter?.id||mid,msgId,draft?.ok?{url:draft.signedUrl,filename:"Isaacs-Partners-DHA-1738-Draft.pdf"}:null):null;
   await admin.from("ai_conversations").update({matter_id:immigrationWorkflow.matter?.id||con.matter_id||mid||null,state:immigrationWorkflow.workflow?.state||"QUALIFICATION",facts:{...(con.facts||{}),immigrationQualification:{mode:immigrationWorkflow.mode,state:immigrationWorkflow.workflow?.state||"QUALIFICATION",complete:Boolean(immigrationWorkflow.complete),paymentSeen:Boolean(immigrationWorkflow.payment?.seen),missing:immigrationWorkflow.missing||[]}},updated_at:new Date().toISOString()}).eq("id",con.id);
   return json({ok:true,conversation:{...con,matter_id:immigrationWorkflow.matter?.id||con.matter_id||mid||null,state:immigrationWorkflow.workflow?.state||"QUALIFICATION"},message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"IMMIGRATION_QUALIFICATION",mode:immigrationWorkflow.mode,complete:Boolean(immigrationWorkflow.complete),paymentSeen:Boolean(immigrationWorkflow.payment?.seen),missing:immigrationWorkflow.missing||[]},context:{identity:{type:identity?.identityType,status:identity?.identityStatus,authorityRole,verified:identity?.verified},authorization}});
