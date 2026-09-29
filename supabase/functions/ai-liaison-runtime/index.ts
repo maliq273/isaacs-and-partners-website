@@ -73,6 +73,14 @@ async function scopeOperational(intelligence:any,identity:any){const role=String
 function agent(){const p=new AIProviderService();const c=new CompanyTruthService();return new WhatsAppAgent({db:admin,responseGenerator:async(input:any)=>{try{return await new TruthFusionEngine({provider:p,companyTruth:c}).generate(input)}catch(error){console.error("Anthony AI provider unavailable; using deterministic fallback",error);return null}}})}
 const historicalRetriever=new HistoricalMemoryRetrievalService();const relationshipMemory=new CustomerRelationshipMemoryEngine();const roi=new RelationshipOperationalIntelligenceEngine({db:admin});const authorityEngine=new AuthorityRoleIntelligenceEngine({db:admin});const identityEngine=new IdentityRelationshipResolutionEngine({db:admin,authorityEngine});const authorisationEngine=new AnthonyAuthorizationEngine({db:admin});const actionService=new AuthorityActionService({db:admin});
 const immigrationQualification=new ImmigrationQualificationWorkflowService({db:admin});
+async function immigrationApplicationCall(action,matterId,body,userId,internal){
+  const response=await fetch(SUPABASE_URL+"/functions/v1/immigration-application-runtime",{method:"POST",headers:{"Content-Type":"application/json","x-ai-internal-worker-token":INTERNAL_WORKER_TOKEN||""},body:JSON.stringify({action,matter_id:matterId,body,userId,internal})});
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok||!payload?.ok)throw new Error(payload?.error||"Immigration application runtime failed.");
+  return payload;
+}
+function applicationSummaryRequest(text){return /\b(summary|progress|documentation|documents|pdf|dha[- ]?1738)\b/i.test(String(text||""))&&/\b(application|matter|file|documentation|documents|pdf|dha[- ]?1738|progress|summary)\b/i.test(String(text||""));}
+
 const authorityInteractionEngine=new AuthorityInteractionEngine({db:admin,companyTruth:new CompanyTruthService()});
 async function prepareImmigrationDraft({workflow,matter,actorUserId}:any){
   const text=String(workflow?.requestBody||"");
@@ -213,6 +221,36 @@ Deno.serve(async req=>{if(req.method==="OPTIONS")return new Response("ok",{statu
 const identity=channel==="WHATSAPP"?await identityEngine.resolveWhatsApp({phoneNumber:phone,chatId,whatsappName:nullable(p?.whatsappName,255)}):null;const authorityRole=identity?.authorityRole||null;const staffConversation=Boolean(identity?.verified&&["STAFF","SUPER_ADMIN","DIRECTOR","PARTNER","SHAREHOLDER","STAKEHOLDER"].includes(String(authorityRole||"").toUpperCase()));const uid=identity?.userId||user?.id||identity?.contact?.user_id||null;const contact=identity?.contact||null;const matter=await matterFor(uid,mid,identity);
 const resolvedMatter=matter||(identity?.matters||[]).find((x:any)=>!["CLOSED","COMPLETED","CANCELLED","ARCHIVED"].includes(String(x?.status||"").toUpperCase()))||null;const con=await conversation(uid,chatId,phone,channel,mid);const prior=await history(con.id);const authorityInteraction=await authorityInteractionEngine.resolve({identity,conversation:con,chatId,message:body});const authoritySession=authorityInteraction.session;if(authoritySession)await authorityInteractionEngine.persistSession(con.id,authoritySession);const authorization=authorisationEngine.evaluate({identity,message:body,intent:p?.intent,domain:p?.serviceDomain});const clientMsg=await append(con.id,identity?.identityType||"UNKNOWN","INBOUND",body,nullable(p?.intent,100),nullable(p?.serviceDomain,100),{source:"ai-liaison-runtime",transport:internal?"openwa":"portal",identity_type:identity?.identityType||"UNKNOWN",identity_status:identity?.identityStatus||"UNKNOWN",authority_id:identity?.authority?.authorityId||null,authority_role:authorityRole||null,phone_verified:Boolean(identity?.verified),relationship_count:identity?.relationships?.length||0,authorization_scope:authorization.scope.level,authorization_allowed:authorization.allowed,disclosure_rule:authorization.disclosureRule,...(msgId&&!staffConversation?{client_message_id:msgId}:{})});
 
+const applicationMatter=resolvedMatter?.service_type==="IMM-CRITICAL-SKILLS"?resolvedMatter:null;
+if(applicationMatter){
+  const applicationMatterId=applicationMatter.id;
+  if(staffConversation&&applicationSummaryRequest(body)){
+    const summary=await immigrationApplicationCall("SUMMARY",applicationMatterId,body,uid,true);
+    const reply=clean(summary.summary,8192);
+    const aiMsg=reply?await append(con.id,"AI","OUTBOUND",reply,"IMMIGRATION_APPLICATION_SUMMARY","IMMIGRATION",{source:"immigration-application-runtime",assistant_name:"Anthony",progress:summary.progress,field_audit:summary.intake?.field_audit||null}):null;
+    const out=reply&&channel==="WHATSAPP"?await queue(con,uid,reply,phone,applicationMatterId,msgId,summary.latestDocument?.signedUrl?{url:summary.latestDocument.signedUrl,filename:"Isaacs-Partners-DHA-1738-Draft.pdf"}:null):null;
+    return json({ok:true,conversation:{...con,matter_id:applicationMatterId},message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"IMMIGRATION_APPLICATION_SUMMARY",progress:summary.progress,documentId:summary.latestDocument?.id||null}});
+  }
+  const current=await immigrationApplicationCall("SNAPSHOT",applicationMatterId,body,uid,internal);
+  const greeting=/^(hi|hello|hey|good morning|good afternoon|good evening|help|start|what do you need|what information|what documents)\b/i.test(body.trim());
+  const currentAnswered=current.intake?.answer_states?.[current.intake?.current_question_key]?.status;
+  if(greeting&&!currentAnswered){
+    const q=current.nextQuestion;
+    const reply=q?"Hi, I’m Anthony. Let’s complete your Critical Skills Work Visa application.\n\n"+q.prompt+"\n\nApplication progress: "+(current.progress?.overallPercent||0)+"%.":"Hi, I’m Anthony. Your application interview is complete; I’m keeping the checklist ready for review.";
+    const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"IMMIGRATION_APPLICATION_INTAKE","IMMIGRATION",{source:"immigration-application-runtime",assistant_name:"Anthony",current_question:q?.key||null,progress:current.progress});
+    const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,applicationMatterId,msgId):null;
+    return json({ok:true,conversation:{...con,matter_id:applicationMatterId},message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"IMMIGRATION_APPLICATION_NEXT",progress:current.progress,nextQuestion:q}});
+  }
+  const intake=await immigrationApplicationCall("ANSWER",applicationMatterId,body,uid,internal);
+  const q=intake.nextQuestion;
+  const reply=q
+    ?"Thank you. I’ve recorded that answer on your matter.\n\nNext question:\n"+q.prompt+"\n\nApplication progress: "+(intake.progress?.overallPercent||0)+"%."+((intake.draft?.documentId)?"\n\nI have also updated the reviewable DHA-1738 draft.":"")
+    :"Thank you. I’ve recorded the final application answer.\n\nApplication intake is complete. I’ll keep the outstanding document checklist and DHA-1738 draft ready for Isaacs & Partners staff review.\n\nProgress: "+(intake.progress?.overallPercent||0)+"%.";
+  const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"IMMIGRATION_APPLICATION_INTAKE","IMMIGRATION",{source:"immigration-application-runtime",assistant_name:"Anthony",progress:intake.progress,field_audit:intake.intake?.field_audit||null,next_question:q?.key||null,draft_document_id:intake.intake?.draft_document_id||null});
+  const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,applicationMatterId,msgId,intake.latestDocument?.signedUrl?{url:intake.latestDocument.signedUrl,filename:"Isaacs-Partners-DHA-1738-Draft.pdf"}:null):null;
+  await admin.from("ai_conversations").update({matter_id:applicationMatterId,state:intake.intake?.status||"IN_PROGRESS",facts:{...(con.facts||{}),immigrationApplication:{form:"DHA_1738",progress:intake.progress,fieldAudit:intake.intake?.field_audit||null,currentQuestion:q?.key||null,draftDocumentId:intake.intake?.draft_document_id||null}},updated_at:new Date().toISOString()}).eq("id",con.id);
+  return json({ok:true,conversation:{...con,matter_id:applicationMatterId,state:intake.intake?.status||"IN_PROGRESS"},message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"IMMIGRATION_APPLICATION_INTAKE",progress:intake.progress,nextQuestion:q,draftDocumentId:intake.intake?.draft_document_id||null}});
+}
 const immigrationWorkflow=await immigrationQualification.process({identity,conversationId:con.id,matterId:resolvedMatter?.id||mid||con.matter_id||null,body});
 if(immigrationWorkflow){
   let draft=null;
