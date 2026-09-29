@@ -21,3 +21,8 @@ verify_jwt = false
 # with the caller JWT; the browser never receives a service-role credential.
 [functions.ai-liaison-runtime]
 verify_jwt = false
+
+
+# Authenticated client application intake plus trusted WhatsApp/admin relay.
+[functions.immigration-application-runtime]
+verify_jwt = false
