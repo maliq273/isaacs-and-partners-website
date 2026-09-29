@@ -79,7 +79,8 @@ async function immigrationApplicationCall(action,matterId,body,userId,internal){
   if(!response.ok||!payload?.ok)throw new Error(payload?.error||"Immigration application runtime failed.");
   return payload;
 }
-function applicationSummaryRequest(text){return /\b(summary|progress|documentation|documents|pdf|dha[- ]?1738)\b/i.test(String(text||""))&&/\b(application|matter|file|documentation|documents|pdf|dha[- ]?1738|progress|summary)\b/i.test(String(text||""));}
+function applicationGenerateRequest(text){return /\b(create|generate|prepare|draft|update)\b/i.test(String(text||""))&&/\b(dha[- ]?1738|critical skills|application|form|pdf)\b/i.test(String(text||""));}
+function applicationSummaryRequest(text){return !applicationGenerateRequest(text)&&/\b(summary|progress|documentation|documents|pdf|dha[- ]?1738)\b/i.test(String(text||""))&&/\b(application|matter|file|documentation|documents|pdf|dha[- ]?1738|progress|summary)\b/i.test(String(text||""));}
 
 const authorityInteractionEngine=new AuthorityInteractionEngine({db:admin,companyTruth:new CompanyTruthService()});
 async function prepareImmigrationDraft({workflow,matter,actorUserId}:any){
@@ -224,6 +225,13 @@ const resolvedMatter=matter||(identity?.matters||[]).find((x:any)=>!["CLOSED","C
 const applicationMatter=resolvedMatter?.service_type==="IMM-CRITICAL-SKILLS"?resolvedMatter:null;
 if(applicationMatter){
   const applicationMatterId=applicationMatter.id;
+  if(staffConversation&&applicationGenerateRequest(body)){
+    const generated=await immigrationApplicationCall("GENERATE",applicationMatterId,body,uid,true);
+    const reply="The current DHA-1738 reviewable draft has been regenerated from the authoritative application record.\n\nProgress: "+(generated.progress?.overallPercent||0)+"%.\nField audit: "+(generated.intake?.field_audit?.filledCount||0)+" filled; "+(generated.intake?.field_audit?.notAvailableCount||0)+" not available; "+(generated.intake?.field_audit?.unmappedCount||0)+" unmapped.\nStatus: NEEDS_REVIEW.\nPDF: "+(generated.latestDocument?.signedUrl||"available in the matter documents.");
+    const aiMsg=await append(con.id,"AI","OUTBOUND",reply,"IMMIGRATION_APPLICATION_GENERATE","IMMIGRATION",{source:"immigration-application-runtime",assistant_name:"Anthony",progress:generated.progress,field_audit:generated.intake?.field_audit||null,document_id:generated.latestDocument?.id||null});
+    const out=channel==="WHATSAPP"?await queue(con,uid,reply,phone,applicationMatterId,msgId,generated.latestDocument?.signedUrl?{url:generated.latestDocument.signedUrl,filename:"Isaacs-Partners-DHA-1738-Draft.pdf"}:null):null;
+    return json({ok:true,conversation:{...con,matter_id:applicationMatterId},message:clientMsg,aiMessage:aiMsg,transportMessageId:out,result:{action:"IMMIGRATION_APPLICATION_GENERATE",progress:generated.progress,documentId:generated.latestDocument?.id||null}});
+  }
   if(staffConversation&&applicationSummaryRequest(body)){
     const summary=await immigrationApplicationCall("SUMMARY",applicationMatterId,body,uid,true);
     const reply=clean(summary.summary,8192);
