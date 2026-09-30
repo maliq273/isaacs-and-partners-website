@@ -10,7 +10,7 @@ export const DHA1738_FORM=Object.freeze({
   fieldMap:Object.freeze({
     "Check Box14":"visa.critical_skills","SurnameFamily name":"identity.surname","Given names":"identity.first_names",
     "Year":"identity.dob_year","Month":"identity.dob_month","Day":"identity.dob_day","Text8":"identity.nationality",
-    "Passport number":"identity.passportNumber","Outline your proposed activities whilst in the Republic":"intent.proposed_activities",
+    "Passport number":"passport.number","Outline your proposed activities whilst in the Republic":"intent.proposed_activities",
     "Title I Mr I Ms I Other specify":"identity.title","Maiden name":"identity.maiden_name","Stage name":"identity.stage_name",
     "Previousalternative namesaliases including details":"identity.previous_names","Date of divorce":"identity.date_of_divorce",
     "If acquired other than by birth date and conditions under which acquired":"citizenship.acquisition_details",
