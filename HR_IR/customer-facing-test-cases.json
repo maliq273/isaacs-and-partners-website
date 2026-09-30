@@ -1,0 +1,112 @@
+{
+  "version": "1.0.0",
+  "requiredStages": [
+    "CUSTOMER_MESSAGE",
+    "CLASSIFICATION",
+    "QUALIFICATION",
+    "EVIDENCE",
+    "PRICING",
+    "PAYMENT",
+    "MATTER",
+    "STAFF_WORKFLOW",
+    "COMPLETION"
+  ],
+  "cases": [
+    {
+      "service": "employment-contracts",
+      "firstMessage": "I need an employment contract for a new employee.",
+      "expected": {
+        "domain": "HR_IR",
+        "humanRequired": true,
+        "quoteRequired": true,
+        "depositRequired": true,
+        "finalBalanceRequired": true,
+        "staffDeliveryRequired": true
+      }
+    },
+    {
+      "service": "hr-policies",
+      "firstMessage": "We need help creating an HR policy for our company.",
+      "expected": {
+        "domain": "HR_IR",
+        "humanRequired": true,
+        "quoteRequired": true,
+        "depositRequired": true,
+        "finalBalanceRequired": true,
+        "staffDeliveryRequired": true
+      }
+    },
+    {
+      "service": "disciplinary-hearings",
+      "firstMessage": "I need help with a disciplinary hearing for an employee.",
+      "expected": {
+        "domain": "HR_IR",
+        "humanRequired": true,
+        "quoteRequired": true,
+        "depositRequired": true,
+        "finalBalanceRequired": true,
+        "staffDeliveryRequired": true
+      }
+    },
+    {
+      "service": "chairperson-services",
+      "firstMessage": "We need an independent chairperson for a disciplinary hearing.",
+      "expected": {
+        "domain": "HR_IR",
+        "humanRequired": true,
+        "quoteRequired": true,
+        "depositRequired": true,
+        "finalBalanceRequired": true,
+        "staffDeliveryRequired": true
+      }
+    },
+    {
+      "service": "grievance-hearings",
+      "firstMessage": "An employee has lodged a grievance and we need assistance with the hearing.",
+      "expected": {
+        "domain": "HR_IR",
+        "humanRequired": true,
+        "quoteRequired": true,
+        "depositRequired": true,
+        "finalBalanceRequired": true,
+        "staffDeliveryRequired": true
+      }
+    },
+    {
+      "service": "performance-management",
+      "firstMessage": "We need help managing an employee's poor performance.",
+      "expected": {
+        "domain": "HR_IR",
+        "humanRequired": true,
+        "quoteRequired": true,
+        "depositRequired": true,
+        "finalBalanceRequired": true,
+        "staffDeliveryRequired": true
+      }
+    },
+    {
+      "service": "retrenchment-consulting",
+      "firstMessage": "We are considering retrenchment and need HR/IR advice.",
+      "expected": {
+        "domain": "HR_IR",
+        "humanRequired": true,
+        "quoteRequired": true,
+        "depositRequired": true,
+        "finalBalanceRequired": true,
+        "staffDeliveryRequired": true
+      }
+    },
+    {
+      "service": "ccma-representation",
+      "firstMessage": "We have a CCMA matter and need representation.",
+      "expected": {
+        "domain": "HR_IR",
+        "humanRequired": true,
+        "quoteRequired": true,
+        "depositRequired": true,
+        "finalBalanceRequired": true,
+        "staffDeliveryRequired": true
+      }
+    }
+  ]
+}
