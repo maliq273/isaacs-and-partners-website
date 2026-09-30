@@ -70,7 +70,33 @@ Truth hierarchy now prioritises:
 5. Customer-originated historical memory
 6. General model knowledge
 
-### Phase 5 — AI architecture
+#### Hindsight learned-memory layer
+
+🟢 **Integrated as a non-authoritative learning layer**
+
+Anthony now has a dedicated Hindsight boundary for long-term learned context:
+
+```
+Supabase / Company Truth
+        ↓
+Existing historical customer memory
+        ↓
+Hindsight recall
+        ↓
+Anthony
+        ↓
+Durable learning event
+        ↓
+Hindsight retain
+```
+
+Hindsight memories are isolated by client/staff scope plus a separate general learning bank. Recalled Hindsight context is explicitly untrusted and cannot override live records, pricing, permissions, legal sources or human approval.
+
+The integration is REST-based, so Hindsight can be self-hosted or consumed from Hindsight Cloud without exposing its API key to browser code. The production baseline is Hindsight v0.10.2.
+
+See `docs/architecture/HINDSIGHT_AGENT_MEMORY.md`.
+
+## Phase 5 — AI architecture
 
 🟢 **~95%**
 
