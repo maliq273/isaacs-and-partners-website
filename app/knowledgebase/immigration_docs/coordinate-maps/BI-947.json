@@ -357,5 +357,21 @@
     "allRectsInsidePage": null,
     "method": "dynamic fuzzy label resolution against repository bbox HTML at generation time",
     "sourceHashChecked": true
+  },
+  "anchorAliases": {
+    "first_names": "First name s",
+    "dob": "Date of birth",
+    "nationality_current": "Present nationality",
+    "previous_relationships": "Details of previous marriage s or permanent spousal relationship s if any",
+    "home_phone": "Home",
+    "work_phone": "Work",
+    "email": "E mail address",
+    "permit_office": "Issuing office",
+    "adult_dependants": "Names of children over the age of 21 who are still dependent on the applicant and give reasons for dependency",
+    "current_duties": "Principal applicant Describe briefly your present last duties",
+    "residence_history": "FULL DETAILS OF PREVIOUS AND CURRENT RESIDENCE",
+    "health": "infectious physical mental condition",
+    "asylum_elsewhere": "applied for asylum in another country",
+    "signature_date": "Date"
   }
 }
