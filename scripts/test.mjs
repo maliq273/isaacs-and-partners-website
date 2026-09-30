@@ -84,7 +84,37 @@ if (pricingResult.action !== 'APPROVAL_NEEDED' || pricingResult.approval_needed 
   process.exit(1);
 }
 
-console.log(`Production smoke tests passed: ${required.length} required boundaries + communication approval + costing model verified.`);
+console.log("Production smoke tests passed: required boundaries + communication approval + costing model verified.");
+// Immigration/Anthony registry smoke tests.
+const { IMMIGRATION_WORKFLOWS, workflowCapability } = await import('../app/immigration/ImmigrationWorkflowRegistry.js');
+for (const code of ['DHA-84','DHA-1738','BI-947','BI-1712A','DHA-49','SECTION-22','SECTION-24','VISA-APPEAL-DG','VISA-APPEAL-MINISTER','WAIVER','UNDESIRABILITY-REVIEW']) {
+  if (!IMMIGRATION_WORKFLOWS[code] || !workflowCapability(code).supported) {
+    console.error('Immigration workflow registry missing or unsupported: '+code);
+    process.exit(1);
+  }
+}
+const { DHA1738_FORM, buildProgress, nextQuestion } = await import('../app/immigration/ApplicationIntakeRegistry.js');
+if (DHA1738_FORM.fieldMap['Passport number'] !== 'passport.number') {
+  console.error('DHA-1738 authority map failed: passport.number is not authoritative.');
+  process.exit(1);
+}
+if (DHA1738_FORM.questions.length < 30 || DHA1738_FORM.documents.length < 10) {
+  console.error('DHA-1738 registry is incomplete.');
+  process.exit(1);
+}
+const p0=buildProgress({}, DHA1738_FORM.documents.map(d=>({key:d.key,status:'OUTSTANDING'})));
+if (p0.questionsCompleted !== 0 || p0.status !== 'IN_PROGRESS') {
+  console.error('DHA-1738 initial progress model failed.');
+  process.exit(1);
+}
+const answered={};
+for(const q of DHA1738_FORM.questions) answered[q.key]={status:'ANSWERED',value:'test'};
+if(nextQuestion(answered)!==null) {
+  console.error('DHA-1738 question engine final-state test failed.');
+  process.exit(1);
+}
+console.log('PASS: Anthony immigration workflow registry + DHA-1738 authority/progress tests');
+
 
 // Run comprehensive app/tests test suite
 import assert from 'node:assert/strict';
