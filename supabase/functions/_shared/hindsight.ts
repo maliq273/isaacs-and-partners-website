@@ -17,7 +17,7 @@ function memorySafe(value: unknown, max = 4000) {
     .replace(/\b[A-Z]{2,6}\d{5,12}\b/g, "[REDACTED_IDENTIFIER]");
 }
 function slug(value: unknown, max = 160) { return clean(value, max).toLowerCase().replace(/[^a-z0-9:_-]+/g, "-").replace(/^-+|-+$/g, ""); }
-function bank(scope: string, id: string | null | undefined) { return "anthony:" + (slug(scope, 32) || "global") + ":" + (slug(id || "default", 160) || "default"); }
+function bank(scope: string, id: string | null | undefined) { return "anthony-" + (slug(scope, 32) || "global") + "-" + (slug(id || "default", 160) || "default"); }
 
 async function request(path: string, init: RequestInit = {}) {
   if (!ENABLED) return null;
