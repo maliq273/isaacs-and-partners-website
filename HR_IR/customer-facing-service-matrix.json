@@ -1,0 +1,245 @@
+{
+  "version": "1.0.0",
+  "domain": "HR_IR",
+  "services": [
+    {
+      "id": "employment-contracts",
+      "name": "Employment Contracts",
+      "serviceCode": "HR-EMPLOYMENT-CONTRACTS",
+      "pricingMode": "STAFF_QUOTE_REQUIRED",
+      "qualification": [
+        "customer_type",
+        "employment_relationship",
+        "new_or_review",
+        "employee_count",
+        "role_or_category",
+        "remuneration",
+        "working_hours",
+        "existing_contract",
+        "urgency"
+      ],
+      "evidence": [
+        "existing_contract",
+        "job_description_or_role_details",
+        "remuneration_details",
+        "workplace_policies_if_relevant"
+      ],
+      "humanGate": "HR staff review and approved quote",
+      "completion": [
+        "draft_or_reviewed_contract",
+        "client_review",
+        "final_delivery"
+      ]
+    },
+    {
+      "id": "hr-policies",
+      "name": "HR Policies",
+      "serviceCode": "HR-HR-POLICIES",
+      "pricingMode": "STAFF_QUOTE_REQUIRED",
+      "qualification": [
+        "customer_type",
+        "policy_subject",
+        "employee_count",
+        "existing_policy",
+        "business_context",
+        "urgency"
+      ],
+      "evidence": [
+        "existing_policy",
+        "relevant_contracts",
+        "organisation_details",
+        "existing_procedures_if_any"
+      ],
+      "humanGate": "HR staff review and approved quote",
+      "completion": [
+        "policy_draft_or_review",
+        "client_approval",
+        "final_delivery"
+      ]
+    },
+    {
+      "id": "disciplinary-hearings",
+      "name": "Disciplinary Hearings",
+      "serviceCode": "HR-DISCIPLINARY-HEARINGS",
+      "pricingMode": "STAFF_QUOTE_REQUIRED",
+      "qualification": [
+        "party_role",
+        "allegation_or_issue",
+        "incident_date",
+        "hearing_date",
+        "employee_count",
+        "prior_action",
+        "urgency"
+      ],
+      "evidence": [
+        "employment_contract",
+        "disciplinary_code_or_policy",
+        "notice_to_attend",
+        "warnings_or_prior_records",
+        "allegation_evidence",
+        "witness_details"
+      ],
+      "humanGate": "Human HR professional/chairperson delivery",
+      "completion": [
+        "hearing_or_review_completed",
+        "outcome_recorded",
+        "client_update",
+        "closure"
+      ]
+    },
+    {
+      "id": "chairperson-services",
+      "name": "Chairperson Services",
+      "serviceCode": "HR-CHAIRPERSON-SERVICES",
+      "pricingMode": "STAFF_QUOTE_REQUIRED",
+      "qualification": [
+        "party_role",
+        "hearing_type",
+        "hearing_date",
+        "employee_count",
+        "allegation_or_issue",
+        "documents_available",
+        "urgency"
+      ],
+      "evidence": [
+        "notice_to_attend",
+        "disciplinary_code_or_policy",
+        "allegations",
+        "employee_response",
+        "witness_details",
+        "prior_warnings_if_any"
+      ],
+      "humanGate": "Human chairperson assignment and approval",
+      "completion": [
+        "hearing_conducted",
+        "outcome_or_recommendation_recorded",
+        "client_update",
+        "closure"
+      ]
+    },
+    {
+      "id": "grievance-hearings",
+      "name": "Grievance Hearings",
+      "serviceCode": "HR-GRIEVANCE-HEARINGS",
+      "pricingMode": "STAFF_QUOTE_REQUIRED",
+      "qualification": [
+        "party_role",
+        "grievance_subject",
+        "incident_date",
+        "hearing_date",
+        "internal_process_started",
+        "urgency"
+      ],
+      "evidence": [
+        "written_grievance",
+        "employment_contract",
+        "relevant_policy",
+        "correspondence",
+        "supporting_evidence",
+        "witness_details"
+      ],
+      "humanGate": "Human HR professional delivery",
+      "completion": [
+        "grievance_review_or_hearing",
+        "outcome_recorded",
+        "client_update",
+        "closure"
+      ]
+    },
+    {
+      "id": "performance-management",
+      "name": "Performance Management",
+      "serviceCode": "HR-PERFORMANCE-MANAGEMENT",
+      "pricingMode": "STAFF_QUOTE_REQUIRED",
+      "qualification": [
+        "party_role",
+        "performance_issue",
+        "period_of_issue",
+        "targets_or_standard",
+        "prior_feedback",
+        "employee_count",
+        "urgency"
+      ],
+      "evidence": [
+        "employment_contract",
+        "job_description",
+        "performance_plan_or_targets",
+        "review_records",
+        "prior_feedback",
+        "relevant_policy"
+      ],
+      "humanGate": "Human HR professional review",
+      "completion": [
+        "assessment",
+        "action_plan_or_documents",
+        "client_review",
+        "closure"
+      ]
+    },
+    {
+      "id": "retrenchment-consulting",
+      "name": "Retrenchment Consulting",
+      "serviceCode": "HR-RETRENCHMENT-CONSULTING",
+      "pricingMode": "STAFF_QUOTE_REQUIRED",
+      "qualification": [
+        "employer_headcount",
+        "affected_employee_count",
+        "reason",
+        "consultation_started",
+        "proposed_timeline",
+        "union_or_representative",
+        "urgency"
+      ],
+      "evidence": [
+        "business_reason_and_supporting_information",
+        "headcount_information",
+        "affected_roles",
+        "alternatives_considered",
+        "consultation_documents",
+        "selection_criteria",
+        "proposed_timeline",
+        "severance_information"
+      ],
+      "humanGate": "Human HR/IR review before any substantive action",
+      "completion": [
+        "consultation_process_support",
+        "documents_or_outcome",
+        "client_update",
+        "closure"
+      ]
+    },
+    {
+      "id": "ccma-representation",
+      "name": "CCMA Representation",
+      "serviceCode": "HR-CCMA-REPRESENTATION",
+      "pricingMode": "STAFF_QUOTE_REQUIRED",
+      "qualification": [
+        "party_role",
+        "dispute_type",
+        "date_of_event_or_dismissal",
+        "ccma_case_number",
+        "conciliation_date",
+        "referral_status",
+        "representation_needed",
+        "urgency"
+      ],
+      "evidence": [
+        "ccma_referral",
+        "proof_of_service",
+        "employment_contract",
+        "disciplinary_or_grievance_records",
+        "dismissal_or_decision_documents",
+        "correspondence",
+        "witness_details",
+        "hearing_notice"
+      ],
+      "humanGate": "Human HR/IR representative review and assignment",
+      "completion": [
+        "file_review",
+        "representation_or_preparation",
+        "client_update",
+        "closure"
+      ]
+    }
+  ]
+}
