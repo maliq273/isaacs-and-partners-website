@@ -15,6 +15,13 @@ function clean(value, max = 4000) {
 function slug(value, max = 120) {
     return clean(value, max).toLowerCase().replace(/[^a-z0-9:_-]+/g, "-").replace(/^-+|-+$/g, "");
 }
+function memorySafe(value, max = 4000) {
+    return clean(value, max)
+        .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[REDACTED_EMAIL]")
+        .replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, "[REDACTED_PHONE]")
+        .replace(/\b\d{10,}\b/g, "[REDACTED_NUMBER]")
+        .replace(/\b[A-Z]{2,6}\d{5,12}\b/g, "[REDACTED_IDENTIFIER]");
+}
 function env(name, fallback = "") {
     if (typeof process !== "undefined" && process?.env) return process.env[name] || fallback;
     return fallback;
@@ -73,7 +80,7 @@ export default class HindsightMemoryService {
             return await this.request("banks/" + encodeURIComponent(bankId) + "/memories/recall", {
                 method: "POST",
                 signal,
-                body: { query: clean(query, 3000), budget, max_tokens: maxTokens, ...(Array.isArray(tags) && tags.length ? { tags, tags_match: "any" } : {}) }
+                body: { query: memorySafe(query, 3000), budget, max_tokens: maxTokens, ...(Array.isArray(tags) && tags.length ? { tags, tags_match: "any" } : {}) }
             }) || { results: [] };
         } catch (error) {
             return { results: [], degraded: true, error: clean(error?.message, 500) };
@@ -104,7 +111,7 @@ export default class HindsightMemoryService {
                 signal,
                 body: {
                     items: [{
-                        content: clean(content, 6000),
+                        content: memorySafe(content, 6000),
                         context: clean(context, 500),
                         timestamp,
                         metadata: Object.fromEntries(Object.entries(metadata || {}).map(([k, v]) => [k, clean(v, 500)])),
