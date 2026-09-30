@@ -1,3 +1,4 @@
+import { getImmigrationFormIntelligence } from "./ImmigrationFormIntelligenceRegistry.js";
 /**
  * Authoritative immigration application intake registry.
  * Shared by browser Anthony, WhatsApp Anthony, progress/audit and PDF population.
@@ -75,3 +76,34 @@ export function normalizeAnswer(value){const s=String(value??"").trim();if(!s)re
 export function nextQuestion(states={}){return DHA1738_FORM.questions.find(q=>!["ANSWERED","NOT_APPLICABLE"].includes(String(states[q.key]?.status||"").toUpperCase()))||null}
 export function buildProgress(states={},documents=[]){const qt=DHA1738_FORM.questions.length,qc=DHA1738_FORM.questions.filter(q=>["ANSWERED","NOT_APPLICABLE"].includes(String(states[q.key]?.status||"").toUpperCase())).length,dt=DHA1738_FORM.documents.length,dc=DHA1738_FORM.documents.filter(d=>["ON_FILE","VERIFIED","NOT_REQUIRED","PAID"].includes(String(documents.find(x=>x.key===d.key)?.status||"").toUpperCase())).length,qp=qt?Math.round(qc/qt*100):0,dp=dt?Math.round(dc/dt*100):0;return{version:1,questionsTotal:qt,questionsCompleted:qc,questionPercent:qp,documentsTotal:dt,documentsCompleted:dc,documentPercent:dp,overallPercent:Math.round((qp+dp)/2),status:qc===qt?"READY_FOR_DOCUMENT_REVIEW":"IN_PROGRESS"}}
 export default DHA1738_FORM;
+
+
+function humaniseIntakeKey(key){
+ return String(key||"").split(".").pop().replace(/[_-]+/g," ").replace(/\b\w/g,m=>m.toUpperCase());
+}
+export function getApplicationDefinition(code){
+ const key=String(code||"").trim().toUpperCase();
+ if(key==="DHA_1738"||key==="DHA-1738")return DHA1738_FORM;
+ const spec=getImmigrationFormIntelligence(key);
+ if(!spec)return null;
+ const evidenceByKey=new Map((spec.evidence||[]).map(x=>[x.key,x]));
+ const questions=(spec.askInOrder||[]).map(keyPath=>{
+   const ev=evidenceByKey.get(keyPath);
+   const label=ev?.label||humaniseIntakeKey(keyPath);
+   const supplier=ev?.supplier||"CLIENT";
+   return Object.freeze({key:keyPath,label,prompt:`Please provide: ${label}. If this information is not applicable, tell Anthony explicitly.`,supplier});
+ });
+ const documents=(spec.evidence||[]).map(ev=>Object.freeze({key:ev.key,label:ev.label,supplier:ev.supplier,required:ev.required!==false}));
+ return Object.freeze({code:key,version:"2026-09-30",template:spec.template||null,mode:spec.mode,populationStatus:spec.populationStatus,questions:Object.freeze(questions),documents:Object.freeze(documents),fieldMap:Object.freeze({})});
+}
+export function nextQuestionFor(code,states={}){
+ const form=getApplicationDefinition(code);
+ return form?.questions?.find(q=>!["ANSWERED","NOT_APPLICABLE"].includes(String(states[q.key]?.status||"").toUpperCase()))||null;
+}
+export function buildProgressFor(code,states={},documents=[]){
+ const form=getApplicationDefinition(code); if(!form)return buildProgress(states,documents);
+ const qt=form.questions.length,qc=form.questions.filter(q=>["ANSWERED","NOT_APPLICABLE"].includes(String(states[q.key]?.status||"").toUpperCase())).length;
+ const dt=form.documents.length,dc=form.documents.filter(d=>["ON_FILE","VERIFIED","NOT_REQUIRED","PAID"].includes(String(documents.find(x=>x.key===d.key)?.status||"").toUpperCase())).length;
+ const qp=qt?Math.round(qc/qt*100):0,dp=dt?Math.round(dc/dt*100):0;
+ return {version:1,formCode:form.code,questionsTotal:qt,questionsCompleted:qc,questionPercent:qp,documentsTotal:dt,documentsCompleted:dc,documentPercent:dp,overallPercent:Math.round((qp+dp)/2),status:qc===qt?"READY_FOR_DOCUMENT_REVIEW":"IN_PROGRESS"};
+}
