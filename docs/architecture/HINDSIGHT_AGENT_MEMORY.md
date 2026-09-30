@@ -36,10 +36,10 @@ Hindsight retain
 
 ## Scopes
 
-- anthony:client:<contact-id> — client-specific durable preferences and patterns.
-- anthony:staff:<user-id> — staff-specific working preferences and interaction patterns.
-- anthony:matter:<matter-id> — reserved for future matter-scoped learned workflow context.
-- anthony:global:learned — generalised agent lessons containing no customer-identifying information.
+- anthony-client-<contact-id> — client-specific durable preferences and patterns.
+- anthony-staff-<user-id> — staff-specific working preferences and interaction patterns.
+- anthony-matter-<matter-id> — reserved for future matter-scoped learned workflow context.
+- anthony-global-learned — generalised agent lessons containing no customer-identifying information.
 
 The runtime must never use a client bank as a global knowledge source.
 
