@@ -9,6 +9,13 @@ const TENANT = (Deno.env.get("HINDSIGHT_TENANT") || "default").replace(/[^a-zA-Z
 const ENABLED = Deno.env.get("HINDSIGHT_ENABLED") !== "false" && Boolean(API_URL && API_KEY);
 
 function clean(value: unknown, max = 4000) { return String(value ?? "").trim().slice(0, max); }
+function memorySafe(value: unknown, max = 4000) {
+  return clean(value, max)
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[REDACTED_EMAIL]")
+    .replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, "[REDACTED_PHONE]")
+    .replace(/\b\d{10,}\b/g, "[REDACTED_NUMBER]")
+    .replace(/\b[A-Z]{2,6}\d{5,12}\b/g, "[REDACTED_IDENTIFIER]");
+}
 function slug(value: unknown, max = 160) { return clean(value, max).toLowerCase().replace(/[^a-z0-9:_-]+/g, "-").replace(/^-+|-+$/g, ""); }
 function bank(scope: string, id: string | null | undefined) { return "anthony:" + (slug(scope, 32) || "global") + ":" + (slug(id || "default", 160) || "default"); }
 
@@ -52,7 +59,7 @@ async function recall(bankId: string, query: string, maxTokens = 700) {
   try {
     return await request("banks/" + encodeURIComponent(bankId) + "/memories/recall", {
       method: "POST",
-      body: JSON.stringify({ query: clean(query, 3000), budget: "low", max_tokens: maxTokens })
+      body: JSON.stringify({ query: memorySafe(query, 3000), budget: "low", max_tokens: maxTokens })
     }) || { results: [] };
   } catch (error) {
     console.warn("Hindsight recall degraded:", clean((error as Error)?.message, 500));
@@ -67,7 +74,7 @@ async function retain(bankId: string, content: string, metadata: Record<string, 
       method: "POST",
       body: JSON.stringify({
         items: [{
-          content: clean(content, 6000),
+          content: memorySafe(content, 6000),
           context: "Anthony durable interaction learning",
           timestamp: new Date().toISOString(),
           metadata: Object.fromEntries(Object.entries(metadata).map(([key, value]) => [key, clean(value, 500)])),
@@ -112,6 +119,5 @@ export async function hindsightRetain({ bankId, content, metadata = {} }: {
   metadata?: Record<string, string>;
 }) {
   if (!ENABLED) return { enabled: false };
-  await ensureBank(bankId);
   return retain(bankId, content, metadata);
 }
