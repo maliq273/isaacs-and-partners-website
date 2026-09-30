@@ -114,6 +114,30 @@ if(nextQuestion(answered)!==null) {
   process.exit(1);
 }
 console.log('PASS: Anthony immigration workflow registry + DHA-1738 authority/progress tests');
+const { getApplicationDefinition, nextQuestionFor, buildProgressFor } = await import('../app/immigration/ApplicationIntakeRegistry.js');
+for (const code of ['DHA-84','BI-947','BI-1712A','DHA-49','SECTION-22','SECTION-24','VISA-APPEAL-DG','VISA-APPEAL-MINISTER','WAIVER','UNDESIRABILITY-REVIEW']) {
+  const def=getApplicationDefinition(code);
+  if(!def || !def.questions?.length || !def.documents?.length) {
+    console.error('Generic immigration intake registry incomplete: '+code);
+    process.exit(1);
+  }
+  const states={};
+  for(const q of def.questions) states[q.key]={status:'ANSWERED',value:'test'};
+  if(nextQuestionFor(code,states)!==null) { console.error('Generic immigration question engine final-state failed: '+code); process.exit(1); }
+  const progress=buildProgressFor(code,states,def.documents.map(d=>({key:d.key,status:d.required===false?'NOT_REQUIRED':'OUTSTANDING'})));
+  if(progress.questionsCompleted!==def.questions.length || progress.status!=='READY_FOR_DOCUMENT_REVIEW') {
+    console.error('Generic immigration progress engine failed: '+code); process.exit(1);
+  }
+}
+for (const [form, mapFile] of [['DHA-84','coordinate-maps/DHA-84.json'],['BI-947','coordinate-maps/BI-947.json'],['BI-1712A','coordinate-maps/BI-1712A.json']]) {
+  const map=JSON.parse(fs.readFileSync(path.join(root,'app/knowledgebase/immigration_docs',mapFile),'utf8'));
+  if(map.coordinateStrategy!=='BBOX_LABEL_DYNAMIC' || !map.answerPaths || Object.keys(map.answerPaths).length===0) {
+    console.error('Immigration coordinate map incomplete: '+form);
+    process.exit(1);
+  }
+}
+console.log('PASS: generic immigration intake/progress + coordinate-map registry tests');
+
 const { default: HindsightMemoryService } = await import('../app/ai/HindsightMemoryService.js');
 const hindsightSmoke = new HindsightMemoryService({ apiKey: '', enabled: true });
 if (hindsightSmoke.enabled !== false || hindsightSmoke.bankId('client', 'TEST-123') !== 'anthony-client-test-123') {
