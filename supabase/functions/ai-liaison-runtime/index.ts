@@ -416,8 +416,9 @@ if(result?.action==="ESCALATE"&&!staffConversation){const intervention=await adm
 const learningApprovalNeeded=Boolean(result?.approval_needed||result?.approvalNeeded||result?.requiresApproval||result?.action==="APPROVAL_NEEDED"||result?.context?.facts?.approval_needed||con?.facts?.approval_needed);
 const learningParts:any[]=[];
 if(relationshipRecords.length){
-  for(const record of relationshipRecords.slice(0,8)){
-    const value=clean(record?.value_text||record?.evidence||"",1200);
+  const durableCategories=new Set(["SERVICE_INTEREST","GOAL","PREFERENCE","CORRECTION"]);
+  for(const record of relationshipRecords.filter((item:any)=>durableCategories.has(String(item?.category||"").toUpperCase())).slice(0,8)){
+    const value=clean(record?.value_text||"",1200);
     if(value)learningParts.push("Customer-originated durable memory: "+value);
   }
 }
