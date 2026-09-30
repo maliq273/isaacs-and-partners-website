@@ -1,7 +1,7 @@
 {
   "form": "DHA-84",
   "source": "immigrations_docs/Visitor-Visa-Application-Form-DHA-84-Form-11-June-19-2014.pdf",
-  "sha256":null,
+  "sha256": null,
   "pages": 10,
   "purpose": "Authoritative coordinate map for the repository source PDF.",
   "coordinateSystem": "PDF points, origin bottom-left",
@@ -287,5 +287,17 @@
     "allRectsInsidePage": null,
     "method": "dynamic fuzzy label resolution against repository bbox HTML at generation time",
     "sourceHashChecked": true
+  },
+  "occurrences": {
+    "maiden_name": 1,
+    "spouse_maiden_name": 2,
+    "nationality": 1,
+    "spouse_nationality": 2,
+    "employer_address": 1,
+    "self_employed_address": 2,
+    "employer_phone": 1,
+    "self_employed_phone": 2,
+    "employer_fax": 1,
+    "self_employed_fax": 2
   }
 }
