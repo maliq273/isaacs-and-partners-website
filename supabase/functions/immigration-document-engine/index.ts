@@ -26,6 +26,43 @@ async function loadCoordinateMap(template:string){
  if(!response.ok) throw new Error("Coordinate map could not be retrieved.");
  return await response.json();
 }
+function normAnchor(v:string){return String(v||"").toLowerCase().replace(/&nbsp;/g," ").replace(/<[^>]+>/g," ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");}
+function bboxPages(html:string){
+ const pages:any[]=[]; const re=/<page\s+width="([^"]+)"\s+height="([^"]+)"[^>]*>([\s\S]*?)<\/page>/g; let m;
+ while((m=re.exec(html))){const body=m[3];const lines:any[]=[];const lr=/<line\s+xMin="([^"]+)"\s+yMin="([^"]+)"\s+xMax="([^"]+)"\s+yMax="([^"]+)"[^>]*>([\s\S]*?)<\/line>/g;let lm;
+ while((lm=lr.exec(body))){const text=normAnchor(lm[5].replace(/<word[^>]*>([\s\S]*?)<\/word>/g," $1 "));lines.push({xMin:Number(lm[1]),yMin:Number(lm[2]),xMax:Number(lm[3]),yMax:Number(lm[4]),text});}
+ pages.push({width:Number(m[1]),height:Number(m[2]),lines});
+ }
+ return pages;
+}
+async function resolveDynamicCoordinateFields(map:any,template:string){
+ const source=String(map?.source||"").split("/").pop()||"";
+ const bboxFile=source.replace(/\.pdf$/i,".html");
+ const response=await fetch(REPO_RAW+"app/knowledgebase/immigration_docs/bbox/"+bboxFile);
+ if(!response.ok)throw new Error("BBOX source could not be retrieved for coordinate map.");
+ const pages=bboxPages(await response.text());
+ const specs=Object.entries(map?.answerPaths||{});
+ const fields:any[]=[]; const unresolved:any[]=[];
+ for(const [id,answerPath] of specs){
+   const rawLabel=String((map?.unresolved||[]).find((x:any)=>x.id===id)?.label||id).replace(/_/g," ");
+   const anchor=normAnchor(rawLabel);
+   const tokens=anchor.split(" ").filter((x:string)=>x.length>2&&!/^\d+$/.test(x));
+   let best:any=null;
+   for(let pi=0;pi<pages.length;pi++){
+     for(let li=0;li<pages[pi].lines.length;li++){
+       const line=pages[pi].lines[li]; const score=tokens.reduce((n:number,t:string)=>n+(line.text.includes(t)?1:0),0);
+       if(tokens.length && score>=Math.max(1,Math.ceil(tokens.length*0.6))){
+         const x=Math.min(line.xMax+4,pages[pi].width-90); const y=Math.max(6,pages[pi].height-line.yMax-1);
+         const h=Math.max(10,Math.min(22,line.yMax-line.yMin+3)); const w=Math.max(50,pages[pi].width-x-30);
+         best={field:id,answerPath,page:pi+1,writeRect:[x,y,w,h],anchor,anchorRect:[line.xMin,line.yMin,line.xMax,line.yMax],score}; break;
+       }
+     }
+     if(best)break;
+   }
+   if(best)fields.push(best); else unresolved.push({field:id,answerPath,reason:"ANCHOR_NOT_FOUND",anchor});
+ }
+ return {fields,unresolved,total:specs.length,resolved:fields.length};
+}
 function drawWrapped(page:any,text:string,x:number,y:number,maxWidth:number,maxHeight:number,font:any,size:number){
  const words=String(text).split(/\\s+/); let line=""; const lines:string[]=[];
  for(const word of words){const next=line?line+" "+word:word;if(font.widthOfTextAtSize(next,size)<=maxWidth) line=next; else {if(line)lines.push(line);line=word;}}
@@ -58,20 +95,23 @@ let coordinateApplied:any[]=[];
 if(fields.length===0){
  const map=await loadCoordinateMap(template);
  if(map.sha256!==loaded.hash)throw new Error("Coordinate map SHA-256 does not match the source government PDF. Regenerate the map before generating a form.");
- if(!map.verification?.allRectsInsidePage||map.verification?.anchorsUnresolved>0)throw new Error("Coordinate map has unresolved or invalid fields. Official form generation is blocked.");
+ const resolvedMap=map.coordinateStrategy==="BBOX_LABEL_DYNAMIC"
+   ? await resolveDynamicCoordinateFields(map,template)
+   : {fields:map.fields||[],unresolved:[],total:(map.fields||[]).length,resolved:(map.fields||[]).length};
+ if(resolvedMap.unresolved.length)throw new Error("Coordinate map could not resolve all authoritative field anchors: "+resolvedMap.unresolved.map((x:any)=>x.field).join(", "));
  const font=await pdf.embedFont(StandardFonts.Helvetica);
- for(const spec of map.fields){
+ for(const spec of resolvedMap.fields){
    const value=valueAt(answers,String(spec.answerPath));
-   if(value===undefined||value===null||String(value)==="") { unresolved.push({field:spec.id,reason:"ANSWER_MISSING",answerPath:spec.answerPath,page:spec.page}); continue; }
+   if(value===undefined||value===null||String(value)===""){unresolved.push({field:spec.field,reason:"ANSWER_MISSING",answerPath:spec.answerPath,page:spec.page});continue;}
    const page=pdf.getPage(spec.page-1); const [x,y,w,h]=spec.writeRect;
    const ok=drawWrapped(page,String(value),x,y,w,h,font,Math.min(9,Math.max(6,h*0.55)));
-   if(!ok) unresolved.push({field:spec.id,reason:"TEXT_OVERFLOW",answerPath:spec.answerPath,page:spec.page});
-   else coordinateApplied.push({field:spec.id,answerPath:spec.answerPath,page:spec.page,writeRect:spec.writeRect});
+   if(!ok)unresolved.push({field:spec.field,reason:"TEXT_OVERFLOW",answerPath:spec.answerPath,page:spec.page});
+   else coordinateApplied.push({field:spec.field,answerPath:spec.answerPath,page:spec.page,writeRect:spec.writeRect,anchor:spec.anchor});
  }
- if(unresolved.length)console.warn("[immigration-document-engine] Coordinate draft contains unresolved fields:",unresolved.length);
+ if(unresolved.length)console.warn("[immigration-document-engine] Coordinate draft contains unresolved/missing fields:",unresolved.length);
 } else {
  form.updateFieldAppearances(); form.flatten();
 }
-const fieldAudit=fields.length?buildFieldAudit(fields,fieldMap,answers,applied,unresolved):{version:1,generatedAt:new Date().toISOString(),fieldCount:coordinateApplied.length+unresolved.length,filledCount:coordinateApplied.length,notAvailableCount:unresolved.length,unmappedCount:0,formPopulationComplete:unresolved.length===0,entries:[...coordinateApplied.map((x:any)=>({...x,status:"FILLED",label:displayLabel(x.field,x.answerPath),value:String(valueAt(answers,String(x.answerPath)))})),...unresolved.map((x:any)=>({...x,status:"NOT_AVAILABLE",label:displayLabel(x.field,x.answerPath||null)}))],filled:coordinateApplied.map((x:any)=>({...x,status:"FILLED",label:displayLabel(x.field,x.answerPath),value:String(valueAt(answers,String(x.answerPath)))})),notAvailable:unresolved.map((x:any)=>({...x,status:"NOT_AVAILABLE",label:displayLabel(x.field,x.answerPath||null)})),unmapped:[]};
+const fieldAudit=fields.length?buildFieldAudit(fields,fieldMap,answers,applied,unresolved):{version:2,generatedAt:new Date().toISOString(),fieldCount:coordinateApplied.length+unresolved.length,filledCount:coordinateApplied.length,notAvailableCount:unresolved.length,unmappedCount:0,formPopulationComplete:unresolved.length===0,entries:[...coordinateApplied.map((x:any)=>({...x,status:"FILLED",label:displayLabel(x.field,x.answerPath),value:String(valueAt(answers,String(x.answerPath))),coordinate:{page:x.page,writeRect:x.writeRect,anchor:x.anchor}})),...unresolved.map((x:any)=>({...x,status:"NOT_AVAILABLE",label:displayLabel(x.field,x.answerPath||null)}))],filled:coordinateApplied.map((x:any)=>({...x,status:"FILLED",label:displayLabel(x.field,x.answerPath),value:String(valueAt(answers,String(x.answerPath)))})),notAvailable:unresolved.map((x:any)=>({...x,status:"NOT_AVAILABLE",label:displayLabel(x.field,x.answerPath||null)})),unmapped:[]};
 const bytes=await pdf.save();const path=`applications/${matterId||"unassigned"}/${crypto.randomUUID()}-${templatePath(template).split("/").pop()}`;const upload=await admin.storage.from("immigration-generated").upload(path,bytes,{contentType:"application/pdf",cacheControl:"3600",upsert:false});if(upload.error)throw upload.error;const record=await admin.from("immigration_application_documents").insert({matter_id:matterId||null,client_user_id:clientUserId||null,case_type:metadata?.caseType||"unknown",template_path:loaded.path,template_sha256:loaded.hash,generated_path:path,status:"NEEDS_REVIEW",field_manifest:fieldAudit,answers_snapshot:answers||{},checklist:metadata?.checklist||[],provenance:{source:"Anthony Isaacs",template_source:"GitHub /immigrations_docs",generated_by:actor||"SYSTEM"},generated_by:actor||null,generated_at:new Date().toISOString()}).select("id").single();if(record.error)throw record.error;const signed=await admin.storage.from("immigration-generated").createSignedUrl(path,604800);if(signed.error)throw signed.error;return {ok:true,documentId:record.data.id,template:loaded.path,templateSha256:loaded.hash,generatedPath:path,signedUrl:signed.data.signedUrl,appliedFields:fields.length?applied:coordinateApplied,fieldAudit,coordinateMapUsed:fields.length===0,reviewStatus:"NEEDS_REVIEW",submissionReady:false,formPopulationComplete:fieldAudit.formPopulationComplete};}
 Deno.serve(async(req)=>{if(req.method==="OPTIONS")return new Response("ok",{headers:cors});try{const url=new URL(req.url);if(req.method==="GET"&&url.searchParams.get("action")==="INSPECT_TEMPLATE")return json(await inspect(url.searchParams.get("template")||"DHA_1738"));const body=req.method==="POST"?await req.json():Object.fromEntries(url.searchParams.entries());const action=clean(body.action||"");if(action==="INSPECT_TEMPLATE")return json(await inspect(body.template||"DHA_1738"));if(action!=="GENERATE_FORM")return json({error:"Unsupported action."},400);const auth=await authenticate(req);return json(await populate({template:body.template||"DHA_1738",answers:body.answers||{},fieldMap:body.fieldMap||{},metadata:body.metadata||{},matterId:body.matter_id||null,clientUserId:body.client_user_id||null,actor:auth.userId}));}catch(e){console.error("[immigration-document-engine]",e);return json({error:e instanceof Error?e.message:"Immigration document generation failed."},400);}});
