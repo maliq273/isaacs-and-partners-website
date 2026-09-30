@@ -344,7 +344,7 @@
     "a_gender": 1,
     "b_gender": 3,
     "a_first_names": 1,
-    "b_first_names": 3,
+    "b_first_names": 6,
     "a_address": 1,
     "b_address": 3,
     "a_id": 1,
@@ -366,7 +366,7 @@
     "a_foreigner_gender": 2,
     "b_foreigner_gender": 4,
     "a_foreigner_first_names": 2,
-    "b_foreigner_first_names": 4,
+    "b_foreigner_first_names": 7,
     "a_foreigner_address": 2,
     "b_foreigner_address": 4,
     "a_foreigner_passport": 2,
@@ -383,10 +383,14 @@
     "b_foreigner_visa": 2,
     "a_foreigner_expiry": 2,
     "b_foreigner_expiry": 4,
-    "a_commissioner_first": 3,
+    "a_commissioner_first": 5,
     "a_commissioner_surname": 3,
     "a_commissioner_capacity": 1,
     "a_commissioner_place": 1,
     "b_commissioner": 2
+  },
+  "anchorAliases": {
+    "a_foreigner_birthplace": "date of birth place of birth",
+    "b_foreigner_birthplace": "date of birth place of birth"
   }
 }
