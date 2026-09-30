@@ -1,0 +1,19 @@
+
+services:
+  hindsight:
+    image: ghcr.io/vectorize-io/hindsight:0.10.2
+    container_name: hindsight
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8888:8888"
+      - "127.0.0.1:9999:9999"
+    environment:
+      HINDSIGHT_API_LLM_API_KEY: \${HINDSIGHT_API_LLM_API_KEY}
+      HINDSIGHT_API_LLM_PROVIDER: \${HINDSIGHT_API_LLM_PROVIDER:-openai}
+      HINDSIGHT_API_RETAIN_EXTRACTION_MODE: concise
+      HINDSIGHT_API_AUDIT_LOG_ENABLED: \${HINDSIGHT_API_AUDIT_LOG_ENABLED:-true}
+    volumes:
+      - hindsight-data:/home/hindsight/.pg0
+
+volumes:
+  hindsight-data:
