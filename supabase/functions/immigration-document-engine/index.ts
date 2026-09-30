@@ -27,7 +27,7 @@ async function loadCoordinateMap(template:string){
  return await response.json();
 }
 function normAnchor(v:string){return String(v||"").toLowerCase().replace(/&nbsp;/g," ").replace(/<[^>]+>/g," ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");}
-function coordinateAnchor(id:string,label:string){
+function coordinateAnchor(id:string,label:string,map:any=null){
  const aliases:any={
   "previous_surnames":"Previous surname s","original_nationality":"nationality","nationality_acquired":"Where and when was present nationality obtained","email":"E mail address","spouse_dob":"Date of birth of","spouse_nationality":"Nationality","contacts":"Names of Organisations or persons you will be contacting during your stay in the Republic","transit_destination":"Destination after leaving the Republic","transit_mode":"Mode of travel to destination","transit_departure":"Intended date and port of departure from the Republic to that destination","declaration_date":"Date","sa_address":"Residential physical Address in the Republic","sa_host_id":"Identity document number or permanent residence permit number of South African host",
   "affirmative_details":"Give particulars if reply to any of the questions above is in the affirmative","transit_visa":"Visa or permit for destination country",
@@ -38,7 +38,7 @@ function coordinateAnchor(id:string,label:string){
   "a_id":"Identity No","b_id":"Identity No","a_foreigner_birthplace":"date of birth place of birth","b_foreigner_birthplace":"date of birth place of birth","a_expiry":"Date of expiry","b_expiry":"Date of expiry","a_first_names":"First name s","b_first_names":"First name s","a_dob":"Date of birth","b_dob":"Date of birth","a_foreigner_first_names":"First name s","b_foreigner_first_names":"First name s","a_foreigner_surname":"Surname","b_foreigner_surname":"Surname","a_foreigner_gender":"Gender","b_foreigner_gender":"Gender","a_foreigner_address":"Residential address","b_foreigner_address":"Residential address","a_foreigner_passport":"Passport No","b_foreigner_passport":"Passport No","a_foreigner_dob":"Date of birth","b_foreigner_dob":"Date of birth","a_foreigner_nationality":"Nationality","b_foreigner_nationality":"Nationality","a_foreigner_visa":"Type of visa permit held","b_foreigner_visa":"Type of visa permit held","a_foreigner_expiry":"Date of expiry","b_foreigner_expiry":"Date of expiry","a_relationship_duration":"spousal relationship for the past years","a_relationship_status":"spousal relationship","b_relationship_continues":"relationship mentioned in the preceding paragraph still subsists","a_exclusivity":"party to a marriage or spousal relationship","a_evidence":"documentation proving cohabitation","a_oath_date":"signed and sworn solemnly affirmed before me","b_oath_date":"signed and sworn solemnly affirmed before me","a_commissioner_first":"First name s","a_commissioner_surname":"Surname","a_commissioner_capacity":"Capacity","a_commissioner_place":"Place",
   "a_foreigner_birthplace":"Place of birth","b_foreigner_birthplace":"Place of Birth","a_commissioner":"Commissioner of Oaths","b_commissioner":"Commissioner of Oaths"
  };
- return aliases[id]||label.replace(/_/g," ");
+ return map?.anchorAliases?.[id]||aliases[id]||label.replace(/_/g," ");
 }
 function bboxPages(html:string){
  const pages:any[]=[]; const re=/<page\s+width="([^"]+)"\s+height="([^"]+)"[^>]*>([\s\S]*?)<\/page>/g; let m;
@@ -58,7 +58,7 @@ async function resolveDynamicCoordinateFields(map:any,template:string){
  const fields:any[]=[]; const unresolved:any[]=[];
  for(const [id,answerPath] of specs){
    const rawLabel=String((map?.unresolved||[]).find((x:any)=>x.id===id)?.label||id);
-   const anchor=normAnchor(coordinateAnchor(id,rawLabel));
+   const anchor=normAnchor(coordinateAnchor(id,rawLabel,map));
    const tokens=anchor.split(" ").filter((x:string)=>x.length>2&&!/^\d+$/.test(x));
    let best:any=null; const candidates:any[]=[];
    for(let pi=0;pi<pages.length;pi++)for(let li=0;li<pages[pi].lines.length;li++){
