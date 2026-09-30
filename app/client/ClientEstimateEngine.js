@@ -43,11 +43,18 @@ export default class ClientEstimateEngine{
   const token=auth.getToken();if(!token)throw new Error("Your session has expired.");
   const businessId=this.dashboard.role==="BUSINESS"?this.dashboard.data.businesses?.[0]?.id:null;
   const phone=this.dashboard.data.profile?.phone||this.dashboard.user?.phone||null;
-  const r=await fetch(authConfig.supabase.url+"/functions/v1/commercial-approval-engine",{method:"POST",headers:{Authorization:"Bearer "+token,apikey:authConfig.supabase.publishableKey,"Content-Type":"application/json"},body:JSON.stringify({action:"CREATE_ESTIMATE",client_user_id:this.dashboard.user.id,business_id:businessId,service_code:service.code,qualifying_answers:answers,request_data:{channel:"PORTAL",phone_number:phone}})});
+  let matterId=null;
+  if(isHrService(service)){
+   const request=this.supabase.rpc("client_portal_create_service_request",{p_service_type:service.code,p_title:service.name,p_description:answers.details||service.name,p_business_id:businessId});
+   const {data:matter,error:matterError}=await request;
+   if(matterError)throw matterError;
+   matterId=matter?.id||null;
+  }
+  const r=await fetch(authConfig.supabase.url+"/functions/v1/commercial-approval-engine",{method:"POST",headers:{Authorization:"Bearer "+token,apikey:authConfig.supabase.publishableKey,"Content-Type":"application/json"},body:JSON.stringify({action:"CREATE_ESTIMATE",client_user_id:this.dashboard.user.id,business_id:businessId,service_code:service.code,qualifying_answers:answers,request_data:{channel:"PORTAL",phone_number:phone,matter_id:matterId}})});
   const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.error||"Estimate could not be created.");
   this.dashboard.closeModal();
   const staffQuote=Boolean(b.pricing_mode==="STAFF_QUOTE_REQUIRED"||b.staff_quote_required);
-  this.dashboard.alert(staffQuote?"Your HR/IR service request has been sent for professional review and quotation. No final price has been issued yet.":("Indicative estimate prepared: "+(b.rough_low?money(b.rough_low)+" – ":"")+money(b.rough_high||0)+". This is not a final quote. Super Admin approval is now required."));
+  this.dashboard.alert(staffQuote?"Your HR/IR service request has been submitted for professional review and quotation. No final price has been issued yet. Your service request is now linked to the operational workflow." :("Indicative estimate prepared: "+(b.rough_low?money(b.rough_low)+" – ":"")+money(b.rough_high||0)+". This is not a final quote. Super Admin approval is now required."));
   await this.dashboard.refresh();
   this.dashboard.openSection("estimates");
  }
