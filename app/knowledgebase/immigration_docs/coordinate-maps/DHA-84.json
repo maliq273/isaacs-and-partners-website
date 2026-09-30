@@ -1,7 +1,7 @@
 {
   "form": "DHA-84",
   "source": "immigrations_docs/Visitor-Visa-Application-Form-DHA-84-Form-11-June-19-2014.pdf",
-  "sha256": "dd30e6b861291d4ae7d305b6e3c42d901ec657521e115e9d3f68588fc52d2891",
+  "sha256":null,
   "pages": 10,
   "purpose": "Authoritative coordinate map for the repository source PDF.",
   "coordinateSystem": "PDF points, origin bottom-left",
