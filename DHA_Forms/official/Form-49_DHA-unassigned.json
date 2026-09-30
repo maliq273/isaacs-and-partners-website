@@ -12,16 +12,68 @@
     "sourceVerified": true
   },
   "construction": {
-    "status": "semantic_skeleton",
+    "status": "SEMANTIC_FIELD_MAP",
     "generationAuthorised": false
   },
-  "fields": [],
+  "fields": [
+    {
+      "key": "appeal.reference_number",
+      "label": "Application/reference number",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "identity.surname",
+      "label": "Surname/family name",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "identity.first_names",
+      "label": "First names",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "identity.date_of_birth",
+      "label": "Date of birth",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "identity.nationality",
+      "label": "Nationality",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "passport.number",
+      "label": "Passport number",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "appeal.rejection_received_date",
+      "label": "Date rejection received",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "appeal.grounds_and_reasons",
+      "label": "Grounds/reasons for appeal",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "appeal.supporting_evidence",
+      "label": "Supporting evidence",
+      "supplier": "CLIENT"
+    },
+    {
+      "key": "appeal.stage",
+      "label": "Appeal stage",
+      "supplier": "STAFF"
+    }
+  ],
   "coordinateMap": {
-    "status": "pending",
+    "status": "SOURCE_PDF_REQUIRED",
     "path": null
   },
   "validation": {
     "renderTestPassed": false,
-    "sourcePdfHash": null
+    "sourcePdfHash": null,
+    "semanticMapVerified": true
   }
 }
