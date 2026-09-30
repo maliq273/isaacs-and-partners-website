@@ -12,7 +12,7 @@ import AnthonyAuthorizationEngine from "https://raw.githubusercontent.com/maliq2
 import AuthorityActionService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/AuthorityActionService.js?v=c519189c786688ba916193c9e43a9f69cdcb6820";
 import AuthorityInteractionEngine from "./AuthorityInteractionEngine.js";
 import ImmigrationQualificationWorkflowService from "https://raw.githubusercontent.com/maliq273/isaacs-and-partners-website/main/app/ai/ImmigrationQualificationWorkflowService.js?v=275afafb839eda960f834020b7c35b7cdb587650";
-import { hindsightBank, hindsightRecall, hindsightRetain } from "../_shared/hindsight.ts";
+import { hindsightBank, hindsightRecall, hindsightRetain } from "./_shared/hindsight.ts";
 
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL");
 const SERVICE_ROLE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
