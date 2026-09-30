@@ -116,7 +116,7 @@ if(nextQuestion(answered)!==null) {
 console.log('PASS: Anthony immigration workflow registry + DHA-1738 authority/progress tests');
 const { default: HindsightMemoryService } = await import('../app/ai/HindsightMemoryService.js');
 const hindsightSmoke = new HindsightMemoryService({ apiKey: '', enabled: true });
-if (hindsightSmoke.enabled !== false || hindsightSmoke.bankId('client', 'TEST-123') !== 'anthony:client:test-123') {
+if (hindsightSmoke.enabled !== false || hindsightSmoke.bankId('client', 'TEST-123') !== 'anthony-client-test-123') {
   console.error('Hindsight adapter smoke test failed: disabled configuration or bank isolation is incorrect.');
   process.exit(1);
 }
