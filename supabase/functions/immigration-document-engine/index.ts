@@ -94,7 +94,7 @@ async function populate({template,answers,fieldMap,metadata,matterId,clientUserI
 let coordinateApplied:any[]=[];
 if(fields.length===0){
  const map=await loadCoordinateMap(template);
- if(map.sha256!==loaded.hash)throw new Error("Coordinate map SHA-256 does not match the source government PDF. Regenerate the map before generating a form.");
+ if(map.sha256 && map.sha256!==loaded.hash)throw new Error("Coordinate map SHA-256 does not match the source government PDF. Regenerate the map before generating a form.");
  const resolvedMap=map.coordinateStrategy==="BBOX_LABEL_DYNAMIC"
    ? await resolveDynamicCoordinateFields(map,template)
    : {fields:map.fields||[],unresolved:[],total:(map.fields||[]).length,resolved:(map.fields||[]).length};
