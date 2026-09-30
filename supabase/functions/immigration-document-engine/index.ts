@@ -27,6 +27,19 @@ async function loadCoordinateMap(template:string){
  return await response.json();
 }
 function normAnchor(v:string){return String(v||"").toLowerCase().replace(/&nbsp;/g," ").replace(/<[^>]+>/g," ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");}
+function coordinateAnchor(id:string,label:string){
+ const aliases:any={
+  "sa_address":"Residential physical Address in the Republic","sa_host_id":"Identity document number or permanent residence permit number of South African host",
+  "affirmative_details":"Give particulars if reply to any of the questions above is in the affirmative","transit_visa":"Visa or permit for destination country",
+  "employer_address":"Name of Employer University Organisation","employer_phone":"Telephone No","employer_fax":"Fax No",
+  "self_employed_address":"Address","self_employed_phone":"Telephone No","self_employed_fax":"Fax No",
+  "temp_permit":"Type of temporary residence permit held","permit_valid_until":"Valid until","permit_office":"Issuing office",
+  "contact_sa":"Contact address telephone in South Africa","spouse_employment":"Employment details of spouse",
+  "a_id":"Identity No","b_id":"Identity No","a_expiry":"Date of expiry","b_expiry":"Date of expiry",
+  "a_foreigner_birthplace":"Place of birth","b_foreigner_birthplace":"Place of Birth","a_commissioner":"Commissioner of Oaths","b_commissioner":"Commissioner of Oaths"
+ };
+ return aliases[id]||label.replace(/_/g," ");
+}
 function bboxPages(html:string){
  const pages:any[]=[]; const re=/<page\s+width="([^"]+)"\s+height="([^"]+)"[^>]*>([\s\S]*?)<\/page>/g; let m;
  while((m=re.exec(html))){const body=m[3];const lines:any[]=[];const lr=/<line\s+xMin="([^"]+)"\s+yMin="([^"]+)"\s+xMax="([^"]+)"\s+yMax="([^"]+)"[^>]*>([\s\S]*?)<\/line>/g;let lm;
@@ -44,21 +57,16 @@ async function resolveDynamicCoordinateFields(map:any,template:string){
  const specs=Object.entries(map?.answerPaths||{});
  const fields:any[]=[]; const unresolved:any[]=[];
  for(const [id,answerPath] of specs){
-   const rawLabel=String((map?.unresolved||[]).find((x:any)=>x.id===id)?.label||id).replace(/_/g," ");
-   const anchor=normAnchor(rawLabel);
+   const rawLabel=String((map?.unresolved||[]).find((x:any)=>x.id===id)?.label||id);
+   const anchor=normAnchor(coordinateAnchor(id,rawLabel));
    const tokens=anchor.split(" ").filter((x:string)=>x.length>2&&!/^\d+$/.test(x));
-   let best:any=null;
-   for(let pi=0;pi<pages.length;pi++){
-     for(let li=0;li<pages[pi].lines.length;li++){
-       const line=pages[pi].lines[li]; const score=tokens.reduce((n:number,t:string)=>n+(line.text.includes(t)?1:0),0);
-       if(tokens.length && score>=Math.max(1,Math.ceil(tokens.length*0.6))){
-         const x=Math.min(line.xMax+4,pages[pi].width-90); const y=Math.max(6,pages[pi].height-line.yMax-1);
-         const h=Math.max(10,Math.min(22,line.yMax-line.yMin+3)); const w=Math.max(50,pages[pi].width-x-30);
-         best={field:id,answerPath,page:pi+1,writeRect:[x,y,w,h],anchor,anchorRect:[line.xMin,line.yMin,line.xMax,line.yMax],score}; break;
-       }
-     }
-     if(best)break;
+   let best:any=null; const candidates:any[]=[];
+   for(let pi=0;pi<pages.length;pi++)for(let li=0;li<pages[pi].lines.length;li++){
+     const line=pages[pi].lines[li]; const score=tokens.reduce((n:number,t:string)=>n+(line.text.includes(t)?1:0),0);
+     if(tokens.length && score>=Math.max(1,Math.ceil(tokens.length*0.6)))candidates.push({pi,line,score});
    }
+   const desired=Number((map?.occurrences||{})[id]||1); const picked=candidates[Math.max(0,desired-1)];
+   if(picked){const {pi,line,score}=picked;const x=Math.min(line.xMax+4,pages[pi].width-90);const y=Math.max(6,pages[pi].height-line.yMax-1);const h=Math.max(10,Math.min(22,line.yMax-line.yMin+3));const w=Math.max(50,pages[pi].width-x-30);best={field:id,answerPath,page:pi+1,writeRect:[x,y,w,h],anchor,anchorRect:[line.xMin,line.yMin,line.xMax,line.yMax],score};}
    if(best)fields.push(best); else unresolved.push({field:id,answerPath,reason:"ANCHOR_NOT_FOUND",anchor});
  }
  return {fields,unresolved,total:specs.length,resolved:fields.length};
