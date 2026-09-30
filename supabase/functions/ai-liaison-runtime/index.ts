@@ -413,6 +413,7 @@ const isApprovalNeeded=Boolean(
 const nextState=isApprovalNeeded?"approval_needed":(result?.action==="ESCALATE"&&!staffConversation?"AI_ESCALATED":con.state||"AI_ACTIVE");
 
 if(result?.action==="ESCALATE"&&!staffConversation){const intervention=await admin.rpc("ai_create_human_intervention",{p_conversation_id:con.id,p_matter_id:mid||con.matter_id||null,p_client_user_id:uid,p_reason:result?.reason||"Anthony has requested authorised human assistance.",p_priority:result?.priority||"NORMAL",p_question:body,p_ai_context:{assistant_name:"Anthony",identity:identity?{type:identity.identityType,status:identity.identityStatus,authority_role:authorityRole}:null,authorization,operational:operationalIntelligence.portfolio||null}});if(intervention.error)throw intervention.error;}
+const learningApprovalNeeded=Boolean(result?.approval_needed||result?.approvalNeeded||result?.requiresApproval||result?.action==="APPROVAL_NEEDED"||result?.context?.facts?.approval_needed||con?.facts?.approval_needed);
 const learningParts:any[]=[];
 if(relationshipRecords.length){
   for(const record of relationshipRecords.slice(0,8)){
@@ -424,7 +425,7 @@ learningParts.push("Anthony interaction outcome: action="+clean(result?.action||
   "; intent="+clean(result?.intent?.intent||"UNKNOWN",120)+
   "; service="+clean(result?.servicePlan?.service?.name||result?.servicePlan?.domain||"UNKNOWN",180)+
   "; escalated="+String(result?.action==="ESCALATE")+
-  "; approvalNeeded="+String(isApprovalNeeded));
+  "; approvalNeeded="+String(learningApprovalNeeded));
 if(hindsightActorBank){
   await hindsightRetain({
     bankId:hindsightActorBank,
@@ -434,7 +435,7 @@ if(hindsightActorBank){
 }
 const globalLearning="Anthony operational learning: service="+clean(result?.servicePlan?.service?.name||result?.servicePlan?.domain||"UNKNOWN",180)+
   "; action="+clean(result?.action||"RESPOND",80)+
-  "; approvalNeeded="+String(isApprovalNeeded)+
+  "; approvalNeeded="+String(learningApprovalNeeded)+
   "; escalated="+String(result?.action==="ESCALATE")+
   "; workflow="+clean(result?.servicePlan?.domain||"GENERAL",100);
 await hindsightRetain({
