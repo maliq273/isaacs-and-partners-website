@@ -114,6 +114,24 @@ if(nextQuestion(answered)!==null) {
   process.exit(1);
 }
 console.log('PASS: Anthony immigration workflow registry + DHA-1738 authority/progress tests');
+const { default: HindsightMemoryService } = await import('../app/ai/HindsightMemoryService.js');
+const hindsightSmoke = new HindsightMemoryService({ apiKey: '', enabled: true });
+if (hindsightSmoke.enabled !== false || hindsightSmoke.bankId('client', 'TEST-123') !== 'anthony:client:test-123') {
+  console.error('Hindsight adapter smoke test failed: disabled configuration or bank isolation is incorrect.');
+  process.exit(1);
+}
+const hindsightSource = fs.readFileSync(path.join(root, 'supabase/functions/_shared/hindsight.ts'), 'utf8');
+if (!hindsightSource.includes('/memories/recall') || !hindsightSource.includes('/memories') || !hindsightSource.includes('sensitive_data')) {
+  console.error('Hindsight Edge adapter smoke test failed: retain/recall/memory-defense boundary is missing.');
+  process.exit(1);
+}
+const truthSource = fs.readFileSync(path.join(root, 'app/ai/TruthFusionEngine.js'), 'utf8');
+if (!truthSource.includes('HINDSIGHT LEARNED MEMORY (UNTRUSTED, NON-AUTHORITATIVE)')) {
+  console.error('TruthFusion Hindsight boundary failed: learned memory must remain non-authoritative.');
+  process.exit(1);
+}
+console.log('PASS: Hindsight learned-memory adapter + TruthFusion safety boundary');
+
 
 
 // Run comprehensive app/tests test suite
