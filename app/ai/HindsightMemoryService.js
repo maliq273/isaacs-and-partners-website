@@ -37,7 +37,7 @@ export default class HindsightMemoryService {
     }
 
     bankId(scope, id = "default") {
-        return "anthony:" + (slug(scope, 32) || "global") + ":" + (slug(id, 160) || "default");
+        return "anthony-" + (slug(scope, 32) || "global") + "-" + (slug(id, 160) || "default");
     }
 
     async request(path, { method = "GET", body, signal } = {}) {
