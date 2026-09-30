@@ -11,6 +11,8 @@ services:
       HINDSIGHT_API_LLM_API_KEY: \${HINDSIGHT_API_LLM_API_KEY}
       HINDSIGHT_API_LLM_PROVIDER: \${HINDSIGHT_API_LLM_PROVIDER:-openai}
       HINDSIGHT_API_RETAIN_EXTRACTION_MODE: concise
+      HINDSIGHT_API_DEFAULT_BANK_TEMPLATE: >-
+        {"version":"1","bank":{"retain_mission":"Retain durable preferences, corrections, decisions and reusable interaction outcomes. Never treat memory as company policy or authoritative legal or operational truth.","observations_mission":"Consolidate recurring evidence-backed patterns while preserving uncertainty.","memory_defense":{"enabled":true,"rules":[{"on":"sensitive_data","action":"redact"}]}}}
       HINDSIGHT_API_AUDIT_LOG_ENABLED: \${HINDSIGHT_API_AUDIT_LOG_ENABLED:-true}
     volumes:
       - hindsight-data:/home/hindsight/.pg0
