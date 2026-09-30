@@ -299,5 +299,28 @@
     "self_employed_phone": 2,
     "employer_fax": 1,
     "self_employed_fax": 2
+  },
+  "anchorAliases": {
+    "previous_surnames": "Previous surname s",
+    "original_nationality": "nationality",
+    "nationality_acquired": "Where and when was present nationality obtained",
+    "email": "E mail address",
+    "spouse_dob": "Date of birth of",
+    "spouse_nationality": "Nationality",
+    "contacts": "Names of Organisations or persons you will be contacting during your stay in the Republic",
+    "transit_destination": "Destination after leaving the Republic",
+    "transit_mode": "Mode of travel to destination",
+    "transit_departure": "Intended date and port of departure from the Republic to that destination",
+    "declaration_date": "Date",
+    "sa_address": "Residential physical Address in the Republic",
+    "sa_host_id": "Identity document number or permanent residence permit number of South African host",
+    "affirmative_details": "Give particulars if reply to any of the questions above is in the affirmative",
+    "transit_visa": "Visa or permit for destination country",
+    "employer_address": "Name of Employer University Organisation",
+    "employer_phone": "Telephone No",
+    "employer_fax": "Fax No",
+    "self_employed_address": "Address",
+    "self_employed_phone": "Telephone No",
+    "self_employed_fax": "Fax No"
   }
 }
