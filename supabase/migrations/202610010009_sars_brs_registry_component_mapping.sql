@@ -15,7 +15,7 @@ alter table public.sars_brs2530_source_code_dictionary
 
 create table if not exists public.sars_brs2530_component_registry (
  id uuid primary key default gen_random_uuid(),
- semantic_key text primary key,
+ semantic_key text not null unique,
  label text not null,
  category text not null check(category in ('EARNING','ALLOWANCE','FRINGE_BENEFIT','DEDUCTION','EMPLOYER_CONTRIBUTION','TAX_CREDIT','LUMP_SUM','STATUTORY','INFORMATION')),
  description text,
