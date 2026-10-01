@@ -11,6 +11,7 @@ const json=(b:any,s=200)=>new Response(JSON.stringify(b),{status:s,headers:{"con
 const clean=(v:any,n=5000)=>String(v??"").trim().slice(0,n);
 const money=(v:any)=>new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR"}).format(Number(v)||0);
 
+async function requireServiceAccess(businessId:string,serviceCode:string){ await admin.rpc("ensure_payroll_service_entitlements",{p_business_id:businessId}); const q=await admin.rpc("assert_client_service_access",{p_business_id:businessId,p_service_code:serviceCode}); if(q.error)throw new Error(q.error.message||"Service access is locked."); }
 async function auth(req:Request,body:any){
  const internal=req.headers.get("X-AI-Internal-Worker-Token");
  if(internal&&INTERNAL&&internal===INTERNAL)return {userId:null,internal:true,role:"SUPER_ADMIN"};
@@ -251,7 +252,7 @@ async function generatePayslip(body:any,a:any){
 async function payroll(body:any,a:any){
  if(!a.internal&&!["BUSINESS","STAFF","SUPER_ADMIN"].includes(a.role))throw new Error("Payroll Centre is available to business customers and authorised staff.");
  const businessId=clean(body.business_id,100);if(!businessId)throw new Error("business_id is required.");
- const b=await admin.from("businesses").select("*").eq("id",businessId).maybeSingle();if(b.error||!b.data)throw new Error("Business not found.");
+ const b=await admin.from("businesses").select("*").eq("id",businessId).maybeSingle();if(b.error||!b.data)throw new Error("Business not found.");await requireServiceAccess(businessId,"HR-PAYROLL");
  if(!a.internal&&a.role==="BUSINESS"&&b.data.owner_user_id!==a.userId)throw new Error("Business is outside your access scope.");
  let emps:any[]=body.employees||[];if(!emps.length){const q=await admin.from("hr_employees").select("*").eq("business_id",businessId).eq("employment_status","ACTIVE");if(q.error)throw q.error;emps=q.data||[];}
  if(!emps.length)throw new Error("No active employees found.");
@@ -275,8 +276,8 @@ Deno.serve(async(req)=>{
   if(action==="TEMPLATES"){const q=await admin.from("hr_document_templates").select("template_code,service_code,name,description,version,required_answers").eq("active",true).order("service_code").order("name");return json({ok:true,templates:q.data||[]});}
   if(action==="GENERATE_DOCUMENT")return json(await generateDocument(req,body,a));
   if(action==="CALCULATE_PAYROLL")return json(await payroll(body,a));
-  if(action==="GENERATE_PAYSLIP")return json(await generatePayslip(body,a));
-  if(action==="PAYROLL_RUNS"){if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(a.role)&&!a.internal)throw new Error("Payroll access denied.");const q=await admin.from("hr_payroll_runs").select("*").eq("business_id",clean(body.business_id,100)).order("created_at",{ascending:false}).limit(20);return json({ok:true,runs:q.data||[]});}
+  if(action==="GENERATE_PAYSLIP"){const businessId=clean(body.business_id,100);if(businessId)await requireServiceAccess(businessId,"HR-PAYROLL");return json(await generatePayslip(body,a));}
+  if(action==="PAYROLL_RUNS"){const businessId=clean(body.business_id,100);if(businessId)await requireServiceAccess(businessId,"HR-PAYROLL");if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(a.role)&&!a.internal)throw new Error("Payroll access denied.");const q=await admin.from("hr_payroll_runs").select("*").eq("business_id",clean(body.business_id,100)).order("created_at",{ascending:false}).limit(20);return json({ok:true,runs:q.data||[]});}
   return json({error:"Unsupported action."},400);
  }catch(e){return json({error:e instanceof Error?e.message:"HR operations request failed."},400);}
 });
