@@ -157,6 +157,27 @@ const brackets=[
  [245100,.18,0],[383100,.26,44118],[530200,.31,79998],[695800,.36,125599],[887000,.39,185215],[1878600,.41,259783],[Infinity,.45,666339]
 ];
 function annualTax(taxable:number){for(const [upper,rate,base] of brackets){const lower=upper===Infinity?1878600:brackets.findIndex(x=>x[0]===upper)===0?0:brackets[brackets.findIndex(x=>x[0]===upper)-1][0] as number;if(taxable<=upper)return Math.max(0,base+(taxable-lower)*rate);}return 0;}
+async function resolvePayrollComponents(components:any[], employee:any, yoa:number){
+ const keys=[...new Set((components||[]).map(c=>c.semantic_key).filter(Boolean))];
+ if(!keys.length){
+   if((components||[]).some(c=>c.sars_source_code)) throw new Error("Payroll components must use semantic registry keys; direct SARS source-code entry is no longer permitted.");
+   return [];
+ }
+ const q=await admin.from("sars_brs2530_component_registry").select("semantic_key,label,default_component_type,mapping,version,effective_from_yoa,effective_to_yoa").in("semantic_key",keys).eq("version","25.3.0").eq("active",true);
+ if(q.error)throw q.error;
+ const map=new Map((q.data||[]).map(x=>[x.semantic_key,x]));
+ const foreign=Boolean(employee?.sars_profile?.foreign_service_indicator||employee?.sars_profile?.foreign_service);
+ return (components||[]).map(c=>{
+   const r=map.get(c.semantic_key);
+   if(!r)throw new Error("No active SARS BRS registry mapping exists for payroll component "+c.semantic_key+".");
+   if(r.effective_from_yoa && yoa<r.effective_from_yoa)throw new Error("Payroll component "+c.semantic_key+" is not effective for YoA "+yoa+".");
+   if(r.effective_to_yoa && yoa>r.effective_to_yoa)throw new Error("Payroll component "+c.semantic_key+" has expired for YoA "+yoa+".");
+   const m=r.mapping||{};
+   const code=foreign && m.foreign_service_code ? m.foreign_service_code : m.source_code;
+   if(!code)throw new Error("SARS BRS registry mapping for "+c.semantic_key+" has no applicable source code.");
+   return {...c,component_type:r.default_component_type,component_code:c.semantic_key,component_name:r.label,sars_source_code:code,mapping_version:r.version,mapping_snapshot:{semantic_key:c.semantic_key,label:r.label,mapping:m,source_code:code,foreign_service:foreign}};
+ });
+}
 function calcPayrollEmployee(e:any,components:any[]=[],policy:any={}){
  const earnings=components.filter(c=>c.component_type==="EARNING"||c.component_type==="ALLOWANCE");
  const benefits=components.filter(c=>c.component_type==="FRINGE_BENEFIT");
@@ -239,7 +260,7 @@ async function payroll(body:any,a:any){
  if(componentQ.error)throw componentQ.error;
  const componentsByEmployee=(componentQ.data||[]).reduce((m,c)=>{(m[c.employee_id]??=[]).push(c);return m},{} as Record<string,any[]>);
  const payrollProfile=(await admin.from("hr_payroll_profiles").select("*").eq("business_id",businessId).maybeSingle()).data||{};
- const rows=emps.map(e=>calcPayrollEmployee(e,componentsByEmployee[e.id]||[],payrollProfile.payroll_policy||{}));
+ const resolvedComponentsByEmployee:any={}; for(const e of emps){ resolvedComponentsByEmployee[e.id]=await resolvePayrollComponents(componentsByEmployee[e.id]||[],e,2027); } const rows=emps.map(e=>calcPayrollEmployee(e,resolvedComponentsByEmployee[e.id]||[],payrollProfile.payroll_policy||{}));
  const run=await admin.from("hr_payroll_runs").insert({business_id:businessId,period_start:periodStart,period_end:periodEnd,pay_date:clean(body.pay_date,20)||null,tax_year:2027,status:"CALCULATED",rules_version:"SARS-2027",total_gross:rows.reduce((s,x)=>s+x.gross_pay,0),total_paye:rows.reduce((s,x)=>s+x.paye,0),total_uif_employee:rows.reduce((s,x)=>s+x.uif_employee,0),total_uif_employer:rows.reduce((s,x)=>s+x.uif_employer,0),total_sdl:rows.reduce((s,x)=>s+x.sdl,0),metadata:{engine:"Isaacs & Partners HR Payroll Centre",calculation_scope:"CONFIGURABLE_COMPONENT_ENGINE",payroll_profile:payrollProfile.id||null,bargaining_council:payrollProfile.bargaining_council_code||null,sars_rules_version:payrollProfile.sars_rules_version||"25.3.0"}}).select("id").single();
  if(run.error)throw run.error;
  for(let i=0;i<emps.length;i++){const x=rows[i];const ins=await admin.from("hr_payroll_entries").insert({payroll_run_id:run.data.id,employee_id:emps[i].id,gross_pay:x.gross_pay,taxable_income:x.taxable_income,paye:x.paye,uif_employee:x.uif_employee,uif_employer:x.uif_employer,sdl:x.sdl,net_pay:x.net_pay,source_codes:x.source_codes,brs_source_codes:x.source_codes,earnings:x.earnings,deductions:x.deductions});if(ins.error)throw ins.error;}
