@@ -157,15 +157,29 @@ const brackets=[
  [245100,.18,0],[383100,.26,44118],[530200,.31,79998],[695800,.36,125599],[887000,.39,185215],[1878600,.41,259783],[Infinity,.45,666339]
 ];
 function annualTax(taxable:number){for(const [upper,rate,base] of brackets){const lower=upper===Infinity?1878600:brackets.findIndex(x=>x[0]===upper)===0?0:brackets[brackets.findIndex(x=>x[0]===upper)-1][0] as number;if(taxable<=upper)return Math.max(0,base+(taxable-lower)*rate);}return 0;}
-function calcPayrollEmployee(e:any){
- const gross=Math.max(Number(e.basic_salary)||0,0);
+function calcPayrollEmployee(e:any,components:any[]=[],policy:any={}){
+ const earnings=components.filter(c=>c.component_type==="EARNING"||c.component_type==="ALLOWANCE");
+ const benefits=components.filter(c=>c.component_type==="FRINGE_BENEFIT");
+ const deductions=components.filter(c=>c.component_type==="DEDUCTION");
+ const employerContrib=components.filter(c=>c.component_type==="EMPLOYER_CONTRIBUTION");
+ const credits=components.filter(c=>c.component_type==="TAX_CREDIT");
+ const lumpSums=components.filter(c=>c.component_type==="LUMP_SUM");
+ const base=Math.max(Number(e.basic_salary)||0,0);
+ const variable=earnings.reduce((s,c)=>s+(Number(c.amount)||0),0);
+ const fringe=benefits.filter(c=>c.taxable).reduce((s,c)=>s+(Number(c.amount)||0),0);
+ const gross=Math.max(base+variable,0);
  const age=Number(e.age)||0;
- const annual=gross*12;
+ const taxableMonthly=Math.max(gross+fringe+lumpSums.filter(c=>c.taxable).reduce((s,c)=>s+(Number(c.amount)||0),0),0);
+ const annual=taxableMonthly*12;
  const rebate=age>=75?17820+9765+3249:age>=65?17820+9765:17820;
- const paye=Math.max(0,(annualTax(annual)-rebate)/12);
+ const medicalCredit=credits.reduce((s,c)=>s+(Number(c.amount)||0),0);
+ const paye=Math.max(0,(annualTax(annual)-rebate-medicalCredit*12)/12);
  const uif=Math.min(gross,17712)*.01;
  const sdl=gross*.01;
- return {gross_pay:gross,taxable_income:gross,paye:Math.round(paye*100)/100,uif_employee:Math.round(uif*100)/100,uif_employer:Math.round(uif*100)/100,sdl:Math.round(sdl*100)/100,net_pay:Math.round((gross-paye-uif)*100)/100,source_codes:{PAYE:"4102",UIF:"4141",SDL:"4142"},calculation_status:"CORE_SALARY_ONLY"};
+ const employeeDeductions=deductions.reduce((s,c)=>s+(Number(c.amount)||0),0);
+ const employeeBenefits={medical_aid:components.filter(c=>/medical/i.test(c.component_name||"")).reduce((s,c)=>s+(Number(c.amount)||0),0),provident:components.filter(c=>/provident/i.test(c.component_name||"")).reduce((s,c)=>s+(Number(c.amount)||0),0),pension:components.filter(c=>/pension/i.test(c.component_name||"")).reduce((s,c)=>s+(Number(c.amount)||0),0)};
+ const componentSourceCodes=Object.fromEntries(components.filter(c=>c.sars_source_code).map(c=>[c.sars_source_code,(Number(c.amount)||0)]));
+ return {gross_pay:gross,taxable_income:taxableMonthly,paye:Math.round(paye*100)/100,uif_employee:Math.round(uif*100)/100,uif_employer:Math.round(uif*100)/100,sdl:Math.round(sdl*100)/100,net_pay:Math.round((gross-paye-uif-employeeDeductions)*100)/100,source_codes:{...componentSourceCodes,4102:Math.round(paye*100)/100,4141:Math.round(uif*100)/100,4142:Math.round(sdl*100)/100,3699:Math.round(taxableMonthly*100)/100},earnings:earnings.reduce((o,c)=>({...o,[c.component_code]:Number(c.amount)||0}),{basic_salary:base}),deductions:{...deductions.reduce((o,c)=>({...o,[c.component_code]:Number(c.amount)||0}),{}),paye:Math.round(paye*100)/100,uif:Math.round(uif*100)/100},employer_contributions:employerContrib.reduce((o,c)=>({...o,[c.component_code]:Number(c.amount)||0}),{}),benefits:employeeBenefits,calculation_status:"CONFIGURABLE_COMPONENT_ENGINE"}; }
 }
 async function generatePayslip(body:any,a:any){
  if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(a.role)&&!a.internal)throw new Error("Payroll access denied.");
@@ -185,9 +199,13 @@ async function generatePayslip(body:any,a:any){
   "Pay frequency: "+(emp.pay_frequency||"MONTHLY"),
   "",
   "EARNINGS",
-  "Basic salary: "+money(e.gross_pay),
+  "Basic salary / fixed earnings: "+money(e.gross_pay),
+  "",
+  "Configured earnings / allowances: "+JSON.stringify(e.earnings||{}),
+  "Employee benefits / fringe benefits: "+JSON.stringify(e.benefits||{}),
   "",
   "DEDUCTIONS",
+  ...Object.entries(e.deductions||{}).filter(([k])=>k!=="paye"&&k!=="uif").map(([k,v])=>String(k)+": "+money(v)),
   "PAYE: "+money(e.paye),
   "UIF employee: "+money(e.uif_employee),
   "",
@@ -206,6 +224,8 @@ async function generatePayslip(body:any,a:any){
  const up=await admin.storage.from("hr-generated").upload(path,pdf,{contentType:"application/pdf",upsert:false});if(up.error)throw up.error;
  const ins=await admin.from("hr_generated_documents").insert({business_id:b.data.id,document_type:"PAYSLIP",title:"Payslip — "+[emp.first_name,emp.last_name].filter(Boolean).join(" ")+" — "+run.period_end,status:"ISSUED",pdf_path:path,source_answers:{payroll_entry_id:e.id,payroll_run_id:run.id},provenance:{assistant:"Anthony Isaacs",brand:"Isaacs & Partners",rules_version:run.rules_version},created_by:a.userId}).select("id").single();if(ins.error)throw ins.error;
  await admin.from("hr_payroll_entries").update({payslip_document_id:ins.data.id}).eq("id",e.id);
+ const pp=(await admin.from("hr_payroll_profiles").select("*").eq("business_id",b.data.id).maybeSingle()).data;
+ if(pp?.billing_model==="PER_EMPLOYEE_PAYSLIP"){await admin.from("hr_payslip_charge_events").upsert({business_id:b.data.id,payroll_profile_id:pp.id,payroll_run_id:run.id,payroll_entry_id:e.id,employee_id:emp.id,unit_price:Number(pp.payslip_unit_price)||0,quantity:1,currency:pp.currency||"ZAR",status:"BILLABLE",source:"PAYSLIP_GENERATION"},{onConflict:"payroll_entry_id"});}
  const s=await admin.storage.from("hr-generated").createSignedUrl(path,86400);return {ok:true,document_id:ins.data.id,pdf_url:s.data?.signedUrl,status:"ISSUED"};
 }
 async function payroll(body:any,a:any){
@@ -216,10 +236,14 @@ async function payroll(body:any,a:any){
  let emps:any[]=body.employees||[];if(!emps.length){const q=await admin.from("hr_employees").select("*").eq("business_id",businessId).eq("employment_status","ACTIVE");if(q.error)throw q.error;emps=q.data||[];}
  if(!emps.length)throw new Error("No active employees found.");
  const periodStart=clean(body.period_start,20),periodEnd=clean(body.period_end,20);
- const rows=emps.map(calcPayrollEmployee);
- const run=await admin.from("hr_payroll_runs").insert({business_id:businessId,period_start:periodStart,period_end:periodEnd,pay_date:clean(body.pay_date,20)||null,tax_year:2027,status:"CALCULATED",rules_version:"SARS-2027",total_gross:rows.reduce((s,x)=>s+x.gross_pay,0),total_paye:rows.reduce((s,x)=>s+x.paye,0),total_uif_employee:rows.reduce((s,x)=>s+x.uif_employee,0),total_uif_employer:rows.reduce((s,x)=>s+x.uif_employer,0),total_sdl:rows.reduce((s,x)=>s+x.sdl,0),metadata:{engine:"Isaacs & Partners HR Payroll Centre",calculation_scope:"CORE_SALARY_ONLY",source:"SARS 2027 employer guide"}}).select("id").single();
+ const componentQ=await admin.from("hr_payroll_components").select("*").eq("business_id",businessId).eq("active",true);
+ if(componentQ.error)throw componentQ.error;
+ const componentsByEmployee=(componentQ.data||[]).reduce((m,c)=>{(m[c.employee_id]??=[]).push(c);return m},{} as Record<string,any[]>);
+ const payrollProfile=(await admin.from("hr_payroll_profiles").select("*").eq("business_id",businessId).maybeSingle()).data||{};
+ const rows=emps.map(e=>calcPayrollEmployee(e,componentsByEmployee[e.id]||[],payrollProfile.payroll_policy||{}));
+ const run=await admin.from("hr_payroll_runs").insert({business_id:businessId,period_start:periodStart,period_end:periodEnd,pay_date:clean(body.pay_date,20)||null,tax_year:2027,status:"CALCULATED",rules_version:"SARS-2027",total_gross:rows.reduce((s,x)=>s+x.gross_pay,0),total_paye:rows.reduce((s,x)=>s+x.paye,0),total_uif_employee:rows.reduce((s,x)=>s+x.uif_employee,0),total_uif_employer:rows.reduce((s,x)=>s+x.uif_employer,0),total_sdl:rows.reduce((s,x)=>s+x.sdl,0),metadata:{engine:"Isaacs & Partners HR Payroll Centre",calculation_scope:"CONFIGURABLE_COMPONENT_ENGINE",payroll_profile:payrollProfile.id||null,bargaining_council:payrollProfile.bargaining_council_code||null,sars_rules_version:payrollProfile.sars_rules_version||"25.3.0"}}).select("id").single();
  if(run.error)throw run.error;
- for(let i=0;i<emps.length;i++){const x=rows[i];const ins=await admin.from("hr_payroll_entries").insert({payroll_run_id:run.data.id,employee_id:emps[i].id,gross_pay:x.gross_pay,taxable_income:x.taxable_income,paye:x.paye,uif_employee:x.uif_employee,uif_employer:x.uif_employer,sdl:x.sdl,net_pay:x.net_pay,source_codes:x.source_codes,earnings:{basic_salary:x.gross_pay},deductions:{paye:x.paye,uif:x.uif_employee}});if(ins.error)throw ins.error;}
+ for(let i=0;i<emps.length;i++){const x=rows[i];const ins=await admin.from("hr_payroll_entries").insert({payroll_run_id:run.data.id,employee_id:emps[i].id,gross_pay:x.gross_pay,taxable_income:x.taxable_income,paye:x.paye,uif_employee:x.uif_employee,uif_employer:x.uif_employer,sdl:x.sdl,net_pay:x.net_pay,source_codes:x.source_codes,brs_source_codes:x.source_codes,earnings:x.earnings,deductions:x.deductions});if(ins.error)throw ins.error;}
  return {ok:true,payroll_run_id:run.data.id,rules_version:"SARS-2027",status:"CALCULATED",employee_count:emps.length,totals:{gross:rows.reduce((s,x)=>s+x.gross_pay,0),paye:rows.reduce((s,x)=>s+x.paye,0),uif_employee:rows.reduce((s,x)=>s+x.uif_employee,0),uif_employer:rows.reduce((s,x)=>s+x.uif_employer,0),sdl:rows.reduce((s,x)=>s+x.sdl,0)},notice:"Core-salary calculation only. Variable remuneration, benefits, directives, ETI and full BRS validation must be completed before a SARS submission is treated as final."};
 }
 Deno.serve(async(req)=>{
