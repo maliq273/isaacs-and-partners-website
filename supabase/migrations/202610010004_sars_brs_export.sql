@@ -25,4 +25,4 @@ alter table public.sars_payroll_export_runs enable row level security;
 drop policy if exists sars_payroll_export_owner on public.sars_payroll_export_runs;
 create policy sars_payroll_export_owner on public.sars_payroll_export_runs for all to authenticated
 using (exists(select 1 from public.businesses b where b.id=sars_payroll_export_runs.business_id and b.owner_user_id=(select auth.uid())) or exists(select 1 from public.profiles p where p.id=(select auth.uid()) and p.role in ('STAFF','SUPER_ADMIN')))
-with check (exists(select 1 from public.businesses b where b.id=sars_payroll_export_runs.business_id and b.owner_user_id=(select auth.uid())) or exists(select 1 from public.profiles p where p.id=(select auth.uid()) and p.role in ('STAFF','SUPER_ADMIN')));
+with check (exists(select 1 from public.businesses b where b.id=sars_payroll_export_runs.business_id and b.owner_user_id=(select auth.uid())) or exists(select 1 from public.profiles p where p.id=(select auth.uid()) and p.role in ('STAFF','SUPER_ADMIN')));\nalter table public.businesses add column if not exists sars_profile jsonb not null default '{}'::jsonb;\n
