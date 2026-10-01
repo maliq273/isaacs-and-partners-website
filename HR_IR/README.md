@@ -51,3 +51,18 @@ Anthony performs customer intake, qualification, document/evidence triage, statu
 ## Production test
 
 Use `customer-facing-test-cases.json` to exercise each service through the same lifecycle. A passing test requires the customer request to remain traceable into the service request/estimate, quote approval, payment state, matter/work queue and closure state.
+
+
+## HR Operations Centre
+
+The customer portal now extends the governed eight-service workflow with:
+
+- an authenticated client legal/billing/recovery profile;
+- Anthony questionnaire extensions for employment contracts and disciplinary documents;
+- branded DOCX + PDF generation for temporary, project-based, full-time fixed-term/permanent contracts;
+- branded written warnings, final written warnings and notices to attend disciplinary hearings;
+- a client document-centre catalogue for SLA, retainer, temporary placement, permanent placement and confidentiality documents;
+- an Isaacs & Partners Payroll Centre with employee masterfile, payroll runs and branded payslips;
+- versioned SARS 2027 core PAYE/UIF/SDL calculations and payroll provenance.
+
+The payroll centre is deliberately not treated as a completed SARS filing integration: SARS requires the current BRS and electronic eFiling/e@syFile submission channel. The system records the applicable rules version and blocks the interpretation of core-salary calculations as a final SARS submission until full BRS validation/export is implemented.
