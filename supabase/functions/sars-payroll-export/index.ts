@@ -29,7 +29,7 @@ async function exportRun(body:any,actor:any){
  const rq=await db.from("hr_payroll_runs").select("*").eq("id",runId).eq("business_id",businessId).maybeSingle();if(rq.error||!rq.data)throw new Error("Payroll run not found.");const run=rq.data;
  const eq=await db.from("hr_payroll_entries").select("*,hr_employees(*)").eq("payroll_run_id",runId);if(eq.error)throw eq.error;const entries=eq.data||[];if(!entries.length)throw new Error("Payroll run has no employees.");
  const profileQ=await db.from("client_legal_profiles").select("*").eq("user_id",b.owner_user_id).maybeSingle();const cp=profileQ.data||{};
- const employer:any={...cp,...b,...(b.sars_profile||{})};
+ const employer:any={...cp,...(cp.metadata?.sars||{}),...b,...(b.sars_profile||{})};
  const errors:string[]=[],warnings:string[]=[];
  const requireE=(cond:boolean,msg:string)=>{if(!cond)errors.push(msg)};
  const paye=String(employer.paye_reference||"").replace(/\D/g,""),sdl=String(employer.sdl_reference||""),uif=String(employer.uif_reference||"");
