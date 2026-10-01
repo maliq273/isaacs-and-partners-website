@@ -110,11 +110,12 @@ async function brandLogo(){
  try{const r=await fetch(url);if(r.ok)return new Uint8Array(await r.arrayBuffer());}catch(_){}
  return null;
 }
-async function makePdf(title:string,body:string[]){
+async function makePdf(title:string,body:string[],logo?:Uint8Array|null){
  const d=await PDFDocument.create(),p=d.addPage([595.28,841.89]);
  const regular=await d.embedFont(StandardFonts.Helvetica),bold=await d.embedFont(StandardFonts.HelveticaBold);
  const ink=rgb(.08,.08,.1),gold=rgb(.788,.635,.153),muted=rgb(.38,.4,.45);
  let y=790;
+ if(logo){try{const img=await d.embedPng(logo);const scale=Math.min(150/img.width,45/img.height);p.drawImage(img,{x:42,y:y-2,width:img.width*scale,height:img.height*scale});y-=50;}catch(_){} }
  p.drawText("ISAACS & PARTNERS",{x:42,y,size:18,font:bold,color:ink});
  p.drawText("HR & INDUSTRIAL RELATIONS",{x:42,y:y-18,size:8,font:bold,color:gold});
  y-=42;
@@ -139,7 +140,8 @@ async function generateDocument(req:Request,body:any,a:any){
  const p=await profile(matter.individual_user_id,matter.business_id);
  const title=tq.data.name;
  const bodyLines=lines(title,ans,p);
- const [pdf,logo]=await Promise.all([makePdf(title,bodyLines),brandLogo()]);
+ const logo=await brandLogo();
+ const pdf=await makePdf(title,bodyLines,logo);
  const docx=await makeDocx(title,bodyLines,logo);
  const base=(matter.reference_number||matter.id)+"/"+code+"-"+crypto.randomUUID();
  const pu=await admin.storage.from("hr-generated").upload(base+".pdf",pdf,{contentType:"application/pdf",upsert:false});
