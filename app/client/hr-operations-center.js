@@ -48,7 +48,7 @@ function panel(){
  (role==="BUSINESS"?'<article class="cp-card"><header><div><span class="cp-eyebrow">Payroll & SARS Centre</span><h2>Payroll, payslips and employer records</h2><p>Designed as the Isaacs & Partners payroll workspace. Current engine is anchored to the SARS 2027 tax year and records its rules version on each run.</p></div></header><div class="cp-card-body" data-payroll-centre></div></article>':"");
 }
 function bind(){
- const p=document.querySelector("[data-hr-profile-form"); if(p)p.addEventListener("submit",saveProfile);
+ const p=document.querySelector("[data-hr-profile-form]"); if(p)p.addEventListener("submit",saveProfile);
  const g=document.querySelector("[data-hr-generator]"); if(g)g.addEventListener("click",e=>{const b=e.target.closest("[data-generate-hr]");if(b)generate(b.dataset.generateHr,b.dataset.template)});
  const pc=document.querySelector("[data-payroll-centre]");if(pc)pc.addEventListener("click",e=>{const a=e.target.closest("[data-payroll-action]");if(a)payrollAction(a.dataset.payrollAction)});
 }
