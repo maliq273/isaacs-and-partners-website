@@ -30,13 +30,19 @@ export async function resolveUserDashboardRole(user=auth.getCurrentUser()){
     const token=auth.getToken(),publishableKey=authConfig.supabase.publishableKey;
     if(!token||!publishableKey)return null;
     const params=new URLSearchParams({select:"role,is_active",id:`eq.${encodeURIComponent(key)}`,limit:"1"});
+    const controller=typeof AbortController!=="undefined"?new AbortController():null;
+    const timeoutId=controller?setTimeout(()=>controller.abort(),10000):null;
     try{
-        const response=await fetch(`${authConfig.supabase.url}/rest/v1/profiles?${params.toString()}`,{method:"GET",headers:{Accept:"application/json",apikey:publishableKey,Authorization:`Bearer ${token}`}});
+        const response=await fetch(`${authConfig.supabase.url}/rest/v1/profiles?${params.toString()}`,{method:"GET",cache:"no-store",headers:{Accept:"application/json",apikey:publishableKey,Authorization:`Bearer ${token}`},signal:controller?.signal});
         if(!response.ok){console.warn(`[DashboardAccess] Profile role lookup failed: HTTP ${response.status}`);return null;}
         const rows=await response.json();const profile=Array.isArray(rows)?rows[0]:rows;const role=normaliseAccountType(profile?.role);
         if(!role||profile?.is_active===false)return null;
         PROFILE_ROLE_CACHE.set(key,role);return role;
-    }catch(error){console.warn("[DashboardAccess] Profile role lookup failed:",error);return null;}
+    }catch(error){
+        if(error?.name==="AbortError") console.warn("[DashboardAccess] Profile role lookup timed out after 10 seconds.");
+        else console.warn("[DashboardAccess] Profile role lookup failed:",error);
+        return null;
+    }finally{if(timeoutId)clearTimeout(timeoutId);}
 }
 
 export function clearRoleCache(userId=null){if(userId){PROFILE_ROLE_CACHE.delete(String(userId));return;}PROFILE_ROLE_CACHE.clear();}
