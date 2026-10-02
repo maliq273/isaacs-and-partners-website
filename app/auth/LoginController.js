@@ -68,7 +68,7 @@ class LoginController {
             }
             this.setStatus("Login successful. Redirecting...");
             await this.delay(50);
-            navigation.toRoleDashboard(actualRole, { replace: true });
+            if (["INDIVIDUAL","BUSINESS"].includes(actualRole)) navigation.toDashboard({ replace: true }); else navigation.toRoleDashboard(actualRole, { replace: true });
         } catch (error) {
             this.handleLoginError(error);
         } finally {
