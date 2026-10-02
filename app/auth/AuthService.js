@@ -274,6 +274,32 @@ class AuthService {
         const normalised = this._normaliseSupabaseSession(response);
 
         /*
+         * Supabase intentionally obfuscates an existing confirmed account
+         * when email confirmation is enabled. The returned user has no
+         * identities in that case. Treating that response as a new
+         * registration makes the UI claim that an account was created when
+         * nothing was created.
+         */
+        if (
+            !normalised.authenticated &&
+            normalised.user &&
+            Array.isArray(normalised.user.identities) &&
+            normalised.user.identities.length === 0
+        ) {
+            throw this._createAuthError(
+                "USER_ALREADY_REGISTERED",
+                "An account already exists for this email address. Please sign in instead."
+            );
+        }
+
+        if (!normalised.user) {
+            throw this._createAuthError(
+                "REGISTRATION_FAILED",
+                "The authentication service did not return a registration result. Please try again."
+            );
+        }
+
+        /*
          * Supabase returns a user without an access token when email
          * confirmation is enabled. That is a successful registration,
          * but it is deliberately NOT an authenticated session.
@@ -285,18 +311,21 @@ class AuthService {
             );
         }
 
+        const requiresEmailConfirmation =
+            Boolean(normalised.user) && !normalised.authenticated;
+
         eventBus.emit("auth:registrationSucceeded", {
             user: normalised.user,
             accountType: type,
             authenticated: normalised.authenticated,
-            requiresEmailConfirmation: !normalised.authenticated
+            requiresEmailConfirmation
         });
 
         return {
             registered: true,
             authenticated: normalised.authenticated,
             user: normalised.user,
-            requiresEmailConfirmation: !normalised.authenticated
+            requiresEmailConfirmation
         };
     }
 
