@@ -42,7 +42,7 @@
     </section>
 </main>
 <script type="module">
-import loginController from "./LoginController.js?v=20260825-4";
+import loginController from "./LoginController.js?v=20261002-1";
 const form=document.querySelector("#loginForm"),picker=document.querySelector("#rolePicker"),cards=[...document.querySelectorAll("[data-role]")],input=document.querySelector("#loginType"),label=document.querySelector("#selectedRoleLabel"),labels={individual:"Individual",business:"Business",staff:"Staff"};
 function selectRole(role){if(!labels[role])return;input.value=role;label.textContent=labels[role];cards.forEach(c=>{const active=c.dataset.role===role;c.classList.toggle("active",active);c.setAttribute("aria-pressed",String(active));});picker.hidden=true;form.hidden=false;loginController.setRole(role);document.querySelector("#identifier")?.focus();}
 function changeRole(){form.hidden=true;picker.hidden=false;input.value="";loginController.setRole(null);}
