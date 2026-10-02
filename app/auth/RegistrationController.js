@@ -196,7 +196,7 @@ class RegistrationController {
             window.location.assign(returnUrl);
             return;
         }
-        window.location.assign("../dashboard/");
+        window.location.assign("/app/client/dashboard.html");
     }
 
     isSafeReturnUrl(url) {
