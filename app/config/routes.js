@@ -2,7 +2,7 @@
  * Isaacs and Partners application route contract.
  */
 export const ROUTES = Object.freeze({
-    HOME: "/", LOGIN: "/app/auth/login.html", SIGNUP: "/signup.html",
+    HOME: "/", LOGIN: "/app/auth/login.html", SIGNUP: "/app/client/register.html",
     DASHBOARD: "/app/dashboard/", STAFF_DASHBOARD: "/app/dashboard/staff.html",
     SUPER_ADMIN_DASHBOARD: "/app/dashboard/super-admin.html", INDIVIDUAL_DASHBOARD: "/app/client/dashboard.html",
     BUSINESS_DASHBOARD: "/app/client/dashboard.html", ACCOUNTS: "/app/dashboard/accounts.html",
