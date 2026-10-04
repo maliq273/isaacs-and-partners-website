@@ -17,6 +17,10 @@ class DashboardPageController{
     await auth.initialise();
     if(!auth.isAuthenticated()){navigation.toLogin(this.getCurrentReturnUrl(),{replace:true});return this}
     const user=auth.getCurrentUser(),role=await resolveUserDashboardRole(user),pageRole=this.getPageRole();
+    if (document.body?.dataset?.page === "dashboard") {
+      navigation.toUserDashboard(user,{replace:true});
+      return this;
+    }
     if(!this.canUsePage(role,pageRole)){navigation.toRoleDashboard(role,{replace:true});return this}
     try{
       this.data=pageRole==="SUPER_ADMIN"?await adminDashboardData.getDashboardSummary(role):await dashboardData.getCurrentDashboard({limit:10});
@@ -394,7 +398,14 @@ class DashboardPageController{
   calculateOutstandingBalance(invoices){return money((invoices||[]).reduce((s,x)=>s+Number(x?.balance_due??x?.amount_due??0),0))}
   countComplianceItems(d){return(d||[]).filter(x=>/compliance|sars|uif|coida/i.test(String(x?.type||x?.category||x?.document_type||""))).length}
   collectionMessage(items,label){return items.length?`${items.length} ${label}${items.length===1?"":"s"} currently linked to your account.`:`No ${label}s are currently linked to your account.`}
-  bindEvents(){document.querySelectorAll("[data-auth-action='logout']").forEach(b=>b.addEventListener("click",this.handleLogout));document.querySelectorAll("[data-admin-action='refresh']").forEach(b=>b.addEventListener("click",this.handleRefresh))}
+  bindEvents(){
+    document.querySelectorAll("[data-auth-action='logout']").forEach(b=>b.addEventListener("click",this.handleLogout));
+    document.querySelectorAll("[data-admin-action='refresh']").forEach(b=>b.addEventListener("click",this.handleRefresh));
+    document.querySelectorAll("#create-matter,[data-matter-action='new']").forEach(b=>b.addEventListener("click",e=>{
+      e.preventDefault();
+      navigation._navigate("./matters.html",{replace:false});
+    }));
+  }
   async handleRefresh(){this.initialised=false;this.data=null;await this.initialise()}
   async handleLogout(e){e?.preventDefault();try{const u=auth.getCurrentUser();clearRoleCache(u?.id||u?.user_id||null);await auth.logout({remote:true,reason:"user"});navigation.toLogin(null,{replace:true})}catch(error){console.error("[DashboardPageController] Logout failed:",error)}}
   renderLogoutState(){document.querySelectorAll("[data-auth-action='logout']").forEach(b=>b.disabled=false)}
