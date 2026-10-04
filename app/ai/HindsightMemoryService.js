@@ -13,7 +13,7 @@ function clean(value, max = 4000) {
     return String(value ?? "").trim().slice(0, max);
 }
 function slug(value, max = 120) {
-    return clean(value, max).toLowerCase().replace(/[^a-z0-9:_-]+/g, "-").replace(/^-+|-+$/g, "");
+    return clean(value, max).toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "");
 }
 function memorySafe(value, max = 4000) {
     return clean(value, max)

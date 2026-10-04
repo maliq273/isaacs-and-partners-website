@@ -2,289 +2,376 @@
   "form": "BI-947",
   "source": "immigrations_docs/BI-947.pdf",
   "sha256": "3cc26008554a2ab48262fd5d738223e494d856177929e07cb3672c5ddbab91bf",
-  "pages": 0,
-  "purpose": "Application for a Permanent Residence Permit (Form 18). Used for permanent residence applications under the categories/grounds set out in the form and accompanying requirements.",
-  "sourceNotes": "The DHA form states that pages 13-18 contain category-specific document requirements, that applicants are interviewed, and that the completed form must be accompanied by the applicable documents.",
+  "pages": 18,
+  "purpose": "Authoritative coordinate map for the repository source PDF.",
   "coordinateSystem": "PDF points, origin bottom-left",
+  "coordinateStrategy": "BBOX_LABEL_DYNAMIC",
   "fields": [],
   "unresolved": [
     {
       "id": "title",
-      "label": "1.1 Title"
+      "label": "title"
     },
     {
       "id": "surname",
-      "label": "1.2 Surname"
+      "label": "surname"
     },
     {
       "id": "first_names",
-      "label": "1.3 First name(s)"
+      "label": "first names"
     },
     {
       "id": "maiden_name",
-      "label": "1.4 Maiden name"
+      "label": "maiden name"
     },
     {
       "id": "former_surnames",
-      "label": "1.5 Other former surnames"
+      "label": "former surnames"
     },
     {
       "id": "dob",
-      "label": "1.6 Date of birth"
+      "label": "dob"
     },
     {
       "id": "birth_country",
-      "label": "1.7 Country of birth"
+      "label": "birth country"
     },
     {
       "id": "nationality_birth",
-      "label": "1.8 Nationality at birth"
+      "label": "nationality birth"
     },
     {
       "id": "nationality_current",
-      "label": "1.9 Present nationality"
+      "label": "nationality current"
     },
     {
       "id": "passport",
-      "label": "1.10 Passport No."
+      "label": "passport"
     },
     {
       "id": "passport_expiry",
-      "label": "Expiry date"
+      "label": "passport expiry"
     },
     {
       "id": "passport_issued_by",
-      "label": "1.11 Issued by (country)"
+      "label": "passport issued by"
     },
     {
       "id": "marital_status",
-      "label": "1.11 Marital status"
+      "label": "marital status"
     },
     {
       "id": "relationship_type",
-      "label": "1.12 Type of marriage/relationship"
+      "label": "relationship type"
     },
     {
       "id": "marriage_date",
-      "label": "1.13 Date of marriage/notarial contract concluded"
+      "label": "marriage date"
     },
     {
       "id": "previous_relationships",
-      "label": "1.14 Details of previous marriage(s) or permanent spousal relationship(s)"
+      "label": "previous relationships"
     },
     {
       "id": "marriage_place",
-      "label": "Date and place of marriage/commencement of spousal relationship"
+      "label": "marriage place"
     },
     {
       "id": "divorce_place",
-      "label": "Date and place of divorce/separation"
+      "label": "divorce place"
     },
     {
       "id": "custody_maintenance",
-      "label": "Details about custody/maintenance of children"
+      "label": "custody maintenance"
     },
     {
       "id": "residential_address",
-      "label": "1.15 Present residential address"
+      "label": "residential address"
     },
     {
       "id": "suburb_city",
-      "label": "Suburb/City/Town"
+      "label": "suburb city"
     },
     {
       "id": "residence_since",
-      "label": "Since"
+      "label": "residence since"
     },
     {
       "id": "postal_address",
-      "label": "1.16 Postal address"
+      "label": "postal address"
     },
     {
       "id": "postal_suburb",
-      "label": "Suburb"
+      "label": "postal suburb"
     },
     {
       "id": "postal_city",
-      "label": "City"
+      "label": "postal city"
     },
     {
       "id": "postal_code",
-      "label": "Code"
+      "label": "postal code"
     },
     {
       "id": "home_phone",
-      "label": "1.17 Tel. No. Home"
+      "label": "home phone"
     },
     {
       "id": "work_phone",
-      "label": "Work"
+      "label": "work phone"
     },
     {
       "id": "email",
-      "label": "E-mail address"
+      "label": "email"
     },
     {
       "id": "occupation",
-      "label": "1.18 Occupation"
+      "label": "occupation"
     },
     {
       "id": "temp_permit",
-      "label": "1.19 Type of temporary residence permit held"
+      "label": "temp permit"
     },
     {
       "id": "permit_valid_until",
-      "label": "1.20 Valid until"
+      "label": "permit valid until"
     },
     {
       "id": "permit_office",
-      "label": "Issuing office"
+      "label": "permit office"
     },
     {
       "id": "father",
-      "label": "2.1 Father"
+      "label": "father"
     },
     {
       "id": "mother",
-      "label": "2.2 Mother"
+      "label": "mother"
     },
     {
       "id": "spouse",
-      "label": "3. Details of applicant's spouse"
+      "label": "spouse"
     },
     {
       "id": "spouse_parents",
-      "label": "4. Details of spouse's parents"
+      "label": "spouse parents"
     },
     {
       "id": "children",
-      "label": "5. Details of biological or legally adopted children"
+      "label": "children"
     },
     {
       "id": "children_not_applying",
-      "label": "6. Children not applying and reasons"
+      "label": "children not applying"
     },
     {
       "id": "adult_dependants",
-      "label": "7. Children over 21 dependent and reasons"
+      "label": "adult dependants"
     },
     {
       "id": "sa_relatives",
-      "label": "8. Relatives/friends resident in South Africa"
+      "label": "sa relatives"
     },
     {
       "id": "employment_record",
-      "label": "9. Employment record"
+      "label": "employment record"
     },
     {
       "id": "current_duties",
-      "label": "Present/last duties"
+      "label": "current duties"
     },
     {
       "id": "spouse_duties",
-      "label": "Spouse's present/last duties"
+      "label": "spouse duties"
     },
     {
       "id": "intended_occupation",
-      "label": "Occupation intended following in South Africa"
+      "label": "intended occupation"
     },
     {
       "id": "funds_transfer",
-      "label": "Amount of money to transfer to South Africa"
+      "label": "funds transfer"
     },
     {
       "id": "pension_income",
-      "label": "Pension/private income"
+      "label": "pension income"
     },
     {
       "id": "assets",
-      "label": "Other assets"
+      "label": "assets"
     },
     {
       "id": "mother_tongue",
-      "label": "10. Mother tongue"
+      "label": "mother tongue"
     },
     {
       "id": "language_proficiency",
-      "label": "Proficiency in other languages"
+      "label": "language proficiency"
     },
     {
       "id": "family_origin",
-      "label": "11. Family members remaining in country of origin"
+      "label": "family origin"
     },
     {
       "id": "residence_history",
-      "label": "12. Previous/current residence history"
+      "label": "residence history"
     },
     {
       "id": "criminal",
-      "label": "13(a)(i) Criminal conviction"
+      "label": "criminal"
     },
     {
       "id": "insolvent",
-      "label": "13(a)(ii) Insolvency"
+      "label": "insolvent"
     },
     {
       "id": "civil_action",
-      "label": "13(a)(iii) Civil action"
+      "label": "civil action"
     },
     {
       "id": "outstanding_debts",
-      "label": "13(b) Outstanding debts"
+      "label": "outstanding debts"
     },
     {
       "id": "pending_enquiry",
-      "label": "13(c) Pending civil/criminal enquiry"
+      "label": "pending enquiry"
     },
     {
       "id": "previous_pr",
-      "label": "13(d) Previous permanent residence application"
+      "label": "previous pr"
     },
     {
       "id": "refused_removed",
-      "label": "13(e) Refused entry/PR/removed/deported"
+      "label": "refused removed"
     },
     {
       "id": "previous_sa",
-      "label": "13(f) Previously in South Africa"
+      "label": "previous sa"
     },
     {
       "id": "health",
-      "label": "13(g) Infectious/physical/mental condition"
+      "label": "health"
     },
     {
       "id": "other_relationship",
-      "label": "13(h) Other spousal relationship"
+      "label": "other relationship"
     },
     {
       "id": "asylum_elsewhere",
-      "label": "13(i) Asylum applications elsewhere"
+      "label": "asylum elsewhere"
     },
     {
       "id": "contact_sa",
-      "label": "14. Contact address/telephone in South Africa"
+      "label": "contact sa"
     },
     {
       "id": "spouse_employment",
-      "label": "Employment details of spouse if SA citizen/PR"
+      "label": "spouse employment"
     },
     {
       "id": "signature_applicant",
-      "label": "Signature of applicant"
+      "label": "signature applicant"
     },
     {
       "id": "signature_spouse",
-      "label": "Signature of legal spouse"
+      "label": "signature spouse"
     },
     {
       "id": "signature_date",
-      "label": "Date"
+      "label": "signature date"
     }
   ],
+  "answerPaths": {
+    "title": "identity.title",
+    "surname": "identity.surname",
+    "first_names": "identity.first_names",
+    "maiden_name": "identity.maiden_name",
+    "former_surnames": "identity.previous_names",
+    "dob": "identity.date_of_birth",
+    "birth_country": "identity.country_of_birth",
+    "nationality_birth": "citizenship.nationality_at_birth",
+    "nationality_current": "identity.nationality",
+    "passport": "passport.number",
+    "passport_expiry": "passport.expiry_date",
+    "passport_issued_by": "passport.issue_country",
+    "marital_status": "marital.status",
+    "relationship_type": "relationship.type",
+    "marriage_date": "relationship.marriage_date",
+    "previous_relationships": "relationship.previous_history",
+    "marriage_place": "relationship.marriage_place",
+    "divorce_place": "identity.date_of_divorce",
+    "custody_maintenance": "family.custody_maintenance",
+    "residential_address": "residence.address",
+    "suburb_city": "residence.suburb_city",
+    "residence_since": "residence.since",
+    "postal_address": "residence.postal_address",
+    "postal_suburb": "residence.postal_suburb",
+    "postal_city": "residence.postal_city",
+    "postal_code": "residence.postal_code",
+    "home_phone": "contact.phone",
+    "work_phone": "contact.work_phone",
+    "email": "contact.email",
+    "occupation": "employment.occupation",
+    "temp_permit": "immigration.current_status",
+    "permit_valid_until": "immigration.permit_valid_until",
+    "permit_office": "immigration.permit_office",
+    "father": "family.father",
+    "mother": "family.mother",
+    "spouse": "family.spouse",
+    "spouse_parents": "family.spouse_parents",
+    "children": "family.children",
+    "children_not_applying": "family.children_not_applying",
+    "adult_dependants": "family.adult_dependants",
+    "sa_relatives": "family.sa_relatives",
+    "employment_record": "employment.full_history",
+    "current_duties": "employment.current_duties",
+    "spouse_duties": "employment.spouse_duties",
+    "intended_occupation": "employment.intended_occupation",
+    "funds_transfer": "finance.funds_to_transfer",
+    "pension_income": "finance.pension_income",
+    "assets": "finance.assets",
+    "mother_tongue": "language.mother_tongue",
+    "language_proficiency": "language.proficiency",
+    "family_origin": "origin.family_remaining",
+    "residence_history": "residence.history",
+    "criminal": "history.criminal",
+    "insolvent": "history.insolvent",
+    "civil_action": "history.civil_actions",
+    "outstanding_debts": "history.debts",
+    "pending_enquiry": "history.pending_enquiries",
+    "previous_pr": "history.previous_pr",
+    "refused_removed": "history.refused_removed",
+    "previous_sa": "history.previous_sa",
+    "health": "history.health",
+    "other_relationship": "history.other_spousal_relationships",
+    "asylum_elsewhere": "history.asylum_elsewhere",
+    "contact_sa": "sa.contact",
+    "spouse_employment": "sa.spouse_employment",
+    "signature_applicant": "declaration.applicant_signature",
+    "signature_spouse": "declaration.spouse_signature",
+    "signature_date": "declaration.date"
+  },
   "verification": {
-    "anchorsResolved": 0,
-    "anchorsUnresolved": 68,
-    "allRectsInsidePage": true,
-    "method": "pdftotext bbox anchor resolution against original PDF; no recreated form"
+    "anchorsResolved": null,
+    "anchorsUnresolved": null,
+    "allRectsInsidePage": null,
+    "method": "dynamic fuzzy label resolution against repository bbox HTML at generation time",
+    "sourceHashChecked": true
+  },
+  "anchorAliases": {
+    "first_names": "First name s",
+    "dob": "Date of birth",
+    "nationality_current": "Present nationality",
+    "previous_relationships": "Details of previous marriage s or permanent spousal relationship s if any",
+    "home_phone": "Home",
+    "work_phone": "Work",
+    "email": "E mail address",
+    "permit_office": "Issuing office",
+    "adult_dependants": "Names of children over the age of 21 who are still dependent on the applicant and give reasons for dependency",
+    "current_duties": "Principal applicant Describe briefly your present last duties",
+    "residence_history": "FULL DETAILS OF PREVIOUS AND CURRENT RESIDENCE",
+    "health": "infectious physical mental condition",
+    "asylum_elsewhere": "applied for asylum in another country",
+    "signature_date": "Date"
   }
 }

@@ -176,6 +176,15 @@ class RegistrationController {
             case "NETWORK_ERROR":
                 message = "Unable to connect to the authentication service. Please check your internet connection.";
                 break;
+            case "REQUEST_TIMEOUT":
+                message = "The authentication service took too long to respond. No account change was assumed. Please wait a moment and try again.";
+                break;
+            case "USER_ALREADY_REGISTERED":
+                message = "An account already exists for this email address. Please sign in instead.";
+                break;
+            case "REGISTRATION_FAILED":
+                message = "The authentication service did not complete the registration. Please try again.";
+                break;
         }
         this.showError(message);
     }
@@ -187,7 +196,7 @@ class RegistrationController {
             window.location.assign(returnUrl);
             return;
         }
-        window.location.assign("../dashboard/");
+        window.location.assign("/app/client/dashboard.html");
     }
 
     isSafeReturnUrl(url) {

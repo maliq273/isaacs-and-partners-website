@@ -10,7 +10,8 @@
     "test": "node scripts/test.mjs",
     "lint": "node scripts/lint.mjs",
     "production-check": "node scripts/production-check.mjs --write",
-    "production-check:ci": "node scripts/production-check.mjs --ci --write"
+    "production-check:ci": "node scripts/production-check.mjs --ci --write && node scripts/verify-immigration-coordinate-maps.mjs",
+    "verify:immigration-maps": "node scripts/verify-immigration-coordinate-maps.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.23.0",

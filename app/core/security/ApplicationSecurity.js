@@ -31,7 +31,10 @@ const PUBLIC_ROUTES = Object.freeze([
     "/",
     "/index.html",
     "/login.html",
-    "/register.html"
+    "/register.html",
+    "/app/auth/login.html",
+    "/app/auth/register.html",
+    "/app/client/payroll-login.html"
 ]);
 
 function normalisePath(path = "") {

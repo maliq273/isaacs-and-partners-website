@@ -1,44 +1,44 @@
 {
   "form": "DHA-84",
-  "source": "immigrations_docs/dha84-form11.pdf",
-  "sha256": "1fbbd287e4fedb6ced6a0896c0c9efbd1795eb3386db2b123b7f4fea0c8c12a7",
-  "pages": 0,
-  "purpose": "Port of Entry Visa or Transit Visa (Form 11). Used to collect the traveller's identity, travel document, residence/contact information, South Africa visit details, host/contact details, admissibility/security declarations and transit information where applicable.",
-  "sourceNotes": "Official government/consular copies identify DHA-84 as Form 11 and require a separate form for each accompanying family member. The current repository copy is the source template used for rendering.",
+  "source": "immigrations_docs/Visitor-Visa-Application-Form-DHA-84-Form-11-June-19-2014.pdf",
+  "sha256": null,
+  "pages": 10,
+  "purpose": "Authoritative coordinate map for the repository source PDF.",
   "coordinateSystem": "PDF points, origin bottom-left",
+  "coordinateStrategy": "BBOX_LABEL_DYNAMIC",
   "fields": [],
   "unresolved": [
     {
       "id": "surname",
-      "label": "Surname"
+      "label": "surname"
     },
     {
       "id": "first_names",
-      "label": "First names (in full)"
+      "label": "first names"
     },
     {
       "id": "maiden_name",
-      "label": "Maiden name"
+      "label": "maiden name"
     },
     {
       "id": "previous_surnames",
-      "label": "Previous surname(s)"
+      "label": "previous surnames"
     },
     {
       "id": "date_of_birth",
-      "label": "Date of birth"
+      "label": "date of birth"
     },
     {
       "id": "country_of_birth",
-      "label": "Country of birth"
+      "label": "country of birth"
     },
     {
       "id": "gender",
-      "label": "Gender"
+      "label": "gender"
     },
     {
       "id": "nationality",
-      "label": "Nationality"
+      "label": "nationality"
     },
     {
       "id": "original_nationality",
@@ -46,189 +46,281 @@
     },
     {
       "id": "nationality_acquired",
-      "label": "Where and when was present nationality obtained"
+      "label": "nationality acquired"
     },
     {
       "id": "passport_number",
-      "label": "Passport/Travel Document Number"
+      "label": "passport number"
     },
     {
       "id": "issuing_authority",
-      "label": "Issuing authority"
+      "label": "issuing authority"
     },
     {
       "id": "passport_expiry",
-      "label": "Date of expiry"
+      "label": "passport expiry"
     },
     {
       "id": "document_type",
-      "label": "Type of document"
+      "label": "document type"
     },
     {
       "id": "permanent_address",
-      "label": "Permanent residential address"
+      "label": "permanent address"
     },
     {
       "id": "address_period",
-      "label": "Period resident at this address"
+      "label": "address period"
     },
     {
       "id": "permanent_residence_country",
-      "label": "Country of permanent residence"
+      "label": "permanent residence country"
     },
     {
       "id": "telephone",
-      "label": "Telephone number"
+      "label": "telephone"
     },
     {
       "id": "home_phone",
-      "label": "Home telephone No"
+      "label": "home phone"
     },
     {
       "id": "cell_phone",
-      "label": "Cellphone No"
+      "label": "cell phone"
     },
     {
       "id": "email",
-      "label": "E-mail address"
+      "label": "email"
     },
     {
       "id": "country_residence_period",
-      "label": "Period resident in that country"
+      "label": "country residence period"
     },
     {
       "id": "occupation",
-      "label": "Occupation or profession"
+      "label": "occupation"
     },
     {
       "id": "employer",
-      "label": "Name of Employer, University Organisation"
+      "label": "employer"
     },
     {
       "id": "employer_address",
-      "label": "Address"
+      "label": "employer address"
     },
     {
       "id": "employer_phone",
-      "label": "Telephone No"
+      "label": "employer phone"
     },
     {
       "id": "employer_fax",
-      "label": "Fax No"
+      "label": "employer fax"
     },
     {
       "id": "self_employed_business",
-      "label": "Name of business"
+      "label": "self employed business"
     },
     {
       "id": "self_employed_address",
-      "label": "Address"
+      "label": "self employed address"
     },
     {
       "id": "self_employed_phone",
-      "label": "Telephone No"
+      "label": "self employed phone"
     },
     {
       "id": "self_employed_fax",
-      "label": "Fax No"
+      "label": "self employed fax"
     },
     {
       "id": "marital_status",
-      "label": "Marital status"
+      "label": "marital status"
     },
     {
       "id": "spouse_first_names",
-      "label": "First name(s) of spouse"
+      "label": "spouse first names"
     },
     {
       "id": "spouse_maiden_name",
-      "label": "Maiden name"
+      "label": "spouse maiden name"
     },
     {
       "id": "marriage_date_place",
-      "label": "Date and place of marriage"
+      "label": "marriage date place"
     },
     {
       "id": "spouse_dob",
-      "label": "Date of birth of spouse"
+      "label": "spouse dob"
     },
     {
       "id": "spouse_nationality",
-      "label": "Nationality"
+      "label": "spouse nationality"
     },
     {
       "id": "arrival_date",
-      "label": "Expected date of arrival in the Republic"
+      "label": "arrival date"
     },
     {
       "id": "arrival_place",
-      "label": "Place of arrival"
+      "label": "arrival place"
     },
     {
       "id": "purpose",
-      "label": "Purpose of visit"
+      "label": "purpose"
     },
     {
       "id": "duration",
-      "label": "Duration of stay"
+      "label": "duration"
     },
     {
       "id": "entries",
-      "label": "Number of entries required"
+      "label": "entries"
     },
     {
       "id": "sa_address",
-      "label": "Residential (physical) Address in the Republic"
+      "label": "sa address"
     },
     {
       "id": "host",
-      "label": "Name of Host or Hotel"
+      "label": "host"
     },
     {
       "id": "host_phone",
-      "label": "Telephone of Host or Hotel"
+      "label": "host phone"
     },
     {
       "id": "contacts",
-      "label": "Names of Organisations or persons you will be contacting"
+      "label": "contacts"
     },
     {
       "id": "sa_host_id",
-      "label": "Identity document number or permanent residence permit number of South African host"
+      "label": "sa host id"
     },
     {
       "id": "affirmative_details",
-      "label": "Give particulars if reply to any of the questions above is in the affirmative"
+      "label": "affirmative details"
     },
     {
       "id": "transit_destination",
-      "label": "Destination after leaving the Republic"
+      "label": "transit destination"
     },
     {
       "id": "transit_mode",
-      "label": "Mode of travel to destination"
+      "label": "transit mode"
     },
     {
       "id": "transit_departure",
-      "label": "Intended date and port of departure from the Republic to that destination"
+      "label": "transit departure"
     },
     {
       "id": "transit_visa",
-      "label": "Visa or permit for destination country"
+      "label": "transit visa"
     },
     {
       "id": "applicant_signature",
-      "label": "Signature of applicant"
+      "label": "applicant signature"
     },
     {
       "id": "declaration_date",
-      "label": "Date"
+      "label": "declaration date"
     }
   ],
+  "answerPaths": {
+    "surname": "identity.surname",
+    "first_names": "identity.first_names",
+    "maiden_name": "identity.maiden_name",
+    "previous_surnames": "identity.previous_names",
+    "date_of_birth": "identity.date_of_birth",
+    "country_of_birth": "identity.country_of_birth",
+    "gender": "identity.gender",
+    "nationality": "identity.nationality",
+    "original_nationality": "citizenship.original_nationality",
+    "nationality_acquired": "citizenship.acquisition_details",
+    "passport_number": "passport.number",
+    "issuing_authority": "passport.issuing_authority",
+    "passport_expiry": "passport.expiry_date",
+    "document_type": "passport.document_type",
+    "permanent_address": "residence.normal_address",
+    "address_period": "residence.period",
+    "permanent_residence_country": "residence.country",
+    "telephone": "contact.phone",
+    "home_phone": "contact.home_phone",
+    "cell_phone": "contact.phone",
+    "email": "contact.email",
+    "country_residence_period": "residence.country_period",
+    "occupation": "employment.occupation",
+    "employer": "employment.employer",
+    "employer_address": "employment.employer_address",
+    "employer_phone": "employment.employer_phone",
+    "employer_fax": "employment.employer_fax",
+    "self_employed_business": "employment.self_employed_business",
+    "self_employed_address": "employment.self_employed_address",
+    "self_employed_phone": "employment.self_employed_phone",
+    "self_employed_fax": "employment.self_employed_fax",
+    "marital_status": "marital.status",
+    "spouse_first_names": "marital.spouse_first_names",
+    "spouse_maiden_name": "marital.spouse_maiden_name",
+    "marriage_date_place": "marital.marriage_date_place",
+    "spouse_dob": "marital.spouse_dob",
+    "spouse_nationality": "marital.spouse_nationality",
+    "arrival_date": "visit.arrival_date",
+    "arrival_place": "visit.arrival_place",
+    "purpose": "visit.purpose",
+    "duration": "visit.duration",
+    "entries": "visit.entries",
+    "sa_address": "visit.sa_address",
+    "host": "visit.host_name",
+    "host_phone": "visit.host_phone",
+    "contacts": "visit.contacts",
+    "sa_host_id": "visit.sa_host_id",
+    "affirmative_details": "history.affirmative_details",
+    "transit_destination": "transit.destination",
+    "transit_mode": "transit.mode",
+    "transit_departure": "transit.departure_date_port",
+    "transit_visa": "transit.destination_visa",
+    "applicant_signature": "declaration.signature",
+    "declaration_date": "declaration.date"
+  },
   "verification": {
-    "anchorsResolved": 0,
-    "anchorsUnresolved": 54,
-    "allRectsInsidePage": true,
-    "method": "pdftotext bbox anchor resolution against original PDF; no recreated form"
+    "anchorsResolved": null,
+    "anchorsUnresolved": null,
+    "allRectsInsidePage": null,
+    "method": "dynamic fuzzy label resolution against repository bbox HTML at generation time",
+    "sourceHashChecked": true
+  },
+  "occurrences": {
+    "maiden_name": 1,
+    "spouse_maiden_name": 2,
+    "nationality": 1,
+    "spouse_nationality": 2,
+    "employer_address": 1,
+    "self_employed_address": 2,
+    "employer_phone": 1,
+    "self_employed_phone": 2,
+    "employer_fax": 1,
+    "self_employed_fax": 2
+  },
+  "anchorAliases": {
+    "previous_surnames": "Previous surname s",
+    "original_nationality": "nationality",
+    "nationality_acquired": "Where and when was present nationality obtained",
+    "email": "E mail address",
+    "spouse_dob": "Date of birth of",
+    "spouse_nationality": "Nationality",
+    "contacts": "Names of Organisations or persons you will be contacting during your stay in the Republic",
+    "transit_destination": "Destination after leaving the Republic",
+    "transit_mode": "Mode of travel to destination",
+    "transit_departure": "Intended date and port of departure from the Republic to that destination",
+    "declaration_date": "Date",
+    "sa_address": "Residential physical Address in the Republic",
+    "sa_host_id": "Identity document number or permanent residence permit number of South African host",
+    "affirmative_details": "Give particulars if reply to any of the questions above is in the affirmative",
+    "transit_visa": "Visa or permit for destination country",
+    "employer_address": "Name of Employer University Organisation",
+    "employer_phone": "Telephone No",
+    "employer_fax": "Fax No",
+    "self_employed_address": "Address",
+    "self_employed_phone": "Telephone No",
+    "self_employed_fax": "Fax No"
   }
 }

@@ -13,3 +13,15 @@
 @media(max-width:1100px){.cp-service-grid{grid-template-columns:repeat(2,1fr)}.cp-stat-grid{grid-template-columns:repeat(2,1fr)}.cp-grid-2,.cp-quote-grid{grid-template-columns:1fr}.cp-sidebar{width:220px;flex-basis:220px}}
 @media(max-width:800px){.cp-topbar{padding:0 12px}.cp-live{display:none}.cp-sidebar{position:fixed;left:0;top:72px;bottom:0;z-index:45;width:230px;transform:translateX(-100%);transition:.2s}.customer-portal.nav-open .cp-sidebar{transform:none}.cp-shell{display:block}.cp-main{padding:18px 12px}.cp-hero{display:block;padding:22px}.cp-hero-actions{margin-top:15px}.cp-workspace-switcher{grid-template-columns:1fr}.cp-service-grid{grid-template-columns:1fr}.cp-upload-fields,.cp-line{grid-template-columns:1fr}.cp-notification{grid-template-columns:auto 1fr}.cp-notification>div:last-child{grid-column:2}.cp-user span:nth-child(2),.cp-user i,.cp-logout{display:none}}
 @media(max-width:520px){.cp-stat-grid{grid-template-columns:1fr 1fr}.cp-stat-grid article{padding:13px}.cp-stat-grid strong{font-size:1.35rem}.cp-card-body,.cp-card>header{padding:15px}.cp-chat-form{grid-template-columns:1fr}.cp-chat-form .cp-btn{width:100%}}
+
+
+.cp-onboarding{min-height:100vh;display:grid;place-items:center;padding:32px 18px;background:radial-gradient(circle at top,#262015 0,#0d0d0d 42%);color:var(--text,#f5f1e8)}
+.cp-onboarding-card{width:min(100%,1080px);background:rgba(23,23,23,.98);border:1px solid rgba(201,162,39,.28);border-radius:24px;padding:34px;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+.cp-ai-avatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:#c9a227;color:#111;font-weight:900;font-size:24px;margin-bottom:14px}
+.cp-ai-intro{font-size:16px;line-height:1.7;max-width:850px;color:#d8d1c5}
+.cp-onboarding-card h1{font-size:clamp(30px,5vw,48px);margin:8px 0 20px}.cp-onboarding-card h2{margin-top:30px}
+.cp-service-directory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:460px;overflow:auto;padding:4px}
+.cp-service-select{display:flex;gap:12px;align-items:flex-start;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:13px;background:rgba(0,0,0,.18);cursor:pointer}
+.cp-service-select input{width:auto;margin-top:4px}.cp-service-select span{display:grid;gap:4px}.cp-service-select small{opacity:.7}
+.cp-ai-rule{display:grid;gap:5px;margin:24px 0;padding:16px;border-left:3px solid #c9a227;background:rgba(201,162,39,.07)}
+@media(max-width:760px){.cp-service-directory{grid-template-columns:1fr}.cp-onboarding-card{padding:22px}}

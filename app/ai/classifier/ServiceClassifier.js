@@ -5,17 +5,22 @@ function distance(a, b) { const left = String(a); const right = String(b); const
 
 const DOMAIN_RULES = [
     { value: "IMMIGRATION", keywords: ["visa", "immigration", "dha", "vfs", "permanent residence", "citizenship", "refugee", "asylum"] },
-    { value: "HR_IR", keywords: ["ccma", "labour", "labor", "employment", "employee", "industrial relations", "disciplinary", "grievance", "performance", "misconduct", "dismissal", "retrenchment", "bargaining council", "hr"] },
+    { value: "HR_IR", keywords: ["ccma", "labour", "labor", "employment", "employee", "industrial relations", "disciplinary", "grievance", "performance", "misconduct", "dismissal", "retrenchment", "bargaining council", "hr", "chairperson"] },
     { value: "BUSINESS_COMPLIANCE", keywords: ["cipc", "sars", "uif", "coida", "tax", "business registration", "company registration", "compliance", "vat", "paye"] },
     { value: "LEGAL", keywords: ["contract", "legal", "affidavit", "power of attorney", "settlement", "legal opinion", "notary", "notarial", "mediation", "negotiation"] }
 ];
 
 const SERVICE_ALIASES = [
     ["ccma", "ccma-representation", "CCMA Representation"], ["ccma hearing", "ccma-representation", "CCMA Representation"],
-    ["disciplinary hearing", "disciplinary-hearings", "Disciplinary Hearings"], ["grievance hearing", "grievance-hearings", "Grievance Hearings"],
-    ["retrenchment", "retrenchment-consulting", "Retrenchment Consulting"], ["bargaining council", "bargaining-council-matters", "Bargaining Council Matters"],
-    ["employment contract", "employment-contracts", "Employment Contracts"], ["hr policy", "hr-policies", "HR Policies"],
-    ["performance management", "performance-management", "Performance Management"], ["payroll", "payroll-advisory", "Payroll Advisory"],
+    ["disciplinary hearing", "disciplinary-hearings", "Disciplinary Hearings"], ["disciplinary inquiry", "disciplinary-hearings", "Disciplinary Hearings"],
+    ["chairperson", "chairperson-services", "Chairperson Services"], ["chairperson service", "chairperson-services", "Chairperson Services"],
+    ["grievance hearing", "grievance-hearings", "Grievance Hearings"], ["grievance", "grievance-hearings", "Grievance Hearings"],
+    ["retrenchment", "retrenchment-consulting", "Retrenchment Consulting"], ["section 189", "retrenchment-consulting", "Retrenchment Consulting"],
+    ["bargaining council", "bargaining-council-matters", "Bargaining Council Matters"],
+    ["employment contract", "employment-contracts", "Employment Contracts"], ["employment agreement", "employment-contracts", "Employment Contracts"],
+    ["hr policy", "hr-policies", "HR Policies"], ["hr policies", "hr-policies", "HR Policies"],
+    ["performance management", "performance-management", "Performance Management"], ["poor performance", "performance-management", "Performance Management"],
+    ["payroll", "payroll-advisory", "Payroll Advisory"],
     ["work visa", "work-visas", "Work Visas"], ["critical skills", "critical-skills-visas", "Critical Skills Visas"],
     ["general work visa", "general-work-visas", "General Work Visas"], ["business visa", "business-visas", "Business Visas"],
     ["permanent residence", "permanent-residence", "Permanent Residence"], ["citizenship", "citizenship-applications", "Citizenship Applications"],

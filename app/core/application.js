@@ -31,7 +31,7 @@ import { eventBus } from "./events.js";
 import { state } from "./state.js";
 import { router } from "./router.js";
 
-import { auth as authService } from "../auth/AuthService.js?v=20260822";
+import { auth as authService } from "../auth/AuthService.js?v=20261002-1";
 import { authGuard } from "../auth/AuthGuard.js";
 
 import { coreStorage } from "./storage.js";
