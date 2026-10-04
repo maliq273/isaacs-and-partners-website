@@ -8,7 +8,7 @@ export const ROUTES = Object.freeze({
     BUSINESS_DASHBOARD: "/app/client/dashboard.html", ACCOUNTS: "/app/dashboard/accounts.html",
     CLIENTS: "/app/dashboard/clients.html", MATTERS: "/app/dashboard/matters.html", REPORTS: "/app/dashboard/reports.html",
     STAFF: "/app/dashboard/staff.html", STAFF_ADMIN: "/app/dashboard/staff-admin.html", AI: "/app/dashboard/ai.html",
-    ANALYTICS: "/app/dashboard/analytics.html", CONSULTATION: "/app/consultation/index.html", BOOKING: "/app/booking/index.html",
+    ANALYTICS: "/app/dashboard/analytics.html", CONSULTATION: "/app/consultation/index.html", BOOKING: "/app/booking/index.html", PAYROLL_SARS_LOGIN: "/app/client/payroll-login.html",
     CLIENT_PORTAL: "/app/client/dashboard.html", DOCUMENTS: "/documents/", KNOWLEDGEBASE: "/knowledgebase/", UPLOADS: "/uploads/", API: "/api"
 });
 
