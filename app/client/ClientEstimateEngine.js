@@ -20,7 +20,7 @@ export default class ClientEstimateEngine{
  }
  async open(preselected=null){
   await this.load();
-  if(preselected){const service=typeof preselected==="object"?preselected:this.services.find(s=>s.code===preselected||s.name===preselected);if(service){this.form(service);return;}}
+  if(preselected){let service=typeof preselected==="object"?preselected:this.services.find(s=>s.code===preselected||s.name===preselected);if(service?.service_code&&!service.code)service={...service,code:service.service_code,name:service.service_name,service_domain:service.service_domain||service.domain,metadata:service.metadata||{pricing_status:service.pricing_visibility}};if(service){this.form(service);return;}}
   this.dashboard.modal('<span class="cp-eyebrow">Controlled Commercial Workflow</span><h2>Request an estimate</h2><p>Anthony will ask the qualifying questions and route the request for commercial review. HR/IR services remain human-delivered and require approved pricing before work starts.</p><div class="cp-service-grid" data-estimate-services>'+this.services.map((s,i)=>'<button class="cp-service" data-estimate-service="'+i+'"><strong>'+esc(s.name)+'</strong><span>'+esc(s.description||s.service_domain||"Service")+'</span></button>').join("")+'</div>');
   document.querySelectorAll("[data-estimate-service]").forEach(b=>b.onclick=()=>this.form(this.services[Number(b.dataset.estimateService)]));
  }
