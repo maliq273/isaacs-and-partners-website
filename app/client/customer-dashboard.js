@@ -38,8 +38,9 @@ class CustomerDashboard{
   this.mount();await this.initSupabase();await this.beginPortalSession();await this.load();
   if(this.dashboardState?.setup_status!=="COMPLETED"){this.renderOnboarding();return}
   this.bind();this.render();this.connectRealtime();
-  if(new URLSearchParams(window.location.search).get("workspace")==="payroll" && this.role==="BUSINESS"){
-    setTimeout(()=>this.openSection("payroll-centre"),250);
+  const workspace=new URLSearchParams(window.location.search).get("workspace");
+  if(this.role==="BUSINESS" && ["payroll","sars","payroll-admin"].includes(workspace)){
+    setTimeout(()=>this.openSection(workspace==="payroll"||workspace==="payroll-admin"?"payroll-centre":"sars-compliance"),250);
   }
  }
  mount(){
