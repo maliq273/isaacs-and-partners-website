@@ -18,8 +18,9 @@ export default class ClientEstimateEngine{
   this.questions=q.data||[];
   return this.services;
  }
- async open(){
+ async open(preselected=null){
   await this.load();
+  if(preselected){const service=typeof preselected==="object"?preselected:this.services.find(s=>s.code===preselected||s.name===preselected);if(service){this.form(service);return;}}
   this.dashboard.modal('<span class="cp-eyebrow">Controlled Commercial Workflow</span><h2>Request an estimate</h2><p>Anthony will ask the qualifying questions and route the request for commercial review. HR/IR services remain human-delivered and require approved pricing before work starts.</p><div class="cp-service-grid" data-estimate-services>'+this.services.map((s,i)=>'<button class="cp-service" data-estimate-service="'+i+'"><strong>'+esc(s.name)+'</strong><span>'+esc(s.description||s.service_domain||"Service")+'</span></button>').join("")+'</div>');
   document.querySelectorAll("[data-estimate-service]").forEach(b=>b.onclick=()=>this.form(this.services[Number(b.dataset.estimateService)]));
  }
@@ -27,7 +28,8 @@ export default class ClientEstimateEngine{
   const qs=this.questions.filter(q=>q.service_code===service.code);
   const fields=qs.length?qs.map(q=>this.field(q)).join(""):'<label>Tell Anthony what you need<textarea data-estimate-answer="details" rows="5" required></textarea></label>';
   const staffQuote=isHrService(service)&&String(service?.metadata?.pricing_status||"").toUpperCase()==="STAFF_QUOTE_REQUIRED";
-  this.dashboard.modal('<span class="cp-eyebrow">'+esc(service.name)+'</span><h2>Qualifying questions</h2><p>These answers prepare the professional review and commercial request. '+(staffQuote?"This HR/IR service requires a staff-approved quotation; no automatic customer price will be issued.":"Indicative estimates remain non-binding until approved.")+'</p><div class="cp-form">'+fields+'<div class="cp-alert" data-estimate-note>Final pricing is not being issued at this stage.</div><button class="cp-btn cp-btn-gold" data-create-estimate>'+ (staffQuote?"Submit for professional quote":"Create indicative estimate") +'</button></div>');
+  const payrollService=/PAYROLL|PAYROLL OUTSOURCING/i.test(String(service?.code||"")+" "+String(service?.name||""));
+  this.dashboard.modal('<span class="cp-eyebrow">'+esc(service.name)+'</span><h2>Qualifying questions</h2><p>These answers prepare the professional review and commercial request. '+(staffQuote?"This HR/IR service requires a staff-approved quotation; no automatic customer price will be issued.":"Indicative estimates remain non-binding until approved.")+'</p><div class="cp-form">'+fields+'<div class="cp-alert" data-estimate-note>Final pricing is not being issued at this stage.</div>'+(payrollService?'<article class="cp-card" style="margin:12px 0"><strong>Employer portal access</strong><p>Payroll Outsourcing can activate a dedicated Payroll Administrator login and SARS Compliance portal. Access is separately approved by Isaacs & Partners.</p><label><input type="checkbox" data-payroll-admin-request> Request approved payroll administrator access</label></article>':"")+'<button class="cp-btn cp-btn-gold" data-create-estimate>'+ (staffQuote?"Submit for professional quote":"Create indicative estimate") +'</button></div>');
   document.querySelector("[data-create-estimate]").onclick=()=>this.submit(service,qs);
  }
  field(q){
@@ -50,7 +52,7 @@ export default class ClientEstimateEngine{
    if(matterError)throw matterError;
    matterId=matter?.id||null;
   }
-  const r=await fetch(authConfig.supabase.url+"/functions/v1/commercial-approval-engine",{method:"POST",headers:{Authorization:"Bearer "+token,apikey:authConfig.supabase.publishableKey,"Content-Type":"application/json"},body:JSON.stringify({action:"CREATE_ESTIMATE",client_user_id:this.dashboard.user.id,business_id:businessId,service_code:service.code,qualifying_answers:answers,request_data:{channel:"PORTAL",phone_number:phone,matter_id:matterId}})});
+  const r=await fetch(authConfig.supabase.url+"/functions/v1/commercial-approval-engine",{method:"POST",headers:{Authorization:"Bearer "+token,apikey:authConfig.supabase.publishableKey,"Content-Type":"application/json"},body:JSON.stringify({action:"CREATE_ESTIMATE",client_user_id:this.dashboard.user.id,business_id:businessId,service_code:service.code,qualifying_answers:answers,request_data:{channel:"PORTAL",phone_number:phone,matter_id:matterId,payroll_admin_access_requested:!!document.querySelector("[data-payroll-admin-request]")?.checked}})});
   const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.error||"Estimate could not be created.");
   this.dashboard.closeModal();
   const staffQuote=Boolean(b.pricing_mode==="STAFF_QUOTE_REQUIRED"||b.staff_quote_required);
