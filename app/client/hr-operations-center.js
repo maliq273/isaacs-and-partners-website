@@ -28,6 +28,7 @@ async function init(){
 }
 
 function mount(){
+ for(let i=0;i<100&&!document.querySelector(".cp-nav");i++)await new Promise(r=>setTimeout(r,50));
  const nav=document.querySelector(".cp-nav"),main=document.querySelector(".cp-main");if(!nav||!main)return;
  if(!nav.querySelector('[data-section="hr-operations"]')){
   const b=document.createElement("button");b.dataset.section="hr-operations";b.textContent="▦ HR Operations";nav.appendChild(b);
