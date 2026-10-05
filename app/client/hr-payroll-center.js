@@ -1,7 +1,7 @@
 import auth from "../auth/AuthService.js";
 import authConfig from "../auth/auth.config.js";
 import { resolveUserDashboardRole } from "../dashboard/DashboardAccess.js";
-import { getSupabaseBrowserClient, ensureSupabaseSession } from "../services/SupabaseBrowserClient.js";
+import { ensureSupabaseSession } from "../services/SupabaseBrowserClient.js";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const waitForPortal=async()=>{for(let i=0;i<100;i++){const nav=document.querySelector(".cp-nav"),main=document.querySelector(".cp-main");if(nav&&main)return true;await new Promise(r=>setTimeout(r,50));}return false;};
 
