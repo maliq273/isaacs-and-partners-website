@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Payroll & SARS Sign In | Isaacs & Partners</title>
+<title>Employer Technology Sign In | Isaacs & Partners</title>
 <link rel="stylesheet" href="../../style.css"><link rel="stylesheet" href="../css/login.css"><link rel="stylesheet" href="../css/login-roles.css?v=20261005">
 </head>
 <body class="login-page">
 <main class="login-shell"><section class="login-card">
-<header class="login-brand"><a class="login-home-logo" href="/index.html"><img src="../../assets/logo.png" alt="Isaacs & Partners"></a><h1>Payroll & SARS</h1><p>Secure employer payroll, payslip and SARS workspace</p></header>
+<header class="login-brand"><a class="login-home-logo" href="/index.html"><img src="../../assets/logo.png" alt="Isaacs & Partners"></a><h1 id="portalTitle">Payroll & SARS</h1><p id="portalSubtitle">Secure employer payroll, payslip and SARS workspace</p></header>
 <div class="login-message" id="payrollStatus" role="status">Business accounts only. Your payroll/SARS access is separately controlled by your Isaacs & Partners service entitlements.</div>
 <form id="payrollLoginForm" class="login-form">
 <div class="login-message error" id="payrollError" role="alert" hidden></div>
@@ -23,13 +23,23 @@
 import auth from "../auth/AuthService.js";
 import {resolveUserDashboardRole} from "../dashboard/DashboardAccess.js";
 const form=document.querySelector("#payrollLoginForm"),btn=document.querySelector("#payrollLoginButton"),err=document.querySelector("#payrollError"),status=document.querySelector("#payrollStatus");
+const mode=new URLSearchParams(location.search).get("portal")||"payroll";
+const title=document.querySelector("#portalTitle"),subtitle=document.querySelector("#portalSubtitle");
+if(mode==="sars"){title.textContent="SARS Compliance Portal";subtitle.textContent="Employer reconciliation, BRS validation and statutory payroll records";status.textContent="Access is controlled by the HR-SARS service entitlement.";btn.textContent="Sign in to SARS Compliance";}
+if(mode==="admin"){title.textContent="Approved Payroll Administrator";subtitle.textContent="Dedicated payroll administration workspace";status.textContent="Payroll Administrator access is available only after Payroll Outsourcing approval.";btn.textContent="Sign in as Payroll Administrator";}
 const show=(e)=>{err.textContent=e||"";err.hidden=!e};
 await auth.initialise();
-if(auth.isAuthenticated()){const role=await resolveUserDashboardRole(auth.getCurrentUser());if(role==="BUSINESS"){location.replace("/app/client/dashboard.html?workspace=payroll");}else{show("This workspace is available to authorised business accounts.");}}
+async function enter(){const role=await resolveUserDashboardRole(auth.getCurrentUser());if(role!=="BUSINESS")throw new Error("This workspace is available only to authorised Business accounts.");
+ const sb=await ensureSupabaseSession(auth);
+ const b=await sb.from("businesses").select("id").eq("owner_user_id",auth.getCurrentUser().id).eq("is_active",true).limit(1).maybeSingle();
+ if(b.error)throw b.error;if(!b.data)throw new Error("No active business profile is linked to this login.");
+ if(mode==="sars"){const q=await sb.from("client_service_entitlements").select("status,access_state").eq("business_id",b.data.id).eq("service_code","HR-SARS").maybeSingle();if(q.error)throw q.error;if(!q.data||q.data.status!=="ACTIVE"||q.data.access_state==="LOCKED")throw new Error("SARS Compliance access is not active. Anthony or Super Admin must activate HR-SARS.");location.replace("/app/client/dashboard.html?workspace=sars");return;}
+ if(mode==="admin"){const q=await sb.from("matters").select("id").eq("business_id",b.data.id).eq("service_type","HR-PAYROLL-OUTSOURCING").in("portal_request_status",["approved","completed"]).limit(1).maybeSingle();if(q.error)throw q.error;if(!q.data)throw new Error("Payroll Administrator access has not been approved yet. Submit Payroll Outsourcing to Anthony first.");location.replace("/app/client/dashboard.html?workspace=payroll-admin");return;}
+ location.replace("/app/client/dashboard.html?workspace=payroll");}
+if(auth.isAuthenticated())enter().catch(e=>show(e.message));
 form.addEventListener("submit",async e=>{e.preventDefault();show("");btn.disabled=true;btn.textContent="Signing in…";try{
  const fd=new FormData(form);const r=await auth.login(String(fd.get("email")||"").trim(),String(fd.get("password")||""),{rememberMe:fd.get("rememberMe")==="on"});if(!r?.authenticated)throw new Error("Authentication failed.");
- const role=await resolveUserDashboardRole(auth.getCurrentUser());if(role!=="BUSINESS"){await auth.logout();throw new Error("Payroll & SARS access requires a Business account.");}
- location.replace("/app/client/dashboard.html?workspace=payroll");
+ await enter();
 }catch(e){show(e?.message||"Unable to sign in.");}finally{btn.disabled=false;btn.textContent="Sign in to Payroll & SARS";}});
 </script>
 </body></html>
