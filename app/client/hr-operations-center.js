@@ -1,7 +1,7 @@
 import auth from "../auth/AuthService.js";
 import authConfig from "../auth/auth.config.js";
 import { resolveUserDashboardRole } from "../dashboard/DashboardAccess.js";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { ensureSupabaseSession } from "../services/SupabaseBrowserClient.js";
 
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money=v=>new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR"}).format(Number(v)||0);
@@ -14,9 +14,8 @@ async function init(){
  user=auth.getCurrentUser();
  role=await resolveUserDashboardRole(user);
  if(!["INDIVIDUAL","BUSINESS"].includes(role))return;
- sb=createClient(authConfig.supabase.url,authConfig.supabase.publishableKey,{auth:{persistSession:false,autoRefreshToken:false}});
- const s=await sb.auth.setSession({access_token:auth.getToken(),refresh_token:auth.getRefreshToken()});
- if(s.error)throw s.error;
+ sb=await ensureSupabaseSession(auth);
+ 
  const [p,b,m]=await Promise.all([
   sb.from("client_legal_profiles").select("*").eq("user_id",user.id).maybeSingle(),
   sb.from("businesses").select("*").eq("owner_user_id",user.id).eq("is_active",true).order("legal_name"),
