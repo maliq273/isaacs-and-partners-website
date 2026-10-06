@@ -919,6 +919,24 @@ h1.v2-title {
     </section>
   </section>
 
+  <!-- Client Service Access -->
+  <section class="panel">
+    <div class="panel-header"><div><p class="eyebrow">Customer Access</p><h2>Client Service Access</h2><p>Super Admin can approve portal access separately from granting individual services. Grants are recorded as explicit commercial entitlement overrides.</p></div></div>
+    <div id="client-service-access-error" class="login-message login-error" hidden role="alert"></div>
+    <div class="admin-section-grid">
+      <div>
+        <label for="service-client-select">Client / Business</label><select id="service-client-select" class="form-control" style="width:100%;margin:8px 0 14px"><option value="">Loading clients…</option></select>
+        <label for="service-business-select">Business</label><select id="service-business-select" class="form-control" style="width:100%;margin:8px 0 14px"><option value="">Select client first</option></select>
+        <label for="service-code-select">Service</label><select id="service-code-select" class="form-control" style="width:100%;margin:8px 0 14px"><option value="">Loading services…</option></select>
+        <label for="service-billing-model">Billing model</label><select id="service-billing-model" class="form-control" style="width:100%;margin:8px 0 14px"><option value="ONE_OFF">Access / One-off</option><option value="MONTHLY">Monthly</option><option value="PER_EMPLOYEE_PAYSLIP">Per employee / payslip</option><option value="MATTER">Matter</option></select>
+        <label for="service-grant-amount">Amount</label><input id="service-grant-amount" class="form-control" type="number" min="0" step="0.01" value="0" style="width:100%;margin:8px 0 14px">
+        <label for="service-grant-notes">Grant note</label><input id="service-grant-notes" class="form-control" type="text" placeholder="Reason / commercial instruction" style="width:100%;margin:8px 0 14px">
+        <button id="service-grant-button" class="btn btn-primary" type="button">Grant / Reactivate Service</button>
+      </div>
+      <div><h3 style="margin-top:0">Current Entitlements</h3><div id="client-service-entitlements-list" class="admin-list"><div class="empty-state">Select a client to view service access.</div></div></div>
+    </div>
+  </section>
+
   <!-- Integration Health -->
   <section class="panel">
     <div class="panel-header">
@@ -986,6 +1004,7 @@ h1.v2-title {
 <script type="module">
 import dashboardPageController from "./DashboardPageController.js?v=20260922-dashboard-fix-3";
 import clientPortalAdmin from "../services/ClientPortalAdminService.js?v=20260906-1";
+import clientServiceAdmin from "../services/ClientServiceAdminService.js?v=20261006-1";
 import staffAdminController from "./StaffAdminController.js";
 import executivePAReminderService from "../services/ExecutivePAReminderService.js";
 
@@ -1043,6 +1062,18 @@ async function loadPABriefing(){
     if (statusEl) statusEl.textContent = "Could not compile reminders: " + (err.message || err);
   }
 }
+
+
+const serviceClientSelect=document.getElementById("service-client-select"),serviceBusinessSelect=document.getElementById("service-business-select"),serviceCodeSelect=document.getElementById("service-code-select"),serviceList=document.getElementById("client-service-entitlements-list"),serviceError=document.getElementById("client-service-access-error");
+let serviceSnapshot=null;
+const serviceEsc=value=>String(value??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function selectedServiceClient(){return (serviceSnapshot?.clients||[]).find(x=>x.user_id===serviceClientSelect?.value)||null}
+function renderServiceBusinesses(){const c=selectedServiceClient();if(!serviceBusinessSelect)return;serviceBusinessSelect.innerHTML='<option value="">Select business</option>'+(c?.businesses||[]).map(b=>`<option value="${b.business_id}">${serviceEsc(b.trading_name||b.legal_name)}</option>`).join("");renderServiceEntitlements()}
+function renderServiceEntitlements(){const c=selectedServiceClient(),b=(c?.businesses||[]).find(x=>x.business_id===serviceBusinessSelect?.value);if(!serviceList)return;const rows=b?.entitlements||[];serviceList.innerHTML=rows.length?rows.map(e=>`<div class="admin-list-row"><div><strong>${serviceEsc(e.service_name)}</strong><small>${serviceEsc(e.service_code)} · ${serviceEsc(e.billing_model)}</small></div><div><span class="status-badge ${e.access_state==="ENABLED"?"active":"inactive"}">${serviceEsc(e.access_state)}</span><button class="btn btn-sm btn-secondary" data-service-revoke="${e.id}">Revoke</button></div></div>`).join(""):'<div class="empty-state">No service entitlements for this business.</div>'}
+async function loadServiceAccess(){try{serviceError.hidden=true;serviceSnapshot=await clientServiceAdmin.snapshot();const clients=serviceSnapshot?.clients||[];serviceClientSelect.innerHTML='<option value="">Select client</option>'+clients.map(c=>`<option value="${c.user_id}">${serviceEsc([c.first_name,c.last_name].filter(Boolean).join(" ")||c.email)} · ${serviceEsc(c.email||"")}</option>`).join("");serviceCodeSelect.innerHTML='<option value="">Select service</option>'+(serviceSnapshot?.services||[]).map(s=>`<option value="${s.code}">${serviceEsc(s.name)} · ${serviceEsc(s.code)}</option>`).join("");renderServiceBusinesses()}catch(e){serviceError.hidden=false;serviceError.textContent=e.message||"Unable to load service access."}}
+serviceClientSelect?.addEventListener("change",renderServiceBusinesses);serviceBusinessSelect?.addEventListener("change",renderServiceEntitlements);
+document.getElementById("service-grant-button")?.addEventListener("click",async()=>{try{serviceError.hidden=true;if(!serviceClientSelect.value||!serviceBusinessSelect.value||!serviceCodeSelect.value)throw new Error("Select a client, business and service.");await clientServiceAdmin.grant({clientUserId:serviceClientSelect.value,businessId:serviceBusinessSelect.value,serviceCode:serviceCodeSelect.value,billingModel:document.getElementById("service-billing-model").value,amount:document.getElementById("service-grant-amount").value,notes:document.getElementById("service-grant-notes").value});await loadServiceAccess();serviceClientSelect.value=serviceClientSelect.value;renderServiceBusinesses();serviceError.hidden=false;serviceError.className="login-message";serviceError.textContent="Service access granted / reactivated."}catch(e){serviceError.hidden=false;serviceError.textContent=e.message||"Service grant failed."}});
+serviceList?.addEventListener("click",async e=>{const b=e.target.closest("[data-service-revoke]");if(!b)return;try{const reason=window.prompt("Reason for revoking service access:","Revoked by Super Admin.");if(reason===null)return;await clientServiceAdmin.revoke(b.dataset.serviceRevoke,reason);await loadServiceAccess();renderServiceBusinesses()}catch(err){serviceError.hidden=false;serviceError.textContent=err.message||"Service revoke failed."}});
 
 async function loadPortalAccess(){
   try{
@@ -1112,6 +1143,7 @@ list?.addEventListener("click",async event=>{
     if(button.dataset.portalAction==="approve")await clientPortalAdmin.approve(button.dataset.userId,notes);
     else await clientPortalAdmin.suspend(button.dataset.userId,notes);
     await loadPortalAccess();
+  await loadServiceAccess();
   }catch(e){
     if(error){error.hidden=false;error.textContent=e.message||"Portal access action failed.";}
   }finally{button.disabled=false;}
