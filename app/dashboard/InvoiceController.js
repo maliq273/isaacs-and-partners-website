@@ -2,6 +2,7 @@ import auth from "../auth/AuthService.js";
 import authConfig from "../auth/auth.config.js";
 import navigation from "../core/navigation.js";
 import { resolveUserDashboardRole } from "./DashboardAccess.js";
+import InvoiceStatus from "../domain/enums/InvoiceStatus.js";
 
 const esc = v => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#039;");
 const money = v => new Intl.NumberFormat("en-ZA", { style:"currency", currency:"ZAR" }).format(Number(v || 0));
@@ -54,7 +55,25 @@ class InvoiceController {
         if(!this.permissions.manage_invoices) return this.message("You do not have permission to create or manage invoices.","error");
         this.openModal(`<div class="modal-backdrop" data-invoice-action="close"></div><section class="modal-card modal-wide" role="dialog" aria-modal="true"><div class="modal-header"><div><p class="eyebrow">${this.role} · Accounts Receivable</p><h2>${row.id?"Edit":"New"} Invoice</h2><p>Customer, invoice dates, payment terms, line items, discounts, tax and notes.</p></div><button class="icon-button" type="button" data-invoice-action="close">×</button></div><form id="invoice-form" data-id="${esc(row.id||"")}"><div class="form-grid"><label>Customer<select name="customer_id" required><option value="">Select customer</option>${this.clientOptions(row)}</select></label><label>Matter<select name="matter_id"><option value="">No matter</option>${this.matterOptions(row)}</select></label><label>Invoice #<input name="invoice_number" value="${esc(row.invoice_number||"")}" placeholder="Auto-generated"></label><label>Order / Reference #<input name="order_number" value="${esc(row.order_number||"")}"></label><label>Invoice date<input name="invoice_date" type="date" value="${esc(row.invoice_date||today())}"></label><label>Due date<input name="due_date" type="date" value="${esc(row.due_date||"")}"></label><label>Payment terms<select name="terms"><option value="DUE_ON_RECEIPT">Due on receipt</option><option value="NET_7">Net 7</option><option value="NET_15">Net 15</option><option value="NET_30">Net 30</option><option value="NET_60">Net 60</option></select></label><label class="form-wide">Subject<input name="subject" value="${esc(row.subject||"")}"></label></div><div class="transaction-table-wrap"><table class="transaction-table"><thead><tr><th>Item</th><th>Description</th><th>Qty</th><th>Rate</th><th>Tax %</th><th></th></tr></thead><tbody id="invoice-items">${this.itemRows(row)}</tbody></table><button type="button" class="btn btn-secondary" data-invoice-action="add-item">+ Add line item</button></div><div class="form-grid"><label>Discount type<select name="discount_type"><option value="PERCENT">%</option><option value="FIXED">Amount</option></select></label><label>Discount value<input name="discount_value" type="number" min="0" step="0.01" value="${esc(row.discount_value||0)}"></label><label>Tax %<input name="tax_rate" type="number" min="0" step="0.01" value="${esc(row.tax_rate||0)}"></label><label>Shipping<input name="shipping_charge" type="number" min="0" step="0.01" value="${esc(row.shipping_charge||0)}"></label><label>Adjustment<input name="adjustment" type="number" step="0.01" value="${esc(row.adjustment||0)}"></label><label class="form-wide">Customer notes<textarea name="customer_notes" rows="3">${esc(row.customer_notes||"")}</textarea></label><label class="form-wide">Terms & conditions<textarea name="terms_and_conditions" rows="4">${esc(row.terms_and_conditions||"Payment due according to the selected terms. Services remain subject to the signed engagement and retainer agreement.")}</textarea></label></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-invoice-action="close">Cancel</button><button type="submit" class="btn btn-primary">Save as Draft</button></div></form></section>`);
     }
-    onClick(e){const b=e.target.closest("[data-invoice-action]");if(!b)return;const a=b.dataset.invoiceAction;if(a==="new")return this.openForm();if(a==="edit")return this.openForm(this.rows.find(x=>x.id===b.dataset.id)||{});if(a==="refresh")return this.load();if(a==="close")return this.close();if(a==="add-item")return this.addItem();if(a==="remove-item")return b.closest("tr")?.remove();if(a==="send")return this.markSent(b.dataset.id);if(a==="payment")return this.recordPayment(b.dataset.id);if(a==="void")return this.voidInvoice(b.dataset.id);}
+    async onClick(e){
+        const b=e.target.closest("[data-invoice-action]");
+        if(!b)return;
+        const a=b.dataset.invoiceAction;
+        try{
+            if(a==="new")return this.openForm();
+            if(a==="edit")return this.openForm(this.rows.find(x=>x.id===b.dataset.id)||{});
+            if(a==="refresh")return await this.load();
+            if(a==="close")return this.close();
+            if(a==="add-item")return this.addItem();
+            if(a==="remove-item")return b.closest("tr")?.remove();
+            if(a==="send")return await this.markSent(b.dataset.id);
+            if(a==="payment")return await this.recordPayment(b.dataset.id);
+            if(a==="void")return await this.voidInvoice(b.dataset.id);
+        }catch(error){
+            console.error("[InvoiceController] action failed",error);
+            this.message(error?.message||"Invoice action failed.","error");
+        }
+    }
     addItem(){const body=document.querySelector("#invoice-items");if(!body)return;const tr=document.createElement("tr");tr.dataset.invoiceItemRow="true";tr.innerHTML=`<td><input name="item_name" required></td><td><input name="item_description"></td><td><input name="quantity" type="number" min="0.001" step="0.001" value="1"></td><td><input name="rate" type="number" min="0" step="0.01" value="0"></td><td><input name="tax_rate" type="number" min="0" step="0.01" value="0"></td><td><button type="button" class="btn btn-small btn-danger" data-invoice-action="remove-item">Remove</button></td>`;body.appendChild(tr);}
     async onSubmit(e){
         if(e.target.id!=="invoice-form")return;e.preventDefault();if(!this.permissions.manage_invoices)return this.message("You do not have permission to manage invoices.","error");
@@ -66,9 +85,9 @@ class InvoiceController {
             this.close();await this.load();this.message("Invoice saved as a live draft.","success");
         }catch(error){console.error("[InvoiceController] save failed",error);this.message(error.message,"error");}
     }
-    async markSent(id){if(!this.permissions.manage_invoices)return this.message("Invoice management permission is required.","error");await this.request(`invoices?id=eq.${encodeURIComponent(id)}`,{method:"PATCH",body:JSON.stringify({status:"SENT",sent_at:new Date().toISOString()})});await this.load();this.message("Invoice marked as sent.","success");}
+    async markSent(id){if(!this.permissions.manage_invoices)return this.message("Invoice management permission is required.","error");await this.request(`invoices?id=eq.${encodeURIComponent(id)}`,{method:"PATCH",body:JSON.stringify({status:InvoiceStatus.SENT,sent_at:new Date().toISOString()})});await this.load();this.message("Invoice marked as sent.","success");}
     async recordPayment(id){if(!this.permissions.manage_invoices)return this.message("Invoice management permission is required.","error");const amount=window.prompt("Payment amount received (ZAR):","0");if(amount===null)return;await this.rpc("record_verified_invoice_payment",{p_invoice_id:id,p_amount:Number(amount),p_payment_method:"OTHER",p_provider:"ADMIN_CONTROLLED_UI",p_provider_reference:`UI-${Date.now()}`,p_metadata:{source:"INVOICE_ADMIN_UI"}});await this.load();this.message("Payment recorded and invoice balance updated.","success");}
-    async voidInvoice(id){if(!this.permissions.manage_invoices)return this.message("Invoice management permission is required.","error");if(!window.confirm("Void this invoice? This is an audit-preserving financial action."))return;await this.request(`invoices?id=eq.${encodeURIComponent(id)}`,{method:"PATCH",body:JSON.stringify({status:"VOID",voided_at:new Date().toISOString()})});await this.load();this.message("Invoice voided.","success");}
+    async voidInvoice(id){if(!this.permissions.manage_invoices)return this.message("Invoice management permission is required.","error");if(!window.confirm("Void this invoice? This is an audit-preserving financial action."))return;await this.request(`invoices?id=eq.${encodeURIComponent(id)}`,{method:"PATCH",body:JSON.stringify({status:InvoiceStatus.VOID,voided_at:new Date().toISOString()})});await this.load();this.message("Invoice voided.","success");}
     render(){
         const outstanding=this.rows.filter(x=>!["PAID","VOID","CANCELLED"].includes(String(x.status||"").toUpperCase())).reduce((a,x)=>a+Number(x.balance_due??x.total??0),0);const paid=this.rows.filter(x=>String(x.status||"").toUpperCase()==="PAID").reduce((a,x)=>a+Number(x.total||0),0);
         this.set("#invoice-total",this.rows.length);this.set("#invoice-outstanding",money(outstanding));this.set("#invoice-paid",money(paid));this.set("#invoice-overdue",this.rows.filter(x=>String(x.status||"").toUpperCase()==="OVERDUE").length);
