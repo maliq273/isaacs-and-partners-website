@@ -17,7 +17,7 @@
 <section class="panel"><div class="panel-header"><div><h2>Accounts Receivable</h2><p>Draft → Sent → Outstanding/Overdue → Partially Paid → Paid, with audit-preserving voids. Every invoice can be rendered as a branded visual PDF.</p></div></div><div class="table-wrapper"><table><thead><tr><th>Invoice #</th><th>Customer</th><th>Subject</th><th>Total</th><th>Balance</th><th>Status</th><th>Due</th><th>Actions</th></tr></thead><tbody id="invoices-table"><tr><td colspan="8">Loading invoices...</td></tr></tbody></table></div></section>
 </main><div id="invoice-modal" class="modal-host" hidden></div>
 <script type="module">
-import controller from "./InvoiceController.js?v=20260829-2";
+import controller from "./InvoiceController.js?v=20261006-1";
 import invoicePdfService from "./InvoicePdfService.js?v=20260829-1";
 
 const message = (text, type = "error") => {
