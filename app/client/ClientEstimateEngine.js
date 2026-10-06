@@ -21,8 +21,16 @@ export default class ClientEstimateEngine{
  async open(preselected=null){
   await this.load();
   if(preselected){let service=typeof preselected==="object"?preselected:this.services.find(s=>s.code===preselected||s.name===preselected);if(service?.service_code&&!service.code)service={...service,code:service.service_code,name:service.service_name,service_domain:service.service_domain||service.domain,metadata:service.metadata||{pricing_status:service.pricing_visibility}};if(service){this.form(service);return;}}
-  this.dashboard.modal('<span class="cp-eyebrow">Controlled Commercial Workflow</span><h2>Request an estimate</h2><p>Anthony will ask the qualifying questions and route the request for commercial review. HR/IR services remain human-delivered and require approved pricing before work starts.</p><div class="cp-service-grid" data-estimate-services>'+this.services.map((s,i)=>'<button class="cp-service" data-estimate-service="'+i+'"><strong>'+esc(s.name)+'</strong><span>'+esc(s.description||s.service_domain||"Service")+'</span></button>').join("")+'</div>');
-  document.querySelectorAll("[data-estimate-service]").forEach(b=>b.onclick=()=>this.form(this.services[Number(b.dataset.estimateService)]));
+  const domains={IMMIGRATION:"Immigration",HR:"HR & Industrial Relations",BUSINESS:"Business Compliance",LEGAL:"Legal"};
+  const key=s=>{const d=String(s?.service_domain||"").toUpperCase(), code=String(s?.code||"").toUpperCase(); if(d.includes("IMMIGRATION")||code.includes("IMMIGRATION"))return "IMMIGRATION"; if(d.includes("HR")||d.includes("INDUSTRIAL")||d.includes("LABOUR")||code.startsWith("HR-")||code.includes("OUTSOURCING")||code.includes("PAYROLL"))return "HR"; if(d.includes("BUSINESS")||d.includes("COMPLIANCE")||code.includes("BUSINESS"))return "BUSINESS"; return "LEGAL";};
+  const groups=Object.keys(domains).map(k=>({key:k,name:domains[k],services:this.services.filter(s=>key(s)===k)})).filter(g=>g.services.length);
+  this.dashboard.modal('<span class="cp-eyebrow">Controlled Matter Intake</span><h2>Start a new matter</h2><p>Choose one of the four practice areas. Anthony will then show the services available within that area.</p><div class="cp-service-grid" data-matter-categories>'+groups.map(g=>'<button class="cp-service" data-matter-category="'+g.key+'"><strong>'+g.name+'</strong><span>'+g.services.length+' available services</span></button>').join("")+'</div>');
+  document.querySelectorAll("[data-matter-category]").forEach(btn=>btn.onclick=()=>this.showSubservices(groups.find(g=>g.key===btn.dataset.matterCategory)));
+ }
+ showSubservices(group){
+  if(!group)return;
+  this.dashboard.modal('<span class="cp-eyebrow">'+esc(group.name)+'</span><h2>Select a service</h2><p>This is the second step of the matter intake.</p><div class="cp-service-grid" data-estimate-services>'+group.services.map((s,i)=>'<button class="cp-service" data-estimate-service="'+i+'"><strong>'+esc(s.name)+'</strong><span>'+esc(s.description||"Professional service")+'</span></button>').join("")+'</div>');
+  document.querySelectorAll("[data-estimate-service]").forEach(btn=>btn.onclick=()=>this.form(group.services[Number(btn.dataset.estimateService)]));
  }
  form(service){
   const qs=this.questions.filter(q=>q.service_code===service.code);
