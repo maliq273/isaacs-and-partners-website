@@ -66,7 +66,8 @@ returns jsonb language plpgsql security definer set search_path = public as $$
 declare uid uuid := (select auth.uid()); s public.client_dashboard_state; next_status text;
 begin
   if uid is null then raise exception 'Authentication required'; end if;
-  next_status := case when upper(coalesce(p_setup_step,'COMPLETED'))='COMPLETED' then 'COMPLETED' else 'IN_PROGRESS' end;
+  if upper(coalesce(p_setup_step,'IN_PROGRESS'))='COMPLETED' then raise exception 'Dashboard completion is controlled by Anthony server runtime.'; end if;
+  next_status := 'IN_PROGRESS';
   insert into public.client_dashboard_state(user_id,setup_status,setup_step,setup_started_at,setup_completed_at,anthony_intro_seen,profile_data,selected_service_codes,updated_at)
   values(uid,next_status,coalesce(p_setup_step,'COMPLETED'),now(),case when next_status='COMPLETED' then now() else null end,p_anthony_intro_seen,coalesce(p_profile_data,'{}'::jsonb),coalesce(p_selected_service_codes,'{}'::text[]),now())
   on conflict (user_id) do update set setup_status=excluded.setup_status,setup_step=excluded.setup_step,setup_started_at=coalesce(client_dashboard_state.setup_started_at,excluded.setup_started_at),setup_completed_at=excluded.setup_completed_at,anthony_intro_seen=excluded.anthony_intro_seen,profile_data=excluded.profile_data,selected_service_codes=excluded.selected_service_codes,updated_at=now()
