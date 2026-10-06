@@ -25,7 +25,7 @@ export default class AILiaisonRuntimeService {
         const data = await this._readJson(response); if (!response.ok) throw this._createHttpError(response.status, data); if (!data?.ok) throw new Error(data?.error || "AI liaison runtime failed."); return data;
     }
 
-    async getClientConversation({ chatId = null, channel = "PORTAL" } = {}) {
+    async completeDashboardSetup({ profileData = {}, selectedServiceCodes = [] } = {}) {\n        const token = await this._getAccessToken();\n        const user = this.auth.getCurrentUser();\n        if (!user?.id) throw new Error("Authenticated client identity is unavailable.");\n        const response = await fetch(this.functionUrl, {\n            method: "POST",\n            headers: this._headers(token),\n            body: JSON.stringify({ action: "SETUP_DASHBOARD", profileData, selectedServiceCodes })\n        });\n        const data = await this._readJson(response);\n        if (!response.ok) throw this._createHttpError(response.status, data);\n        if (!data?.ok) throw new Error(data?.error || "Anthony dashboard setup failed.");\n        return data;\n    }\n\n    async getClientConversation({ chatId = null, channel = "PORTAL" } = {}) {
         const token = await this._getAccessToken(); const user = this.auth.getCurrentUser();
         const resolvedChatId = String(chatId || `portal:${user.id}`).trim(); const resolvedChannel = String(channel || "PORTAL").trim().toUpperCase();
         if (resolvedChannel !== "PORTAL" || resolvedChatId !== `portal:${user.id}`) throw new Error("Invalid client conversation scope.");
