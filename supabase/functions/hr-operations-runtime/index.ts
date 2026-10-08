@@ -266,7 +266,11 @@ async function payroll(body:any,a:any){
  const internalPayroll=Boolean(b.data?.is_internal_company);
  const run=await admin.from("hr_payroll_runs").insert({business_id:businessId,period_start:periodStart,period_end:periodEnd,pay_date:clean(body.pay_date,20)||null,tax_year:2027,status:"CALCULATED",workflow_stage:"PREVIEW",billing_status:internalPayroll?"NOT_REQUIRED":"PAYMENT_PENDING",approval_status:internalPayroll?"PENDING_SUPER_ADMIN":"NOT_REQUIRED",rules_version:"SARS-2027",total_gross:rows.reduce((s,x)=>s+x.gross_pay,0),total_paye:rows.reduce((s,x)=>s+x.paye,0),total_uif_employee:rows.reduce((s,x)=>s+x.uif_employee,0),total_uif_employer:rows.reduce((s,x)=>s+x.uif_employer,0),total_sdl:rows.reduce((s,x)=>s+x.sdl,0),metadata:{engine:"Isaacs & Partners HR Payroll Centre",calculation_scope:"CONFIGURABLE_COMPONENT_ENGINE",payroll_profile:payrollProfile.id||null,bargaining_council:payrollProfile.bargaining_council_code||null,sars_rules_version:payrollProfile.sars_rules_version||"25.3.0",actor_user_id:a.userId,actor_role:a.role,workflow:"IMPORT -> VALIDATE -> CALCULATE -> PREVIEW -> INVOICE -> PAYSTACK VERIFY -> RELEASE -> ARCHIVE -> SARS",internal_payroll:internalPayroll}}).select("id").single();
  if(run.error)throw run.error;
- for(let i=0;i<emps.length;i++){const x=rows[i];const ins=await admin.from("hr_payroll_entries").insert({payroll_run_id:run.data.id,employee_id:emps[i].id,gross_pay:x.gross_pay,taxable_income:x.taxable_income,paye:x.paye,uif_employee:x.uif_employee,uif_employer:x.uif_employer,sdl:x.sdl,net_pay:x.net_pay,source_codes:x.source_codes,brs_source_codes:x.source_codes,earnings:x.earnings,deductions:x.deductions,release_status:"LOCKED"}).select("id").single();if(ins.error)throw ins.error;
+ if(internalPayroll){
+   const n=await admin.from("notifications").insert((await admin.from("profiles").select("id").eq("role","SUPER_ADMIN").eq("is_active",true)).data?.map((p:any)=>({recipient_user_id:p.id,channel:"PORTAL",subject:"Internal payroll requires approval",message:"Payroll completed by: "+(a.userId||"authorised internal operator")+". Payroll run "+run.data.id+" is ready for Super Admin approval. Please log in and approve before release.",status:"PENDING",provider:"SYSTEM",metadata:{payroll_run_id:run.data.id,business_id:businessId,completed_by:a.userId}})||[]);
+   if(n.error)throw n.error;
+ }
+ for(let i=0;i<emps.length;i++{const x=rows[i];const ins=await admin.from("hr_payroll_entries").insert({payroll_run_id:run.data.id,employee_id:emps[i].id,gross_pay:x.gross_pay,taxable_income:x.taxable_income,paye:x.paye,uif_employee:x.uif_employee,uif_employer:x.uif_employer,sdl:x.sdl,net_pay:x.net_pay,source_codes:x.source_codes,brs_source_codes:x.source_codes,earnings:x.earnings,deductions:x.deductions,release_status:"LOCKED"}).select("id").single();if(ins.error)throw ins.error;
    if(!internalPayroll){const ce=await admin.from("hr_payslip_charge_events").insert({business_id:businessId,payroll_profile_id:payrollProfile.id,payroll_run_id:run.data.id,payroll_entry_id:ins.data.id,employee_id:emps[i].id,unit_price:Number(payrollProfile.payslip_unit_price)||0,quantity:1,currency:payrollProfile.currency||"ZAR",status:"BILLABLE",source:"PAYROLL_CALCULATION"});if(ce.error)throw ce.error;}
  }
  return {ok:true,payroll_run_id:run.data.id,rules_version:"SARS-2027",status:"PREVIEW",workflow_stage:"PREVIEW",internal_payroll:internalPayroll,approval_status:internalPayroll?"PENDING_SUPER_ADMIN":"NOT_REQUIRED",billing_status:internalPayroll?"NOT_REQUIRED":"PAYMENT_PENDING",employee_count:emps.length,totals:{gross:rows.reduce((s,x)=>s+x.gross_pay,0),paye:rows.reduce((s,x)=>s+x.paye,0),uif_employee:rows.reduce((s,x)=>s+x.uif_employee,0),uif_employer:rows.reduce((s,x)=>s+x.uif_employer,0),sdl:rows.reduce((s,x)=>s+x.sdl,0)},notice:"Payroll is calculated and remains a preview until the applicable approval or payment gate is satisfied."};
@@ -280,6 +284,26 @@ Deno.serve(async(req)=>{
   if(action==="TEMPLATES"){const q=await admin.from("hr_document_templates").select("template_code,service_code,name,description,version,required_answers").eq("active",true).order("service_code").order("name");return json({ok:true,templates:q.data||[]});}
   if(action==="GENERATE_DOCUMENT")return json(await generateDocument(req,body,a));
   if(action==="CALCULATE_PAYROLL")return json(await payroll(body,a));
+  if(action==="PREPARE_CLIENT_BILLING"){
+    const runId=clean(body.payroll_run_id,100); if(!runId)throw new Error("payroll_run_id is required.");
+    const r=await admin.rpc("payroll_prepare_client_billing_actor",{p_payroll_run_id:runId,p_actor_user_id:a.userId});
+    if(r.error)throw new Error(r.error.message||"Unable to prepare payroll billing.");
+    return json(r.data);
+  }
+  if(action==="APPROVE_INTERNAL_PAYROLL"){
+    if(a.role!=="SUPER_ADMIN"&&!a.internal)throw new Error("Only Super Admin may approve internal payroll.");
+    const runId=clean(body.payroll_run_id,100);
+    const q=await admin.from("hr_payroll_runs").select("id,business_id").eq("id",runId).maybeSingle();if(q.error||!q.data)throw new Error("Payroll run not found.");
+    const b=await admin.from("businesses").select("is_internal_company").eq("id",q.data.business_id).maybeSingle();if(!b.data?.is_internal_company)throw new Error("This is not an Isaacs & Partners internal payroll.");
+    const r=await admin.rpc("payroll_internal_approve",{p_payroll_run_id:runId,p_notes:clean(body.notes,1000)});if(r.error)throw new Error(r.error.message||"Approval failed.");return json(r.data);
+  }
+  if(action==="RELEASE_PAYROLL"){
+    const runId=clean(body.payroll_run_id,100);if(!runId)throw new Error("payroll_run_id is required.");
+    const q=await admin.from("hr_payroll_runs").select("id,business_id").eq("id",runId).maybeSingle();if(q.error||!q.data)throw new Error("Payroll run not found.");
+    const b=await admin.from("businesses").select("owner_user_id,is_internal_company").eq("id",q.data.business_id).maybeSingle();if(q.error||!b.data)throw new Error("Business not found.");
+    if(!a.internal&&a.role==="BUSINESS"&&b.data.owner_user_id!==a.userId)throw new Error("Business is outside your access scope.");
+    const r=await admin.rpc("payroll_release_if_paid",{p_payroll_run_id:runId});if(r.error)throw new Error(r.error.message||"Payroll remains locked.");return json(r.data);
+  }
   if(action==="GENERATE_PAYSLIP"){const businessId=clean(body.business_id,100);if(businessId)await requireServiceAccess(businessId,"HR-PAYROLL");return json(await generatePayslip(body,a));}
   if(action==="PAYROLL_RUNS"){const businessId=clean(body.business_id,100);if(businessId)await requireServiceAccess(businessId,"HR-PAYROLL");if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(a.role)&&!a.internal)throw new Error("Payroll access denied.");const q=await admin.from("hr_payroll_runs").select("*").eq("business_id",clean(body.business_id,100)).order("created_at",{ascending:false}).limit(20);return json({ok:true,runs:q.data||[]});}
   return json({error:"Unsupported action."},400);
