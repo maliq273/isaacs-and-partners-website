@@ -13,13 +13,14 @@ async function actor(req:Request){
  if(!token)throw Error("Authentication required.");
  const u=await db.auth.getUser(token);if(u.error||!u.data.user)throw Error("Authentication required.");
  const p=await db.from("profiles").select("role,is_active").eq("id",u.data.user.id).maybeSingle();
- if(p.error||!p.data?.is_active||!["BUSINESS","STAFF","SUPER_ADMIN"].includes(p.data.role))throw Error("Authorised payroll access required.");
+ if(p.error||!p.data?.is_active||!["BUSINESS","INDIVIDUAL","STAFF","SUPER_ADMIN"].includes(p.data.role))throw Error("Authorised payment access required.");
  return {userId:u.data.user.id,role:p.data.role};
 }
 async function invoiceAccess(invoiceId:string,a:any){
  const q=await db.from("invoices").select("*,businesses(owner_user_id,phone,legal_name,trading_name)").eq("id",invoiceId).maybeSingle();
  if(q.error||!q.data)throw Error("Invoice not found.");
  if(a.role==="BUSINESS"&&q.data.businesses?.owner_user_id!==a.userId)throw Error("Invoice is outside your access scope.");
+ if(a.role==="INDIVIDUAL"&&q.data.individual_user_id!==a.userId)throw Error("Invoice is outside your access scope.");
  return q.data;
 }
 async function initialize(body:any,a:any){
