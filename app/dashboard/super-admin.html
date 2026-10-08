@@ -919,6 +919,25 @@ h1.v2-title {
     </section>
   </section>
 
+  <!-- Payroll Approval & Reviewer Control -->
+  <section class="admin-section-grid">
+    <section class="panel">
+      <div class="panel-header"><div><p class="eyebrow">Payroll Control</p><h2>Internal Payroll Approval Queue</h2><p>Internal payroll cannot be released until Super Admin reviews and approves it.</p></div></div>
+      <div id="payroll-approval-error" class="login-message login-error" hidden></div>
+      <div id="payroll-approval-list" class="admin-list"><div class="empty-state">Loading payroll approvals…</div></div>
+    </section>
+    <section class="panel">
+      <div class="panel-header"><div><p class="eyebrow">Client Payroll Reviewers</p><h2>Designated Payslip Reviewer</h2><p>Anthony sends the review/release request to the designated person. If none is assigned, the company owner is used.</p></div></div>
+      <div id="payroll-reviewer-error" class="login-message login-error" hidden></div>
+      <div style="padding:20px 24px">
+        <label for="payroll-reviewer-business">Company</label><select id="payroll-reviewer-business" class="form-control" style="width:100%;margin:8px 0 14px"><option value="">Loading companies…</option></select>
+        <label for="payroll-reviewer-user">Reviewer / Contact</label><select id="payroll-reviewer-user" class="form-control" style="width:100%;margin:8px 0 14px"><option value="">Select reviewer</option></select>
+        <button id="payroll-reviewer-save" class="btn btn-primary" type="button">Set reviewer</button>
+        <div id="payroll-reviewer-current" style="margin-top:16px;color:var(--ink-muted)">No reviewer loaded.</div>
+      </div>
+    </section>
+  </section>
+
   <!-- Client Service Access -->
   <section class="panel">
     <div class="panel-header"><div><p class="eyebrow">Customer Access</p><h2>Client Service Access</h2><p>Super Admin can approve portal access separately from granting individual services. Grants are recorded as explicit commercial entitlement overrides.</p></div></div>
@@ -1005,6 +1024,7 @@ h1.v2-title {
 import dashboardPageController from "./DashboardPageController.js?v=20260922-dashboard-fix-3";
 import clientPortalAdmin from "../services/ClientPortalAdminService.js?v=20260906-1";
 import clientServiceAdmin from "../services/ClientServiceAdminService.js?v=20261006-1";
+import payrollAdmin from "../services/PayrollAdminService.js?v=20261008-1";
 import staffAdminController from "./StaffAdminController.js";
 import executivePAReminderService from "../services/ExecutivePAReminderService.js";
 
