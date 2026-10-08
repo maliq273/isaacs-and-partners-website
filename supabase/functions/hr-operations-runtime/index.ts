@@ -327,7 +327,7 @@ Deno.serve(async(req)=>{
     const q=await admin.from("hr_payroll_runs").select("id,business_id").eq("id",runId).maybeSingle();if(q.error||!q.data)throw new Error("Payroll run not found.");
     const b=await admin.from("businesses").select("owner_user_id,is_internal_company").eq("id",q.data.business_id).maybeSingle();if(q.error||!b.data)throw new Error("Business not found.");
     if(!a.internal&&a.role==="BUSINESS"&&b.data.owner_user_id!==a.userId)throw new Error("Business is outside your access scope.");
-    const r=await admin.rpc("payroll_release_if_paid",{p_payroll_run_id:runId});if(r.error)throw new Error(r.error.message||"Payroll remains locked.");return json(r.data);
+    const r=await admin.rpc("payroll_release_if_paid_actor",{p_payroll_run_id:runId,p_actor_user_id:a.userId});if(r.error)throw new Error(r.error.message||"Payroll remains locked.");return json(r.data);
   }
   if(action==="GENERATE_PAYSLIP"){const businessId=clean(body.business_id,100);if(businessId)await requireServiceAccess(businessId,"HR-PAYROLL");return json(await generatePayslip(body,a));}
   if(action==="PAYROLL_RUNS"){const businessId=clean(body.business_id,100);if(businessId)await requireServiceAccess(businessId,"HR-PAYROLL");if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(a.role)&&!a.internal)throw new Error("Payroll access denied.");const q=await admin.from("hr_payroll_runs").select("*").eq("business_id",clean(body.business_id,100)).order("created_at",{ascending:false}).limit(20);return json({ok:true,runs:q.data||[]});}
