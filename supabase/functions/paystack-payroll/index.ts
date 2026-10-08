@@ -63,8 +63,14 @@ async function verify(reference:string){
    if(iq.data?.business_id){const bq=await db.from("businesses").select("owner_user_id").eq("id",iq.data.business_id).maybeSingle();if(bq.data?.owner_user_id)await db.rpc("payroll_release_if_paid_actor",{p_payroll_run_id:runId,p_actor_user_id:bq.data.owner_user_id});}
  }
  if(purpose==="SARS"){await db.from("hr_sars_billing_periods").update({status:"PAID",access_state:"ENABLED",payment_id:pq.data.id,paid_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("invoice_id",pq.data.invoice_id);}
- if(purpose==="SERVICE"){await db.rpc("client_service_payment_verified",{p_invoice_id:pq.data.invoice_id,p_payment_id:pq.data.id});}
- return {ok:true,status:"COMPLETED",payment_id:pq.data.id,invoice_id:pq.data.invoice_id,purpose};
+ if(purpose==="SERVICE"){await db.from("client_service_entitlements").update({access_state:"LOCKED",lock_reason:"Payment verified. Awaiting Super Admin/Finance final unlock approval.",metadata:{...(await db.from("client_service_entitlements").select("metadata").eq("current_invoice_id",pq.data.invoice_id).maybeSingle()).data?.metadata,payment_verified:true,payment_id:pq.data.id,verified_at:new Date().toISOString(),release_ready:true}}).eq("current_invoice_id",pq.data.invoice_id);await notifyFinancePaymentSuccess(pq.data.invoice_id,pq.data.id,Number(pq.data.amount),String(pq.data.currency||"ZAR"));}
+ return {ok:true,status:"PAID",payment_id:pq.data.id,invoice_id:pq.data.invoice_id,purpose,release_ready:purpose==="SERVICE"};
+}
+async function notifyFinancePaymentSuccess(invoiceId:string,paymentId:string,amount:number,currency:string){
+ const q=await db.from("profiles").select("id").in("role",["SUPER_ADMIN","FINANCE"]).eq("is_active",true);
+ if(q.error||!q.data?.length)return;
+ const msg={type:"PAYMENT_VERIFIED_RELEASE_REQUEST",title:"Payment verified — release approval required",message:`Paystack payment verified for invoice ${invoiceId}. Amount ${currency} ${amount.toFixed(2)}. Anthony is ready to request final customer unlock approval.`,metadata:{invoice_id:invoiceId,payment_id:paymentId,amount,currency,status:"PAID",action_required:"FINAL_UNLOCK_APPROVAL"}};
+ for(const p of q.data){await db.from("notifications").insert({user_id:p.id,type:msg.type,title:msg.title,message:msg.message,metadata:msg.metadata});}
 }
 async function webhook(req:Request){
  if(!PAYSTACK_KEY)throw Error("Paystack is not configured.");
