@@ -313,7 +313,17 @@ Deno.serve(async(req)=>{
     const runId=clean(body.payroll_run_id,100); if(!runId)throw new Error("payroll_run_id is required.");
     const r=await admin.rpc("payroll_prepare_client_billing_actor",{p_payroll_run_id:runId,p_actor_user_id:a.userId});
     if(r.error)throw new Error(r.error.message||"Unable to prepare payroll billing.");
-    return json(r.data);
+    const result=r.data||{};
+    const runQ=await admin.from("hr_payroll_runs").select("business_id,period_end").eq("id",runId).maybeSingle();
+    const bQ=runQ.data?await admin.from("businesses").select("owner_user_id,legal_name,trading_name").eq("id",runQ.data.business_id).maybeSingle():null;
+    if(bQ?.data?.owner_user_id){
+      const cQ=await admin.from("communication_contacts").select("phone_number,chat_id,whatsapp_consent").eq("user_id",bQ.data.owner_user_id).eq("is_active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle();
+      if(cQ.data?.chat_id&&cQ.data?.whatsapp_consent!==false){
+        const msg=await admin.from("communication_messages").insert({customer_user_id:bQ.data.owner_user_id,channel:"WHATSAPP",direction:"OUTBOUND",phone_number:cQ.data.phone_number,chat_id:cQ.data.chat_id,body:"Anthony Isaacs has prepared your payroll for "+(runQ.data.period_end||"")+" . Payroll payslip payment and the SARS monthly retainer are ready in your Isaacs & Partners portal. Please log in to review and pay. Payslips and SARS access remain locked until the relevant payment is verified.",status:"QUEUED",metadata:{source:"payroll_payment_request",payroll_run_id:runId,business_id:runQ.data.business_id}});
+        if(!msg.error&&msg.data?.[0])await admin.from("communication_outbox").insert({message_id:msg.data[0].id,session_id:null,chat_id:cQ.data.chat_id,status:"QUEUED",available_at:new Date().toISOString()});
+      }
+    }
+    return json(result);
   }
   if(action==="APPROVE_INTERNAL_PAYROLL"){
     if(a.role!=="SUPER_ADMIN"&&!a.internal)throw new Error("Only Super Admin may approve internal payroll.");
