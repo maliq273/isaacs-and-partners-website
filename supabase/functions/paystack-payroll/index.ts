@@ -57,7 +57,10 @@ async function verify(reference:string){
  await db.from("invoices").update({status:"PAID",amount_paid:pq.data.amount,balance_due:0,paid_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",pq.data.invoice_id);
  const purpose=String(pq.data.metadata?.purpose||"").toUpperCase();
  const runId=clean(pq.data.metadata?.payroll_run_id,100);
- if(purpose==="PAYROLL"&&runId){await db.rpc("payroll_release_if_paid",{p_payroll_run_id:runId});}
+ if(purpose==="PAYROLL"&&runId){
+   const iq=await db.from("invoices").select("business_id").eq("id",pq.data.invoice_id).maybeSingle();
+   if(iq.data?.business_id){const bq=await db.from("businesses").select("owner_user_id").eq("id",iq.data.business_id).maybeSingle();if(bq.data?.owner_user_id)await db.rpc("payroll_release_if_paid_actor",{p_payroll_run_id:runId,p_actor_user_id:bq.data.owner_user_id});}
+ }
  if(purpose==="SARS"){await db.from("hr_sars_billing_periods").update({status:"PAID",access_state:"ENABLED",payment_id:pq.data.id,paid_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("invoice_id",pq.data.invoice_id);}
  return {ok:true,status:"COMPLETED",payment_id:pq.data.id,invoice_id:pq.data.invoice_id,purpose};
 }
