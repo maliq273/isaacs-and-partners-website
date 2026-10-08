@@ -35,14 +35,14 @@ async function initialize(body:any,a:any){
    invoice_id:invoice.id,amount:Number(invoice.balance_due),currency:invoice.currency||"ZAR",
    payment_method:"PAYSTACK",provider:"PAYSTACK",provider_reference:ref,status:"PENDING",
    metadata:{payroll_run_id:clean(body.payroll_run_id,100)||null,purpose:clean(body.purpose,50)||"PAYROLL",business_id:invoice.business_id}
- }).select("id").single();
+ }).select("id,metadata").single();
  if(p.error)throw p.error;
  const res=await fetch("https://api.paystack.co/transaction/initialize",{
    method:"POST",headers:{"Authorization":"Bearer "+PAYSTACK_KEY,"Content-Type":"application/json"},
    body:JSON.stringify({email,amount:Math.round(Number(invoice.balance_due)*100),currency:invoice.currency||"ZAR",reference:ref,callback_url:body.callback_url||undefined,metadata:{internal_payment_id:p.data.id,invoice_id:invoice.id,payroll_run_id:clean(body.payroll_run_id,100)||null,purpose:clean(body.purpose,50)||"PAYROLL"}})
  });
  const x=await res.json();if(!res.ok||!x.status){await db.from("payments").update({status:"FAILED",metadata:{error:x}}).eq("id",p.data.id);throw Error(x.message||"Paystack transaction initialization failed.");}
- await db.from("payments").update({metadata:{...(p.data||{}),authorization_url:x.data?.authorization_url}}).eq("id",p.data.id);
+ await db.from("payments").update({metadata:{...(p.data?.metadata||{}),authorization_url:x.data?.authorization_url}}).eq("id",p.data.id);
  return {ok:true,payment_id:p.data.id,invoice_id:invoice.id,amount:invoice.balance_due,currency:invoice.currency,reference:ref,authorization_url:x.data?.authorization_url,access_code:x.data?.access_code};
 }
 async function verify(reference:string){
