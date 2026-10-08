@@ -26,6 +26,8 @@ async function initialize(body:any,a:any){
  if(!PAYSTACK_KEY)throw Error("Paystack is not configured. Add PAYSTACK_SECRET_KEY to the Supabase Edge Function secrets before taking payments.");
  const invoice=await invoiceAccess(clean(body.invoice_id,100),a);
  if(Number(invoice.balance_due)<=0)throw Error("This invoice is already paid.");
+ const existing=await db.from("payments").select("id,provider_reference,status,metadata").eq("invoice_id",invoice.id).eq("provider","PAYSTACK").eq("status","PENDING").order("created_at",{ascending:false}).limit(1).maybeSingle();
+ if(existing.data?.provider_reference)return {ok:true,payment_id:existing.data.id,invoice_id:invoice.id,amount:invoice.balance_due,currency:invoice.currency,reference:existing.data.provider_reference,authorization_url:existing.data.metadata?.authorization_url||null,reused:true};
  const email=clean(body.email,254);
  if(!email)throw Error("A payer email is required.");
  const ref="IP-"+crypto.randomUUID().replace(/-/g,"").slice(0,24).toUpperCase();
@@ -40,6 +42,7 @@ async function initialize(body:any,a:any){
    body:JSON.stringify({email,amount:Math.round(Number(invoice.balance_due)*100),currency:invoice.currency||"ZAR",reference:ref,callback_url:body.callback_url||undefined,metadata:{internal_payment_id:p.data.id,invoice_id:invoice.id,payroll_run_id:clean(body.payroll_run_id,100)||null,purpose:clean(body.purpose,50)||"PAYROLL"}})
  });
  const x=await res.json();if(!res.ok||!x.status){await db.from("payments").update({status:"FAILED",metadata:{error:x}}).eq("id",p.data.id);throw Error(x.message||"Paystack transaction initialization failed.");}
+ await db.from("payments").update({metadata:{...(p.data||{}),authorization_url:x.data?.authorization_url}}).eq("id",p.data.id);
  return {ok:true,payment_id:p.data.id,invoice_id:invoice.id,amount:invoice.balance_due,currency:invoice.currency,reference:ref,authorization_url:x.data?.authorization_url,access_code:x.data?.access_code};
 }
 async function verify(reference:string){
