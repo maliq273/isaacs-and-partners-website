@@ -34,12 +34,12 @@ async function initialize(body:any,a:any){
  const p=await db.from("payments").insert({
    invoice_id:invoice.id,amount:Number(invoice.balance_due),currency:invoice.currency||"ZAR",
    payment_method:"PAYSTACK",provider:"PAYSTACK",provider_reference:ref,status:"PENDING",
-   metadata:{payroll_run_id:clean(body.payroll_run_id,100)||null,purpose:clean(body.purpose,50)||"PAYROLL",business_id:invoice.business_id}
+   metadata:{payroll_run_id:clean(body.payroll_run_id,100)||null,purpose:clean(body.purpose,50)||"PAYROLL",business_id:invoice.business_id,service_entitlement_id:clean(body.service_entitlement_id,100)||null}
  }).select("id,metadata").single();
  if(p.error)throw p.error;
  const res=await fetch("https://api.paystack.co/transaction/initialize",{
    method:"POST",headers:{"Authorization":"Bearer "+PAYSTACK_KEY,"Content-Type":"application/json"},
-   body:JSON.stringify({email,amount:Math.round(Number(invoice.balance_due)*100),currency:invoice.currency||"ZAR",reference:ref,callback_url:body.callback_url||undefined,metadata:{internal_payment_id:p.data.id,invoice_id:invoice.id,payroll_run_id:clean(body.payroll_run_id,100)||null,purpose:clean(body.purpose,50)||"PAYROLL"}})
+   body:JSON.stringify({email,amount:Math.round(Number(invoice.balance_due)*100),currency:invoice.currency||"ZAR",reference:ref,callback_url:body.callback_url||undefined,metadata:{internal_payment_id:p.data.id,invoice_id:invoice.id,payroll_run_id:clean(body.payroll_run_id,100)||null,purpose:clean(body.purpose,50)||"PAYROLL",service_entitlement_id:clean(body.service_entitlement_id,100)||null}})
  });
  const x=await res.json();if(!res.ok||!x.status){await db.from("payments").update({status:"FAILED",metadata:{error:x}}).eq("id",p.data.id);throw Error(x.message||"Paystack transaction initialization failed.");}
  await db.from("payments").update({metadata:{...(p.data?.metadata||{}),authorization_url:x.data?.authorization_url}}).eq("id",p.data.id);
@@ -62,6 +62,7 @@ async function verify(reference:string){
    if(iq.data?.business_id){const bq=await db.from("businesses").select("owner_user_id").eq("id",iq.data.business_id).maybeSingle();if(bq.data?.owner_user_id)await db.rpc("payroll_release_if_paid_actor",{p_payroll_run_id:runId,p_actor_user_id:bq.data.owner_user_id});}
  }
  if(purpose==="SARS"){await db.from("hr_sars_billing_periods").update({status:"PAID",access_state:"ENABLED",payment_id:pq.data.id,paid_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("invoice_id",pq.data.invoice_id);}
+ if(purpose==="SERVICE"){await db.rpc("client_service_payment_verified",{p_invoice_id:pq.data.invoice_id,p_payment_id:pq.data.id});}
  return {ok:true,status:"COMPLETED",payment_id:pq.data.id,invoice_id:pq.data.invoice_id,purpose};
 }
 async function webhook(req:Request){
