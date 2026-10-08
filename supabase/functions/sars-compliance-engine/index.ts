@@ -18,6 +18,9 @@ async function auth(req:Request){const token=(req.headers.get("Authorization")||
 async function businessAccess(id:string,a:any){const r=await db.from("businesses").select("*").eq("id",id).maybeSingle();if(r.error||!r.data)throw Error("Business not found.");if(a.role==="BUSINESS"&&r.data.owner_user_id!==a.userId)throw Error("Business is outside your access scope.");return r.data}
 async function assertSarsClientAccess(businessId:string,period:string,actor:any){
   if(actor.role!=="BUSINESS")return;
+  await db.rpc("ensure_payroll_service_entitlements",{p_business_id:businessId});
+  const entitlement=await db.rpc("assert_client_service_access",{p_business_id:businessId,p_service_code:"HR-SARS"});
+  if(entitlement.error)throw new Error("SARS Compliance access is locked. Super Admin approval is required before this module can be used.");
   const profile=await db.from("hr_payroll_profiles").select("sars_monthly_fee,subscription_currency").eq("business_id",businessId).eq("active",true).maybeSingle();
   if(profile.error)throw profile.error;
   const fee=num(profile.data?.sars_monthly_fee);
