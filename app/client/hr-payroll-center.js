@@ -9,7 +9,14 @@ const money=v=>new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR"}).
 (async()=>{
  await auth.initialise();if(!auth.isAuthenticated())return;const user=auth.getCurrentUser();const role=await resolveUserDashboardRole(user);if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(role))return;
  const sb=await ensureSupabaseSession(auth);
- const bs=role==="BUSINESS"
+ if(role==="BUSINESS"){
+  const access=await sb.rpc("client_service_access_snapshot");
+  const first=(access.data?.businesses||[])[0];
+  const entitlement=(first?.entitlements||[]).find((e)=>e.service_code==="HR-PAYROLL");
+  if(!entitlement||entitlement.access_state!=="ENABLED"||entitlement.status!=="ACTIVE"){
+   if(await waitForPortal()){const main=document.querySelector(".cp-main");const nav=document.querySelector(".cp-nav");if(nav&&!nav.querySelector('[data-section="payroll-centre"]')){const b=document.createElement("button");b.dataset.section="payroll-centre";b.textContent="▦ Payroll Centre";nav.appendChild(b);}if(main){const p=document.createElement("section");p.className="cp-section";p.dataset.panel="payroll-centre";p.innerHTML='<div class="cp-section-head"><div><span class="cp-eyebrow">Payroll Access</span><h2>Payroll access requires Super Admin approval</h2><p>Your company can request Payroll access. Anthony will route the request to Super Admin. The Payroll Centre remains unavailable until access is granted.</p></div></div><div class="cp-card"><div class="cp-card-body"><p>Status: <strong>'+esc(entitlement?.access_state||"NOT GRANTED")+'</strong></p><button class="cp-btn cp-btn-gold" data-request-payroll-access>Request Payroll access</button><div data-request-status style="margin-top:10px"></div></div></div>';main.appendChild(p);p.querySelector("[data-request-payroll-access]").addEventListener("click",async()=>{const r=await sb.rpc("client_service_request",{p_business_id:first.business_id,p_service_code:"HR-PAYROLL",p_notes:"Client requested Payroll Centre access."});p.querySelector("[data-request-status]").textContent=r.error?.message||"Payroll access request sent to Super Admin.";});}}
+   return;
+ }} const bs=role==="BUSINESS"
   ? await sb.from("businesses").select("id,legal_name,trading_name,sars_profile,is_internal_company").eq("owner_user_id",user.id).eq("is_active",true)
   : await sb.from("businesses").select("id,legal_name,trading_name,sars_profile,is_internal_company").eq("is_active",true);
  const businesses=bs.data||[];if(!businesses.length&&role==="BUSINESS")return;
