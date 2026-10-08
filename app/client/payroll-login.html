@@ -22,6 +22,7 @@
 <script type="module">
 import auth from "../auth/AuthService.js";
 import {resolveUserDashboardRole} from "../dashboard/DashboardAccess.js";
+import {ensureSupabaseSession} from "../services/SupabaseBrowserClient.js";
 const form=document.querySelector("#payrollLoginForm"),btn=document.querySelector("#payrollLoginButton"),err=document.querySelector("#payrollError"),status=document.querySelector("#payrollStatus");
 const mode=new URLSearchParams(location.search).get("portal")||"payroll";
 const title=document.querySelector("#portalTitle"),subtitle=document.querySelector("#portalSubtitle");
