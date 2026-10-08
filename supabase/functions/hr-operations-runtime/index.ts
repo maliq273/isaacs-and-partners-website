@@ -210,6 +210,7 @@ async function generatePayslip(body:any,a:any){
  const e=q.data, run=e.hr_payroll_runs, emp=e.hr_employees;
  if(String(e.release_status).toUpperCase()!=="RELEASED")throw new Error("Payslip preview is available only after payroll has been released. Review the reconciliation first.");
  const b=await admin.from("businesses").select("*").eq("id",run.business_id).maybeSingle();if(b.error||!b.data)throw new Error("Employer business not found.");
+ await requireServiceAccess(run.business_id,"HR-PAYROLL",a);
  if(!a.internal&&a.role==="BUSINESS"&&b.data.owner_user_id!==a.userId)throw new Error("Business is outside your access scope.");
  await requireServiceAccess(run.business_id,"HR-PAYROLL",a);
  const bodyLines=[
@@ -315,6 +316,7 @@ Deno.serve(async(req)=>{
   if(action==="CALCULATE_PAYROLL")return json(await payroll(body,a));
   if(action==="PREPARE_CLIENT_BILLING"){
     const runId=clean(body.payroll_run_id,100); if(!runId)throw new Error("payroll_run_id is required.");
+    const billingRun=await admin.from("hr_payroll_runs").select("business_id").eq("id",runId).maybeSingle();if(billingRun.error||!billingRun.data)throw new Error("Payroll run not found.");await requireServiceAccess(billingRun.data.business_id,"HR-PAYROLL",a);
     const r=await admin.rpc("payroll_prepare_client_billing_actor",{p_payroll_run_id:runId,p_actor_user_id:a.userId});
     if(r.error)throw new Error(r.error.message||"Unable to prepare payroll billing.");
     const result=r.data||{};
