@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Isaacs & Partners Payslip</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#000;margin:20px}.page{width:900px;margin:auto;border:1px solid #000;padding:10px}h1{text-align:center;font-size:15px;margin-bottom:10px}table{width:100%;border-collapse:collapse;margin-top:6px}th,td{border:1px solid #000;padding:4px;vertical-align:top}th{background:#e6e6e6;font-weight:bold;text-align:left}.no-border td{border:none;padding:2px 4px}.label{font-weight:bold;white-space:nowrap}.right{text-align:right}.center{text-align:center}.fold{margin:6px 0;border-top:1px dashed #000;font-size:9px}.net{font-weight:bold;font-size:12px;background:#f0f0f0}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}.status{border:1px solid #000;padding:6px;margin-top:8px;text-align:center;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>PAYSLIP</h1>
+<table class="no-border">
+<tr><td><b>Company:</b> {{company.name}}</td><td><b>Employee:</b> {{employee.full_name}}</td><td><b>Pay Period:</b> {{run.period_end}}</td></tr>
+<tr><td><b>PAYE Ref:</b> {{company.paye_reference}}</td><td><b>Employee No:</b> {{employee.employee_number}}</td><td><b>Termination:</b> {{employee.termination_date}}</td></tr>
+<tr><td><b>UIF Ref:</b> {{company.uif_reference}}</td><td><b>Income Tax No:</b> {{employee.tax_number}}</td><td><b>Payment Type:</b> {{employee.payment_type}}</td></tr>
+<tr><td><b>Account No:</b> {{employee.account_number}}</td><td><b>Branch No:</b> {{employee.branch_code}}</td><td></td></tr>
+</table>
+<div class="fold">Confidential Payslip Fold Line</div>
+<table class="no-border">
+<tr><td class="label">Company Name:</td><td>{{company.name}}</td><td class="label">Run:</td><td>{{run.label}}</td></tr>
+<tr><td class="label">First Names:</td><td>{{employee.first_names}}</td><td class="label">Last Name:</td><td>{{employee.last_name}}</td></tr>
+<tr><td class="label">Identity No:</td><td>{{employee.masked_id_number}}</td><td class="label">Position:</td><td>{{employee.position}}</td></tr>
+<tr><td class="label">Period Start Date:</td><td>{{run.period_start}}</td><td class="label">Period End Date:</td><td>{{run.period_end}}</td></tr>
+<tr><td class="label">Payment Date:</td><td>{{run.pay_date}}</td><td class="label">Grade:</td><td>{{employee.grade}}</td></tr>
+<tr><td class="label">Bank Name:</td><td>{{employee.bank_name}}</td><td class="label">Branch Code:</td><td>{{employee.branch_code}}</td></tr>
+<tr><td class="label">Account Number:</td><td>{{employee.account_number}}</td><td class="label">Currency:</td><td>{{run.currency}}</td></tr>
+</table>
+<table>
+<tr><th colspan="4" class="center">Earnings</th><th colspan="4" class="center">Deductions</th></tr>
+<tr><th>Description</th><th class="right">Units</th><th class="right">Amount</th><th class="right">Balance</th><th>Description</th><th class="right">Units</th><th class="right">Amount</th><th class="right">Balance</th></tr>
+{{earnings_deduction_rows}}
+<tr><td><b>Total Earnings</b></td><td></td><td class="right"><b>{{totals.gross}}</b></td><td></td><td><b>Total Deductions</b></td><td></td><td class="right"><b>{{totals.deductions}}</b></td><td></td></tr>
+</table>
+<table><tr class="net"><td class="center">Net Pay</td><td class="right">{{totals.net_pay}}</td></tr></table>
+<div class="two-col">
+<table><tr><th colspan="3">Company Contributions</th></tr><tr><th>Description</th><th class="right">Amount</th><th class="right">Balance</th></tr>{{company_contribution_rows}}<tr><td><b>Total Company Contributions</b></td><td class="right"><b>{{totals.company_contributions}}</b></td><td></td></tr></table>
+<table><tr><th colspan="2">Year To Date Totals</th></tr><tr><td>Tax Paid</td><td class="right">{{ytd.tax_paid}}</td></tr><tr><td>Taxable Earnings</td><td class="right">{{ytd.taxable_earnings}}</td></tr><tr><td>Taxable Company Contributions</td><td class="right">{{ytd.taxable_company_contributions}}</td></tr><tr><td>Fringe Benefits</td><td class="right">{{ytd.fringe_benefits}}</td></tr></table>
+</div>
+<table style="margin-top:8px;width:50%"><tr><th colspan="3">Leave</th></tr><tr><th>Description</th><th class="right">Accrual</th><th class="right">Balance</th></tr>{{leave_rows}}</table>
+<div class="status">{{document_status}} — {{payslip_reference}}</div>
+</div>
+</body>
+</html>
