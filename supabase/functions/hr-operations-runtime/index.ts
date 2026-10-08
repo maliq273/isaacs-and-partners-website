@@ -283,6 +283,30 @@ Deno.serve(async(req)=>{
   const action=clean(body.action,80).toUpperCase();
   if(action==="TEMPLATES"){const q=await admin.from("hr_document_templates").select("template_code,service_code,name,description,version,required_answers").eq("active",true).order("service_code").order("name");return json({ok:true,templates:q.data||[]});}
   if(action==="GENERATE_DOCUMENT")return json(await generateDocument(req,body,a));
+  if(action==="IMPORT_PAYROLL_DATA"){
+    if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(a.role)&&!a.internal)throw new Error("Payroll import access denied.");
+    const businessId=clean(body.business_id,100);if(!businessId)throw new Error("business_id is required.");
+    const b=await admin.from("businesses").select("id,owner_user_id,is_internal_company").eq("id",businessId).maybeSingle();if(b.error||!b.data)throw new Error("Business not found.");
+    if(!a.internal&&a.role==="BUSINESS"&&b.data.owner_user_id!==a.userId)throw new Error("Business is outside your access scope.");
+    const rows=Array.isArray(body.rows)?body.rows:[];if(!rows.length)throw new Error("The spreadsheet contains no employee rows.");
+    const required=["employee_number","first_name","last_name","employment_type","employment_status","pay_frequency","basic_salary"];
+    const errors:any[]=[];
+    rows.forEach((r:any,i:number)=>{for(const k of required){if(r[k]===undefined||r[k]===null||String(r[k]).trim()==="")errors.push({row:i+2,field:k,error:"Required value missing"});}});
+    if(errors.length) return json({ok:false,status:"VALIDATION_FAILED",errors},422);
+    const payload=rows.map((r:any)=>({
+      business_id:businessId,employee_number:clean(r.employee_number,100),first_name:clean(r.first_name,200),last_name:clean(r.last_name,200),
+      id_number:clean(r.id_number,100)||null,passport_number:clean(r.passport_number,100)||null,tax_number:clean(r.tax_number,100)||null,
+      date_of_birth:clean(r.date_of_birth,30)||null,nationality:clean(r.nationality,100)||null,employment_type:clean(r.employment_type,100),
+      employment_status:clean(r.employment_status,100),start_date:clean(r.start_date,30)||null,end_date:clean(r.end_date,30)||null,
+      job_title:clean(r.job_title,200)||null,department:clean(r.department,200)||null,pay_frequency:clean(r.pay_frequency,50),
+      basic_salary:Number(r.basic_salary)||0,bank_account_last4:clean(r.bank_account_last4,4)||null,
+      medical_dependants:Number(r.medical_dependants)||0,age:Number(r.age)||null,
+      metadata:{source:"PAYROLL_SPREADSHEET",source_file_name:clean(body.source_file_name,255),imported_by:a.userId},
+      sars_profile:r.sars_profile||{}
+    }));
+    const q=await admin.from("hr_employees").upsert(payload,{onConflict:"business_id,employee_number"});if(q.error)throw q.error;
+    return json({ok:true,status:"IMPORTED",business_id:businessId,employee_count:payload.length,source_file_name:clean(body.source_file_name,255),notice:"Employee data imported into the payroll masterfile. Anthony will validate the payroll run before calculation."});
+  }
   if(action==="CALCULATE_PAYROLL")return json(await payroll(body,a));
   if(action==="PREPARE_CLIENT_BILLING"){
     const runId=clean(body.payroll_run_id,100); if(!runId)throw new Error("payroll_run_id is required.");
