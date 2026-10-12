@@ -1048,7 +1048,7 @@ h1.v2-title {
   </section>
   <section class="panel" id="admin-secrets-config">
     <div class="panel-header"><div><h2>Integration Secrets</h2><p>Enter credentials here to send them directly to Supabase project secrets. Values are never written to the service catalogue or shown again after saving.</p></div><span class="status-badge pending">Server-side only</span></div>
-    <div style="padding:20px 24px"><div class="login-message">One-time prerequisite: configure <code>SUPABASE_ACCESS_TOKEN</code> as a secret for the <code>admin-sync-secrets</code> Edge Function. The token stays server-side and is needed to update project secrets through Supabase Management API. Do not paste your service-role key into this form.</div><div id="admin-secrets-status" class="login-message" role="status" hidden></div><div id="admin-secret-fields" class="integration-grid"></div><p class="sheet-note">Paystack is currently under review. Saving credentials does not mark the merchant account approved; live payments remain subject to Paystack approval and webhook verification.</p></div>
+    <div style="padding:20px 24px"><div class="login-message">Secrets are saved encrypted in Supabase Vault through an authenticated Super Admin Edge Function. Values are never returned to the browser after saving. Do not paste your service-role key or Supabase Management API token into this form.</div><div id="admin-secrets-status" class="login-message" role="status" hidden></div><div id="admin-secret-fields" class="integration-grid"></div><p class="sheet-note">Paystack is currently under review. Saving credentials does not mark the merchant account approved; live payments remain subject to Paystack approval and webhook verification.</p></div>
   </section>
 
 </main>
