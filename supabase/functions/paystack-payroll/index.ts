@@ -2,7 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-let PAYSTACK_KEY=Deno.env.get("PAYSTACK_SECRET_KEY")||"";\nasync function ensurePaystackKey(){if(PAYSTACK_KEY)return PAYSTACK_KEY;const q=await db.rpc("integration_secret_get",{p_name:"PAYSTACK_SECRET_KEY"});if(!q.error&&q.data)PAYSTACK_KEY=String(q.data);return PAYSTACK_KEY;}
+let PAYSTACK_KEY=Deno.env.get("PAYSTACK_SECRET_KEY")||"";
+async function ensurePaystackKey(){if(PAYSTACK_KEY)return PAYSTACK_KEY;const q=await db.rpc("integration_secret_get",{p_name:"PAYSTACK_SECRET_KEY"});if(!q.error&&q.data)PAYSTACK_KEY=String(q.data);return PAYSTACK_KEY;}
 const db=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization,apikey,content-type,x-paystack-signature"};
 const json=(x:any,s=200)=>new Response(JSON.stringify(x),{status:s,headers:{"content-type":"application/json",...cors}});
@@ -73,7 +74,7 @@ async function notifyFinancePaymentSuccess(invoiceId:string,paymentId:string,amo
  for(const p of q.data){await db.from("notifications").insert({user_id:p.id,type:msg.type,title:msg.title,message:msg.message,metadata:msg.metadata});}
 }
 async function webhook(req:Request){
- if(!PAYSTACK_KEY)throw Error("Paystack is not configured.");
+ if(!await ensurePaystackKey())throw Error("Paystack is not configured. Add PAYSTACK_SECRET_KEY in Super Admin → Integration Secrets.");
  const body=await req.text(),sig=req.headers.get("x-paystack-signature")||"";
  const digest=await crypto.subtle.importKey("raw",new TextEncoder().encode(PAYSTACK_KEY),{name:"HMAC",hash:"SHA-512"},false,["sign"]);
  const mac=Array.from(new Uint8Array(await crypto.subtle.sign("HMAC",digest,new TextEncoder().encode(body)))).map(x=>x.toString(16).padStart(2,"0")).join("");
