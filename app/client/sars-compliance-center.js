@@ -5,7 +5,7 @@ import { ensureSupabaseSession } from "../services/SupabaseBrowserClient.js";
 const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const waitForPortal=async()=>{for(let i=0;i<100;i++){const nav=document.querySelector(".cp-nav"),main=document.querySelector(".cp-main");if(nav&&main)return true;await new Promise(r=>setTimeout(r,50));}return false;};
 
-(async()=>{await auth.initialise();if(!auth.isAuthenticated())return;const u=auth.getCurrentUser(),role=await resolveUserDashboardRole(u);if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(role))return;const sb=await ensureSupabaseSession(auth);const bq=await sb.from("businesses").select("id,legal_name,trading_name").eq("owner_user_id",u.id).eq("is_active",true);const businesses=bq.data||[];
+(async()=>{await auth.initialise();if(!auth.isAuthenticated())return;const u=auth.getCurrentUser(),role=await resolveUserDashboardRole(u);if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(role))return;const sb=await ensureSupabaseSession(auth);const bq=role==="SUPER_ADMIN"?await sb.from("businesses").select("id,legal_name,trading_name").eq("is_active",true).order("legal_name"):await sb.from("businesses").select("id,legal_name,trading_name").eq("owner_user_id",u.id).eq("is_active",true);const businesses=bq.data||[];
 const selectedBusiness=businesses[0];
 const now=new Date();const currentPeriod=String(now.getFullYear())+"-"+String(now.getMonth()+1).padStart(2,"0");
 let sarsLocked=false;
