@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const PAYSTACK_KEY=Deno.env.get("PAYSTACK_SECRET_KEY")||"";
+let PAYSTACK_KEY=Deno.env.get("PAYSTACK_SECRET_KEY")||"";\nasync function ensurePaystackKey(){if(PAYSTACK_KEY)return PAYSTACK_KEY;const q=await db.rpc("integration_secret_get",{p_name:"PAYSTACK_SECRET_KEY"});if(!q.error&&q.data)PAYSTACK_KEY=String(q.data);return PAYSTACK_KEY;}
 const db=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization,apikey,content-type,x-paystack-signature"};
 const json=(x:any,s=200)=>new Response(JSON.stringify(x),{status:s,headers:{"content-type":"application/json",...cors}});
@@ -24,7 +24,7 @@ async function invoiceAccess(invoiceId:string,a:any){
  return q.data;
 }
 async function initialize(body:any,a:any){
- if(!PAYSTACK_KEY)throw Error("Paystack is not configured. Add PAYSTACK_SECRET_KEY to the Supabase Edge Function secrets before taking payments.");
+ if(!await ensurePaystackKey())throw Error("Paystack is not configured. Add PAYSTACK_SECRET_KEY in Super Admin → Integration Secrets.");
  const invoice=await invoiceAccess(clean(body.invoice_id,100),a);
  if(Number(invoice.balance_due)<=0)throw Error("This invoice is already paid.");
  const existing=await db.from("payments").select("id,provider_reference,status,metadata").eq("invoice_id",invoice.id).eq("provider","PAYSTACK").eq("status","PENDING").order("created_at",{ascending:false}).limit(1).maybeSingle();
@@ -47,7 +47,7 @@ async function initialize(body:any,a:any){
  return {ok:true,payment_id:p.data.id,invoice_id:invoice.id,amount:invoice.balance_due,currency:invoice.currency,reference:ref,authorization_url:x.data?.authorization_url,access_code:x.data?.access_code};
 }
 async function verify(reference:string){
- if(!PAYSTACK_KEY)throw Error("Paystack is not configured.");
+ if(!await ensurePaystackKey())throw Error("Paystack is not configured.");
  const res=await fetch("https://api.paystack.co/transaction/verify/"+encodeURIComponent(reference),{headers:{Authorization:"Bearer "+PAYSTACK_KEY}});
  const x=await res.json();if(!res.ok||!x.status)throw Error(x.message||"Paystack verification failed.");
  const t=x.data;
