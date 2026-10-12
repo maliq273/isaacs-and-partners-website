@@ -610,7 +610,7 @@ h1.v2-title {
 
 <aside class="v2-sidebar">
   <div class="brand-logo">Isaacs &amp; Partners</div>
-  <nav aria-label="Super Admin navigation">
+  <nav aria-label="Super Admin navigation">\n    <div class="admin-nav-group"><h3>Quick access</h3><a href="../client/payroll-login.html"><strong>HR Payroll</strong><small>Payroll operations</small></a><a href="../client/dashboard.html#sars-compliance"><strong>SARS Compliance</strong><small>Tax submissions</small></a><a href="#admin-commercial-config"><strong>Services &amp; Pricing</strong><small>Commercial controls</small></a><a href="#admin-secrets-config"><strong>Integration Secrets</strong><small>Server-side credentials</small></a></div>
     <span class="nav-section-label">Control Centre</span>
     <div id="super-admin-nav" class="admin-nav-list"></div>
   </nav>
@@ -1040,7 +1040,7 @@ import clientPortalAdmin from "../services/ClientPortalAdminService.js?v=2026090
 import clientServiceAdmin from "../services/ClientServiceAdminService.js?v=20261006-1";
 import payrollAdmin from "../services/PayrollAdminService.js?v=20261008-1";
 import staffAdminController from "./StaffAdminController.js";
-import executivePAReminderService from "../services/ExecutivePAReminderService.js";
+import "../dashboard/AdminCommercialConfig.js?v=20261012-1";\nimport executivePAReminderService from "../services/ExecutivePAReminderService.js";
 
 const list=document.getElementById("client-portal-access-list");
 const error=document.getElementById("client-portal-access-error");
