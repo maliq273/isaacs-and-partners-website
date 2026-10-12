@@ -51,7 +51,7 @@ async function saveSecret(name){
  const body=await response.json().catch(()=>({}));
  if(!response.ok)throw Error(body.error||body.message||"Secret sync failed.");
  input.value="";
- status($("admin-secrets-status"),body.message||name+" saved to Supabase Edge Function secrets.");
+ status($("admin-secrets-status"),body.message||name+" saved to encrypted Supabase Vault.");
 }
 document.addEventListener("DOMContentLoaded",async()=>{
  if(!$("admin-pricing-list"))return;
