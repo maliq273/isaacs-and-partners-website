@@ -5,6 +5,8 @@ const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const money=v=>Number(v||0).toLocaleString("en-ZA",{style:"currency",currency:"ZAR",maximumFractionDigits:2});
 const state={services:[],filter:"",domain:""};
+const serviceLineHashes={"#service-immigration":"IMMIGRATION","#service-hr-ir":"HR & Industrial Relations","#service-legal":"Legal","#service-business-compliance":"Business Compliance"};
+function applyServiceLineHash(){const domain=serviceLineHashes[location.hash];if(domain){state.domain=domain;if($("admin-pricing-domain"))$("admin-pricing-domain").value=domain;render();document.getElementById("admin-commercial-config")?.scrollIntoView({behavior:"smooth",block:"start"});}document.querySelectorAll("[data-service-line]").forEach(a=>a.setAttribute("aria-current",String(a.dataset.serviceLine===state.domain)));}
 const status=(el,msg,bad=false)=>{if(!el)return;el.hidden=!msg;el.className=bad?"login-message login-error":"login-message";el.textContent=msg||""};
 async function client(){await auth.initialise();if(!auth.isAuthenticated())throw Error("Please sign in again.");const {ensureSupabaseSession}=await import("../services/SupabaseBrowserClient.js");return ensureSupabaseSession(auth);}
 function render(){
@@ -30,7 +32,7 @@ async function savePrice(code){
  const {data,error}=await sb.rpc("service_price_set",{p_service_code:code,p_amount:amount,p_notes:"Set through Super Admin Services & Pricing."});
  if(error)throw error;
  const s=state.services.find(x=>x.code===code);if(s){s.minimum_fee=amount;s.metadata={...(s.metadata||{}),pricing_status:"ADMIN_SET"};}
- render();status($("admin-pricing-status"),"Saved "+code+" at "+money(amount)+". New customer assignments will use this server-side price.");
+ render();status($("admin-pricing-status"),"Saved "+code+" at "+money(amount)+". New customer assignments will use this server-side price.");applyServiceLineHash();
 }
 const secretFields=[
  {name:"PAYSTACK_SECRET_KEY",label:"Paystack secret key",hint:"Payment initialisation and server-side verification",placeholder:"sk_test_… or sk_live_…"},
