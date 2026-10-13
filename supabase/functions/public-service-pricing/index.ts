@@ -27,7 +27,7 @@ Deno.serve(async (req: Request) => {
   if (error) return new Response(JSON.stringify({ error: "Unable to load published prices" }), { status: 503, headers });
   const services = (data || []).filter((s: any) => {
     const m = s.metadata || {};
-    return m.public_pricing === true || ["ADMIN_SET", "APPROVED_ANCHOR"].includes(m.pricing_status);
+    return m.public_pricing === true || m.price_set_by != null || ["ADMIN_SET", "APPROVED_ANCHOR"].includes(m.pricing_status);
   }).map((s: any) => ({
     code: s.code, name: s.name, service_domain: s.service_domain || "Other",
     pricing_mode: s.pricing_mode, amount: Number(s.minimum_fee),
