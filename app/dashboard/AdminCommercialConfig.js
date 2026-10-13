@@ -32,7 +32,7 @@ async function savePrice(code){
  const {data,error}=await sb.rpc("service_price_set",{p_service_code:code,p_amount:amount,p_notes:"Set through Super Admin Services & Pricing."});
  if(error)throw error;
  const s=state.services.find(x=>x.code===code);if(s){s.minimum_fee=amount;s.metadata={...(s.metadata||{}),pricing_status:"ADMIN_SET"};}
- render();status($("admin-pricing-status"),"Saved "+code+" at "+money(amount)+". New customer assignments will use this server-side price.");applyServiceLineHash();
+ render();status($("admin-pricing-status"),"Saved "+code+" at "+money(amount)+". The public pricing feed now uses this catalogue price; refresh the public website to confirm. New customer assignments will use this server-side price.");applyServiceLineHash();
 }
 const secretFields=[
  {name:"PAYSTACK_SECRET_KEY",label:"Paystack secret key",hint:"Payment initialisation and server-side verification",placeholder:"sk_test_… or sk_live_…"},
