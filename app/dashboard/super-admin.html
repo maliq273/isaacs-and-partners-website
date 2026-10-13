@@ -579,6 +579,15 @@ h1.v2-title {
   }
 }
 
+
+.admin-service-lines{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.admin-service-lines a{padding:13px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--ink);min-width:0}
+.admin-service-lines a:hover,.admin-service-lines a[aria-current="true"]{border-color:var(--accent);background:rgba(201,162,39,.07)}
+.admin-service-lines strong{display:block;font-size:.86rem}
+.admin-service-lines span{display:block;margin-top:5px;color:var(--ink-muted);font-size:.72rem;line-height:1.4}
+@media(max-width:900px){.admin-service-lines{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.admin-service-lines{grid-template-columns:1fr}}
+
 /* Super Admin tidy layout: compact, ordered navigation and consistent spacing */
 body[data-page="super-admin"]{grid-template-columns:248px minmax(0,1fr);height:100dvh;overflow:hidden}
 aside.v2-sidebar{position:sticky;top:0;height:100dvh;padding:18px 14px;gap:14px;min-width:0}
@@ -1085,7 +1094,12 @@ h1.v2-title{font-size:clamp(2rem,3vw,3rem);line-height:1.05}
   </section>
   <section class="panel" id="admin-commercial-config">
     <div class="panel-header"><div><h2>Services &amp; Pricing</h2><p>Prices are saved to the service catalogue. Client assignment invoices use the saved server-side price; an unpriced service cannot be assigned.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><span id="admin-pricing-count" class="status-badge">Loading services…</span><button id="admin-pricing-refresh" type="button" class="btn btn-secondary btn-sm">Refresh</button></div></div>
-    <div style="padding:20px 24px"><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px"><input id="admin-pricing-search" class="form-control" placeholder="Search service name or code" aria-label="Search services"><select id="admin-pricing-domain" class="form-control" aria-label="Filter service category"><option value="">All categories</option></select></div><div id="admin-pricing-status" class="login-message" role="status" hidden></div><div class="table-wrapper"><table class="admin-table"><thead><tr><th>Service</th><th>Category</th><th>Current price / model</th><th>Set price (ZAR)</th></tr></thead><tbody id="admin-pricing-list"><tr><td colspan="4" class="empty-state">Loading service catalogue…</td></tr></tbody></table></div></div>
+    <div style="padding:20px 24px"><div id="admin-service-lines" class="admin-service-lines" aria-label="Main customer service lines">
+<a href="#service-immigration" data-service-line="IMMIGRATION"><strong>Immigration</strong><span>Visas · permits · residence · appeals</span></a>
+<a href="#service-hr-ir" data-service-line="HR & Industrial Relations"><strong>HR / IR</strong><span>Payroll · SARS · CCMA · contracts</span></a>
+<a href="#service-legal" data-service-line="Legal"><strong>Legal</strong><span>Consultations · drafting · agreements</span></a>
+<a href="#service-business-compliance" data-service-line="Business Compliance"><strong>Business Compliance</strong><span>Company setup · SARS · UIF · COIDA</span></a>
+</div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px"><input id="admin-pricing-search" class="form-control" placeholder="Search service name or code" aria-label="Search services"><select id="admin-pricing-domain" class="form-control" aria-label="Filter service category"><option value="">All categories</option></select></div><div id="admin-pricing-status" class="login-message" role="status" hidden></div><div class="table-wrapper"><table class="admin-table"><thead><tr><th>Service</th><th>Category</th><th>Current price / model</th><th>Set price (ZAR)</th></tr></thead><tbody id="admin-pricing-list"><tr><td colspan="4" class="empty-state">Loading service catalogue…</td></tr></tbody></table></div></div>
   </section>
   <section class="panel" id="admin-secrets-config">
     <div class="panel-header"><div><h2>Integration Secrets</h2><p>Enter credentials here to send them directly to Supabase project secrets. Values are never written to the service catalogue or shown again after saving.</p></div><span class="status-badge pending">Server-side only</span></div>
