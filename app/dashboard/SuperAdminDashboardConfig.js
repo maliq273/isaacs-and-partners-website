@@ -1,48 +1,38 @@
 /**
- * Super Admin command-centre navigation.
- *
- * One authoritative navigation map. Routes are existing production routes;
- * this file only controls presentation/order and does not create a second data model.
+ * Super Admin sidebar: ordered operational workspace map.
+ * Keep routes on existing production pages and in-page controls where possible.
  */
 export const SUPER_ADMIN_DASHBOARD_CATEGORIES = Object.freeze([
-  { key:"command-centre", title:"Command Centre", description:"Live workload, alerts and operational health.", modules:[
-    {title:"Dashboard",href:"./super-admin.html",description:"Live firm overview and control centre."},
-    {title:"Reports",href:"./reports.html",description:"Operational, financial and document reporting."},
-    {title:"Analytics",href:"./analytics.html",description:"Business intelligence and performance."}
-  ]},
-  { key:"people", title:"People & Accounts", description:"Authoritative people, staff and client records.", modules:[
-    {title:"Authority & People",href:"./authority-people.html",description:"Super Admins, Directors, Shareholders, Partners and Staff."},
-    {title:"Staff & Permissions",href:"./staff-admin.html",description:"Staff accounts, permissions and workload controls."},
-    {title:"Individuals & Businesses",href:"./accounts.html",description:"Authoritative customer account records."},
-    {title:"Clients",href:"./clients.html",description:"Client relationship and account management."}
-  ]},
-  { key:"operations", title:"Operations", description:"The firm's live work queue.", modules:[
-    {title:"Matters",href:"./matters.html",description:"Open and progress firm matters."},
-    {title:"Assignments",href:"./assignments.html",description:"Allocate operational work."},
-    {title:"Cases",href:"./cases.html",description:"Manage case records linked to matters."},
-    {title:"Document Vault",href:"./document-vault.html",description:"Review controlled documents and ingestion state."},
-    {title:"Document Workspace",href:"./document-workspace.html",description:"Controlled document operations."}
-  ]},
-  { key:"communications", title:"Communications", description:"Controlled WhatsApp and notification operations.", modules:[
-    {title:"WhatsApp Communications",href:"./communications.html",description:"Read and send controlled WhatsApp messages."}
-  ]},
-  { key:"commercial", title:"Commercial & Finance", description:"Quotes, invoices, services and authoritative pricing.", modules:[
-    {title:"Quotes",href:"./quotes.html",description:"Create, review and track quotations."},
-    {title:"Invoices",href:"./invoices.html",description:"Create, send and audit invoices."},
-    {title:"Service Inventory & Rates",href:"./service-inventory.html",description:"Authoritative services and editable rates."}
-  ]},
-  { key:"organisation", title:"Organisation", description:"The firm's legal and operational master record.", modules:[
-    {title:"Organisation Master",href:"./organisation-profile.html",description:"Legal identity, tax, banking and firm configuration."}
-  ]},
-  { key:"anthony", title:"Anthony Isaacs", description:"Governed AI oversight and operational intelligence.", modules:[
-    {title:"AI Control & Knowledge",href:"./ai.html",description:"AI orchestration, knowledge and intervention controls."}
-  ]}
+ {key:"core",title:"Core & Service Access",description:"The systems you use most.",modules:[
+  {title:"HR Payroll & SARS",href:"../client/payroll-login.html",description:"Payroll workspace and payroll approvals."},
+  {title:"Services & Pricing",href:"#admin-commercial-config",description:"Catalogue, prices, billing models and customer assignment."},
+  {title:"Secrets & Integrations",href:"#admin-secrets-config",description:"Encrypted credentials and integration health."},
+  {title:"Operational",href:"./matters.html",description:"Matters, assignments, work queue and appointments."},
+  {title:"Client Service Approval",href:"#commercial-approval-center",description:"Approve portal access, assign modules and release after verified payment."}
+ ]},
+ {key:"services",title:"Main Services",description:"The four customer-facing service lines and their catalogue subcategories.",modules:[
+  {title:"Immigration",href:"#service-immigration",description:"Visas, permits, renewals, permanent residence, appeals and refusals."},
+  {title:"HR / IR",href:"#service-hr-ir",description:"Payroll, SARS, contracts, policies, hearings, CCMA and HR support."},
+  {title:"Legal",href:"#service-legal",description:"Consultations, legal drafting, document review, agreements and advice."},
+  {title:"Business Compliance",href:"#service-business-compliance",description:"Company setup, SARS, UIF, COIDA, tax clearance and compliance."}
+ ]},
+ {key:"communications",title:"Anthony & Communications",description:"Auditable AI and client communications.",modules:[
+  {title:"Anthony Activity Logs",href:"./ai.html",description:"AI activity, oversight and intervention controls."},
+  {title:"Anthony WhatsApp Logs",href:"./communications.html",description:"Inbound/outbound message history and delivery state."},
+  {title:"Company Documents",href:"./document-vault.html",description:"Controlled company and client document repository."}
+ ]},
+ {key:"finance",title:"Finance",description:"Commercial operations and payment oversight.",modules:[
+  {title:"Finance Overview",href:"./invoices.html",description:"Invoices, payment status, balances and billing."},
+  {title:"Quotes & Estimates",href:"./quotes.html",description:"Quote preparation and approval."},
+  {title:"Payroll Approval",href:"#payroll-approval-list",description:"Review internal payroll before release."}
+ ]},
+ {key:"management",title:"People & Administration",description:"Accounts, permissions and firm operations.",modules:[
+  {title:"Client Accounts",href:"./accounts.html",description:"Customer identity, company relationships and portal status."},
+  {title:"Staff & Permissions",href:"./staff-admin.html",description:"Staff access and role controls."},
+  {title:"Company Profile",href:"./organisation-profile.html",description:"Legal identity, tax and firm configuration."},
+  {title:"Reports & Analytics",href:"./reports.html",description:"Operational and financial reporting."},
+  {title:"Dashboard Home",href:"./super-admin.html",description:"Return to the Super Admin overview."}
+ ]}
 ]);
-
-export function getSuperAdminCategories(){
-  return SUPER_ADMIN_DASHBOARD_CATEGORIES.map(category=>({
-    ...category,
-    modules:category.modules.map(module=>({...module}))
-  }));
-}
+export function getSuperAdminCategories(){return SUPER_ADMIN_DASHBOARD_CATEGORIES.map(c=>({...c,modules:c.modules.map(m=>({...m}))}));}
 export default SUPER_ADMIN_DASHBOARD_CATEGORIES;
