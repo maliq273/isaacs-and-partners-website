@@ -4,7 +4,8 @@
  */
 export const SUPER_ADMIN_DASHBOARD_CATEGORIES = Object.freeze([
  {key:"core",title:"Core & Service Access",description:"The systems you use most.",modules:[
-  {title:"HR Payroll & SARS",href:"../client/payroll-login.html",description:"Payroll workspace and payroll approvals."},
+  {title:"HR Payroll",href:"../client/payroll-login.html",description:"Payroll import, reconciliation, calculation and release approvals."},
+  {title:"SARS Compliance",href:"../client/dashboard.html#sars-compliance",description:"SARS compliance workspace and monthly retainer access."},
   {title:"Services & Pricing",href:"#admin-commercial-config",description:"Catalogue, prices, billing models and customer assignment."},
   {title:"Secrets & Integrations",href:"#admin-secrets-config",description:"Encrypted credentials and integration health."},
   {title:"Operational",href:"./matters.html",description:"Matters, assignments, work queue and appointments."},
