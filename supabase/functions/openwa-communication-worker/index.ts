@@ -14,21 +14,29 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 });
 
 async function loadVaultOpenwaConfig(): Promise<Record<string, string>> {
-  const names = ["OPENWA_BASE_URL","OPENWA_API_KEY","OPENWA_SESSION_ID","OPENWA_WEBHOOK_SECRET","OPENWA_WORKER_TOKEN","openwa_worker_token"];
-  if (names.slice(0,5).every(name => Deno.env.get(name))) return {};
-  const result = await supabase.rpc("integration_secrets_get", { p_names: names });
-  if (result.error) {
-    console.error("OpenWA Vault configuration lookup failed", result.error.message);
-    return {};
-  }
-  return result.data || {};
+  const names = ["OPENWA_BASE_URL","OPENWA_API_KEY","OPENWA_SESSION_ID","OPENWA_WEBHOOK_SECRET","OPENWA_WORKER_TOKEN"];
+  const missing = names.filter(name => !Deno.env.get(name));
+  const pairs = await Promise.all(missing.map(async name => {
+    try {
+      const result = await supabase.rpc("integration_secret_get", { p_name: name });
+      if (result.error) {
+        console.error("OpenWA Vault lookup failed for", name, result.error.message);
+        return [name, ""] as const;
+      }
+      return [name, typeof result.data === "string" ? result.data : ""] as const;
+    } catch (error) {
+      console.error("OpenWA Vault lookup failed for", name, error);
+      return [name, ""] as const;
+    }
+  }));
+  return Object.fromEntries(pairs);
 }
 const vaultOpenwa = await loadVaultOpenwaConfig();
 const OPENWA_BASE_URL = (Deno.env.get("OPENWA_BASE_URL") || vaultOpenwa.OPENWA_BASE_URL || "").replace(/\/$/, "");
 const OPENWA_API_KEY = Deno.env.get("OPENWA_API_KEY") || vaultOpenwa.OPENWA_API_KEY || "";
 const OPENWA_SESSION_ID = Deno.env.get("OPENWA_SESSION_ID") || vaultOpenwa.OPENWA_SESSION_ID || "";
 const OPENWA_WEBHOOK_SECRET = Deno.env.get("OPENWA_WEBHOOK_SECRET") || vaultOpenwa.OPENWA_WEBHOOK_SECRET || "";
-const OPENWA_WORKER_TOKEN = Deno.env.get("OPENWA_WORKER_TOKEN") || vaultOpenwa.OPENWA_WORKER_TOKEN || vaultOpenwa.openwa_worker_token || "";
+const OPENWA_WORKER_TOKEN = Deno.env.get("OPENWA_WORKER_TOKEN") || vaultOpenwa.OPENWA_WORKER_TOKEN || "";
 
 const MAX_ATTEMPTS = 5;
 
