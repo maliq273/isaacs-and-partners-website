@@ -24,7 +24,7 @@ async function loadVaultOpenwaConfig(): Promise<Record<string, string>> {
   return result.data || {};
 }
 const vaultOpenwa = await loadVaultOpenwaConfig();
-const OPENWA_BASE_URL = (Deno.env.get("OPENWA_BASE_URL") || vaultOpenwa.OPENWA_BASE_URL || "").replace(/\\/$/, "");
+const OPENWA_BASE_URL = (Deno.env.get("OPENWA_BASE_URL") || vaultOpenwa.OPENWA_BASE_URL || "").replace(/\/$/, "");
 const OPENWA_API_KEY = Deno.env.get("OPENWA_API_KEY") || vaultOpenwa.OPENWA_API_KEY || "";
 const OPENWA_SESSION_ID = Deno.env.get("OPENWA_SESSION_ID") || vaultOpenwa.OPENWA_SESSION_ID || "";
 const OPENWA_WEBHOOK_SECRET = Deno.env.get("OPENWA_WEBHOOK_SECRET") || vaultOpenwa.OPENWA_WEBHOOK_SECRET || "";
