@@ -2,8 +2,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-const OPENWA_BASE_URL = Deno.env.get("OPENWA_BASE_URL")?.replace(/\/$/, "");
-const OPENWA_SESSION_ID = Deno.env.get("OPENWA_SESSION_ID");
 const OWNER_PHONE = (Deno.env.get("ANTHONY_OWNER_PHONE") || "27718831097").replace(/\D/g, "");
 const OPENWA_USER_AGENT = "IsaacsPartners-OpenWA/1.0";
 
@@ -27,7 +25,9 @@ async function integrationSecret(name: string): Promise<string | null> {
 
 // Prefer Edge Function environment secrets, then fall back to the managed
 // Supabase Vault. This lets Super Admin rotate secrets without redeploying code.
+const OPENWA_BASE_URL = (Deno.env.get("OPENWA_BASE_URL") || await integrationSecret("OPENWA_BASE_URL"))?.replace(/\/$/, "");
 const OPENWA_API_KEY = Deno.env.get("OPENWA_API_KEY") || await integrationSecret("OPENWA_API_KEY");
+const OPENWA_SESSION_ID = Deno.env.get("OPENWA_SESSION_ID") || await integrationSecret("OPENWA_SESSION_ID");
 const OPENWA_WEBHOOK_SECRET = Deno.env.get("OPENWA_WEBHOOK_SECRET") || await integrationSecret("OPENWA_WEBHOOK_SECRET");
 const OPENWA_WORKER_TOKEN = Deno.env.get("OPENWA_WORKER_TOKEN") || await integrationSecret("OPENWA_WORKER_TOKEN");
 
