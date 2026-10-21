@@ -64,10 +64,23 @@ else {
    document.querySelectorAll(".cp-nav [data-section]").forEach(item=>item.classList.toggle("is-active",item===button));
    document.querySelectorAll(".cp-main .cp-section").forEach(section=>section.classList.toggle("is-active",section.dataset.panel===button.dataset.section));
   });
-  await Promise.allSettled([import("../client/hr-payroll-center.js?v=20261021-admin"),import("../client/sars-compliance-center.js?v=20261021-admin")]);
+  const waitForPanel=async(name,maxWaitMs=8000)=>{const start=Date.now();while(Date.now()-start<maxWaitMs){if(document.querySelector('.cp-main [data-panel="'+name+'"]'))return true;await new Promise(resolve=>setTimeout(resolve,50));}return false;};
+  const imports=await Promise.allSettled([import("../client/hr-payroll-center.js?v=20261021-admin"),import("../client/sars-compliance-center.js?v=20261021-admin")]);
+  const readiness=await Promise.all([waitForPanel("payroll-centre"),waitForPanel("sars-compliance")]);
+  const loading=document.querySelector('[data-panel="admin-workspace-loading"]');
+  if(loading)loading.remove();
   const target=location.hash.replace(/^#/,"");
-  if(["payroll-centre","sars-compliance"].includes(target))document.querySelector('.cp-nav [data-section="'+target+'"]')?.click();
-  else document.querySelector('.cp-nav [data-section="payroll-centre"]')?.click();
+  const requested=["payroll-centre","sars-compliance"].includes(target)?target:"payroll-centre";
+  const selected=readiness[requested==="payroll-centre"?0:1]?requested:(readiness[0]?"payroll-centre":readiness[1]?"sars-compliance":null);
+  if(selected)document.querySelector('.cp-nav [data-section="'+selected+'"]')?.click();
+  else {
+   const main=document.querySelector(".cp-main");
+   const failed=imports.map((result,i)=>result.status==="rejected"?(i===0?"HR Payroll":"SARS Compliance")+": "+String(result.reason?.message||result.reason):null).filter(Boolean);
+   const message=document.createElement("section");message.className="cp-section is-active";
+   const heading=document.createElement("h2");heading.textContent="Payroll & SARS modules could not initialise";
+   const detail=document.createElement("p");detail.textContent=failed.join(" · ")||"The modules did not mount. Check Supabase session, business access and Edge Function logs. Access remains restricted.";
+   message.append(heading,detail);main.appendChild(message);status.textContent="Module initialisation failed — see details.";
+  }
  }
 }
 </script>
