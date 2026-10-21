@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Payroll & SARS Operations | Isaacs & Partners Super Admin</title>
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/components.css">
+<link rel="stylesheet" href="../css/forms.css">
+<link rel="stylesheet" href="../css/customer-dashboard.css?v=20261021-admin-payroll">
+<link rel="stylesheet" href="../css/customer-dashboard-admin-theme.css?v=20261021-admin-payroll">
+<style>
+.admin-workspace-top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 22px;background:var(--surface,#fff);border-bottom:1px solid var(--border,#ddd)}
+.admin-workspace-top img{width:44px;height:44px;object-fit:contain}
+.admin-workspace-brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.admin-workspace-brand small{display:block;font-weight:400;color:var(--ink-muted,#666)}
+.admin-workspace-layout{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:calc(100vh - 78px)}
+.admin-workspace-layout aside{padding:18px;background:var(--surface,#fff);border-right:1px solid var(--border,#ddd)}
+.admin-workspace-layout .cp-nav{display:flex;flex-direction:column;gap:8px}
+.admin-workspace-layout .cp-main{padding:24px;min-width:0}
+.admin-workspace-layout .cp-section{display:none}
+.admin-workspace-layout .cp-section.is-active{display:block}
+.admin-workspace-layout .cp-nav [data-section]{width:100%;text-align:left}
+@media(max-width:760px){.admin-workspace-layout{grid-template-columns:1fr}.admin-workspace-layout aside{border-right:0;border-bottom:1px solid var(--border,#ddd)}.admin-workspace-layout .cp-nav{display:grid;grid-template-columns:1fr 1fr}.admin-workspace-layout .cp-main{padding:14px}.admin-workspace-top{padding:12px}}
+</style>
+</head>
+<body class="customer-portal">
+<header class="admin-workspace-top">
+ <div class="admin-workspace-brand"><a href="../../index.html"><img src="../../assets/logo.png" alt="Isaacs & Partners"></a><div>Isaacs & Partners<small>Super Admin · Payroll & SARS Operations</small></div></div>
+ <a class="cp-btn cp-btn-light" href="./super-admin.html">← Return to Super Admin</a>
+</header>
+<div class="admin-workspace-layout">
+ <aside>
+  <p class="cp-eyebrow">Restricted workspace</p>
+  <h2>Payroll & SARS</h2>
+  <p class="cp-muted">Administrative access only. Client release and payment gates remain enforced by Supabase.</p>
+  <nav class="cp-nav" aria-label="Payroll and SARS modules">
+   <button class="is-active" data-section="payroll-centre" type="button">▦ HR Payroll</button>
+   <button data-section="sars-compliance" type="button">▣ SARS Compliance</button>
+  </nav>
+  <p class="cp-muted" style="margin-top:18px" data-admin-workspace-status>Checking Super Admin access…</p>
+ </aside>
+ <main class="cp-main" aria-live="polite">
+  <section class="cp-section is-active" data-panel="payroll-centre"><div class="cp-loading"><strong>Loading HR Payroll…</strong><span>Checking your authorised session.</span></div></section>
+ </main>
+</div>
+<script type="module">
+import auth from "../auth/AuthService.js";
+import {resolveUserDashboardRole} from "./DashboardAccess.js";
+const status=document.querySelector("[data-admin-workspace-status]");
+await auth.initialise();
+if(!auth.isAuthenticated()){location.replace("/app/auth/login.html?returnTo="+encodeURIComponent(location.pathname+location.hash));}
+else {
+ const role=await resolveUserDashboardRole(auth.getCurrentUser());
+ if(role!=="SUPER_ADMIN"){location.replace(role==="STAFF"?"/app/dashboard/staff.html":"/app/client/dashboard.html");}
+ else {
+  status.textContent="Authenticated Super Admin session";
+  document.addEventListener("click",event=>{
+   const button=event.target.closest(".cp-nav [data-section]");
+   if(!button)return;
+   document.querySelectorAll(".cp-nav [data-section]").forEach(item=>item.classList.toggle("is-active",item===button));
+   document.querySelectorAll(".cp-main .cp-section").forEach(section=>section.classList.toggle("is-active",section.dataset.panel===button.dataset.section));
+  });
+  await Promise.allSettled([import("../client/hr-payroll-center.js?v=20261021-admin"),import("../client/sars-compliance-center.js?v=20261021-admin")]);
+  const target=location.hash.replace(/^#/,"");
+  if(["payroll-centre","sars-compliance"].includes(target))document.querySelector('.cp-nav [data-section="'+target+'"]')?.click();
+  else document.querySelector('.cp-nav [data-section="payroll-centre"]')?.click();
+ }
+}
+</script>
+</body>
+</html>
