@@ -3,7 +3,7 @@ const SUPABASE_URL=Deno.env.get("SUPABASE_URL")||"";
 const ANON_KEY=Deno.env.get("SUPABASE_ANON_KEY")||"";
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization,apikey,content-type"};
 const json=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json",...cors}});
-const allowed=new Set(["PAYSTACK_SECRET_KEY","OPENAI_API_KEY","ANTHROPIC_API_KEY","OPENWA_API_KEY","GITHUB_TOKEN"]);
+const allowed=new Set(["PAYSTACK_SECRET_KEY","OPENAI_API_KEY","ANTHROPIC_API_KEY","OPENWA_API_KEY","OPENWA_WORKER_TOKEN","OPENWA_WEBHOOK_SECRET","OPENWA_BASE_URL","OPENWA_SESSION_ID","GITHUB_TOKEN"]);
 Deno.serve(async req=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
  if(req.method!=="POST")return json({error:"POST required."},405);
@@ -20,6 +20,6 @@ Deno.serve(async req=>{
   if(value.length<4||value.length>10000)return json({error:"Secret value is empty or too long."},400);
   const stored=await db.rpc("admin_secret_store",{p_name:name,p_value:value,p_description:"Managed by Super Admin Control Centre"});
   if(stored.error)return json({error:stored.error.message||"Supabase Vault rejected the secret."},400);
-  return json({ok:true,name,message:name+" saved in encrypted Supabase Vault. Paystack runtime reads PAYSTACK_SECRET_KEY from Vault."});
+  return json({ok:true,name,message:name+" saved in encrypted Supabase Vault. Connected workers read supported values from Vault when an Edge Function environment secret is not set."});
  }catch(e){return json({error:String(e?.message||e)},500)}
 });

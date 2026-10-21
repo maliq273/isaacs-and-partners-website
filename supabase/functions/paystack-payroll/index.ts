@@ -47,13 +47,18 @@ async function initialize(body:any,a:any){
  await db.from("payments").update({metadata:{...(p.data?.metadata||{}),authorization_url:x.data?.authorization_url}}).eq("id",p.data.id);
  return {ok:true,payment_id:p.data.id,invoice_id:invoice.id,amount:invoice.balance_due,currency:invoice.currency,reference:ref,authorization_url:x.data?.authorization_url,access_code:x.data?.access_code};
 }
-async function verify(reference:string){
+async function verify(reference:string,actorContext?:any){
+ if(!reference)throw Error("A Paystack reference is required.");
+ const pq=await db.from("payments").select("*").eq("provider","PAYSTACK").eq("provider_reference",reference).maybeSingle();
+ if(pq.error||!pq.data)throw Error("Internal payment record not found.");
+ // Browser VERIFY calls must be scoped to the authenticated payer. Webhooks
+ // call verify without an actor only after Paystack's HMAC signature is checked.
+ if(actorContext)await invoiceAccess(pq.data.invoice_id,actorContext);
  if(!await ensurePaystackKey())throw Error("Paystack is not configured.");
  const res=await fetch("https://api.paystack.co/transaction/verify/"+encodeURIComponent(reference),{headers:{Authorization:"Bearer "+PAYSTACK_KEY}});
  const x=await res.json();if(!res.ok||!x.status)throw Error(x.message||"Paystack verification failed.");
  const t=x.data;
- const pq=await db.from("payments").select("*").eq("provider","PAYSTACK").eq("provider_reference",reference).maybeSingle();if(pq.error||!pq.data)throw Error("Internal payment record not found.");
- const paid=t.status==="success"&&Number(t.amount)===Math.round(Number(pq.data.amount)*100)&&String(t.currency||"ZAR").toUpperCase()===String(pq.data.currency||"ZAR").toUpperCase();
+ const paid=t.status==="success"&&String(t.reference||"")===reference&&Number(t.amount)===Math.round(Number(pq.data.amount)*100)&&String(t.currency||"ZAR").toUpperCase()===String(pq.data.currency||"ZAR").toUpperCase();
  if(!paid){await db.from("payments").update({status:t.status==="failed"?"FAILED":"PENDING",metadata:{...(pq.data.metadata||{}),paystack_verification:t}}).eq("id",pq.data.id);return {ok:false,status:t.status,payment_id:pq.data.id};}
  await db.from("payments").update({status:"COMPLETED",paid_at:new Date().toISOString(),metadata:{...(pq.data.metadata||{}),paystack_verification:t}}).eq("id",pq.data.id);
  await db.from("invoices").update({status:"PAID",amount_paid:pq.data.amount,balance_due:0,paid_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",pq.data.invoice_id);
@@ -89,7 +94,7 @@ Deno.serve(async req=>{
   if(req.headers.get("x-paystack-signature"))return await webhook(req);
   const a=await actor(req),body=await req.json(),action=String(body.action||"").toUpperCase();
   if(action==="INITIALIZE")return json(await initialize(body,a));
-  if(action==="VERIFY")return json(await verify(clean(body.reference,100)));
+  if(action==="VERIFY")return json(await verify(clean(body.reference,100),a));
   throw Error("Unsupported Paystack payroll action.");
  }catch(e){return json({ok:false,error:e instanceof Error?e.message:"Paystack payment operation failed."},400)}
 });

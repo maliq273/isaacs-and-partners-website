@@ -2,11 +2,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-const OPENWA_BASE_URL = Deno.env.get("OPENWA_BASE_URL")?.replace(/\/$/, "");
-const OPENWA_API_KEY = Deno.env.get("OPENWA_API_KEY");
-const OPENWA_SESSION_ID = Deno.env.get("OPENWA_SESSION_ID");
-const OPENWA_WEBHOOK_SECRET = Deno.env.get("OPENWA_WEBHOOK_SECRET");
-const OPENWA_WORKER_TOKEN = Deno.env.get("OPENWA_WORKER_TOKEN");
 const OWNER_PHONE = (Deno.env.get("ANTHONY_OWNER_PHONE") || "27718831097").replace(/\D/g, "");
 const OPENWA_USER_AGENT = "IsaacsPartners-OpenWA/1.0";
 
@@ -17,6 +12,23 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
+
+async function loadVaultOpenwaConfig(): Promise<Record<string, string>> {
+  const names = ["OPENWA_BASE_URL","OPENWA_API_KEY","OPENWA_SESSION_ID","OPENWA_WEBHOOK_SECRET","OPENWA_WORKER_TOKEN","openwa_worker_token"];
+  if (names.slice(0,5).every(name => Deno.env.get(name))) return {};
+  const result = await supabase.rpc("integration_secrets_get", { p_names: names });
+  if (result.error) {
+    console.error("OpenWA Vault configuration lookup failed", result.error.message);
+    return {};
+  }
+  return result.data || {};
+}
+const vaultOpenwa = await loadVaultOpenwaConfig();
+const OPENWA_BASE_URL = (Deno.env.get("OPENWA_BASE_URL") || vaultOpenwa.OPENWA_BASE_URL || "").replace(/\\/$/, "");
+const OPENWA_API_KEY = Deno.env.get("OPENWA_API_KEY") || vaultOpenwa.OPENWA_API_KEY || "";
+const OPENWA_SESSION_ID = Deno.env.get("OPENWA_SESSION_ID") || vaultOpenwa.OPENWA_SESSION_ID || "";
+const OPENWA_WEBHOOK_SECRET = Deno.env.get("OPENWA_WEBHOOK_SECRET") || vaultOpenwa.OPENWA_WEBHOOK_SECRET || "";
+const OPENWA_WORKER_TOKEN = Deno.env.get("OPENWA_WORKER_TOKEN") || vaultOpenwa.OPENWA_WORKER_TOKEN || vaultOpenwa.openwa_worker_token || "";
 
 const MAX_ATTEMPTS = 5;
 
