@@ -38,7 +38,11 @@ const secretFields=[
  {name:"PAYSTACK_SECRET_KEY",label:"Paystack secret key",hint:"Payment initialisation and server-side verification",placeholder:"sk_test_… or sk_live_…"},
  {name:"OPENAI_API_KEY",label:"OpenAI API key",hint:"Anthony AI runtime, if configured to use OpenAI",placeholder:"sk-…"},
  {name:"ANTHROPIC_API_KEY",label:"Anthropic API key",hint:"Optional AI provider",placeholder:"sk-ant-…"},
- {name:"OPENWA_API_KEY",label:"OpenWA API key",hint:"WhatsApp transport integration",placeholder:"Enter OpenWA API key"},
+ {name:"OPENWA_API_KEY",label:"OpenWA API key",hint:"Required for the WhatsApp transport API",placeholder:"Enter OpenWA API key"},
+ {name:"OPENWA_BASE_URL",label:"OpenWA base URL",hint:"For example, https://openwa.isaacsandpartners.online",placeholder:"https://openwa.isaacsandpartners.online"},
+ {name:"OPENWA_SESSION_ID",label:"OpenWA session ID",hint:"The active WhatsApp session UUID configured in OpenWA",placeholder:"Enter OpenWA session UUID"},
+ {name:"OPENWA_WORKER_TOKEN",label:"OpenWA worker token",hint:"Must match the internal worker token used by the AI liaison runtime",placeholder:"Enter OpenWA worker token"},
+ {name:"OPENWA_WEBHOOK_SECRET",label:"OpenWA webhook HMAC secret",hint:"Must match the signing secret configured in OpenWA webhooks",placeholder:"Enter webhook HMAC secret"},
  {name:"GITHUB_TOKEN",label:"GitHub integration token",hint:"Repository automation only; use least privilege",placeholder:"github_pat_…"}
 ];
 function renderSecrets(){
