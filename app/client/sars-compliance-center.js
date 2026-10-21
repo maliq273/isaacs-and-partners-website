@@ -7,7 +7,7 @@ const waitForPortal=async()=>{for(let i=0;i<100;i++){const nav=document.querySel
 
 (async()=>{await auth.initialise();if(!auth.isAuthenticated())return;const u=auth.getCurrentUser(),role=await resolveUserDashboardRole(u);if(!["BUSINESS","STAFF","SUPER_ADMIN"].includes(role))return;const sb=await ensureSupabaseSession(auth);const bq=role==="SUPER_ADMIN"?await sb.from("businesses").select("id,legal_name,trading_name").eq("is_active",true).order("legal_name"):await sb.from("businesses").select("id,legal_name,trading_name").eq("owner_user_id",u.id).eq("is_active",true);const businesses=bq.data||[];
 const selectedBusiness=businesses[0];
-const currentPeriod=()=>{const selected=document.querySelector("[data-sc-period]")?.value||"202608";return /^\\d{6}$/.test(selected)?selected.slice(0,4)+"-"+selected.slice(4,6):"";};
+const currentPeriod=()=>{const selected=document.querySelector("[data-sc-period]")?.value||"202608";return /^\d{6}$/.test(selected)?selected.slice(0,4)+"-"+selected.slice(4,6):"";};
 let sarsLocked=false;
 if(role==="BUSINESS"){
  const access=await sb.rpc("client_service_access_snapshot");
