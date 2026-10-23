@@ -75,13 +75,13 @@ export default class BookingConfirmation {
                     </div>
 
                     <span class="ip-page__eyebrow">
-                        Booking Confirmed
+                        ${pending ? "Booking Request Received" : "Booking Confirmed"}
                     </span>
 
                     <h2
                         id="booking-confirmation-title"
                     >
-                        Your appointment has been booked
+                        ${pending ? "Your appointment request has been received" : "Your appointment has been booked"}
                     </h2>
 
                     <p>
