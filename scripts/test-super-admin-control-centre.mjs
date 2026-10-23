@@ -11,7 +11,7 @@ const required=[
  "app/booking/booking.js",
  "app/booking/confirmation.js",
  "supabase/migrations/20261023081939_super_admin_control_centre.sql",
- "supabase/migrations/20261023082104_harden_control_centre_ledgers.sql",
+ "supabase/migrations/20261023082104_harden_control_centre_ledgers.sql",\n "supabase/migrations/20261023083003_guard_vendor_payment_overpayment.sql",
  "supabase/functions/anthony-memory-agent/index.ts"
 ];
 const missing=required.filter(p=>!fs.existsSync(path.join(root,p)));
@@ -40,7 +40,7 @@ const booking=fs.readFileSync(path.join(root,required[4]),"utf8");
 for(const token of ["appointment_availability_slots","submit_public_booking_request","slotId"]){
  if(!booking.includes(token)){console.error("Public booking integration missing: "+token);process.exit(1);}
 }
-const agent=fs.readFileSync(path.join(root,required[8]),"utf8");
+const paymentGuard=fs.readFileSync(path.join(root,required[8]),"utf8");\nif(!paymentGuard.includes("Payment exceeds the outstanding vendor invoice balance")){console.error("Server-side vendor overpayment guard missing.");process.exit(1);}\nconst agent=fs.readFileSync(path.join(root,required[9]),"utf8");
 for(const token of ["XAI_API_KEY","includeMemory","grok_eligible","SUPER_ADMIN","api.x.ai"]){
  if(!agent.includes(token)){console.error("Grok privacy/authorization boundary missing: "+token);process.exit(1);}
 }
