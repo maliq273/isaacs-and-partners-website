@@ -3,7 +3,7 @@ const SUPABASE_URL=Deno.env.get("SUPABASE_URL")||"";
 const ANON_KEY=Deno.env.get("SUPABASE_ANON_KEY")||"";
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization,apikey,content-type"};
 const json=(data:any,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json",...cors}});
-const allowed=new Set(["PAYSTACK_MERCHANT_ID","PAYSTACK_PUBLIC_KEY","PAYSTACK_SECRET_KEY","OPENAI_API_KEY","ANTHROPIC_API_KEY","OPENWA_API_KEY","OPENWA_WORKER_TOKEN","OPENWA_WEBHOOK_SECRET","OPENWA_BASE_URL","OPENWA_SESSION_ID","GITHUB_TOKEN"]);
+const allowed=new Set(["PAYSTACK_MERCHANT_ID","PAYSTACK_PUBLIC_KEY","PAYSTACK_SECRET_KEY","OPENAI_API_KEY","ANTHROPIC_API_KEY","XAI_API_KEY","OPENWA_API_KEY","OPENWA_WORKER_TOKEN","OPENWA_WEBHOOK_SECRET","OPENWA_BASE_URL","OPENWA_SESSION_ID","GITHUB_TOKEN"]);
 Deno.serve(async req=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
  if(req.method!=="POST")return json({error:"POST required."},405);
