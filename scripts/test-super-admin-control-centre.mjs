@@ -10,8 +10,8 @@ const required=[
  "app/dashboard/anthony-memory.html",
  "app/booking/booking.js",
  "app/booking/confirmation.js",
- "supabase/migrations/202610230001_super_admin_control_centre.sql",
- "supabase/migrations/202610230002_harden_control_centre_ledgers.sql",
+ "supabase/migrations/20261023081939_super_admin_control_centre.sql",
+ "supabase/migrations/20261023082104_harden_control_centre_ledgers.sql",
  "supabase/functions/anthony-memory-agent/index.ts"
 ];
 const missing=required.filter(p=>!fs.existsSync(path.join(root,p)));
