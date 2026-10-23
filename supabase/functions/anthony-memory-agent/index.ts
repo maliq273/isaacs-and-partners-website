@@ -26,7 +26,7 @@ Deno.serve(async req=>{
   if(body.includeMemory===true){
    const {data,error}=await db.from("anthony_memory_entries").select("id,title,memory_text,category").eq("active",true).eq("grok_eligible",true).eq("sensitivity","INTERNAL").in("category",["PREFERENCE","WORKFLOW","GENERAL"]).order("updated_at",{ascending:false}).limit(20);
    if(error)throw new Error("Could not load approved memory context.");
-   memories=data||[];
+   memories=(data||[]).filter((m:any)=>!(/\\b(passport|identity number|id number|bank account|salary|payroll|medical record|diagnosis|client file|case number|visa application|immigration status|sars record|legal matter)\\b/i.test(String(m.title||"")+" "+String(m.memory_text||""))));
   }
   const keyResult=await db.rpc("integration_secret_get",{p_name:"XAI_API_KEY"});
   if(keyResult.error||!keyResult.data)return json({ok:false,error:"Grok is not configured. Add XAI_API_KEY under Super Admin → Secrets & Integrations."},409);
