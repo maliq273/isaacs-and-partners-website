@@ -167,7 +167,7 @@ grant select,update on public.appointment_booking_requests to authenticated;
 
 create or replace function public.submit_public_booking_request(
  p_slot_id uuid,p_service_id text,p_customer_name text,p_customer_email text,p_customer_phone text,p_notes text default null
-) returns jsonb language plpgsql security definer set search_path='' as $
+) returns jsonb language plpgsql security definer set search_path='' as $$
 declare v_slot public.appointment_availability_slots; v_request_id uuid; v_email text;
 begin
  if length(trim(coalesce(p_customer_name,''))) not between 2 and 200 then raise exception 'A valid customer name is required.' using errcode='22023'; end if;
@@ -202,7 +202,7 @@ grant select on public.customer_statement_lines to authenticated;
 
 -- Audit every vendor ledger mutation with a trigger-owned append-only record.
 create or replace function public.audit_ap_vendor_change()
-returns trigger language plpgsql security definer set search_path=public as $
+returns trigger language plpgsql security definer set search_path=public as $$
 declare v_id uuid; v_action text;
 begin
  v_id := coalesce((to_jsonb(new)->>'id')::uuid,(to_jsonb(old)->>'id')::uuid);
@@ -210,7 +210,7 @@ begin
  insert into public.ap_vendor_audit(actor_user_id,action,entity_type,entity_id,details)
  values(auth.uid(),v_action,tg_table_name,v_id,jsonb_build_object('operation',tg_op));
  return coalesce(new,old);
-end $;
+end $$;
 drop trigger if exists ap_vendors_audit on public.ap_vendors;
 create trigger ap_vendors_audit after insert or update or delete on public.ap_vendors for each row execute function public.audit_ap_vendor_change();
 drop trigger if exists ap_vendor_invoices_audit on public.ap_vendor_invoices;
@@ -219,7 +219,7 @@ drop trigger if exists ap_vendor_payments_audit on public.ap_vendor_payments;
 create trigger ap_vendor_payments_audit after insert or update or delete on public.ap_vendor_payments for each row execute function public.audit_ap_vendor_change();
 
 create or replace function public.audit_anthony_memory_change()
-returns trigger language plpgsql security definer set search_path=public as $
+returns trigger language plpgsql security definer set search_path=public as $$
 declare v_id uuid; v_action text;
 begin
  v_id := coalesce((to_jsonb(new)->>'id')::uuid,(to_jsonb(old)->>'id')::uuid);
@@ -227,7 +227,7 @@ begin
  insert into public.anthony_memory_audit(memory_id,actor_user_id,action,details)
  values(v_id,auth.uid(),v_action,jsonb_build_object('operation',tg_op,'category',coalesce(to_jsonb(new)->>'category',to_jsonb(old)->>'category')));
  return coalesce(new,old);
-end $;
+end $$;
 drop trigger if exists anthony_memory_audit_trigger on public.anthony_memory_entries;
 create trigger anthony_memory_audit_trigger after insert or update or delete on public.anthony_memory_entries for each row execute function public.audit_anthony_memory_change();
 
@@ -248,12 +248,12 @@ commit;
  values(p_slot_id,trim(p_service_id),trim(p_customer_name),v_email,trim(p_customer_phone),nullif(trim(coalesce(p_notes,'')),'')) returning id into v_request_id;
  update public.appointment_availability_slots set booking_request_id=v_request_id,updated_at=now() where id=p_slot_id;
  return jsonb_build_object('ok',true,'request_id',v_request_id,'status','PENDING','message','Your booking request has been received. The team will confirm the appointment.');
-end $;
+end $$;
 revoke all on function public.submit_public_booking_request(uuid,text,text,text,text,text) from public;
 grant execute on function public.submit_public_booking_request(uuid,text,text,text,text,text) to anon,authenticated;
 
 create or replace function public.admin_decide_booking_request(p_request_id uuid,p_decision text)
-returns jsonb language plpgsql security definer set search_path='' as $
+returns jsonb language plpgsql security definer set search_path='' as $$
 declare r public.appointment_booking_requests; s public.appointment_availability_slots; v_appointment_id uuid; v_decision text:=upper(trim(coalesce(p_decision,'')));
 begin
  if not exists(select 1 from public.profiles p where p.id=auth.uid() and p.role='SUPER_ADMIN' and p.is_active=true) then raise exception 'Active Super Admin access required.' using errcode='42501'; end if;
@@ -271,7 +271,7 @@ begin
  end if;
  update public.appointment_booking_requests set status=v_decision,updated_at=now() where id=r.id;
  return jsonb_build_object('ok',true,'request_id',r.id,'status',v_decision,'appointment_id',v_appointment_id);
-end $;
+end $$;
 revoke all on function public.admin_decide_booking_request(uuid,text) from public,anon;
 grant execute on function public.admin_decide_booking_request(uuid,text) to authenticated;
 
@@ -306,7 +306,7 @@ grant select on public.customer_statement_lines to authenticated;
 
 -- Audit every vendor ledger mutation with a trigger-owned append-only record.
 create or replace function public.audit_ap_vendor_change()
-returns trigger language plpgsql security definer set search_path=public as $
+returns trigger language plpgsql security definer set search_path=public as $$
 declare v_id uuid; v_action text;
 begin
  v_id := coalesce((to_jsonb(new)->>'id')::uuid,(to_jsonb(old)->>'id')::uuid);
@@ -314,7 +314,7 @@ begin
  insert into public.ap_vendor_audit(actor_user_id,action,entity_type,entity_id,details)
  values(auth.uid(),v_action,tg_table_name,v_id,jsonb_build_object('operation',tg_op));
  return coalesce(new,old);
-end $;
+end $$;
 drop trigger if exists ap_vendors_audit on public.ap_vendors;
 create trigger ap_vendors_audit after insert or update or delete on public.ap_vendors for each row execute function public.audit_ap_vendor_change();
 drop trigger if exists ap_vendor_invoices_audit on public.ap_vendor_invoices;
@@ -323,7 +323,7 @@ drop trigger if exists ap_vendor_payments_audit on public.ap_vendor_payments;
 create trigger ap_vendor_payments_audit after insert or update or delete on public.ap_vendor_payments for each row execute function public.audit_ap_vendor_change();
 
 create or replace function public.audit_anthony_memory_change()
-returns trigger language plpgsql security definer set search_path=public as $
+returns trigger language plpgsql security definer set search_path=public as $$
 declare v_id uuid; v_action text;
 begin
  v_id := coalesce((to_jsonb(new)->>'id')::uuid,(to_jsonb(old)->>'id')::uuid);
@@ -331,7 +331,7 @@ begin
  insert into public.anthony_memory_audit(memory_id,actor_user_id,action,details)
  values(v_id,auth.uid(),v_action,jsonb_build_object('operation',tg_op,'category',coalesce(to_jsonb(new)->>'category',to_jsonb(old)->>'category')));
  return coalesce(new,old);
-end $;
+end $$;
 drop trigger if exists anthony_memory_audit_trigger on public.anthony_memory_entries;
 create trigger anthony_memory_audit_trigger after insert or update or delete on public.anthony_memory_entries for each row execute function public.audit_anthony_memory_change();
 
