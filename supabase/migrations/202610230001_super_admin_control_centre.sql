@@ -142,7 +142,116 @@ create table if not exists public.appointment_availability_slots (
  updated_at timestamptz not null default now(),
  constraint appointment_slot_order check(ends_at>starts_at)
 );
-create index if not exists appointment_slots_available_idx on public.appointment_availability_slots(active,starts_at) where booked_appointment_id is null;
+create table if not exists public.appointment_booking_requests (
+ id uuid primary key default gen_random_uuid(),
+ slot_id uuid not null references public.appointment_availability_slots(id) on delete restrict,
+ service_id text not null,
+ customer_name text not null,
+ customer_email text not null,
+ customer_phone text not null,
+ notes text,
+ status text not null default 'PENDING' check(status in ('PENDING','CONFIRMED','DECLINED','CANCELLED')),
+ created_at timestamptz not null default now(),
+ updated_at timestamptz not null default now()
+);
+alter table public.appointment_availability_slots add column if not exists booking_request_id uuid references public.appointment_booking_requests(id) on delete set null;
+create index if not exists appointment_slots_available_idx on public.appointment_availability_slots(active,starts_at) where booked_appointment_id is null and booking_request_id is null;
+create index if not exists appointment_booking_requests_created_idx on public.appointment_booking_requests(created_at desc);
+alter table public.appointment_booking_requests enable row level security;
+drop policy if exists appointment_booking_requests_super_admin_all on public.appointment_booking_requests;
+create policy appointment_booking_requests_super_admin_all on public.appointment_booking_requests for all to authenticated
+using(exists(select 1 from public.profiles p where p.id=auth.uid() and p.role='SUPER_ADMIN' and p.is_active))
+with check(exists(select 1 from public.profiles p where p.id=auth.uid() and p.role='SUPER_ADMIN' and p.is_active));
+revoke all on public.appointment_booking_requests from anon,authenticated;
+grant select,update on public.appointment_booking_requests to authenticated;
+
+create or replace function public.submit_public_booking_request(
+ p_slot_id uuid,p_service_id text,p_customer_name text,p_customer_email text,p_customer_phone text,p_notes text default null
+) returns jsonb language plpgsql security definer set search_path='' as $
+declare v_slot public.appointment_availability_slots; v_request_id uuid; v_email text;
+begin
+ if length(trim(coalesce(p_customer_name,''))) not between 2 and 200 then raise exception 'A valid customer name is required.' using errcode='22023'; end if;
+ v_email:=lower(trim(coalesce(p_customer_email,'')));
+ if length(v_email)>254 or v_email !~ '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+
+drop policy if exists appointment_slots_public_read on public.appointment_availability_slots;
+create policy appointment_slots_public_read on public.appointment_availability_slots for select to anon,authenticated
+using(active=true and booked_appointment_id is null and booking_request_id is null and starts_at>now());
+drop policy if exists appointment_slots_super_admin_all on public.appointment_availability_slots;
+create policy appointment_slots_super_admin_all on public.appointment_availability_slots for all to authenticated
+using(exists(select 1 from public.profiles p where p.id=auth.uid() and p.role='SUPER_ADMIN' and p.is_active))
+with check(exists(select 1 from public.profiles p where p.id=auth.uid() and p.role='SUPER_ADMIN' and p.is_active));
+
+-- Statement query is a RLS-respecting view. Payment totals come only from the
+-- existing payment ledger; the status of a payment remains authoritative.
+create or replace view public.customer_statement_lines with (security_invoker=true) as
+select i.id as invoice_id,i.individual_user_id,i.business_id,i.invoice_number,
+       coalesce(i.issued_at::date,i.invoice_date) as transaction_date,
+       coalesce(i.description,i.subject,'Invoice') as description,
+       coalesce(i.total,i.amount,0)::numeric(14,2) as invoice_total,
+       coalesce(p.paid_total,0)::numeric(14,2) as verified_paid,
+       greatest(coalesce(i.total,i.amount,0)-coalesce(p.paid_total,0),0)::numeric(14,2) as balance_due,
+       i.status as invoice_status,i.due_date
+from public.invoices i
+left join (
+ select invoice_id,sum(amount)::numeric(14,2) as paid_total
+ from public.payments where status='COMPLETED' group by invoice_id
+) p on p.invoice_id=i.id
+where i.status not in ('DRAFT','VOID');
+
+grant select on public.customer_statement_lines to authenticated;
+
+-- Audit every vendor ledger mutation with a trigger-owned append-only record.
+create or replace function public.audit_ap_vendor_change()
+returns trigger language plpgsql security definer set search_path=public as $
+declare v_id uuid; v_action text;
+begin
+ v_id := coalesce((to_jsonb(new)->>'id')::uuid,(to_jsonb(old)->>'id')::uuid);
+ v_action := case when tg_op='INSERT' then 'CREATE' when tg_op='UPDATE' then 'UPDATE' else 'DELETE' end;
+ insert into public.ap_vendor_audit(actor_user_id,action,entity_type,entity_id,details)
+ values(auth.uid(),v_action,tg_table_name,v_id,jsonb_build_object('operation',tg_op));
+ return coalesce(new,old);
+end $;
+drop trigger if exists ap_vendors_audit on public.ap_vendors;
+create trigger ap_vendors_audit after insert or update or delete on public.ap_vendors for each row execute function public.audit_ap_vendor_change();
+drop trigger if exists ap_vendor_invoices_audit on public.ap_vendor_invoices;
+create trigger ap_vendor_invoices_audit after insert or update or delete on public.ap_vendor_invoices for each row execute function public.audit_ap_vendor_change();
+drop trigger if exists ap_vendor_payments_audit on public.ap_vendor_payments;
+create trigger ap_vendor_payments_audit after insert or update or delete on public.ap_vendor_payments for each row execute function public.audit_ap_vendor_change();
+
+create or replace function public.audit_anthony_memory_change()
+returns trigger language plpgsql security definer set search_path=public as $
+declare v_id uuid; v_action text;
+begin
+ v_id := coalesce((to_jsonb(new)->>'id')::uuid,(to_jsonb(old)->>'id')::uuid);
+ v_action := case when tg_op='INSERT' then 'CREATE' when tg_op='UPDATE' and coalesce((to_jsonb(new)->>'active')::boolean,true)=false then 'ARCHIVE' when tg_op='UPDATE' then 'UPDATE' else 'ARCHIVE' end;
+ insert into public.anthony_memory_audit(memory_id,actor_user_id,action,details)
+ values(v_id,auth.uid(),v_action,jsonb_build_object('operation',tg_op,'category',coalesce(to_jsonb(new)->>'category',to_jsonb(old)->>'category')));
+ return coalesce(new,old);
+end $;
+drop trigger if exists anthony_memory_audit_trigger on public.anthony_memory_entries;
+create trigger anthony_memory_audit_trigger after insert or update or delete on public.anthony_memory_entries for each row execute function public.audit_anthony_memory_change();
+
+-- Add the optional provider name to the existing Vault allowlist. API keys are
+-- written only through the existing admin_secret_store endpoint.
+notify pgrst,'reload schema';
+commit;
+ then raise exception 'A valid email address is required.' using errcode='22023'; end if;
+ if length(trim(coalesce(p_customer_phone,''))) not between 6 and 30 then raise exception 'A valid contact number is required.' using errcode='22023'; end if;
+ if length(trim(coalesce(p_service_id,''))) not between 1 and 180 then raise exception 'Please select a service.' using errcode='22023'; end if;
+ if length(coalesce(p_notes,''))>2000 then raise exception 'Notes are too long.' using errcode='22023'; end if;
+ if exists(select 1 from public.appointment_booking_requests r where r.customer_email=v_email and r.created_at>now()-interval '10 minutes' and r.status='PENDING') then
+   raise exception 'A recent request is already pending for this email address.' using errcode='23505';
+ end if;
+ select * into v_slot from public.appointment_availability_slots where id=p_slot_id and active=true and starts_at>now() and booked_appointment_id is null and booking_request_id is null for update;
+ if not found then raise exception 'This appointment slot is no longer available. Refresh the calendar.' using errcode='P0002'; end if;
+ insert into public.appointment_booking_requests(slot_id,service_id,customer_name,customer_email,customer_phone,notes)
+ values(p_slot_id,trim(p_service_id),trim(p_customer_name),v_email,trim(p_customer_phone),nullif(trim(coalesce(p_notes,'')),'')) returning id into v_request_id;
+ update public.appointment_availability_slots set booking_request_id=v_request_id,updated_at=now() where id=p_slot_id;
+ return jsonb_build_object('ok',true,'request_id',v_request_id,'status','PENDING','message','Your booking request has been received. The team will confirm the appointment.');
+end $;
+revoke all on function public.submit_public_booking_request(uuid,text,text,text,text,text) from public;
+grant execute on function public.submit_public_booking_request(uuid,text,text,text,text,text) to anon,authenticated;
+
 alter table public.appointment_availability_slots enable row level security;
 drop policy if exists appointment_slots_public_read on public.appointment_availability_slots;
 create policy appointment_slots_public_read on public.appointment_availability_slots for select to anon,authenticated
