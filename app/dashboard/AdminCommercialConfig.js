@@ -35,8 +35,8 @@ async function savePrice(code){
  render();status($("admin-pricing-status"),"Saved "+code+" at "+money(amount)+". The public pricing feed now uses this catalogue price; refresh the public website to confirm. New customer assignments will use this server-side price.");applyServiceLineHash();
 }
 const secretFields=[
- {name:"PAYSTACK_MERCHANT_ID",label:"Paystack merchant number",hint:"Merchant account identifier supplied by Paystack; stored in Vault for controlled configuration.",placeholder:"2046163"},
- {name:"PAYSTACK_PUBLIC_KEY",label:"Paystack public key",hint:"Publishable key only. Server-side payment verification must continue to use the secret key from Vault.",placeholder:"pk_live_…"},
+ {name:"PAYSTACK_MERCHANT_ID",label:"Paystack merchant number",hint:"Merchant account identifier supplied by Paystack; stored in Vault for controlled configuration.",placeholder:"2046163",initialValue:"2046163"},
+ {name:"PAYSTACK_PUBLIC_KEY",label:"Paystack public key",hint:"Publishable key only. Server-side payment verification must continue to use the secret key from Vault.",placeholder:"pk_live_…",initialValue:"pk_live_59cd05ffcd32b81c2aa54247c050385953d8c7d3"},
  {name:"PAYSTACK_SECRET_KEY",label:"Paystack secret key",hint:"Payment initialisation and server-side verification. Never share this key.",placeholder:"sk_test_… or sk_live_…"},
  {name:"OPENAI_API_KEY",label:"OpenAI API key",hint:"Anthony AI runtime, if configured to use OpenAI",placeholder:"sk-…"},
  {name:"ANTHROPIC_API_KEY",label:"Anthropic API key",hint:"Optional AI provider",placeholder:"sk-ant-…"},
@@ -48,7 +48,7 @@ const secretFields=[
  {name:"GITHUB_TOKEN",label:"GitHub integration token",hint:"Repository automation only; use least privilege",placeholder:"github_pat_…"}
 ];
 function renderSecrets(){
- $("admin-secret-fields").innerHTML=secretFields.map(f=>'<div class="integration-card"><label style="display:block;font-weight:600;margin-bottom:6px" for="secret-'+f.name+'">'+esc(f.label)+'</label><p style="font-size:.8rem;color:var(--ink-muted);margin:0 0 10px">'+esc(f.hint)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="secret-'+f.name+'" class="form-control" style="flex:1;min-width:220px" type="password" autocomplete="new-password" data-secret-name="'+f.name+'" placeholder="'+esc(f.placeholder)+'"><button class="btn btn-sm btn-primary" data-secret-save="'+f.name+'">Save &amp; sync</button></div></div>').join("");
+ $("admin-secret-fields").innerHTML=secretFields.map(f=>'<div class="integration-card"><label style="display:block;font-weight:600;margin-bottom:6px" for="secret-'+f.name+'">'+esc(f.label)+'</label><p style="font-size:.8rem;color:var(--ink-muted);margin:0 0 10px">'+esc(f.hint)+'</p><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="secret-'+f.name+'" class="form-control" style="flex:1;min-width:220px" type="password" autocomplete="new-password" data-secret-name="'+f.name+'" value="'+esc(f.initialValue||"")+'" placeholder="'+esc(f.placeholder)+'"><button class="btn btn-sm btn-primary" data-secret-save="'+f.name+'">Save &amp; sync</button></div></div>').join("");
 }
 async function saveSecret(name){
  const input=document.querySelector('[data-secret-name="'+CSS.escape(name)+'"]'),value=String(input?.value||"").trim();
