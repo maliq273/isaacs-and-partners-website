@@ -171,6 +171,37 @@ where i.status not in ('DRAFT','VOID');
 
 grant select on public.customer_statement_lines to authenticated;
 
+-- Audit every vendor ledger mutation with a trigger-owned append-only record.
+create or replace function public.audit_ap_vendor_change()
+returns trigger language plpgsql security definer set search_path=public as $
+declare v_id uuid; v_action text;
+begin
+ v_id := coalesce((to_jsonb(new)->>'id')::uuid,(to_jsonb(old)->>'id')::uuid);
+ v_action := case when tg_op='INSERT' then 'CREATE' when tg_op='UPDATE' then 'UPDATE' else 'DELETE' end;
+ insert into public.ap_vendor_audit(actor_user_id,action,entity_type,entity_id,details)
+ values(auth.uid(),v_action,tg_table_name,v_id,jsonb_build_object('operation',tg_op));
+ return coalesce(new,old);
+end $;
+drop trigger if exists ap_vendors_audit on public.ap_vendors;
+create trigger ap_vendors_audit after insert or update or delete on public.ap_vendors for each row execute function public.audit_ap_vendor_change();
+drop trigger if exists ap_vendor_invoices_audit on public.ap_vendor_invoices;
+create trigger ap_vendor_invoices_audit after insert or update or delete on public.ap_vendor_invoices for each row execute function public.audit_ap_vendor_change();
+drop trigger if exists ap_vendor_payments_audit on public.ap_vendor_payments;
+create trigger ap_vendor_payments_audit after insert or update or delete on public.ap_vendor_payments for each row execute function public.audit_ap_vendor_change();
+
+create or replace function public.audit_anthony_memory_change()
+returns trigger language plpgsql security definer set search_path=public as $
+declare v_id uuid; v_action text;
+begin
+ v_id := coalesce((to_jsonb(new)->>'id')::uuid,(to_jsonb(old)->>'id')::uuid);
+ v_action := case when tg_op='INSERT' then 'CREATE' when tg_op='UPDATE' and coalesce((to_jsonb(new)->>'active')::boolean,true)=false then 'ARCHIVE' when tg_op='UPDATE' then 'UPDATE' else 'ARCHIVE' end;
+ insert into public.anthony_memory_audit(memory_id,actor_user_id,action,details)
+ values(v_id,auth.uid(),v_action,jsonb_build_object('operation',tg_op,'category',coalesce(to_jsonb(new)->>'category',to_jsonb(old)->>'category')));
+ return coalesce(new,old);
+end $;
+drop trigger if exists anthony_memory_audit_trigger on public.anthony_memory_entries;
+create trigger anthony_memory_audit_trigger after insert or update or delete on public.anthony_memory_entries for each row execute function public.audit_anthony_memory_change();
+
 -- Add the optional provider name to the existing Vault allowlist. API keys are
 -- written only through the existing admin_secret_store endpoint.
 notify pgrst,'reload schema';
