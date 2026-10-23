@@ -172,7 +172,7 @@ declare v_slot public.appointment_availability_slots; v_request_id uuid; v_email
 begin
  if length(trim(coalesce(p_customer_name,''))) not between 2 and 200 then raise exception 'A valid customer name is required.' using errcode='22023'; end if;
  v_email:=lower(trim(coalesce(p_customer_email,'')));
- if length(v_email)>254 or v_email !~ '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+
+ if length(v_email)>254 or v_email !~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+
 drop policy if exists appointment_slots_public_read on public.appointment_availability_slots;
 create policy appointment_slots_public_read on public.appointment_availability_slots for select to anon,authenticated
 using(active=true and booked_appointment_id is null and booking_request_id is null and starts_at>now());
