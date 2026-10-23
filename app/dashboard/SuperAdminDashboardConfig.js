@@ -22,10 +22,16 @@ export const SUPER_ADMIN_DASHBOARD_CATEGORIES = Object.freeze([
   {title:"Anthony WhatsApp Logs",href:"./communications.html",description:"Inbound/outbound message history and delivery state."},
   {title:"Company Documents",href:"./document-vault.html",description:"Controlled company and client document repository."}
  ]},
- {key:"finance",title:"Finance",description:"Commercial operations and payment oversight.",modules:[
-  {title:"Finance Overview",href:"./invoices.html",description:"Invoices, payment status, balances and billing."},
-  {title:"Quotes & Estimates",href:"./quotes.html",description:"Quote preparation and approval."},
-  {title:"Payroll Approval",href:"#payroll-approval-list",description:"Review internal payroll before release."}
+ {key:"billing",title:"Billing & Accounts",description:"Service rates, customer balances, and vendor liabilities.",modules:[
+  {title:"Services & Pricing",href:"#admin-commercial-config",description:"Create and price billable services; save canonical rates used by invoices."},
+  {title:"Customer Invoices & Statements",href:"./invoices.html",description:"Accounts receivable, verified payments, balances and customer statements."},
+  {title:"Quotes & Estimates",href:"./quotes.html",description:"Prepare and approve quotes from the service catalogue."},
+  {title:"Vendor Payables",href:"./vendor-payables.html",description:"Capture supplier invoices, amounts owed by Isaacs & Partners and vendor statements."},
+  {title:"Internal Payroll Approval",href:"#payroll-approval-list",description:"Review internal payroll before release."}
+ ]},
+ {key:"calendar",title:"Scheduling",description:"Appointments and customer-facing availability.",modules:[
+  {title:"Client Calendar & Availability",href:"../booking/index.html",description:"Customer booking page for consultations and available appointment slots."},
+  {title:"Operational Calendar",href:"./matters.html",description:"Coordinate hearings, site visits, matter assignments and appointments through operational records."}
  ]},
  {key:"management",title:"People & Administration",description:"Accounts, permissions and firm operations.",modules:[
   {title:"Client Accounts",href:"./accounts.html",description:"Customer identity, company relationships and portal status."},
