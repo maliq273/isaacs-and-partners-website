@@ -386,7 +386,7 @@ export class BookingController {
             });
             const data=await response.json();
             if(!response.ok||!data?.ok)throw new Error(data?.message||data?.error||"Booking request could not be submitted.");
-            if(this.confirmation)this.confirmation.show({...data,reference:data.request_id,status:"PENDING"});
+            if(this.confirmation)this.confirmation.show({...data,reference:data.request_id,status:"PENDING",date:payload.date,time:payload.time,serviceName:this.getServiceName()});
             this.form.reset();
             this.state={...BookingState};
             await this.loadPublishedAvailability();
