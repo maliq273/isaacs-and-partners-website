@@ -7,7 +7,7 @@
     "dev": "node server.js",
     "start": "node server.js",
     "build": "echo 'No build step required'",
-    "test": "node scripts/test.mjs",
+    "test": "node scripts/test.mjs && node scripts/test-super-admin-control-centre.mjs",
     "lint": "node scripts/lint.mjs",
     "production-check": "node scripts/production-check.mjs --write",
     "production-check:ci": "node scripts/production-check.mjs --ci --write && node scripts/verify-immigration-coordinate-maps.mjs",
