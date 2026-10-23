@@ -15,10 +15,8 @@
  * BookingEngine / BookingManager / BookingValidator / Repository.
  */
 
-import {
-    apiGet,
-    apiPost
-} from "../js/api.js";
+import { apiGet } from "../js/api.js";
+import authConfig from "../auth/auth.config.js";
 
 const BookingState = {
     service: null,
@@ -27,6 +25,7 @@ const BookingState = {
     time: null,
     client: null,
     notes: "",
+    slotId: null,
 };
 
 export class BookingController {
@@ -42,6 +41,7 @@ export class BookingController {
         this.services = [];
         this.providers = [];
         this.availability = [];
+        this.publishedSlots = [];
 
         this.state = {
             ...BookingState,
@@ -53,6 +53,7 @@ export class BookingController {
         await this.loadProviders();
 
         this.bindEvents();
+        await this.loadPublishedAvailability();
 
         return this;
     }
@@ -218,65 +219,49 @@ export class BookingController {
         );
     }
 
-    async refreshAvailability() {
-        if (!this.state.date) {
-            return;
-        }
-
+    async loadPublishedAvailability() {
         try {
-            const params = new URLSearchParams();
-
-            params.set(
-                "date",
-                this.state.date
-            );
-
-            if (this.state.service) {
-                params.set(
-                    "serviceId",
-                    this.state.service
-                );
+            const url = new URL("/rest/v1/appointment_availability_slots", authConfig.supabase.url);
+            url.search = new URLSearchParams({select:"id,starts_at,ends_at,appointment_type,public_label",active:"eq.true",booked_appointment_id:"is.null",booking_request_id:"is.null",starts_at:"gte."+new Date().toISOString(),order:"starts_at.asc",limit:"500"}).toString();
+            const response = await fetch(url,{headers:{apikey:authConfig.supabase.publishableKey,Accept:"application/json"}});
+            if(!response.ok) throw new Error("Published availability could not be loaded.");
+            this.publishedSlots=await response.json();
+            const groups=new Map();
+            for(const slot of this.publishedSlots){
+                const date=new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Johannesburg",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(slot.starts_at));
+                const time=new Intl.DateTimeFormat("en-ZA",{timeZone:"Africa/Johannesburg",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(slot.starts_at));
+                if(!groups.has(date))groups.set(date,{date,available:true,slots:[]});
+                groups.get(date).slots.push({time,available:true});
             }
-
-            if (this.state.provider) {
-                params.set(
-                    "providerId",
-                    this.state.provider
-                );
-            }
-
-            const response = await apiGet(
-                `/api/booking/availability?${params}`
-            );
-
-            this.availability =
-                response?.data ||
-                response ||
-                [];
-
-            if (this.calendar) {
-                this.calendar.setAvailability(
-                    this.availability
-                );
-            }
-
+            this.availability=[...groups.values()];
+            this.calendar?.setAvailability(this.availability);
             return this.availability;
-        } catch (error) {
-            console.error(
-                "Unable to load availability:",
-                error
-            );
+        }catch(error){console.error("Published availability unavailable:",error);return [];}
+    }
 
-            this.showError(
-                "Unable to load availability."
-            );
-
-            return [];
-        }
+    async refreshAvailability() {
+        const published=await this.loadPublishedAvailability();
+        if(published.length)return published;
+        if(!this.state.date)return [];
+        try{
+            const params=new URLSearchParams({date:this.state.date});
+            if(this.state.service)params.set("serviceId",this.state.service);
+            if(this.state.provider)params.set("providerId",this.state.provider);
+            const response=await apiGet("/api/booking/availability?"+params);
+            this.availability=response?.data||response||[];
+            this.calendar?.setAvailability(this.availability);
+            return this.availability;
+        }catch(error){console.error("Unable to load availability:",error);return [];}
     }
 
     selectTime(time) {
         this.state.time = time;
+        const selected=this.publishedSlots.find(slot=>{
+            const date=new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Johannesburg",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(slot.starts_at));
+            const timeText=new Intl.DateTimeFormat("en-ZA",{timeZone:"Africa/Johannesburg",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(slot.starts_at));
+            return date===this.state.date&&timeText===time;
+        });
+        this.state.slotId=selected?.id||null;
 
         const input =
             this.form?.querySelector(
@@ -393,30 +378,19 @@ export class BookingController {
 
         try {
             this.setSubmitting(true);
-
-            const response =
-                await apiPost(
-                    "/api/booking",
-                    payload
-                );
-
-            const booking =
-                response?.data ||
-                response;
-
-            if (this.confirmation) {
-                this.confirmation.show(
-                    booking
-                );
-            }
-
+            if (!this.state.slotId) throw new Error("Select one of the published appointment slots. If no slots are available, contact Isaacs & Partners.");
+            const response=await fetch(new URL("/rest/v1/rpc/submit_public_booking_request",authConfig.supabase.url),{
+                method:"POST",
+                headers:{apikey:authConfig.supabase.publishableKey,"Content-Type":"application/json",Accept:"application/json"},
+                body:JSON.stringify({p_slot_id:this.state.slotId,p_service_id:String(payload.serviceId),p_customer_name:payload.clientName,p_customer_email:payload.clientEmail,p_customer_phone:payload.clientPhone,p_notes:payload.notes})
+            });
+            const data=await response.json();
+            if(!response.ok||!data?.ok)throw new Error(data?.message||data?.error||"Booking request could not be submitted.");
+            if(this.confirmation)this.confirmation.show({...data,reference:data.request_id,status:"PENDING",date:payload.date,time:payload.time,serviceName:this.getServiceName()});
             this.form.reset();
-
-            this.state = {
-                ...BookingState,
-            };
-
-            return booking;
+            this.state={...BookingState};
+            await this.loadPublishedAvailability();
+            return data;
         } catch (error) {
             console.error(
                 "Booking submission failed:",
