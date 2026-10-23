@@ -39,6 +39,7 @@ const secretFields=[
  {name:"PAYSTACK_PUBLIC_KEY",label:"Paystack public key",hint:"Publishable key only. Server-side payment verification must continue to use the secret key from Vault.",placeholder:"pk_live_…",initialValue:"pk_live_59cd05ffcd32b81c2aa54247c050385953d8c7d3"},
  {name:"PAYSTACK_SECRET_KEY",label:"Paystack secret key",hint:"Payment initialisation and server-side verification. Never share this key.",placeholder:"sk_test_… or sk_live_…"},
  {name:"OPENAI_API_KEY",label:"OpenAI API key",hint:"Anthony AI runtime, if configured to use OpenAI",placeholder:"sk-…"},
+ {name:"XAI_API_KEY",label:"xAI / Grok API key",hint:"Optional server-side key for the explicitly consented Anthony Grok memory agent. Never exposed to the browser.",placeholder:"Enter xAI API key"},
  {name:"ANTHROPIC_API_KEY",label:"Anthropic API key",hint:"Optional AI provider",placeholder:"sk-ant-…"},
  {name:"OPENWA_API_KEY",label:"OpenWA API key",hint:"Required for the WhatsApp transport API",placeholder:"Enter OpenWA API key"},
  {name:"OPENWA_BASE_URL",label:"OpenWA base URL",hint:"For example, https://openwa.isaacsandpartners.online",placeholder:"https://openwa.isaacsandpartners.online"},
