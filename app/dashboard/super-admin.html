@@ -671,7 +671,7 @@ h1.v2-title{font-size:clamp(2rem,3vw,3rem);line-height:1.05}
     <div>
       <p class="eyebrow">Private Control Plane</p>
       <h1 class="v2-title" id="admin-greeting">Super Admin</h1>
-      <p class="page-description">The operational command centre for people, matters, communications, finance, documents, portal access, integrations and audited administrative activity.</p>
+      <p class="page-description">The firm-wide command centre for payroll, SARS, service pricing, billing, vendor obligations, staff authority, customer access, scheduling and auditable operations.</p>
     </div>
     <div class="page-actions">
       <span class="control-plane-badge" id="admin-system-status">Checking live data…</span>
@@ -1070,7 +1070,7 @@ h1.v2-title{font-size:clamp(2rem,3vw,3rem);line-height:1.05}
         <a href="./authority-people.html"><strong>Authority &amp; People</strong><span>Roles and Anthony permissions</span></a>
         <a href="./staff-admin.html"><strong>Staff &amp; Permissions</strong><span>Staff accounts and access</span></a>
         <a href="./organisation-profile.html"><strong>Organisation Master</strong><span>Legal identity and firm configuration</span></a>
-        <a href="./service-inventory.html"><strong>Service Inventory</strong><span>Services and authoritative rates</span></a>
+        <a href="./service-inventory.html"><strong>Add / Manage Services</strong><span>Create a service, define its cost and save the authoritative price used for quotes and invoices</span></a>
         <a href="./document-workspace.html"><strong>Document Workspace</strong><span>Controlled document operations</span></a>
         <a href="./reports.html"><strong>Reports</strong><span>Operational and financial reporting</span></a>
       </div>
@@ -1102,7 +1102,7 @@ h1.v2-title{font-size:clamp(2rem,3vw,3rem);line-height:1.05}
   </section>
   <section class="panel" id="admin-secrets-config">
     <div class="panel-header"><div><h2>Integration Secrets</h2><p>Enter credentials here to send them directly to Supabase project secrets. Values are never written to the service catalogue or shown again after saving.</p></div><span class="status-badge pending">Server-side only</span></div>
-    <div style="padding:20px 24px"><div class="login-message">Secrets are saved encrypted in Supabase Vault through an authenticated Super Admin Edge Function. Values are never returned to the browser after saving. Do not paste your service-role key or Supabase Management API token into this form.</div><div id="admin-secrets-status" class="login-message" role="status" hidden></div><div id="admin-secret-fields" class="integration-grid"></div><p class="sheet-note">Paystack is currently under review. Saving credentials does not mark the merchant account approved; live payments remain subject to Paystack approval and webhook verification.</p></div>
+    <div style="padding:20px 24px"><div class="login-message">Secrets are saved encrypted in Supabase Vault through an authenticated Super Admin Edge Function. Values are never returned to the browser after saving. Do not paste your service-role key or Supabase Management API token into this form.</div><div id="admin-secrets-status" class="login-message" role="status" hidden></div><div id="admin-secret-fields" class="integration-grid"></div><p class="sheet-note">Merchant number 2046163 has been supplied. Save the pre-filled merchant number and public key below to the encrypted configuration store. This does not establish that live transactions are approved; server-side secret-key verification and webhook checks remain mandatory.</p></div>
   </section>
 
 </main>
