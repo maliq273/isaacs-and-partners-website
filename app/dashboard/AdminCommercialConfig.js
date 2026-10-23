@@ -35,7 +35,9 @@ async function savePrice(code){
  render();status($("admin-pricing-status"),"Saved "+code+" at "+money(amount)+". The public pricing feed now uses this catalogue price; refresh the public website to confirm. New customer assignments will use this server-side price.");applyServiceLineHash();
 }
 const secretFields=[
- {name:"PAYSTACK_SECRET_KEY",label:"Paystack secret key",hint:"Payment initialisation and server-side verification",placeholder:"sk_test_… or sk_live_…"},
+ {name:"PAYSTACK_MERCHANT_ID",label:"Paystack merchant number",hint:"Merchant account identifier supplied by Paystack; stored in Vault for controlled configuration.",placeholder:"2046163"},
+ {name:"PAYSTACK_PUBLIC_KEY",label:"Paystack public key",hint:"Publishable key only. Server-side payment verification must continue to use the secret key from Vault.",placeholder:"pk_live_…"},
+ {name:"PAYSTACK_SECRET_KEY",label:"Paystack secret key",hint:"Payment initialisation and server-side verification. Never share this key.",placeholder:"sk_test_… or sk_live_…"},
  {name:"OPENAI_API_KEY",label:"OpenAI API key",hint:"Anthony AI runtime, if configured to use OpenAI",placeholder:"sk-…"},
  {name:"ANTHROPIC_API_KEY",label:"Anthropic API key",hint:"Optional AI provider",placeholder:"sk-ant-…"},
  {name:"OPENWA_API_KEY",label:"OpenWA API key",hint:"Required for the WhatsApp transport API",placeholder:"Enter OpenWA API key"},
