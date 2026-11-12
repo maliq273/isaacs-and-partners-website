@@ -32,6 +32,8 @@ async function exportRun(body:any,actor:any){
  const profileQ=await db.from("client_legal_profiles").select("*").eq("user_id",b.owner_user_id).maybeSingle();const cp=profileQ.data||{};
  const employer:any={...cp,...(cp.metadata?.sars||{}),...b,...(b.sars_profile||{})};
  const errors:string[]=[],warnings:string[]=[];
+ if(environment==="LIVE"&&entries.some((row:any)=>row.hr_employees?.metadata?.test_fixture===true))throw new Error("SARS LIVE export blocked: this payroll run contains a TEST-only employee. Remove test fixtures and calculate a clean payroll run before live export.");
+ if(environment==="TEST"&&entries.some((row:any)=>row.hr_employees?.metadata?.test_fixture===true))warnings.push("TEST-only employee fixture included. This file is for non-production validation only and must never be submitted as a real employee certificate.");
  const requireE=(cond:boolean,msg:string)=>{if(!cond)errors.push(msg)};
  const paye=String(employer.paye_reference||"").replace(/\D/g,""),sdl=String(employer.sdl_reference||""),uif=String(employer.uif_reference||"");
  requireE((employer.legal_name||employer.trading_name)&&String(employer.legal_name||employer.trading_name).length<=90,"2010 trading/legal name is required and must be <= 90 characters.");
