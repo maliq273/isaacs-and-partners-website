@@ -51,3 +51,15 @@ for(const token of ["XAI_API_KEY","includeMemory","grok_eligible","SUPER_ADMIN",
  if(!agent.includes(token)){console.error("Grok privacy/authorization boundary missing: "+token);process.exit(1);}
 }
 console.log("PASS: Super Admin vendor ledger, customer statements, calendar booking, durable memory, Grok privacy boundary and inline JavaScript syntax.");
+
+const payrollUi=fs.readFileSync(path.join(root,"app/client/hr-payroll-center.js"),"utf8");
+const payrollRuntime=fs.readFileSync(path.join(root,"supabase/functions/hr-operations-runtime/index.ts"),"utf8");
+const sarsExport=fs.readFileSync(path.join(root,"supabase/functions/sars-payroll-export/index.ts"),"utf8");
+for(const [label,source,tokens] of [
+ ["Payroll TEST UI",payrollUi,["data-pc-include-test","TEST ONLY — excluded from normal payroll","include_test_employees:"]],
+ ["Payroll TEST runtime",payrollRuntime,["metadata?.test_fixture!==true||includeTestEmployees","includeTestEmployees&&(!b.data.is_internal_company||a.role!==\"SUPER_ADMIN\")","test_only:includeTestEmployees","TEST payroll runs cannot be approved","TEST payroll runs cannot be released"]],
+ ["SARS TEST export",sarsExport,["SARS LIVE export blocked","TEST-only employee fixture included"]]
+]){
+ for(const token of tokens){if(!source.includes(token)){console.error(label+" missing safety boundary: "+token);process.exit(1);}}
+}
+console.log("PASS: payroll TEST fixture is opt-in, internal Super Admin only, blocked from release and SARS LIVE.");
