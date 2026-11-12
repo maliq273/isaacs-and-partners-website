@@ -28,7 +28,7 @@ export const SUPER_ADMIN_DASHBOARD_CATEGORIES = Object.freeze([
   {title:"Customer Invoices",href:"./invoices.html",description:"Accounts receivable, verified payments and invoice status."},
   {title:"Customer Statements",href:"./customer-statements.html",description:"Generate account statements from issued invoices and completed payments."},
   {title:"Quotes & Estimates",href:"./quotes.html",description:"Prepare and approve quotes from the service catalogue."},
-  {title:"Vendor Payables",href:"./vendor-payables.html",description:"Capture supplier invoices, amounts owed by Isaacs & Partners and vendor statements."},
+  {title:"Creditors & Debtors",href:"./vendor-payables.html",description:"Track supplier liabilities (what we owe) and customer receivables (who owes us), payments, overdue balances and statements."},
   {title:"Internal Payroll Approval",href:"#payroll-approval-list",description:"Review internal payroll before release."}
  ]},
  {key:"calendar",title:"Scheduling",description:"Appointments and customer-facing availability.",modules:[
